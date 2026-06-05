@@ -563,3 +563,14 @@ input::placeholder {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.category-toggle {
+  width: 100%;
+  background: #fffdf9;
+  color: #263238;
+  border: 1px solid #e7dfd3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}

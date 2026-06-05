@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { categories } from "../data/categories";
+import { normaliseItemName } from "../utils/itemUtils";
 
 function InventoryList({
     inventory,
@@ -10,7 +12,14 @@ function InventoryList({
     toggleInventoryActive,
     loadStarterInventory,
 }) {
-    const groupedInventory = inventory.reduce((groups, item) => {
+    const [searchText, setSearchText] = useState("");
+    const [openCategories, setOpenCategories] = useState({});
+
+    const filteredInventory = inventory.filter((item) =>
+        normaliseItemName(item.name).includes(normaliseItemName(searchText))
+    );
+
+    const groupedInventory = filteredInventory.reduce((groups, item) => {
         const category = item.category || "Other";
 
         if (!groups[category]) {
@@ -22,15 +31,20 @@ function InventoryList({
         return groups;
     }, {});
 
+    function toggleCategory(category) {
+        setOpenCategories({
+            ...openCategories,
+            [category]: !openCategories[category],
+        });
+    }
+
     return (
         <section className="section">
             <div className="section-header">
                 <h2>Inventory</h2>
             </div>
 
-            <p className="small-text">
-                Groceries you already have at home.
-            </p>
+            <p className="small-text">Groceries you already have at home.</p>
 
             <button
                 type="button"
@@ -40,97 +54,93 @@ function InventoryList({
                 Load starter inventory
             </button>
 
+            <input
+                type="text"
+                placeholder="Search inventory..."
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+            />
+
             <div className="add-item-row">
                 <input
                     type="text"
                     placeholder="Add inventory item..."
                     value={newInventoryItem}
-                    onChange={(event) =>
-                        setNewInventoryItem(event.target.value)
-                    }
+                    onChange={(event) => setNewInventoryItem(event.target.value)}
                     onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                            addInventoryItem();
-                        }
+                        if (event.key === "Enter") addInventoryItem();
                     }}
                 />
 
-                <button
-                    type="button"
-                    onClick={addInventoryItem}
-                >
+                <button type="button" onClick={addInventoryItem}>
                     Add
                 </button>
             </div>
 
-            {inventory.length === 0 ? (
-                <p className="empty-state">
-                    No inventory items yet.
-                </p>
+            {filteredInventory.length === 0 ? (
+                <p className="empty-state">No matching inventory items.</p>
             ) : (
-                Object.entries(groupedInventory).map(
-                    ([category, items]) => (
-                        <div
-                            className="shopping-group"
-                            key={category}
-                        >
-                            <h3>{category}</h3>
+                Object.entries(groupedInventory).map(([category, items]) => {
+                    const isOpen = openCategories[category] ?? false;
 
-                            <ul className="clean-list">
-                                {items.map((item) => (
-                                    <li
-                                        className="card shopping-row"
-                                        key={item.id}
-                                    >
-                                        <div>
-                                            <label className="active-toggle">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={item.active !== false}
-                                                    onChange={() =>
-                                                        toggleInventoryActive(item.id)
+                    return (
+                        <div className="shopping-group" key={category}>
+                            <button
+                                type="button"
+                                className="category-toggle"
+                                onClick={() => toggleCategory(category)}
+                            >
+                                <span>{category}</span>
+                                <span>
+                                    {items.length} item{items.length === 1 ? "" : "s"}{" "}
+                                    {isOpen ? "▲" : "▼"}
+                                </span>
+                            </button>
+
+                            {isOpen && (
+                                <ul className="clean-list">
+                                    {items.map((item) => (
+                                        <li className="card shopping-row" key={item.id}>
+                                            <div>
+                                                <label className="active-toggle">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={item.active !== false}
+                                                        onChange={() => toggleInventoryActive(item.id)}
+                                                    />
+                                                    Have this
+                                                </label>
+
+                                                <strong>{item.name}</strong>
+
+                                                <select
+                                                    value={item.category || "Other"}
+                                                    onChange={(event) =>
+                                                        updateInventoryCategory(item.id, event.target.value)
                                                     }
-                                                />
-                                                Have this
-                                            </label>
+                                                >
+                                                    {categories.map((category) => (
+                                                        <option key={category} value={category}>
+                                                            {category}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                                            <strong>{item.name}</strong>
-
-                                            <select
-                                                value={item.category || "Other"}
-                                                onChange={(event) =>
-                                                    updateInventoryCategory(
-                                                        item.id,
-                                                        event.target.value
-                                                    )
-                                                }
+                                            <button
+                                                type="button"
+                                                className="delete-button"
+                                                onClick={() => deleteInventoryItem(item.id)}
                                             >
-                                                {categories.map((category) => (
-                                                    <option
-                                                        key={category}
-                                                        value={category}
-                                                    >
-                                                        {category}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <button
-                                            type="button"
-                                            className="delete-button"
-                                            onClick={() =>
-                                                deleteInventoryItem(item.id)
-                                            }
-                                        >
-                                            Delete
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
+                                                Delete
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
-                    )
-                )
+                    );
+                })
             )}
         </section>
     );
