@@ -382,13 +382,13 @@ function App() {
 
     const starterItems = commonInventoryItems
       .filter(
-        (name) =>
-          !existingNames.includes(normaliseItemName(name))
+        (item) =>
+          !existingNames.includes(normaliseItemName(item.name))
       )
-      .map((name) => ({
-        id: Date.now().toString() + name,
-        name,
-        category: "Other",
+      .map((item) => ({
+        id: Date.now().toString() + item.name,
+        name: item.name,
+        category: item.category,
         quantity: null,
         unit: "",
         active: false,

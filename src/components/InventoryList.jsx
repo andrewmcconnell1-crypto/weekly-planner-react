@@ -10,6 +10,18 @@ function InventoryList({
     toggleInventoryActive,
     loadStarterInventory,
 }) {
+    const groupedInventory = inventory.reduce((groups, item) => {
+        const category = item.category || "Other";
+
+        if (!groups[category]) {
+            groups[category] = [];
+        }
+
+        groups[category].push(item);
+
+        return groups;
+    }, {});
+
     return (
         <section className="section">
             <div className="section-header">
@@ -56,58 +68,69 @@ function InventoryList({
                     No inventory items yet.
                 </p>
             ) : (
-                <ul className="clean-list">
-                    {inventory.map((item) => (
-                        <li
-                            className="card shopping-row"
-                            key={item.id}
+                Object.entries(groupedInventory).map(
+                    ([category, items]) => (
+                        <div
+                            className="shopping-group"
+                            key={category}
                         >
-                            <div>
-                                <label className="active-toggle">
-                                    <input
-                                        type="checkbox"
-                                        checked={item.active !== false}
-                                        onChange={() =>
-                                            toggleInventoryActive(item.id)
-                                        }
-                                    />
-                                    Have this
-                                </label>
+                            <h3>{category}</h3>
 
-                                <strong>{item.name}</strong>
+                            <ul className="clean-list">
+                                {items.map((item) => (
+                                    <li
+                                        className="card shopping-row"
+                                        key={item.id}
+                                    >
+                                        <div>
+                                            <label className="active-toggle">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={item.active !== false}
+                                                    onChange={() =>
+                                                        toggleInventoryActive(item.id)
+                                                    }
+                                                />
+                                                Have this
+                                            </label>
 
-                                <select
-                                    value={item.category || "Other"}
-                                    onChange={(event) =>
-                                        updateInventoryCategory(
-                                            item.id,
-                                            event.target.value
-                                        )
-                                    }
-                                >
-                                    {categories.map((category) => (
-                                        <option
-                                            key={category}
-                                            value={category}
+                                            <strong>{item.name}</strong>
+
+                                            <select
+                                                value={item.category || "Other"}
+                                                onChange={(event) =>
+                                                    updateInventoryCategory(
+                                                        item.id,
+                                                        event.target.value
+                                                    )
+                                                }
+                                            >
+                                                {categories.map((category) => (
+                                                    <option
+                                                        key={category}
+                                                        value={category}
+                                                    >
+                                                        {category}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            className="delete-button"
+                                            onClick={() =>
+                                                deleteInventoryItem(item.id)
+                                            }
                                         >
-                                            {category}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <button
-                                type="button"
-                                className="delete-button"
-                                onClick={() =>
-                                    deleteInventoryItem(item.id)
-                                }
-                            >
-                                Delete
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                                            Delete
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
+                )
             )}
         </section>
     );
