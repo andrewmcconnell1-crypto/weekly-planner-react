@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 function ShoppingList({
   newItem,
   setNewItem,
@@ -12,6 +14,8 @@ function ShoppingList({
   goToNextShoppingWeekDefault,
   goToNextShoppingWeek,
 }) {
+  const [collapsedCategories, setCollapsedCategories] = useState({});
+
   const groupedItems = shoppingItems.reduce((groups, item) => {
     const category = item.category || "Other";
 
@@ -22,6 +26,13 @@ function ShoppingList({
     groups[category].push(item);
     return groups;
   }, {});
+
+  function toggleCategory(category) {
+    setCollapsedCategories({
+      ...collapsedCategories,
+      [category]: !collapsedCategories[category],
+    });
+  }
 
   return (
     <section className="screen shop-screen">
@@ -85,38 +96,54 @@ function ShoppingList({
       {shoppingItems.length === 0 ? (
         <p className="empty-state">No shopping items yet.</p>
       ) : (
-        Object.entries(groupedItems).map(([category, items]) => (
-          <div className="shopping-group" key={category}>
-            <div className="group-heading">
-              <h3>{category}</h3>
-              <span>{items.length}</span>
+        Object.entries(groupedItems).map(([category, items]) => {
+          const isCollapsed = collapsedCategories[category] === true;
+
+          return (
+            <div className="shopping-group" key={category}>
+              <button
+                className="group-heading"
+                type="button"
+                aria-expanded={!isCollapsed}
+                onClick={() => toggleCategory(category)}
+              >
+                <span className="group-title">{category}</span>
+                <span className="group-count">{items.length}</span>
+              </button>
+
+              {!isCollapsed && (
+                <ul className="clean-list">
+                  {items.map((item, index) => (
+                    <li
+                      className={`card shopping-row ${
+                        item.checked ? "checked-row" : ""
+                      }`}
+                      key={`${item.id}-${index}`}
+                    >
+                      <label className={item.checked ? "checked-item" : ""}>
+                        <input
+                          type="checkbox"
+                          checked={item.checked}
+                          onChange={() => toggleShoppingItem(item.id)}
+                        />
+
+                        {item.name}
+                      </label>
+
+                      <button
+                        type="button"
+                        className="delete-button"
+                        onClick={() => deleteShoppingItem(item.id)}
+                      >
+                        Delete
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-
-            <ul className="clean-list">
-              {items.map((item, index) => (
-                <li className="card shopping-row" key={`${item.id}-${index}`}>
-                  <label className={item.checked ? "checked-item" : ""}>
-                    <input
-                      type="checkbox"
-                      checked={item.checked}
-                      onChange={() => toggleShoppingItem(item.id)}
-                    />
-
-                    {item.name}
-                  </label>
-
-                  <button
-                    type="button"
-                    className="delete-button"
-                    onClick={() => deleteShoppingItem(item.id)}
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
+          );
+        })
       )}
     </section>
   );

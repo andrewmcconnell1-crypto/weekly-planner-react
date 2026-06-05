@@ -18,10 +18,12 @@ import { initialStaples } from "./data/initialStaples";
 
 import { normaliseItemName } from "./utils/itemUtils";
 import InventoryList from "./components/InventoryList";
+import { commonInventoryItems } from "./data/commonInventory";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
-  const [moreSection, setMoreSection] = useState("staples");
+  const [moreSection, setMoreSection] = useState("overview");
+  const [expandedMealDay, setExpandedMealDay] = useState(null);
 
   const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
@@ -75,6 +77,9 @@ function App() {
   ).length;
 
   const inventoryItemsCount = inventory.length;
+  const activeInventoryCount = inventory.filter(
+    (item) => item.active !== false
+  ).length;
   const shoppingItemsCount = shoppingItems.length;
 
   useEffect(() => {
@@ -140,6 +145,10 @@ function App() {
         [day]: updatedMeal,
       },
     });
+  }
+
+  function toggleExpandedMealDay(day) {
+    setExpandedMealDay(expandedMealDay === day ? null : day);
   }
 
   function addShoppingItem() {
@@ -366,6 +375,28 @@ function App() {
     );
   }
 
+  function loadStarterInventory() {
+    const existingNames = inventory.map((item) =>
+      normaliseItemName(item.name)
+    );
+
+    const starterItems = commonInventoryItems
+      .filter(
+        (name) =>
+          !existingNames.includes(normaliseItemName(name))
+      )
+      .map((name) => ({
+        id: Date.now().toString() + name,
+        name,
+        category: "Other",
+        quantity: null,
+        unit: "",
+        active: false,
+      }));
+
+    setInventory([...inventory, ...starterItems]);
+  }
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -443,7 +474,7 @@ function App() {
             <button
               className="secondary"
               onClick={() => {
-                setMoreSection("inventory");
+                setMoreSection("overview");
                 setActiveTab("more");
               }}
             >
@@ -501,6 +532,8 @@ function App() {
                 day={day}
                 meal={meals[day]}
                 updateMeal={updateMeal}
+                isExpanded={expandedMealDay === day}
+                toggleExpanded={() => toggleExpandedMealDay(day)}
               />
             ))}
           </div>
@@ -528,9 +561,13 @@ function App() {
         <section className="screen">
           <div className="screen-header">
             <div>
-              <p className="section-kicker">Settings</p>
+              <p className="section-kicker">
+                {moreSection === "overview" ? "Tools" : "Manage"}
+              </p>
               <h2>
-                {moreSection === "inventory"
+                {moreSection === "overview"
+                  ? "More"
+                  : moreSection === "inventory"
                   ? "Inventory"
                   : moreSection === "settings"
                     ? "Settings"
@@ -539,59 +576,98 @@ function App() {
             </div>
           </div>
 
-          <div className="more-tabs">
-            <button
-              className={moreSection === "staples" ? "active" : ""}
-              onClick={() => setMoreSection("staples")}
-            >
-              Staples
-            </button>
+          {moreSection === "overview" ? (
+            <div className="more-summary-grid">
+              <article className="more-summary-card">
+                <div>
+                  <p className="section-kicker">Staples</p>
+                  <h3>Regular buys</h3>
+                </div>
 
-            <button
-              className={moreSection === "inventory" ? "active" : ""}
-              onClick={() => setMoreSection("inventory")}
-            >
-              Inventory
-            </button>
+                <p className="small-text">
+                  {activeStaplesCount} active of {staples.length} staples
+                </p>
 
-            <button
-              className={moreSection === "settings" ? "active" : ""}
-              onClick={() => setMoreSection("settings")}
-            >
-              Settings
-            </button>
-          </div>
+                <button type="button" onClick={() => setMoreSection("staples")}>
+                  Manage Staples
+                </button>
+              </article>
 
-          {moreSection === "staples" && (
-            <StaplesList
-              staples={staples}
-              newStaple={newStaple}
-              setNewStaple={setNewStaple}
-              addStaple={addStaple}
-              deleteStaple={deleteStaple}
-              updateStapleFrequency={updateStapleFrequency}
-              updateStapleCategory={updateStapleCategory}
-              toggleStapleActive={toggleStapleActive}
-            />
-          )}
+              <article className="more-summary-card">
+                <div>
+                  <p className="section-kicker">Inventory</p>
+                  <h3>Already at home</h3>
+                </div>
 
-          {moreSection === "inventory" && (
-            <InventoryList
-              inventory={inventory}
-              newInventoryItem={newInventoryItem}
-              setNewInventoryItem={setNewInventoryItem}
-              addInventoryItem={addInventoryItem}
-              deleteInventoryItem={deleteInventoryItem}
-              updateInventoryCategory={updateInventoryCategory}
-              toggleInventoryActive={toggleInventoryActive}
-            />
-          )}
+                <p className="small-text">
+                  {activeInventoryCount} active of {inventoryItemsCount} items
+                </p>
 
-          {moreSection === "settings" && (
-            <div className="settings-placeholder">
-              <strong>Settings</strong>
-              <p className="small-text">Settings will live here later.</p>
+                <button type="button" onClick={() => setMoreSection("inventory")}>
+                  Manage Inventory
+                </button>
+              </article>
+
+              <article className="more-summary-card">
+                <div>
+                  <p className="section-kicker">Settings</p>
+                  <h3>Preferences</h3>
+                </div>
+
+                <p className="small-text">Settings will live here later.</p>
+
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setMoreSection("settings")}
+                >
+                  View Settings
+                </button>
+              </article>
             </div>
+          ) : (
+            <>
+              <button
+                className="secondary back-button"
+                type="button"
+                onClick={() => setMoreSection("overview")}
+              >
+                Back to More
+              </button>
+
+              {moreSection === "staples" && (
+                <StaplesList
+                  staples={staples}
+                  newStaple={newStaple}
+                  setNewStaple={setNewStaple}
+                  addStaple={addStaple}
+                  deleteStaple={deleteStaple}
+                  updateStapleFrequency={updateStapleFrequency}
+                  updateStapleCategory={updateStapleCategory}
+                  toggleStapleActive={toggleStapleActive}
+                />
+              )}
+
+              {moreSection === "inventory" && (
+                <InventoryList
+                  inventory={inventory}
+                  newInventoryItem={newInventoryItem}
+                  setNewInventoryItem={setNewInventoryItem}
+                  addInventoryItem={addInventoryItem}
+                  deleteInventoryItem={deleteInventoryItem}
+                  updateInventoryCategory={updateInventoryCategory}
+                  toggleInventoryActive={toggleInventoryActive}
+                  loadStarterInventory={loadStarterInventory}
+                />
+              )}
+
+              {moreSection === "settings" && (
+                <div className="settings-placeholder">
+                  <strong>Settings</strong>
+                  <p className="small-text">Settings will live here later.</p>
+                </div>
+              )}
+            </>
           )}
         </section>
       )}
@@ -620,7 +696,10 @@ function App() {
 
         <button
           className={activeTab === "more" ? "active" : ""}
-          onClick={() => setActiveTab("more")}
+          onClick={() => {
+            setMoreSection("overview");
+            setActiveTab("more");
+          }}
         >
           More
         </button>

@@ -76,6 +76,7 @@ select:focus-visible {
 .primary-action-card,
 .week-summary-card,
 .summary-card,
+.more-summary-card,
 .settings-placeholder {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -242,12 +243,13 @@ select:focus-visible {
 
 .meal-card {
   display: grid;
-  gap: 10px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .meal-card-header,
-.staple-title-row,
-.group-heading {
+.staple-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -255,13 +257,64 @@ select:focus-visible {
 }
 
 .meal-card-header span,
-.group-heading span {
+.group-count,
+.meal-row-count {
   border-radius: 999px;
   background: var(--soft);
   color: var(--muted);
   padding: 3px 8px;
   font-size: 0.76rem;
   font-weight: 800;
+}
+
+.meal-row-button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 58px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 12px;
+  text-align: left;
+}
+
+.meal-row-button:hover {
+  background: var(--soft);
+}
+
+.meal-row-day {
+  width: 3.1rem;
+  color: #7a6747;
+  font-size: 0.8rem;
+  font-weight: 860;
+  text-transform: uppercase;
+}
+
+.meal-row-main {
+  min-width: 0;
+}
+
+.meal-row-main strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted-title {
+  color: var(--muted);
+  font-weight: 720;
+}
+
+.meal-editor {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding: 12px;
 }
 
 input[type="text"],
@@ -347,17 +400,39 @@ input::placeholder {
 
 .shopping-group {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   margin-top: 6px;
 }
 
-.shopping-group h3 {
+.group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.group-heading:hover {
+  background: var(--soft);
+}
+
+.group-title {
   margin: 0;
   color: #7a6747;
   font-size: 0.82rem;
   font-weight: 840;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.checked-row {
+  background: #f3f1eb;
+  opacity: 0.58;
 }
 
 .checked-item {
@@ -405,6 +480,27 @@ input::placeholder {
 
 .settings-placeholder {
   padding: 16px;
+}
+
+.more-summary-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.more-summary-card {
+  display: grid;
+  gap: 11px;
+  padding: 14px;
+}
+
+.more-summary-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.more-summary-card button,
+.back-button {
+  width: 100%;
 }
 
 @media (min-width: 620px) {
@@ -457,10 +553,6 @@ input::placeholder {
     width: auto;
   }
 
-  .meal-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .staple-card,
   .inventory-card {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -469,11 +561,5 @@ input::placeholder {
 
   .staple-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 900px) {
-  .meal-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

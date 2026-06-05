@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function MealCard({ day, meal, updateMeal }) {
+function MealCard({ day, meal, updateMeal, isExpanded, toggleExpanded }) {
   const [newIngredient, setNewIngredient] = useState("");
 
   function addIngredient() {
@@ -28,65 +28,87 @@ function MealCard({ day, meal, updateMeal }) {
     });
   }
 
+  const mealName = meal.name.trim() || "No meal planned";
+  const ingredientCount = meal.ingredients.length;
+  const ingredientLabel = `${ingredientCount} ingredient${
+    ingredientCount === 1 ? "" : "s"
+  }`;
+
   return (
-    <article className="card meal-card">
-      <div className="meal-card-header">
-        <strong>{day}</strong>
-        <span>{meal.ingredients.length} items</span>
-      </div>
+    <article className={`card meal-card ${isExpanded ? "expanded" : ""}`}>
+      <button
+        className="meal-row-button"
+        type="button"
+        aria-expanded={isExpanded}
+        onClick={toggleExpanded}
+      >
+        <span className="meal-row-day">{day}</span>
 
-      <input
-        type="text"
-        placeholder="Enter meal..."
-        value={meal.name}
-        onChange={(event) =>
-          updateMeal(day, {
-            ...meal,
-            name: event.target.value,
-          })
-        }
-      />
+        <span className="meal-row-main">
+          <strong className={meal.name.trim() ? "" : "muted-title"}>
+            {mealName}
+          </strong>
+        </span>
 
-      <div className="add-item-row">
-        <input
-          type="text"
-          placeholder="Add ingredient..."
-          value={newIngredient}
-          onChange={(event) =>
-            setNewIngredient(event.target.value)
-          }
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              addIngredient();
+        <span className="meal-row-count">{ingredientLabel}</span>
+      </button>
+
+      {isExpanded && (
+        <div className="meal-editor">
+          <input
+            type="text"
+            placeholder="Enter meal..."
+            value={meal.name}
+            onChange={(event) =>
+              updateMeal(day, {
+                ...meal,
+                name: event.target.value,
+              })
             }
-          }}
-        />
+          />
 
-        <button onClick={addIngredient}>
-          Add
-        </button>
-      </div>
-
-      {meal.ingredients.length > 0 && (
-        <ul className="ingredient-list">
-          {meal.ingredients.map((ingredient, index) => (
-            <li
-              className="ingredient-row"
-              key={index}
-            >
-              <span>{ingredient}</span>
-
-              <button
-                className="delete-button"
-                onClick={() =>
-                  deleteIngredient(index)
+          <div className="add-item-row">
+            <input
+              type="text"
+              placeholder="Add ingredient..."
+              value={newIngredient}
+              onChange={(event) =>
+                setNewIngredient(event.target.value)
+              }
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  addIngredient();
                 }
-              >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+              }}
+            />
+
+            <button onClick={addIngredient}>
+              Add
+            </button>
+          </div>
+
+          {meal.ingredients.length > 0 && (
+            <ul className="ingredient-list">
+              {meal.ingredients.map((ingredient, index) => (
+                <li
+                  className="ingredient-row"
+                  key={index}
+                >
+                  <span>{ingredient}</span>
+
+                  <button
+                    className="delete-button"
+                    onClick={() =>
+                      deleteIngredient(index)
+                    }
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
     </article>
   );
