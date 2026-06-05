@@ -17,11 +17,12 @@ import {
 import { initialStaples } from "./data/initialStaples";
 
 import { normaliseItemName } from "./utils/itemUtils";
+import InventoryList from "./components/InventoryList";
 
 function App() {
-  const [activeTab, setActiveTab] = useState("meals");
+  const [activeTab, setActiveTab] = useState("plan");
 
-  const [mealWeekStart, setMealWeekStart] = useState(getSunday);
+  const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
 
   const [mealsByWeek, setMealsByWeek] = useState(() => {
@@ -41,6 +42,13 @@ function App() {
 
   const [newItem, setNewItem] = useState("");
   const [newStaple, setNewStaple] = useState("");
+
+  const [inventory, setInventory] = useState(() => {
+    const savedInventory = localStorage.getItem("inventory");
+    return savedInventory ? JSON.parse(savedInventory) : [];
+  });
+
+  const [newInventoryItem, setNewInventoryItem] = useState("");
 
   const mealWeekKey = getWeekKey(mealWeekStart);
   const shoppingWeekKey = getWeekKey(shoppingWeekStart);
@@ -71,6 +79,10 @@ function App() {
     localStorage.setItem("staples", JSON.stringify(staples));
   }, [staples]);
 
+  useEffect(() => {
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+  }, [inventory]);
+
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
     previousWeek.setDate(mealWeekStart.getDate() - 7);
@@ -85,6 +97,10 @@ function App() {
 
   function goToThisMealWeek() {
     setMealWeekStart(getSunday());
+  }
+
+  function goToNextMealWeekDefault() {
+    setMealWeekStart(getNextSunday());
   }
 
   function goToPreviousShoppingWeek() {
@@ -253,9 +269,14 @@ function App() {
       ...mealIngredients,
     ];
 
-    const existingNames = shoppingItems.map((item) =>
-      normaliseItemName(item.name)
-    );
+    const existingNames = [
+      ...shoppingItems.map((item) =>
+        normaliseItemName(item.name)
+      ),
+      ...inventory
+        .filter((item) => item.active !== false)
+        .map((item) => normaliseItemName(item.name)),
+    ];
 
     const seenNames = new Set(existingNames);
 
@@ -287,113 +308,136 @@ function App() {
       ],
     });
 
-    setActiveTab("shopping");
+    setActiveTab("shop");
+  }
+
+  function addInventoryItem() {
+    const cleanedItem = newInventoryItem.trim();
+
+    if (cleanedItem === "") return;
+
+    setInventory([
+      ...inventory,
+      {
+        id: Date.now().toString(),
+        name: cleanedItem,
+        category: "Other",
+        quantity: null,
+        unit: "",
+        active: true,
+      },
+    ]);
+
+    setNewInventoryItem("");
+  }
+
+  function deleteInventoryItem(id) {
+    setInventory(inventory.filter((item) => item.id !== id));
+  }
+
+  function updateInventoryCategory(id, category) {
+    setInventory(
+      inventory.map((item) =>
+        item.id === id ? { ...item, category } : item
+      )
+    );
+  }
+
+  function toggleInventoryActive(id) {
+    setInventory(
+      inventory.map((item) =>
+        item.id === id
+          ? { ...item, active: item.active === false }
+          : item
+      )
+    );
   }
 
   return (
-    <main className="app">
-      <header className="header">
-        <div className="app-title-row">
-          <div>
-            <p className="eyebrow">Meal Planner</p>
+    <main className="app-shell">
+      <header className="app-header">
+        <div>
+          <p className="eyebrow">Family meals</p>
 
-            <h1>
-              {activeTab === "shopping"
-                ? "Next shop"
-                : activeTab === "staples"
-                  ? "Staples"
-                  : "This week"}
-            </h1>
-          </div>
+          <h1>
+            {activeTab === "shop"
+              ? "Shop for the week"
+              : activeTab === "more"
+                ? "More"
+                : "Plan next week"}
+          </h1>
+
         </div>
 
-        {activeTab === "shopping" ? (
-          <>
-            <div className="date-card">
-              <span>{formatDate(shoppingWeekStart)}</span>
-              <span>→</span>
-              <span>{formatDate(shoppingWeekEnd)}</span>
-            </div>
+        <nav className="app-nav" aria-label="Primary">
+          <button
+            className={activeTab === "plan" ? "active" : ""}
+            onClick={() => setActiveTab("plan")}
+          >
+            Plan
+          </button>
 
-            <div className="week-nav">
-              <button className="secondary" onClick={goToPreviousShoppingWeek}>
-                Previous
-              </button>
+          <button
+            className={activeTab === "shop" ? "active" : ""}
+            onClick={() => setActiveTab("shop")}
+          >
+            Shop
+          </button>
 
-              <button onClick={goToNextShoppingWeekDefault}>Next shop</button>
-
-              <button className="secondary" onClick={goToNextShoppingWeek}>
-                Next
-              </button>
-            </div>
-          </>
-        ) : activeTab === "meals" ? (
-          <>
-            <div className="date-card">
-              <span>{formatDate(mealWeekStart)}</span>
-              <span>→</span>
-              <span>{formatDate(mealWeekEnd)}</span>
-            </div>
-
-            <div className="week-nav">
-              <button className="secondary" onClick={goToPreviousMealWeek}>
-                Previous
-              </button>
-
-              <button onClick={goToThisMealWeek}>Today</button>
-
-              <button className="secondary" onClick={goToNextMealWeek}>
-                Next
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="small-text">
-            Manage recurring household items used to build future shopping
-            lists.
-          </p>
-        )}
+          <button
+            className={activeTab === "more" ? "active" : ""}
+            onClick={() => setActiveTab("more")}
+          >
+            More
+          </button>
+        </nav>
       </header>
 
-      <nav className="tabs">
-        <button
-          className={activeTab === "meals" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("meals")}
-        >
-          Meals
-        </button>
+      {activeTab === "plan" && (
+        <section className="screen">
+          <div className="screen-header">
+            <div>
+              <p className="section-kicker">Planning week</p>
+              <h2>Meals</h2>
+            </div>
 
-        <button
-          className={activeTab === "shopping" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("shopping")}
-        >
-          Shopping
-        </button>
+            <div className="date-card">
+              <span>{formatDate(mealWeekStart)}</span>
+              <span>to</span>
+              <span>{formatDate(mealWeekEnd)}</span>
+            </div>
+          </div>
 
-        <button
-          className={activeTab === "staples" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("staples")}
-        >
-          Staples
-        </button>
-      </nav>
+          <div className="week-nav">
+            <button className="secondary" onClick={goToPreviousMealWeek}>
+              Previous
+            </button>
 
-      {activeTab === "meals" && (
-        <section className="section">
-          <h2>Meals</h2>
+            <button onClick={goToNextMealWeekDefault}>Next shop</button>
 
-          {days.map((day) => (
-            <MealCard
-              key={day}
-              day={day}
-              meal={meals[day]}
-              updateMeal={updateMeal}
-            />
-          ))}
+            <button className="secondary" onClick={goToThisMealWeek}>
+              This week
+            </button>
+
+            <button className="secondary" onClick={goToNextMealWeek}>
+              Next
+            </button>
+          </div>
+
+          <div className="meal-grid">
+            {days.map((day) => (
+              <MealCard
+                key={day}
+                day={day}
+                meal={meals[day]}
+                updateMeal={updateMeal}
+              />
+            ))}
+          </div>
         </section>
       )}
 
-      {activeTab === "shopping" && (
+      {activeTab === "shop" && (
         <ShoppingList
           newItem={newItem}
           setNewItem={setNewItem}
@@ -402,20 +446,44 @@ function App() {
           toggleShoppingItem={toggleShoppingItem}
           deleteShoppingItem={deleteShoppingItem}
           buildShoppingList={buildShoppingList}
+          shoppingWeekStart={shoppingWeekStart}
+          shoppingWeekEnd={shoppingWeekEnd}
+          goToPreviousShoppingWeek={goToPreviousShoppingWeek}
+          goToNextShoppingWeekDefault={goToNextShoppingWeekDefault}
+          goToNextShoppingWeek={goToNextShoppingWeek}
         />
       )}
 
-      {activeTab === "staples" && (
-        <StaplesList
-          staples={staples}
-          newStaple={newStaple}
-          setNewStaple={setNewStaple}
-          addStaple={addStaple}
-          deleteStaple={deleteStaple}
-          updateStapleFrequency={updateStapleFrequency}
-          updateStapleCategory={updateStapleCategory}
-          toggleStapleActive={toggleStapleActive}
-        />
+      {activeTab === "more" && (
+        <section className="screen">
+          <div className="screen-header">
+            <div>
+              <p className="section-kicker">Settings</p>
+              <h2>Staples</h2>
+            </div>
+          </div>
+
+          <StaplesList
+            staples={staples}
+            newStaple={newStaple}
+            setNewStaple={setNewStaple}
+            addStaple={addStaple}
+            deleteStaple={deleteStaple}
+            updateStapleFrequency={updateStapleFrequency}
+            updateStapleCategory={updateStapleCategory}
+            toggleStapleActive={toggleStapleActive}
+          />
+
+          <InventoryList
+            inventory={inventory}
+            newInventoryItem={newInventoryItem}
+            setNewInventoryItem={setNewInventoryItem}
+            addInventoryItem={addInventoryItem}
+            deleteInventoryItem={deleteInventoryItem}
+            updateInventoryCategory={updateInventoryCategory}
+            toggleInventoryActive={toggleInventoryActive}
+          />
+        </section>
       )}
     </main>
   );

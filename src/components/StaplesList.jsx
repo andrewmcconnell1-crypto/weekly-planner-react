@@ -11,9 +11,7 @@ function StaplesList({
   toggleStapleActive,
 }) {
   return (
-    <section style={{ marginTop: "24px" }}>
-      <h2>Staples</h2>
-
+    <div className="staples-panel">
       <div className="add-item-row">
         <input
           type="text"
@@ -30,19 +28,22 @@ function StaplesList({
         <button onClick={addStaple}>Add</button>
       </div>
 
-      <ul style={{ padding: 0, listStyle: "none", marginTop: "16px" }}>
+      <ul className="staples-list">
         {staples.map((staple) => (
-          <li className="card shopping-row" key={staple.id}>
-            <div>
-              <label className="active-toggle">
+          <li className="card staple-card" key={staple.id}>
+            <div className="staple-main">
+              <div className="staple-title-row">
+                <strong>{staple.name}</strong>
+
+                <label className="active-toggle">
                 <input
                   type="checkbox"
                   checked={staple.active}
                   onChange={() => toggleStapleActive(staple.id)}
                 />
                 Active
-              </label>
-              <strong>{staple.name}</strong>
+                </label>
+              </div>
 
               <p className="small-text">
                 {staple.quantity ? `${staple.quantity} ${staple.unit}` : "No quantity set"}
@@ -52,29 +53,31 @@ function StaplesList({
                 Starts: {staple.startDate}
               </p>
 
-              <select
-                value={staple.frequency}
-                onChange={(event) =>
-                  updateStapleFrequency(staple.id, event.target.value)
-                }
-              >
-                <option value="weekly">Weekly</option>
-                <option value="fortnightly">Fortnightly</option>
-                <option value="four-weekly">4-weekly</option>
-                <option value="ad-hoc">Ad hoc</option>
-              </select>
-              <select
-                value={staple.category || "Other"}
-                onChange={(event) =>
-                  updateStapleCategory(staple.id, event.target.value)
-                }
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+              <div className="staple-controls">
+                <select
+                  value={staple.frequency}
+                  onChange={(event) =>
+                    updateStapleFrequency(staple.id, event.target.value)
+                  }
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="fortnightly">Fortnightly</option>
+                  <option value="four-weekly">4-weekly</option>
+                  <option value="ad-hoc">Ad hoc</option>
+                </select>
+                <select
+                  value={staple.category || "Other"}
+                  onChange={(event) =>
+                    updateStapleCategory(staple.id, event.target.value)
+                  }
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <button
@@ -86,7 +89,7 @@ function StaplesList({
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   );
 }
 

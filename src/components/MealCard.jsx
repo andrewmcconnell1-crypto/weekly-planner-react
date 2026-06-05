@@ -29,8 +29,11 @@ function MealCard({ day, meal, updateMeal }) {
   }
 
   return (
-    <div className="card">
-      <strong>{day}</strong>
+    <article className="card meal-card">
+      <div className="meal-card-header">
+        <strong>{day}</strong>
+        <span>{meal.ingredients.length} items</span>
+      </div>
 
       <input
         type="text"
@@ -85,7 +88,7 @@ function MealCard({ day, meal, updateMeal }) {
           ))}
         </ul>
       )}
-    </div>
+    </article>
   );
 }
 
