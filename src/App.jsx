@@ -20,7 +20,8 @@ import { normaliseItemName } from "./utils/itemUtils";
 import InventoryList from "./components/InventoryList";
 
 function App() {
-  const [activeTab, setActiveTab] = useState("plan");
+  const [activeTab, setActiveTab] = useState("home");
+  const [moreSection, setMoreSection] = useState("staples");
 
   const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
@@ -63,6 +64,18 @@ function App() {
 
   const shoppingWeekEnd = new Date(shoppingWeekStart);
   shoppingWeekEnd.setDate(shoppingWeekStart.getDate() + 6);
+
+  const mealsPlannedCount = days.filter((day) => {
+    const meal = meals[day];
+    return meal.name.trim() !== "" || meal.ingredients.length > 0;
+  }).length;
+
+  const activeStaplesCount = staples.filter(
+    (staple) => staple.active !== false
+  ).length;
+
+  const inventoryItemsCount = inventory.length;
+  const shoppingItemsCount = shoppingItems.length;
 
   useEffect(() => {
     localStorage.setItem("mealsByWeek", JSON.stringify(mealsByWeek));
@@ -360,38 +373,95 @@ function App() {
           <p className="eyebrow">Family meals</p>
 
           <h1>
-            {activeTab === "shop"
+            {activeTab === "home"
+              ? "Home"
+              : activeTab === "shop"
               ? "Shop for the week"
               : activeTab === "more"
                 ? "More"
                 : "Plan next week"}
           </h1>
-
         </div>
-
-        <nav className="app-nav" aria-label="Primary">
-          <button
-            className={activeTab === "plan" ? "active" : ""}
-            onClick={() => setActiveTab("plan")}
-          >
-            Plan
-          </button>
-
-          <button
-            className={activeTab === "shop" ? "active" : ""}
-            onClick={() => setActiveTab("shop")}
-          >
-            Shop
-          </button>
-
-          <button
-            className={activeTab === "more" ? "active" : ""}
-            onClick={() => setActiveTab("more")}
-          >
-            More
-          </button>
-        </nav>
       </header>
+
+      {activeTab === "home" && (
+        <section className="screen home-screen">
+          <div className="screen-header">
+            <div>
+              <p className="section-kicker">Dashboard</p>
+              <h2>Next shop at a glance</h2>
+            </div>
+          </div>
+
+          <div className="week-summary-grid">
+            <article className="week-summary-card">
+              <span>Planning week</span>
+              <strong>
+                {formatDate(mealWeekStart)} to {formatDate(mealWeekEnd)}
+              </strong>
+            </article>
+
+            <article className="week-summary-card">
+              <span>Shopping week</span>
+              <strong>
+                {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
+              </strong>
+            </article>
+          </div>
+
+          <div className="summary-grid">
+            <article className="summary-card">
+              <span>Meals planned</span>
+              <strong>{mealsPlannedCount}</strong>
+            </article>
+
+            <article className="summary-card">
+              <span>Active staples</span>
+              <strong>{activeStaplesCount}</strong>
+            </article>
+
+            <article className="summary-card">
+              <span>Inventory items</span>
+              <strong>{inventoryItemsCount}</strong>
+            </article>
+
+            <article className="summary-card">
+              <span>Shopping items</span>
+              <strong>{shoppingItemsCount}</strong>
+            </article>
+          </div>
+
+          <button className="primary-button home-primary" onClick={buildShoppingList}>
+            Generate shopping list
+          </button>
+
+          <div className="home-actions">
+            <button className="secondary" onClick={() => setActiveTab("plan")}>
+              Plan meals
+            </button>
+
+            <button
+              className="secondary"
+              onClick={() => {
+                setMoreSection("inventory");
+                setActiveTab("more");
+              }}
+            >
+              Check inventory
+            </button>
+
+            <button
+              className="secondary"
+              onClick={() => {
+                setMoreSection("staples");
+                setActiveTab("more");
+              }}
+            >
+              Manage staples
+            </button>
+          </div>
+        </section>
+      )}
 
       {activeTab === "plan" && (
         <section className="screen">
@@ -459,32 +529,102 @@ function App() {
           <div className="screen-header">
             <div>
               <p className="section-kicker">Settings</p>
-              <h2>Staples</h2>
+              <h2>
+                {moreSection === "inventory"
+                  ? "Inventory"
+                  : moreSection === "settings"
+                    ? "Settings"
+                    : "Staples"}
+              </h2>
             </div>
           </div>
 
-          <StaplesList
-            staples={staples}
-            newStaple={newStaple}
-            setNewStaple={setNewStaple}
-            addStaple={addStaple}
-            deleteStaple={deleteStaple}
-            updateStapleFrequency={updateStapleFrequency}
-            updateStapleCategory={updateStapleCategory}
-            toggleStapleActive={toggleStapleActive}
-          />
+          <div className="more-tabs">
+            <button
+              className={moreSection === "staples" ? "active" : ""}
+              onClick={() => setMoreSection("staples")}
+            >
+              Staples
+            </button>
 
-          <InventoryList
-            inventory={inventory}
-            newInventoryItem={newInventoryItem}
-            setNewInventoryItem={setNewInventoryItem}
-            addInventoryItem={addInventoryItem}
-            deleteInventoryItem={deleteInventoryItem}
-            updateInventoryCategory={updateInventoryCategory}
-            toggleInventoryActive={toggleInventoryActive}
-          />
+            <button
+              className={moreSection === "inventory" ? "active" : ""}
+              onClick={() => setMoreSection("inventory")}
+            >
+              Inventory
+            </button>
+
+            <button
+              className={moreSection === "settings" ? "active" : ""}
+              onClick={() => setMoreSection("settings")}
+            >
+              Settings
+            </button>
+          </div>
+
+          {moreSection === "staples" && (
+            <StaplesList
+              staples={staples}
+              newStaple={newStaple}
+              setNewStaple={setNewStaple}
+              addStaple={addStaple}
+              deleteStaple={deleteStaple}
+              updateStapleFrequency={updateStapleFrequency}
+              updateStapleCategory={updateStapleCategory}
+              toggleStapleActive={toggleStapleActive}
+            />
+          )}
+
+          {moreSection === "inventory" && (
+            <InventoryList
+              inventory={inventory}
+              newInventoryItem={newInventoryItem}
+              setNewInventoryItem={setNewInventoryItem}
+              addInventoryItem={addInventoryItem}
+              deleteInventoryItem={deleteInventoryItem}
+              updateInventoryCategory={updateInventoryCategory}
+              toggleInventoryActive={toggleInventoryActive}
+            />
+          )}
+
+          {moreSection === "settings" && (
+            <div className="settings-placeholder">
+              <strong>Settings</strong>
+              <p className="small-text">Settings will live here later.</p>
+            </div>
+          )}
         </section>
       )}
+
+      <nav className="bottom-nav" aria-label="Primary">
+        <button
+          className={activeTab === "home" ? "active" : ""}
+          onClick={() => setActiveTab("home")}
+        >
+          Home
+        </button>
+
+        <button
+          className={activeTab === "plan" ? "active" : ""}
+          onClick={() => setActiveTab("plan")}
+        >
+          Plan
+        </button>
+
+        <button
+          className={activeTab === "shop" ? "active" : ""}
+          onClick={() => setActiveTab("shop")}
+        >
+          Shop
+        </button>
+
+        <button
+          className={activeTab === "more" ? "active" : ""}
+          onClick={() => setActiveTab("more")}
+        >
+          More
+        </button>
+      </nav>
     </main>
   );
 }

@@ -10,11 +10,7 @@ function InventoryList({
     toggleInventoryActive,
 }) {
     return (
-        <section className="section">
-            <div className="section-header">
-                <h2>Inventory</h2>
-            </div>
-
+        <div className="inventory-panel">
             <p className="small-text">
                 Groceries you already have at home.
             </p>
@@ -38,10 +34,13 @@ function InventoryList({
             {inventory.length === 0 ? (
                 <p className="empty-state">No inventory items yet.</p>
             ) : (
-                <ul className="clean-list">
+                <ul className="inventory-list">
                     {inventory.map((item) => (
-                        <li className="card shopping-row" key={item.id}>
-                            <div>
+                        <li className="card inventory-card" key={item.id}>
+                            <div className="inventory-main">
+                                <div className="staple-title-row">
+                                    <strong>{item.name}</strong>
+
                                 <label className="active-toggle">
                                     <input
                                         type="checkbox"
@@ -50,7 +49,7 @@ function InventoryList({
                                     />
                                     Have this
                                 </label>
-                                <strong>{item.name}</strong>
+                                </div>
 
                                 <select
                                     value={item.category || "Other"}
@@ -77,7 +76,7 @@ function InventoryList({
                     ))}
                 </ul>
             )}
-        </section>
+        </div>
     );
 }
 

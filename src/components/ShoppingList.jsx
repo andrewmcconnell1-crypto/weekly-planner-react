@@ -93,8 +93,8 @@ function ShoppingList({
             </div>
 
             <ul className="clean-list">
-              {items.map((item) => (
-                <li className="card shopping-row" key={item.id}>
+              {items.map((item, index) => (
+                <li className="card shopping-row" key={`${item.id}-${index}`}>
                   <label className={item.checked ? "checked-item" : ""}>
                     <input
                       type="checkbox"

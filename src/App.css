@@ -66,14 +66,17 @@ select:focus-visible {
 .app-shell {
   width: min(100%, 960px);
   margin: 0 auto;
-  padding: 14px;
+  padding: 14px 14px 96px;
 }
 
 .app-header,
 .screen,
 .card,
 .empty-state,
-.primary-action-card {
+.primary-action-card,
+.week-summary-card,
+.summary-card,
+.settings-placeholder {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -113,23 +116,39 @@ select:focus-visible {
   font-size: 1.35rem;
 }
 
-.app-nav {
+.bottom-nav,
+.more-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   border-radius: 8px;
   background: var(--soft);
   padding: 4px;
 }
 
-.app-nav button {
+.bottom-nav {
+  position: fixed;
+  right: max(14px, calc((100vw - 960px) / 2 + 14px));
+  bottom: 12px;
+  left: max(14px, calc((100vw - 960px) / 2 + 14px));
+  z-index: 10;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  box-shadow: 0 12px 34px rgba(34, 42, 38, 0.18);
+}
+
+.more-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.bottom-nav button,
+.more-tabs button {
   min-height: 42px;
   border-color: transparent;
   background: transparent;
   color: var(--muted);
 }
 
-.app-nav button.active {
+.bottom-nav button.active,
+.more-tabs button.active {
   background: var(--panel);
   color: var(--primary-strong);
   box-shadow: 0 3px 12px rgba(34, 42, 38, 0.08);
@@ -160,6 +179,45 @@ select:focus-visible {
   font-weight: 800;
 }
 
+.week-summary-grid,
+.summary-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.week-summary-card,
+.summary-card {
+  display: grid;
+  gap: 6px;
+  padding: 13px;
+}
+
+.week-summary-card span,
+.summary-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.week-summary-card strong {
+  font-size: 0.98rem;
+}
+
+.summary-card strong {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.home-primary {
+  width: 100%;
+}
+
+.home-actions {
+  display: grid;
+  gap: 8px;
+}
+
 .week-nav {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -168,6 +226,7 @@ select:focus-visible {
 
 .meal-grid,
 .staples-list,
+.inventory-list,
 .clean-list,
 .ingredient-list {
   display: grid;
@@ -312,17 +371,20 @@ input::placeholder {
   font-size: 0.84rem;
 }
 
-.staples-panel {
+.staples-panel,
+.inventory-panel {
   display: grid;
   gap: 14px;
 }
 
-.staple-card {
+.staple-card,
+.inventory-card {
   display: grid;
   gap: 12px;
 }
 
-.staple-main {
+.staple-main,
+.inventory-main {
   display: grid;
   gap: 7px;
 }
@@ -341,14 +403,16 @@ input::placeholder {
   gap: 8px;
 }
 
+.settings-placeholder {
+  padding: 16px;
+}
+
 @media (min-width: 620px) {
   .app-shell {
-    padding: 22px;
+    padding: 22px 22px 104px;
   }
 
   .app-header {
-    grid-template-columns: minmax(0, 1fr) 330px;
-    align-items: end;
     padding: 20px;
   }
 
@@ -360,6 +424,20 @@ input::placeholder {
   .primary-action-card {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
+  }
+
+  .week-summary-grid,
+  .summary-grid,
+  .home-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .home-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .week-nav {
@@ -383,7 +461,8 @@ input::placeholder {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .staple-card {
+  .staple-card,
+  .inventory-card {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
