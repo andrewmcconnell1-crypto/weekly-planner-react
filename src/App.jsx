@@ -23,6 +23,52 @@ import { commonInventoryItems } from "./data/commonInventory";
 import RecipesList from "./components/RecipesList";
 import { initialRecipes } from "./data/initialRecipes";
 
+const recipeIdAliases = {
+  "spaghetti-bolognese": "bolognese",
+};
+
+function normaliseRecipe(recipe, index) {
+  const recipeId = recipeIdAliases[recipe.id] || recipe.id;
+  const starterRecipe = initialRecipes.find(
+    (initialRecipe) => initialRecipe.id === recipeId
+  );
+
+  if (starterRecipe) {
+    return starterRecipe;
+  }
+
+  return {
+    id:
+      recipeId ||
+      `recipe-${index}-${recipe.name || "untitled"}`,
+    name: recipe.name || "Untitled recipe",
+    category: recipe.category || "Family favourites",
+    source: recipe.source || "",
+    sourceUrl: recipe.sourceUrl || "",
+    ingredients: Array.isArray(recipe.ingredients)
+      ? recipe.ingredients
+      : [],
+    method: recipe.method || "",
+  };
+}
+
+function loadRecipes() {
+  const savedRecipes = localStorage.getItem("recipes");
+
+  if (!savedRecipes) return initialRecipes;
+
+  const parsedRecipes = JSON.parse(savedRecipes);
+  const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
+  const savedRecipeIds = new Set(
+    normalisedRecipes.map((recipe) => recipe.id)
+  );
+  const missingStarterRecipes = initialRecipes.filter(
+    (recipe) => !savedRecipeIds.has(recipe.id)
+  );
+
+  return [...normalisedRecipes, ...missingStarterRecipes];
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [moreSection, setMoreSection] = useState("overview");
@@ -85,10 +131,7 @@ function App() {
   ).length;
   const shoppingItemsCount = shoppingItems.length;
 
-  const [recipes, setRecipes] = useState(() => {
-    const savedRecipes = localStorage.getItem("recipes");
-    return savedRecipes ? JSON.parse(savedRecipes) : initialRecipes;
-  });
+  const [recipes, setRecipes] = useState(loadRecipes);
 
   const [newRecipeName, setNewRecipeName] = useState("");
 
@@ -421,7 +464,11 @@ function App() {
       {
         id: Date.now().toString(),
         name: cleanedName,
+        category: "Family favourites",
+        source: "",
+        sourceUrl: "",
         ingredients: [],
+        method: "",
       },
     ]);
 
@@ -463,6 +510,14 @@ function App() {
             ),
           }
           : recipe
+      )
+    );
+  }
+
+  function updateRecipeMethod(recipeId, method) {
+    setRecipes(
+      recipes.map((recipe) =>
+        recipe.id === recipeId ? { ...recipe, method } : recipe
       )
     );
   }
@@ -769,6 +824,7 @@ function App() {
                   deleteRecipe={deleteRecipe}
                   addIngredientToRecipe={addIngredientToRecipe}
                   deleteIngredientFromRecipe={deleteIngredientFromRecipe}
+                  updateRecipeMethod={updateRecipeMethod}
                 />
               )}
 
