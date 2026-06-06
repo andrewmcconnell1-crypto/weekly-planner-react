@@ -127,12 +127,13 @@ function ShoppingList({
                           onChange={() => toggleShoppingItem(item.id)}
                         />
 
-                        {item.name}
+                        <span className="shopping-item-name">{item.name}</span>
                       </label>
 
                       <button
                         type="button"
                         className="delete-button"
+                        aria-label={`Delete ${item.name}`}
                         onClick={() => deleteShoppingItem(item.id)}
                       >
                         Delete
