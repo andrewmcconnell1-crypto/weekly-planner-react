@@ -20,6 +20,9 @@ import { normaliseItemName } from "./utils/itemUtils";
 import InventoryList from "./components/InventoryList";
 import { commonInventoryItems } from "./data/commonInventory";
 
+import RecipesList from "./components/RecipesList";
+import { initialRecipes } from "./data/initialRecipes";
+
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [moreSection, setMoreSection] = useState("overview");
@@ -82,6 +85,13 @@ function App() {
   ).length;
   const shoppingItemsCount = shoppingItems.length;
 
+  const [recipes, setRecipes] = useState(() => {
+    const savedRecipes = localStorage.getItem("recipes");
+    return savedRecipes ? JSON.parse(savedRecipes) : initialRecipes;
+  });
+
+  const [newRecipeName, setNewRecipeName] = useState("");
+
   useEffect(() => {
     localStorage.setItem("mealsByWeek", JSON.stringify(mealsByWeek));
   }, [mealsByWeek]);
@@ -100,6 +110,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("inventory", JSON.stringify(inventory));
   }, [inventory]);
+
+  useEffect(() => {
+    localStorage.setItem("recipes", JSON.stringify(recipes));
+  }, [recipes]);
 
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
@@ -397,6 +411,62 @@ function App() {
     setInventory([...inventory, ...starterItems]);
   }
 
+  function addRecipe() {
+    const cleanedName = newRecipeName.trim();
+
+    if (cleanedName === "") return;
+
+    setRecipes([
+      ...recipes,
+      {
+        id: Date.now().toString(),
+        name: cleanedName,
+        ingredients: [],
+      },
+    ]);
+
+    setNewRecipeName("");
+  }
+
+  function deleteRecipe(id) {
+    setRecipes(recipes.filter((recipe) => recipe.id !== id));
+  }
+
+  function addIngredientToRecipe(recipeId, ingredientName) {
+    const cleanedIngredient = ingredientName.trim();
+
+    if (cleanedIngredient === "") return;
+
+    setRecipes(
+      recipes.map((recipe) =>
+        recipe.id === recipeId
+          ? {
+            ...recipe,
+            ingredients: [
+              ...recipe.ingredients,
+              cleanedIngredient,
+            ],
+          }
+          : recipe
+      )
+    );
+  }
+
+  function deleteIngredientFromRecipe(recipeId, ingredientIndex) {
+    setRecipes(
+      recipes.map((recipe) =>
+        recipe.id === recipeId
+          ? {
+            ...recipe,
+            ingredients: recipe.ingredients.filter(
+              (_, index) => index !== ingredientIndex
+            ),
+          }
+          : recipe
+      )
+    );
+  }
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -490,6 +560,17 @@ function App() {
             >
               Manage staples
             </button>
+
+            <button
+              className="secondary"
+              onClick={() => {
+                setMoreSection("recipes");
+                setActiveTab("more");
+              }}
+            >
+              Manage recipes
+            </button>
+
           </div>
         </section>
       )}
@@ -564,14 +645,17 @@ function App() {
               <p className="section-kicker">
                 {moreSection === "overview" ? "Tools" : "Manage"}
               </p>
+
               <h2>
                 {moreSection === "overview"
                   ? "More"
                   : moreSection === "inventory"
-                  ? "Inventory"
-                  : moreSection === "settings"
-                    ? "Settings"
-                    : "Staples"}
+                    ? "Inventory"
+                    : moreSection === "recipes"
+                      ? "Recipes"
+                      : moreSection === "settings"
+                        ? "Settings"
+                        : "Staples"}
               </h2>
             </div>
           </div>
@@ -605,6 +689,21 @@ function App() {
 
                 <button type="button" onClick={() => setMoreSection("inventory")}>
                   Manage Inventory
+                </button>
+              </article>
+
+              <article className="more-summary-card">
+                <div>
+                  <p className="section-kicker">Recipes</p>
+                  <h3>Saved meals</h3>
+                </div>
+
+                <p className="small-text">
+                  {recipes.length} saved recipe{recipes.length === 1 ? "" : "s"}
+                </p>
+
+                <button type="button" onClick={() => setMoreSection("recipes")}>
+                  Manage Recipes
                 </button>
               </article>
 
@@ -661,6 +760,18 @@ function App() {
                 />
               )}
 
+              {moreSection === "recipes" && (
+                <RecipesList
+                  recipes={recipes}
+                  newRecipeName={newRecipeName}
+                  setNewRecipeName={setNewRecipeName}
+                  addRecipe={addRecipe}
+                  deleteRecipe={deleteRecipe}
+                  addIngredientToRecipe={addIngredientToRecipe}
+                  deleteIngredientFromRecipe={deleteIngredientFromRecipe}
+                />
+              )}
+
               {moreSection === "settings" && (
                 <div className="settings-placeholder">
                   <strong>Settings</strong>
@@ -697,7 +808,7 @@ function App() {
         <button
           className={activeTab === "more" ? "active" : ""}
           onClick={() => {
-            setMoreSection("overview");
+            setMoreSection("inventory");
             setActiveTab("more");
           }}
         >
