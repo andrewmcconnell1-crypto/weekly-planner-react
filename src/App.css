@@ -334,6 +334,19 @@ textarea:focus-visible {
   padding: 12px;
 }
 
+.field-stack {
+  display: grid;
+  gap: 7px;
+}
+
+.field-stack > span,
+.ingredient-section-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
 input[type="text"],
 select,
 textarea {
@@ -368,6 +381,46 @@ input::placeholder {
   width: 100%;
 }
 
+.linked-recipe-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #e7ddcf;
+  border-radius: 8px;
+  background: #fbf7ee;
+  padding: 11px;
+}
+
+.linked-recipe-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.linked-recipe-header div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.linked-recipe-header span {
+  color: #7a6747;
+  font-size: 0.74rem;
+  font-weight: 840;
+  text-transform: uppercase;
+}
+
+.linked-recipe-header strong {
+  line-height: 1.25;
+}
+
+.linked-recipe-header a {
+  color: var(--primary);
+  font-size: 0.86rem;
+  font-weight: 820;
+  white-space: nowrap;
+}
+
 .ingredient-row,
 .shopping-row {
   display: flex;
@@ -379,6 +432,24 @@ input::placeholder {
 .ingredient-row {
   border-top: 1px solid var(--line);
   padding-top: 9px;
+}
+
+.recipe-ingredient-list {
+  gap: 7px;
+}
+
+.recipe-ingredient-list .ingredient-row {
+  border-top: 1px solid #e6d8c6;
+}
+
+.read-only-row {
+  justify-content: flex-start;
+  color: #3f4b46;
+}
+
+.ingredient-section-label {
+  list-style: none;
+  padding-top: 4px;
 }
 
 .ingredient-row span,

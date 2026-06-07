@@ -101,6 +101,8 @@ function App() {
   });
 
   const [newInventoryItem, setNewInventoryItem] = useState("");
+  const [recipes, setRecipes] = useState(loadRecipes);
+  const [newRecipeName, setNewRecipeName] = useState("");
 
   const mealWeekKey = getWeekKey(mealWeekStart);
   const shoppingWeekKey = getWeekKey(shoppingWeekStart);
@@ -110,6 +112,50 @@ function App() {
     mealsByWeek[shoppingWeekKey] || createEmptyMeals();
   const shoppingItems = shoppingItemsByWeek[shoppingWeekKey] || [];
 
+  function getRecipeForMeal(meal) {
+    if (!meal) return null;
+
+    if (meal.recipeId) {
+      const linkedRecipe = recipes.find((recipe) => recipe.id === meal.recipeId);
+
+      if (linkedRecipe) return linkedRecipe;
+    }
+
+    const normalisedMealName = normaliseItemName(meal.name || "");
+
+    if (!normalisedMealName) return null;
+
+    return (
+      recipes.find(
+        (recipe) => normaliseItemName(recipe.name) === normalisedMealName
+      ) || null
+    );
+  }
+
+  function getIngredientsForMeal(meal) {
+    const linkedRecipe = getRecipeForMeal(meal);
+    const recipeIngredients = linkedRecipe?.ingredients || [];
+    const mealIngredients = Array.isArray(meal?.ingredients)
+      ? meal.ingredients
+      : [];
+    const seenIngredients = new Set();
+
+    return [...recipeIngredients, ...mealIngredients].filter((ingredient) => {
+      const cleanedIngredient = String(ingredient).trim();
+
+      if (!cleanedIngredient) return false;
+
+      const normalisedIngredient = normaliseItemName(cleanedIngredient);
+
+      if (seenIngredients.has(normalisedIngredient)) {
+        return false;
+      }
+
+      seenIngredients.add(normalisedIngredient);
+      return true;
+    });
+  }
+
   const mealWeekEnd = new Date(mealWeekStart);
   mealWeekEnd.setDate(mealWeekStart.getDate() + 6);
 
@@ -118,7 +164,10 @@ function App() {
 
   const mealsPlannedCount = days.filter((day) => {
     const meal = meals[day];
-    return meal.name.trim() !== "" || meal.ingredients.length > 0;
+    return (
+      (meal.name || "").trim() !== "" ||
+      getIngredientsForMeal(meal).length > 0
+    );
   }).length;
 
   const activeStaplesCount = staples.filter(
@@ -130,10 +179,6 @@ function App() {
     (item) => item.active !== false
   ).length;
   const shoppingItemsCount = shoppingItems.length;
-
-  const [recipes, setRecipes] = useState(loadRecipes);
-
-  const [newRecipeName, setNewRecipeName] = useState("");
 
   useEffect(() => {
     localStorage.setItem("mealsByWeek", JSON.stringify(mealsByWeek));
@@ -337,7 +382,7 @@ function App() {
       }));
 
     const mealIngredients = days.flatMap((day) =>
-      shoppingWeekMeals[day].ingredients.map((ingredient) => ({
+      getIngredientsForMeal(shoppingWeekMeals[day]).map((ingredient) => ({
         name: ingredient,
         category: "Meal ingredients",
       }))
@@ -662,16 +707,24 @@ function App() {
           </div>
 
           <div className="meal-grid">
-            {days.map((day) => (
-              <MealCard
-                key={day}
-                day={day}
-                meal={meals[day]}
-                updateMeal={updateMeal}
-                isExpanded={expandedMealDay === day}
-                toggleExpanded={() => toggleExpandedMealDay(day)}
-              />
-            ))}
+            {days.map((day) => {
+              const meal = meals[day];
+              const linkedRecipe = getRecipeForMeal(meal);
+
+              return (
+                <MealCard
+                  key={day}
+                  day={day}
+                  meal={meal}
+                  recipes={recipes}
+                  linkedRecipe={linkedRecipe}
+                  ingredientCount={getIngredientsForMeal(meal).length}
+                  updateMeal={updateMeal}
+                  isExpanded={expandedMealDay === day}
+                  toggleExpanded={() => toggleExpandedMealDay(day)}
+                />
+              );
+            })}
           </div>
         </section>
       )}

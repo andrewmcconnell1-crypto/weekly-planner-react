@@ -13,6 +13,7 @@ export function createEmptyMeals() {
 export function createEmptyMeal() {
   return {
     name: "",
+    recipeId: "",
     ingredients: [],
   };
 }
