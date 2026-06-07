@@ -22,10 +22,40 @@ import { commonInventoryItems } from "./data/commonInventory";
 
 import RecipesList from "./components/RecipesList";
 import { initialRecipes } from "./data/initialRecipes";
+import { getRecipeTone } from "./utils/recipeUtils";
 
 const recipeIdAliases = {
   "spaghetti-bolognese": "bolognese",
 };
+
+const emptyMeal = {
+  name: "",
+  recipeId: "",
+  mealType: "cook",
+  repeatFromDay: "",
+  ingredients: [],
+};
+
+function slugifyIdPart(value) {
+  return normaliseItemName(value).replace(/\s+/g, "-") || "item";
+}
+
+function createCollectionId(prefix, collection, name) {
+  const existingIds = new Set(collection.map((item) => item.id));
+  const baseId = `${prefix}-${slugifyIdPart(name)}`;
+
+  if (!existingIds.has(baseId)) return baseId;
+
+  let suffix = 2;
+  let nextId = `${baseId}-${suffix}`;
+
+  while (existingIds.has(nextId)) {
+    suffix += 1;
+    nextId = `${baseId}-${suffix}`;
+  }
+
+  return nextId;
+}
 
 function normaliseRecipe(recipe, index) {
   const recipeId = recipeIdAliases[recipe.id] || recipe.id;
@@ -74,6 +104,8 @@ function App() {
   const [moreSection, setMoreSection] = useState("overview");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
 
+  const [currentWeekStart] = useState(getSunday);
+  const [nextWeekStart] = useState(getNextSunday);
   const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
 
@@ -106,14 +138,29 @@ function App() {
 
   const mealWeekKey = getWeekKey(mealWeekStart);
   const shoppingWeekKey = getWeekKey(shoppingWeekStart);
+  const currentWeekKey = getWeekKey(currentWeekStart);
+  const nextWeekKey = getWeekKey(nextWeekStart);
+  const homeWeekMode =
+    mealWeekKey === currentWeekKey && shoppingWeekKey === currentWeekKey
+      ? "current"
+      : mealWeekKey === nextWeekKey && shoppingWeekKey === nextWeekKey
+        ? "next"
+        : "custom";
 
   const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
   const shoppingWeekMeals =
     mealsByWeek[shoppingWeekKey] || createEmptyMeals();
   const shoppingItems = shoppingItemsByWeek[shoppingWeekKey] || [];
 
+  function getMealType(meal) {
+    if (!meal) return "cook";
+    if (meal.mealType) return meal.mealType;
+    return "cook";
+  }
+
   function getRecipeForMeal(meal) {
     if (!meal) return null;
+    if (getMealType(meal) !== "cook") return null;
 
     if (meal.recipeId) {
       const linkedRecipe = recipes.find((recipe) => recipe.id === meal.recipeId);
@@ -133,6 +180,8 @@ function App() {
   }
 
   function getIngredientsForMeal(meal) {
+    if (getMealType(meal) !== "cook") return [];
+
     const linkedRecipe = getRecipeForMeal(meal);
     const recipeIngredients = linkedRecipe?.ingredients || [];
     const mealIngredients = Array.isArray(meal?.ingredients)
@@ -156,22 +205,112 @@ function App() {
     });
   }
 
+  function getMealDisplayName(meal, linkedRecipe, weekMeals) {
+    const mealType = getMealType(meal);
+
+    if (mealType === "takeaway") return "Takeaway";
+    if (mealType === "eating-out") return "Eating out";
+
+    if (mealType === "repeat") {
+      const repeatFromDay = meal?.repeatFromDay;
+      const sourceMeal = repeatFromDay ? weekMeals[repeatFromDay] : null;
+      const sourceMealType = getMealType(sourceMeal);
+      const sourceRecipe = getRecipeForMeal(sourceMeal);
+      const sourceName =
+        sourceMeal && sourceMealType !== "repeat"
+          ? getMealDisplayName(sourceMeal, sourceRecipe, weekMeals)
+          : "";
+
+      if (sourceName && sourceName !== "No meal planned") {
+        return `Same as ${repeatFromDay}: ${sourceName}`;
+      }
+
+      return repeatFromDay ? `Same as ${repeatFromDay}` : "Same as another night";
+    }
+
+    return linkedRecipe?.name || (meal?.name || "").trim() || "No meal planned";
+  }
+
+  function getMealLabel(meal, linkedRecipe) {
+    const mealType = getMealType(meal);
+    const hasCustomMeal =
+      (meal?.name || "").trim() !== "" || Boolean(meal?.ingredients?.length);
+
+    if (mealType === "takeaway") return "No shopping needed";
+    if (mealType === "eating-out") return "No shopping needed";
+    if (mealType === "repeat") return "Repeat meal";
+    if (linkedRecipe) return linkedRecipe.category || "Recipe";
+    return hasCustomMeal ? "Custom meal" : "Unplanned";
+  }
+
+  function getMealTone(meal, linkedRecipe, hasMeal) {
+    const mealType = getMealType(meal);
+
+    if (!hasMeal) return "empty";
+    if (mealType === "repeat") return "repeat";
+    if (mealType === "takeaway") return "takeaway";
+    if (mealType === "eating-out") return "out";
+    if (linkedRecipe) return getRecipeTone(linkedRecipe.category);
+
+    return "custom";
+  }
+
+  function mealHasPlan(meal) {
+    const mealType = getMealType(meal);
+
+    if (mealType === "takeaway" || mealType === "eating-out") return true;
+    if (mealType === "repeat") return Boolean(meal?.repeatFromDay);
+
+    return (
+      (meal?.name || "").trim() !== "" ||
+      getIngredientsForMeal(meal).length > 0
+    );
+  }
+
+  function getMealSummary(day, meal, weekMeals = meals) {
+    const normalisedMeal = meal || emptyMeal;
+    const linkedRecipe = getRecipeForMeal(normalisedMeal);
+    const ingredients = getIngredientsForMeal(normalisedMeal);
+    const hasMeal = mealHasPlan(normalisedMeal);
+
+    return {
+      day,
+      meal: normalisedMeal,
+      linkedRecipe,
+      ingredients,
+      hasMeal,
+      name: getMealDisplayName(normalisedMeal, linkedRecipe, weekMeals),
+      label: getMealLabel(normalisedMeal, linkedRecipe),
+      tone: getMealTone(normalisedMeal, linkedRecipe, hasMeal),
+    };
+  }
+
   const mealWeekEnd = new Date(mealWeekStart);
   mealWeekEnd.setDate(mealWeekStart.getDate() + 6);
 
   const shoppingWeekEnd = new Date(shoppingWeekStart);
   shoppingWeekEnd.setDate(shoppingWeekStart.getDate() + 6);
 
-  const mealsPlannedCount = days.filter((day) => {
-    const meal = meals[day];
-    return (
-      (meal.name || "").trim() !== "" ||
-      getIngredientsForMeal(meal).length > 0
-    );
-  }).length;
+  const planningDaySummaries = days.map((day) =>
+    getMealSummary(day, meals[day], meals)
+  );
+  const shoppingDaySummaries = days.map((day) =>
+    getMealSummary(day, shoppingWeekMeals[day], shoppingWeekMeals)
+  );
+  const mealsPlannedCount = planningDaySummaries.filter(
+    (daySummary) => daySummary.hasMeal
+  ).length;
+  const shoppingMealIngredientsCount = shoppingDaySummaries.reduce(
+    (total, daySummary) => total + daySummary.ingredients.length,
+    0
+  );
 
   const activeStaplesCount = staples.filter(
     (staple) => staple.active !== false
+  ).length;
+
+  const dueStaplesCount = staples.filter(
+    (staple) => staple.active !== false && stapleIsDueThisWeek(staple)
   ).length;
 
   const inventoryItemsCount = inventory.length;
@@ -179,6 +318,12 @@ function App() {
     (item) => item.active !== false
   ).length;
   const shoppingItemsCount = shoppingItems.length;
+  const pendingShoppingItemsCount = shoppingItems.filter(
+    (item) => !item.checked
+  ).length;
+  const checkedShoppingItemsCount = shoppingItemsCount - pendingShoppingItemsCount;
+  const shoppingActionLabel =
+    shoppingItemsCount > 0 ? "Update shopping list" : "Generate shopping list";
 
   useEffect(() => {
     localStorage.setItem("mealsByWeek", JSON.stringify(mealsByWeek));
@@ -223,6 +368,15 @@ function App() {
     setMealWeekStart(getNextSunday());
   }
 
+  function showHomeWeek(weekStart) {
+    const nextMealWeekStart = new Date(weekStart);
+    const nextShoppingWeekStart = new Date(weekStart);
+
+    setMealWeekStart(nextMealWeekStart);
+    setShoppingWeekStart(nextShoppingWeekStart);
+    setExpandedMealDay(null);
+  }
+
   function goToPreviousShoppingWeek() {
     const previousWeek = new Date(shoppingWeekStart);
     previousWeek.setDate(shoppingWeekStart.getDate() - 7);
@@ -253,6 +407,11 @@ function App() {
     setExpandedMealDay(expandedMealDay === day ? null : day);
   }
 
+  function openPlanDay(day) {
+    setExpandedMealDay(day);
+    setActiveTab("plan");
+  }
+
   function addShoppingItem() {
     const cleanedItem = newItem.trim();
     if (cleanedItem === "") return;
@@ -260,9 +419,10 @@ function App() {
     const updatedItems = [
       ...shoppingItems,
       {
-        id: Date.now().toString(),
+        id: createCollectionId("shopping", shoppingItems, cleanedItem),
         name: cleanedItem,
         category: "Other",
+        source: "Manual",
         checked: false,
       },
     ];
@@ -302,7 +462,7 @@ function App() {
     setStaples([
       ...staples,
       {
-        id: Date.now().toString(),
+        id: createCollectionId("staple", staples, cleanedStaple),
         name: cleanedStaple,
         category: "Other",
         quantity: null,
@@ -379,24 +539,43 @@ function App() {
           ? `${staple.quantity} ${staple.unit} ${staple.name}`
           : staple.name,
         category: staple.category || "Other",
+        source: "Staple",
+        sourceDetail: staple.name,
       }));
 
-    const mealIngredients = days.flatMap((day) =>
-      getIngredientsForMeal(shoppingWeekMeals[day]).map((ingredient) => ({
+    const mealIngredients = days.flatMap((day) => {
+      const daySummary = getMealSummary(day, shoppingWeekMeals[day], shoppingWeekMeals);
+      const sourceDetail = daySummary.hasMeal ? daySummary.name : day;
+
+      return daySummary.ingredients.map((ingredient) => ({
         name: ingredient,
         category: "Meal ingredients",
-      }))
-    );
+        source: "Meal",
+        sourceDetail,
+        day,
+      }));
+    });
 
     const allNewItems = [
       ...dueStaples,
       ...mealIngredients,
     ];
 
+    const generatedSources = ["Meal", "Staple", "Generated"];
+    const existingGeneratedItems = shoppingItems.filter((item) =>
+      generatedSources.includes(item.source)
+    );
+    const retainedShoppingItems = shoppingItems.filter(
+      (item) => !generatedSources.includes(item.source)
+    );
+    const existingGeneratedItemsByName = new Map(
+      existingGeneratedItems.map((item) => [
+        normaliseItemName(item.name),
+        item,
+      ])
+    );
     const existingNames = [
-      ...shoppingItems.map((item) =>
-        normaliseItemName(item.name)
-      ),
+      ...retainedShoppingItems.map((item) => normaliseItemName(item.name)),
       ...inventory
         .filter((item) => item.active !== false)
         .map((item) => normaliseItemName(item.name)),
@@ -418,18 +597,22 @@ function App() {
         return true;
       })
       .map((item) => ({
-        id: Date.now().toString() + item.name,
+        id:
+          existingGeneratedItemsByName.get(normaliseItemName(item.name))?.id ||
+          `generated-${slugifyIdPart(item.name)}`,
         name: item.name,
         category: item.category,
-        checked: false,
+        source: item.source || "Generated",
+        sourceDetail: item.sourceDetail || "",
+        day: item.day || "",
+        checked:
+          existingGeneratedItemsByName.get(normaliseItemName(item.name))
+            ?.checked || false,
       }));
 
     setShoppingItemsByWeek({
       ...shoppingItemsByWeek,
-      [shoppingWeekKey]: [
-        ...shoppingItems,
-        ...newItems,
-      ],
+      [shoppingWeekKey]: [...retainedShoppingItems, ...newItems],
     });
 
     setActiveTab("shop");
@@ -443,7 +626,7 @@ function App() {
     setInventory([
       ...inventory,
       {
-        id: Date.now().toString(),
+        id: createCollectionId("inventory", inventory, cleanedItem),
         name: cleanedItem,
         category: "Other",
         quantity: null,
@@ -488,7 +671,7 @@ function App() {
           !existingNames.includes(normaliseItemName(item.name))
       )
       .map((item) => ({
-        id: Date.now().toString() + item.name,
+        id: `starter-inventory-${slugifyIdPart(item.name)}`,
         name: item.name,
         category: item.category,
         quantity: null,
@@ -507,7 +690,7 @@ function App() {
     setRecipes([
       ...recipes,
       {
-        id: Date.now().toString(),
+        id: createCollectionId("recipe", recipes, cleanedName),
         name: cleanedName,
         category: "Family favourites",
         source: "",
@@ -575,102 +758,178 @@ function App() {
 
           <h1>
             {activeTab === "home"
-              ? "Home"
+              ? "Weekly shop"
               : activeTab === "shop"
-              ? "Shop for the week"
+              ? "Shopping list"
               : activeTab === "more"
                 ? "More"
-                : "Plan next week"}
+                : "Meal plan"}
           </h1>
         </div>
       </header>
 
       {activeTab === "home" && (
         <section className="screen home-screen">
-          <div className="screen-header">
+          <div className="home-hero">
             <div>
-              <p className="section-kicker">Dashboard</p>
-              <h2>Next shop at a glance</h2>
+              <div className="home-week-switch" aria-label="Home week">
+                <button
+                  type="button"
+                  className={homeWeekMode === "current" ? "active" : ""}
+                  onClick={() => showHomeWeek(currentWeekStart)}
+                >
+                  This week
+                </button>
+
+                <button
+                  type="button"
+                  className={homeWeekMode === "next" ? "active" : ""}
+                  onClick={() => showHomeWeek(nextWeekStart)}
+                >
+                  Next week
+                </button>
+              </div>
+
+              <p className="section-kicker">Next shop</p>
+              <h2>
+                {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
+              </h2>
+              <p>
+                {mealsPlannedCount} of {days.length} meals planned,{" "}
+                {dueStaplesCount} staples due, {pendingShoppingItemsCount} items
+                still to buy.
+              </p>
+            </div>
+
+            <div className="home-status">
+              <strong>{pendingShoppingItemsCount}</strong>
+              <span>to buy</span>
             </div>
           </div>
 
-          <div className="week-summary-grid">
-            <article className="week-summary-card">
-              <span>Planning week</span>
-              <strong>
+          <div className="home-primary-row">
+            <button className="primary-button" onClick={buildShoppingList}>
+              {shoppingActionLabel}
+            </button>
+
+            <button className="secondary" onClick={() => setActiveTab("shop")}>
+              Open list
+            </button>
+          </div>
+
+          <div className="home-workflow">
+            <section className="workflow-panel">
+              <div className="workflow-heading">
+                <div>
+                  <p className="section-kicker">Meals</p>
+                  <h2>Plan</h2>
+                </div>
+
+                <span className="workflow-count">
+                  {mealsPlannedCount}/{days.length}
+                </span>
+              </div>
+
+              <div className="date-line">
                 {formatDate(mealWeekStart)} to {formatDate(mealWeekEnd)}
-              </strong>
-            </article>
+              </div>
 
-            <article className="week-summary-card">
-              <span>Shopping week</span>
-              <strong>
-                {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
-              </strong>
-            </article>
-          </div>
+              <div className="home-week-list">
+                {planningDaySummaries.map((daySummary) => (
+                  <button
+                    className={`home-day-row ${
+                      daySummary.hasMeal ? "" : "empty"
+                    }`}
+                    data-tone={daySummary.tone}
+                    type="button"
+                    key={daySummary.day}
+                    onClick={() => openPlanDay(daySummary.day)}
+                  >
+                    <span className="home-day">{daySummary.day.slice(0, 3)}</span>
 
-          <div className="summary-grid">
-            <article className="summary-card">
-              <span>Meals planned</span>
-              <strong>{mealsPlannedCount}</strong>
-            </article>
+                    <span className="home-meal">
+                      <strong>{daySummary.name}</strong>
+                      <span>{daySummary.label}</span>
+                    </span>
 
-            <article className="summary-card">
-              <span>Active staples</span>
-              <strong>{activeStaplesCount}</strong>
-            </article>
+                    <span className="meal-row-count">
+                      {daySummary.ingredients.length}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-            <article className="summary-card">
-              <span>Inventory items</span>
-              <strong>{inventoryItemsCount}</strong>
-            </article>
+              <button className="secondary" onClick={() => setActiveTab("plan")}>
+                Edit meal plan
+              </button>
+            </section>
 
-            <article className="summary-card">
-              <span>Shopping items</span>
-              <strong>{shoppingItemsCount}</strong>
-            </article>
-          </div>
+            <section className="workflow-panel">
+              <div className="workflow-heading">
+                <div>
+                  <p className="section-kicker">Shop</p>
+                  <h2>Readiness</h2>
+                </div>
 
-          <button className="primary-button home-primary" onClick={buildShoppingList}>
-            Generate shopping list
-          </button>
+                <span className="workflow-count">
+                  {shoppingItemsCount}
+                </span>
+              </div>
 
-          <div className="home-actions">
-            <button className="secondary" onClick={() => setActiveTab("plan")}>
-              Plan meals
-            </button>
+              <div className="readiness-list">
+                <div>
+                  <span>Meal ingredients</span>
+                  <strong>{shoppingMealIngredientsCount}</strong>
+                </div>
 
-            <button
-              className="secondary"
-              onClick={() => {
-                setMoreSection("overview");
-                setActiveTab("more");
-              }}
-            >
-              Check inventory
-            </button>
+                <div>
+                  <span>Staples due</span>
+                  <strong>{dueStaplesCount}</strong>
+                </div>
 
-            <button
-              className="secondary"
-              onClick={() => {
-                setMoreSection("staples");
-                setActiveTab("more");
-              }}
-            >
-              Manage staples
-            </button>
+                <div>
+                  <span>Inventory active</span>
+                  <strong>{activeInventoryCount}</strong>
+                </div>
 
-            <button
-              className="secondary"
-              onClick={() => {
-                setMoreSection("recipes");
-                setActiveTab("more");
-              }}
-            >
-              Manage recipes
-            </button>
+                <div>
+                  <span>Checked off</span>
+                  <strong>{checkedShoppingItemsCount}</strong>
+                </div>
+              </div>
 
+              <div className="home-actions">
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setMoreSection("inventory");
+                    setActiveTab("more");
+                  }}
+                >
+                  Check inventory
+                </button>
+
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setMoreSection("staples");
+                    setActiveTab("more");
+                  }}
+                >
+                  Manage staples
+                </button>
+
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setMoreSection("recipes");
+                    setActiveTab("more");
+                  }}
+                >
+                  Recipes
+                </button>
+              </div>
+            </section>
           </div>
         </section>
       )}
@@ -709,16 +968,20 @@ function App() {
           <div className="meal-grid">
             {days.map((day) => {
               const meal = meals[day];
-              const linkedRecipe = getRecipeForMeal(meal);
+              const daySummary = getMealSummary(day, meal, meals);
 
               return (
                 <MealCard
                   key={day}
                   day={day}
                   meal={meal}
+                  days={days}
                   recipes={recipes}
-                  linkedRecipe={linkedRecipe}
-                  ingredientCount={getIngredientsForMeal(meal).length}
+                  linkedRecipe={daySummary.linkedRecipe}
+                  displayName={daySummary.name}
+                  mealLabel={daySummary.label}
+                  mealTone={daySummary.tone}
+                  ingredientCount={daySummary.ingredients.length}
                   updateMeal={updateMeal}
                   isExpanded={expandedMealDay === day}
                   toggleExpanded={() => toggleExpandedMealDay(day)}
@@ -738,6 +1001,9 @@ function App() {
           toggleShoppingItem={toggleShoppingItem}
           deleteShoppingItem={deleteShoppingItem}
           buildShoppingList={buildShoppingList}
+          shoppingActionLabel={shoppingActionLabel}
+          pendingShoppingItemsCount={pendingShoppingItemsCount}
+          checkedShoppingItemsCount={checkedShoppingItemsCount}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
           goToPreviousShoppingWeek={goToPreviousShoppingWeek}
@@ -769,68 +1035,59 @@ function App() {
           </div>
 
           {moreSection === "overview" ? (
-            <div className="more-summary-grid">
-              <article className="more-summary-card">
-                <div>
-                  <p className="section-kicker">Staples</p>
-                  <h3>Regular buys</h3>
-                </div>
+            <div className="manager-list">
+              <button
+                className="manager-row"
+                type="button"
+                onClick={() => setMoreSection("recipes")}
+              >
+                <span>
+                  <strong>Recipes</strong>
+                  <span>
+                    {recipes.length} saved recipe
+                    {recipes.length === 1 ? "" : "s"}
+                  </span>
+                </span>
+                <span className="manager-action">Manage</span>
+              </button>
 
-                <p className="small-text">
-                  {activeStaplesCount} active of {staples.length} staples
-                </p>
+              <button
+                className="manager-row"
+                type="button"
+                onClick={() => setMoreSection("staples")}
+              >
+                <span>
+                  <strong>Staples</strong>
+                  <span>{activeStaplesCount} active regular buys</span>
+                </span>
+                <span className="manager-action">Manage</span>
+              </button>
 
-                <button type="button" onClick={() => setMoreSection("staples")}>
-                  Manage Staples
-                </button>
-              </article>
+              <button
+                className="manager-row"
+                type="button"
+                onClick={() => setMoreSection("inventory")}
+              >
+                <span>
+                  <strong>Inventory</strong>
+                  <span>
+                    {activeInventoryCount} active of {inventoryItemsCount} items
+                  </span>
+                </span>
+                <span className="manager-action">Manage</span>
+              </button>
 
-              <article className="more-summary-card">
-                <div>
-                  <p className="section-kicker">Inventory</p>
-                  <h3>Already at home</h3>
-                </div>
-
-                <p className="small-text">
-                  {activeInventoryCount} active of {inventoryItemsCount} items
-                </p>
-
-                <button type="button" onClick={() => setMoreSection("inventory")}>
-                  Manage Inventory
-                </button>
-              </article>
-
-              <article className="more-summary-card">
-                <div>
-                  <p className="section-kicker">Recipes</p>
-                  <h3>Saved meals</h3>
-                </div>
-
-                <p className="small-text">
-                  {recipes.length} saved recipe{recipes.length === 1 ? "" : "s"}
-                </p>
-
-                <button type="button" onClick={() => setMoreSection("recipes")}>
-                  Manage Recipes
-                </button>
-              </article>
-
-              <article className="more-summary-card">
-                <div>
-                  <p className="section-kicker">Settings</p>
-                  <h3>Preferences</h3>
-                </div>
-
-                <p className="small-text">Settings will live here later.</p>
-
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => setMoreSection("settings")}
-                >
-                  View Settings
-                </button>
-              </article>
+              <button
+                className="manager-row"
+                type="button"
+                onClick={() => setMoreSection("settings")}
+              >
+                <span>
+                  <strong>Settings</strong>
+                  <span>Preferences placeholder</span>
+                </span>
+                <span className="manager-action">Open</span>
+              </button>
             </div>
           ) : (
             <>
@@ -917,7 +1174,7 @@ function App() {
         <button
           className={activeTab === "more" ? "active" : ""}
           onClick={() => {
-            setMoreSection("inventory");
+            setMoreSection("overview");
             setActiveTab("more");
           }}
         >

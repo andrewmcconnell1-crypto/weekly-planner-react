@@ -14,6 +14,8 @@ export function createEmptyMeal() {
   return {
     name: "",
     recipeId: "",
+    mealType: "cook",
+    repeatFromDay: "",
     ingredients: [],
   };
 }

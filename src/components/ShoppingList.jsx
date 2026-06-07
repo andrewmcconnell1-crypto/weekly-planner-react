@@ -8,6 +8,9 @@ function ShoppingList({
   toggleShoppingItem,
   deleteShoppingItem,
   buildShoppingList,
+  shoppingActionLabel,
+  pendingShoppingItemsCount,
+  checkedShoppingItemsCount,
   shoppingWeekStart,
   shoppingWeekEnd,
   goToPreviousShoppingWeek,
@@ -39,7 +42,7 @@ function ShoppingList({
       <div className="screen-header">
         <div>
           <p className="section-kicker">Shopping week</p>
-          <h2>List</h2>
+          <h2>Shop</h2>
         </div>
 
         <div className="date-card">
@@ -70,10 +73,15 @@ function ShoppingList({
       </div>
 
       <div className="primary-action-card">
-        <strong>Next shop</strong>
+        <div>
+          <strong>Shopping list</strong>
+          <p className="small-text">
+            {pendingShoppingItemsCount} pending, {checkedShoppingItemsCount} done
+          </p>
+        </div>
 
         <button className="primary-button" type="button" onClick={buildShoppingList}>
-          Generate Shopping List
+          {shoppingActionLabel}
         </button>
       </div>
 
@@ -127,7 +135,17 @@ function ShoppingList({
                           onChange={() => toggleShoppingItem(item.id)}
                         />
 
-                        <span className="shopping-item-name">{item.name}</span>
+                        <span className="shopping-item-content">
+                          <span className="shopping-item-name">{item.name}</span>
+
+                          {item.source && (
+                            <span className="shopping-item-source">
+                              {item.sourceDetail
+                                ? `${item.source}: ${item.sourceDetail}`
+                                : item.source}
+                            </span>
+                          )}
+                        </span>
                       </label>
 
                       <button
