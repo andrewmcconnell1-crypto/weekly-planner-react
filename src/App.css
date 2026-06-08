@@ -549,10 +549,64 @@ textarea:focus-visible {
   box-shadow: 0 3px 12px rgba(34, 42, 38, 0.08);
 }
 
+.week-more {
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.week-more summary {
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 760;
+  list-style: none;
+}
+
+.week-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.week-more summary::after {
+  content: " +";
+  color: #8a8176;
+}
+
+.week-more[open] {
+  border-color: var(--line);
+  background: #fffdf9;
+}
+
+.week-more[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.week-more[open] summary::after {
+  content: " -";
+}
+
 .week-stepper {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  padding: 8px;
+}
+
+.week-stepper button.secondary {
+  min-height: 38px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 760;
+}
+
+.week-stepper button.secondary:hover {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--ink);
 }
 
 .meal-grid,
@@ -1471,8 +1525,12 @@ input::placeholder {
   }
 
   .week-controls {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr);
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .week-more {
+    min-width: 220px;
   }
 
   .add-item-row {
