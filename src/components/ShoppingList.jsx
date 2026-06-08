@@ -2,6 +2,19 @@ import { useState } from "react";
 
 import WeekControls from "./WeekControls";
 
+function getSourceLabel(source) {
+  if (source === "Restock") return "Stock";
+  if (source === "Recurring buy") return "Recurring";
+  if (source === "Generated") return "Generated";
+  return source || "Manual";
+}
+
+function getSourceClass(source) {
+  return `source-${String(source || "manual")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")}`;
+}
+
 function ShoppingList({
   newItem,
   setNewItem,
@@ -11,8 +24,14 @@ function ShoppingList({
   deleteShoppingItem,
   buildShoppingList,
   shoppingActionLabel,
+  shoppingStatusLabel,
+  shoppingListNeedsUpdate,
+  shoppingListSummary,
+  shoppingLastUpdatedText,
   pendingShoppingItemsCount,
   checkedShoppingItemsCount,
+  stockRestockItemsCount,
+  manualShoppingItemsCount,
   shoppingWeekStart,
   shoppingWeekEnd,
   shoppingWeekMode,
@@ -23,7 +42,9 @@ function ShoppingList({
 }) {
   const [collapsedCategories, setCollapsedCategories] = useState({});
 
-  const groupedItems = shoppingItems.reduce((groups, item) => {
+  const pendingItems = shoppingItems.filter((item) => !item.checked);
+  const doneItems = shoppingItems.filter((item) => item.checked);
+  const groupedPendingItems = pendingItems.reduce((groups, item) => {
     const category = item.category || "Other";
 
     if (!groups[category]) {
@@ -33,12 +54,63 @@ function ShoppingList({
     groups[category].push(item);
     return groups;
   }, {});
+  const formattedShoppingRange = `${shoppingWeekStart.toLocaleDateString("en-AU", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  })} to ${shoppingWeekEnd.toLocaleDateString("en-AU", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  })}`;
 
   function toggleCategory(category) {
     setCollapsedCategories({
       ...collapsedCategories,
       [category]: !collapsedCategories[category],
     });
+  }
+
+  function renderShoppingItem(item, index) {
+    return (
+      <li
+        className={`card shopping-row ${item.checked ? "checked-row" : ""}`}
+        key={`${item.id}-${index}`}
+      >
+        <label className={item.checked ? "checked-item" : ""}>
+          <input
+            type="checkbox"
+            checked={item.checked}
+            onChange={() => toggleShoppingItem(item.id)}
+          />
+
+          <span className="shopping-item-content">
+            <span className="shopping-item-name">{item.name}</span>
+
+            <span className="shopping-item-meta">
+              <span className={`source-chip ${getSourceClass(item.source)}`}>
+                {getSourceLabel(item.source)}
+              </span>
+
+              {item.sourceDetail && (
+                <span className="shopping-source-detail">
+                  {item.sourceDetail}
+                </span>
+              )}
+            </span>
+          </span>
+        </label>
+
+        <button
+          type="button"
+          className="delete-button"
+          aria-label={`Delete ${item.name}`}
+          onClick={() => deleteShoppingItem(item.id)}
+        >
+          Delete
+        </button>
+      </li>
+    );
   }
 
   return (
@@ -48,19 +120,48 @@ function ShoppingList({
           <p className="section-kicker">Shopping week</p>
           <h2>Shop</h2>
         </div>
+      </div>
 
-        <div className="date-card">
-          <span>{shoppingWeekStart.toLocaleDateString("en-AU", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          })}</span>
-          <span>to</span>
-          <span>{shoppingWeekEnd.toLocaleDateString("en-AU", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          })}</span>
+      <div
+        className={`shop-status-panel ${
+          shoppingListNeedsUpdate ? "needs-update" : ""
+        }`}
+      >
+        <div className="shop-status-heading">
+          <div>
+            <span>Shopping week</span>
+            <strong>{formattedShoppingRange}</strong>
+          </div>
+
+          <span
+            className={`list-status-pill ${
+              shoppingListNeedsUpdate ? "needs-update" : ""
+            }`}
+          >
+            {shoppingStatusLabel}
+          </span>
+        </div>
+
+        <div className="shop-stat-grid">
+          <div>
+            <span>To buy</span>
+            <strong>{pendingShoppingItemsCount}</strong>
+          </div>
+
+          <div>
+            <span>Done</span>
+            <strong>{checkedShoppingItemsCount}</strong>
+          </div>
+
+          <div>
+            <span>Stock</span>
+            <strong>{stockRestockItemsCount}</strong>
+          </div>
+
+          <div>
+            <span>Manual</span>
+            <strong>{manualShoppingItemsCount}</strong>
+          </div>
         </div>
       </div>
 
@@ -72,11 +173,17 @@ function ShoppingList({
         onNextWeek={goToNextShoppingWeek}
       />
 
-      <div className="primary-action-card">
+      <div
+        className={`primary-action-card shop-action-card ${
+          shoppingListNeedsUpdate ? "needs-update" : ""
+        }`}
+      >
         <div>
           <strong>Shopping list</strong>
           <p className="small-text">
-            {pendingShoppingItemsCount} pending, {checkedShoppingItemsCount} done
+            {shoppingLastUpdatedText
+              ? `Last updated ${shoppingLastUpdatedText}`
+              : "Generate from planned meals, recurring buys, and stock restocks."}
           </p>
         </div>
 
@@ -85,85 +192,105 @@ function ShoppingList({
         </button>
       </div>
 
-      <div className="add-item-row">
-        <input
-          type="text"
-          placeholder="Add shopping item..."
-          value={newItem}
-          onChange={(event) => setNewItem(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") addShoppingItem();
-          }}
-        />
-
-        <button type="button" onClick={addShoppingItem}>
-          Add
-        </button>
-      </div>
+      {shoppingListSummary && (
+        <div className="generation-summary">
+          <span>
+            {shoppingListSummary.mealIngredientsAdded} meal
+          </span>
+          <span>
+            {shoppingListSummary.recurringBuysAdded} recurring
+          </span>
+          <span>
+            {shoppingListSummary.stockRestocksAdded} stock
+          </span>
+          <span>
+            {shoppingListSummary.skippedInStock} skipped in stock
+          </span>
+        </div>
+      )}
 
       {shoppingItems.length === 0 ? (
-        <p className="empty-state">No shopping items yet.</p>
+        <p className="empty-state">
+          No shopping items yet. Generate a list or add an item manually.
+        </p>
       ) : (
-        Object.entries(groupedItems).map(([category, items]) => {
-          const isCollapsed = collapsedCategories[category] === true;
-
-          return (
-            <div className="shopping-group" key={category}>
-              <button
-                className="group-heading"
-                type="button"
-                aria-expanded={!isCollapsed}
-                onClick={() => toggleCategory(category)}
-              >
-                <span className="group-title">{category}</span>
-                <span className="group-count">{items.length}</span>
-              </button>
-
-              {!isCollapsed && (
-                <ul className="clean-list">
-                  {items.map((item, index) => (
-                    <li
-                      className={`card shopping-row ${
-                        item.checked ? "checked-row" : ""
-                      }`}
-                      key={`${item.id}-${index}`}
-                    >
-                      <label className={item.checked ? "checked-item" : ""}>
-                        <input
-                          type="checkbox"
-                          checked={item.checked}
-                          onChange={() => toggleShoppingItem(item.id)}
-                        />
-
-                        <span className="shopping-item-content">
-                          <span className="shopping-item-name">{item.name}</span>
-
-                          {item.source && (
-                            <span className="shopping-item-source">
-                              {item.sourceDetail
-                                ? `${item.source}: ${item.sourceDetail}`
-                                : item.source}
-                            </span>
-                          )}
-                        </span>
-                      </label>
-
-                      <button
-                        type="button"
-                        className="delete-button"
-                        aria-label={`Delete ${item.name}`}
-                        onClick={() => deleteShoppingItem(item.id)}
-                      >
-                        Delete
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
+        <>
+          <section className="shopping-section">
+            <div className="shopping-section-header">
+              <h3>To buy</h3>
+              <span>{pendingItems.length}</span>
             </div>
-          );
-        })
+
+            {pendingItems.length === 0 ? (
+              <p className="empty-state">Everything is checked off.</p>
+            ) : (
+              Object.entries(groupedPendingItems).map(([category, items]) => {
+                const isCollapsed = collapsedCategories[category] === true;
+
+                return (
+                  <div className="shopping-group" key={category}>
+                    <button
+                      className="group-heading"
+                      type="button"
+                      aria-expanded={!isCollapsed}
+                      onClick={() => toggleCategory(category)}
+                    >
+                      <span className="group-title">{category}</span>
+                      <span className="group-count">{items.length}</span>
+                    </button>
+
+                    {!isCollapsed && (
+                      <ul className="clean-list">
+                        {items.map((item, index) =>
+                          renderShoppingItem(item, index)
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </section>
+
+          {doneItems.length > 0 && (
+            <details
+              className="done-section"
+              open={pendingItems.length === 0}
+            >
+              <summary>
+                <span>Done</span>
+                <span>{doneItems.length}</span>
+              </summary>
+
+              <ul className="clean-list">
+                {doneItems.map((item, index) =>
+                  renderShoppingItem(item, index)
+                )}
+              </ul>
+            </details>
+          )}
+        </>
       )}
+
+      <details className="manual-add-panel">
+        <summary>Add item</summary>
+
+        <div className="add-item-row">
+          <input
+            type="text"
+            placeholder="Add shopping item..."
+            value={newItem}
+            onChange={(event) => setNewItem(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") addShoppingItem();
+            }}
+          />
+
+          <button type="button" onClick={addShoppingItem}>
+            Add
+          </button>
+        </div>
+      </details>
     </section>
   );
 }

@@ -36,6 +36,14 @@ const emptyMeal = {
   ingredients: [],
 };
 
+const generatedShoppingSources = [
+  "Meal",
+  "Staple",
+  "Recurring buy",
+  "Restock",
+  "Generated",
+];
+
 function slugifyIdPart(value) {
   return normaliseItemName(value).replace(/\s+/g, "-") || "item";
 }
@@ -66,6 +74,20 @@ function createStarterInventoryItems() {
     unit: "",
     active: true,
   }));
+}
+
+function getGeneratedShoppingSignature(items) {
+  return items
+    .map((item) =>
+      [
+        normaliseItemName(item.name || ""),
+        item.category || "",
+        item.source || "",
+        item.sourceDetail || "",
+      ].join("|")
+    )
+    .sort()
+    .join("||");
 }
 
 const durableInventoryItemsByName = new Map(
@@ -162,6 +184,11 @@ function App() {
   const [shoppingItemsByWeek, setShoppingItemsByWeek] = useState(() => {
     const savedItems = localStorage.getItem("shoppingItemsByWeek");
     return savedItems ? JSON.parse(savedItems) : {};
+  });
+
+  const [shoppingListMetaByWeek, setShoppingListMetaByWeek] = useState(() => {
+    const savedMeta = localStorage.getItem("shoppingListMetaByWeek");
+    return savedMeta ? JSON.parse(savedMeta) : {};
   });
 
   const [staples, setStaples] = useState(() => {
@@ -380,8 +407,43 @@ function App() {
     (item) => !item.checked
   ).length;
   const checkedShoppingItemsCount = shoppingItemsCount - pendingShoppingItemsCount;
+  const shoppingListPlan = createShoppingListPlan();
+  const shoppingListMeta = shoppingListMetaByWeek[shoppingWeekKey] || null;
+  const currentGeneratedShoppingSignature = getGeneratedShoppingSignature(
+    shoppingItems.filter((item) => generatedShoppingSources.includes(item.source))
+  );
+  const shoppingListIsCurrent =
+    shoppingItemsCount > 0 &&
+    shoppingListMeta?.signature === shoppingListPlan.signature &&
+    currentGeneratedShoppingSignature === shoppingListPlan.signature;
+  const shoppingListNeedsUpdate =
+    shoppingItemsCount > 0 && !shoppingListIsCurrent;
   const shoppingActionLabel =
-    shoppingItemsCount > 0 ? "Update shopping list" : "Generate shopping list";
+    shoppingItemsCount === 0
+      ? "Generate list"
+      : shoppingListNeedsUpdate
+        ? "Update list"
+        : "Refresh list";
+  const shoppingStatusLabel =
+    shoppingItemsCount === 0
+      ? "Not generated"
+      : shoppingListNeedsUpdate
+        ? "Needs update"
+        : "Current";
+  const stockRestockItemsCount = shoppingItems.filter(
+    (item) => item.source === "Restock"
+  ).length;
+  const manualShoppingItemsCount = shoppingItems.filter(
+    (item) => item.source === "Manual"
+  ).length;
+  const shoppingLastUpdatedText = shoppingListMeta?.generatedAt
+    ? new Date(shoppingListMeta.generatedAt).toLocaleString("en-AU", {
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit",
+    })
+    : "";
 
   useEffect(() => {
     localStorage.setItem("mealsByWeek", JSON.stringify(mealsByWeek));
@@ -393,6 +455,13 @@ function App() {
       JSON.stringify(shoppingItemsByWeek)
     );
   }, [shoppingItemsByWeek]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "shoppingListMetaByWeek",
+      JSON.stringify(shoppingListMetaByWeek)
+    );
+  }, [shoppingListMetaByWeek]);
 
   useEffect(() => {
     localStorage.setItem("staples", JSON.stringify(staples));
@@ -595,7 +664,7 @@ function App() {
     return true;
   }
 
-  function buildShoppingList() {
+  function createShoppingListPlan() {
     const dueStaples = staples
       .filter(
         (staple) =>
@@ -641,18 +710,11 @@ function App() {
       ...mealIngredients,
     ];
 
-    const generatedSources = [
-      "Meal",
-      "Staple",
-      "Recurring buy",
-      "Restock",
-      "Generated",
-    ];
     const existingGeneratedItems = shoppingItems.filter((item) =>
-      generatedSources.includes(item.source)
+      generatedShoppingSources.includes(item.source)
     );
     const retainedShoppingItems = shoppingItems.filter(
-      (item) => !generatedSources.includes(item.source)
+      (item) => !generatedShoppingSources.includes(item.source)
     );
     const existingGeneratedItemsByName = new Map(
       existingGeneratedItems.map((item) => [
@@ -660,14 +722,27 @@ function App() {
         item,
       ])
     );
-    const existingNames = [
-      ...retainedShoppingItems.map((item) => normaliseItemName(item.name)),
-      ...inventory
+    const retainedNames = new Set(
+      retainedShoppingItems.map((item) => normaliseItemName(item.name))
+    );
+    const activeStockNames = new Set(
+      inventory
         .filter((item) => item.active !== false)
-        .map((item) => normaliseItemName(item.name)),
-    ];
+        .map((item) => normaliseItemName(item.name))
+    );
+    const summary = {
+      mealIngredientsFound: mealIngredients.length,
+      recurringBuysFound: dueStaples.length,
+      stockRestocksFound: restockInventory.length,
+      mealIngredientsAdded: 0,
+      recurringBuysAdded: 0,
+      stockRestocksAdded: 0,
+      skippedInStock: 0,
+      skippedDuplicates: 0,
+      manualItemsKept: retainedShoppingItems.length,
+    };
 
-    const seenNames = new Set(existingNames);
+    const seenNames = new Set([...retainedNames, ...activeStockNames]);
 
     const newItems = allNewItems
       .filter((item) => {
@@ -676,6 +751,12 @@ function App() {
         );
 
         if (seenNames.has(normalisedName)) {
+          if (activeStockNames.has(normalisedName)) {
+            summary.skippedInStock += 1;
+          } else {
+            summary.skippedDuplicates += 1;
+          }
+
           return false;
         }
 
@@ -696,9 +777,42 @@ function App() {
             ?.checked || false,
       }));
 
+    summary.mealIngredientsAdded = newItems.filter(
+      (item) => item.source === "Meal"
+    ).length;
+    summary.recurringBuysAdded = newItems.filter(
+      (item) => item.source === "Recurring buy"
+    ).length;
+    summary.stockRestocksAdded = newItems.filter(
+      (item) => item.source === "Restock"
+    ).length;
+
+    return {
+      newItems,
+      retainedShoppingItems,
+      signature: getGeneratedShoppingSignature(newItems),
+      summary,
+    };
+  }
+
+  function buildShoppingList() {
+    const listPlan = createShoppingListPlan();
+
     setShoppingItemsByWeek({
       ...shoppingItemsByWeek,
-      [shoppingWeekKey]: [...retainedShoppingItems, ...newItems],
+      [shoppingWeekKey]: [
+        ...listPlan.retainedShoppingItems,
+        ...listPlan.newItems,
+      ],
+    });
+
+    setShoppingListMetaByWeek({
+      ...shoppingListMetaByWeek,
+      [shoppingWeekKey]: {
+        generatedAt: new Date().toISOString(),
+        signature: listPlan.signature,
+        summary: listPlan.summary,
+      },
     });
 
     setActiveTab("shop");
@@ -1078,8 +1192,14 @@ function App() {
           deleteShoppingItem={deleteShoppingItem}
           buildShoppingList={buildShoppingList}
           shoppingActionLabel={shoppingActionLabel}
+          shoppingStatusLabel={shoppingStatusLabel}
+          shoppingListNeedsUpdate={shoppingListNeedsUpdate}
+          shoppingListSummary={shoppingListMeta?.summary || null}
+          shoppingLastUpdatedText={shoppingLastUpdatedText}
           pendingShoppingItemsCount={pendingShoppingItemsCount}
           checkedShoppingItemsCount={checkedShoppingItemsCount}
+          stockRestockItemsCount={stockRestockItemsCount}
+          manualShoppingItemsCount={manualShoppingItemsCount}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
           shoppingWeekMode={shoppingWeekMode}
