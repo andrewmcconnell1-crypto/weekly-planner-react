@@ -22,6 +22,7 @@ function HouseholdBasics({
   updateInventoryCategory,
   toggleInventoryActive,
   loadStarterInventory,
+  resetStockToStarterList,
 }) {
   return (
     <div className="household-basics">
@@ -80,6 +81,7 @@ function HouseholdBasics({
           updateInventoryCategory={updateInventoryCategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
+          resetStockToStarterList={resetStockToStarterList}
         />
       )}
     </div>

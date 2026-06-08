@@ -56,6 +56,17 @@ function createCollectionId(prefix, collection, name) {
   return nextId;
 }
 
+function createStarterInventoryItems() {
+  return commonInventoryItems.map((item) => ({
+    id: `starter-inventory-${slugifyIdPart(item.name)}`,
+    name: item.name,
+    category: item.category,
+    quantity: null,
+    unit: "",
+    active: true,
+  }));
+}
+
 const durableInventoryItemsByName = new Map(
   commonInventoryItems.map((item) => [normaliseItemName(item.name), item])
 );
@@ -723,21 +734,24 @@ function App() {
       normaliseItemName(item.name)
     );
 
-    const starterItems = commonInventoryItems
+    const starterItems = createStarterInventoryItems()
       .filter(
         (item) =>
           !existingNames.includes(normaliseItemName(item.name))
-      )
-      .map((item) => ({
-        id: `starter-inventory-${slugifyIdPart(item.name)}`,
-        name: item.name,
-        category: item.category,
-        quantity: null,
-        unit: "",
-        active: true,
-      }));
+      );
 
     setInventory([...inventory, ...starterItems]);
+  }
+
+  function resetStockToStarterList() {
+    const shouldReset = window.confirm(
+      "Replace this device's stock list with the current starter stock list? This removes custom stock items on this device and marks starter stock as in stock."
+    );
+
+    if (!shouldReset) return;
+
+    setInventory(createStarterInventoryItems());
+    setNewInventoryItem("");
   }
 
   function addRecipe() {
@@ -1162,6 +1176,7 @@ function App() {
                   updateInventoryCategory={updateInventoryCategory}
                   toggleInventoryActive={toggleInventoryActive}
                   loadStarterInventory={loadStarterInventory}
+                  resetStockToStarterList={resetStockToStarterList}
                 />
               )}
 

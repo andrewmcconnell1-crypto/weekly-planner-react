@@ -1072,6 +1072,28 @@ input::placeholder {
   gap: 14px;
 }
 
+.stock-maintenance {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf9;
+  padding: 11px;
+}
+
+.stock-maintenance .small-text {
+  margin: 0;
+}
+
+.reset-stock-button {
+  color: var(--danger);
+}
+
+.reset-stock-button:hover {
+  border-color: #e1b2ac;
+  background: #fff0ee;
+}
+
 .staple-card,
 .inventory-card {
   display: grid;
@@ -1467,6 +1489,15 @@ input::placeholder {
 
   .staple-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stock-maintenance {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .stock-maintenance .small-text {
+    grid-column: 1 / -1;
   }
 }
 

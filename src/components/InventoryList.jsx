@@ -11,6 +11,7 @@ function InventoryList({
     updateInventoryCategory,
     toggleInventoryActive,
     loadStarterInventory,
+    resetStockToStarterList,
 }) {
     const [searchText, setSearchText] = useState("");
     const [openCategories, setOpenCategories] = useState({});
@@ -48,13 +49,27 @@ function InventoryList({
                 Pantry, household, and toiletry items you keep stocked.
             </p>
 
-            <button
-                type="button"
-                className="secondary"
-                onClick={loadStarterInventory}
-            >
-                Load stock list
-            </button>
+            <div className="stock-maintenance">
+                <button
+                    type="button"
+                    className="secondary"
+                    onClick={loadStarterInventory}
+                >
+                    Add missing stock items
+                </button>
+
+                <button
+                    type="button"
+                    className="secondary reset-stock-button"
+                    onClick={resetStockToStarterList}
+                >
+                    Reset to current stock list
+                </button>
+
+                <p className="small-text">
+                    Use reset when this device still has the old stock list.
+                </p>
+            </div>
 
             <input
                 type="text"
