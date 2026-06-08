@@ -28,9 +28,9 @@ function ShoppingList({
   shoppingListNeedsUpdate,
   shoppingListSummary,
   shoppingLastUpdatedText,
+  recurringRemovalItems,
   pendingShoppingItemsCount,
   checkedShoppingItemsCount,
-  stockRestockItemsCount,
   manualShoppingItemsCount,
   shoppingWeekStart,
   shoppingWeekEnd,
@@ -144,7 +144,7 @@ function ShoppingList({
 
         <div className="shop-stat-grid">
           <div>
-            <span>To buy</span>
+            <span>Additions</span>
             <strong>{pendingShoppingItemsCount}</strong>
           </div>
 
@@ -154,8 +154,8 @@ function ShoppingList({
           </div>
 
           <div>
-            <span>Stock</span>
-            <strong>{stockRestockItemsCount}</strong>
+            <span>Remove</span>
+            <strong>{recurringRemovalItems.length}</strong>
           </div>
 
           <div>
@@ -183,7 +183,7 @@ function ShoppingList({
           <p className="small-text">
             {shoppingLastUpdatedText
               ? `Last updated ${shoppingLastUpdatedText}`
-              : "Generate from planned meals, recurring buys, and stock restocks."}
+              : "Generate additions and Woolworths list removals from meals and stock."}
           </p>
         </div>
 
@@ -198,26 +198,49 @@ function ShoppingList({
             {shoppingListSummary.mealIngredientsAdded} meal
           </span>
           <span>
-            {shoppingListSummary.recurringBuysAdded} recurring
-          </span>
-          <span>
             {shoppingListSummary.stockRestocksAdded} stock
           </span>
           <span>
-            {shoppingListSummary.skippedInStock} skipped in stock
+            {shoppingListSummary.recurringRemovalsFound} removals
+          </span>
+          <span>
+            {shoppingListSummary.skippedRecurringList} already on Woolworths
           </span>
         </div>
       )}
 
+      {recurringRemovalItems.length > 0 && (
+        <section className="woolworths-removal-section">
+          <div className="shopping-section-header">
+            <h3>Remove from Woolworths list</h3>
+            <span>{recurringRemovalItems.length}</span>
+          </div>
+
+          <ul className="clean-list">
+            {recurringRemovalItems.map((item, index) => (
+              <li
+                className="card removal-row"
+                key={`${item.id}-${index}`}
+              >
+                <span>
+                  <strong>{item.name}</strong>
+                  <span>Already in stock</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {shoppingItems.length === 0 ? (
         <p className="empty-state">
-          No shopping items yet. Generate a list or add an item manually.
+          No additions yet. Generate additions or add an item manually.
         </p>
       ) : (
         <>
           <section className="shopping-section">
             <div className="shopping-section-header">
-              <h3>To buy</h3>
+              <h3>Additional items</h3>
               <span>{pendingItems.length}</span>
             </div>
 

@@ -1018,6 +1018,7 @@ input::placeholder {
 
 .shop-status-panel,
 .shopping-section,
+.woolworths-removal-section,
 .done-section,
 .manual-add-panel,
 .generation-summary {
@@ -1122,6 +1123,14 @@ input::placeholder {
 .shopping-section {
   display: grid;
   gap: 10px;
+  padding: 12px;
+}
+
+.woolworths-removal-section {
+  display: grid;
+  gap: 10px;
+  border-color: #e1c38f;
+  background: #fffaf0;
   padding: 12px;
 }
 
@@ -1304,6 +1313,22 @@ input::placeholder {
 .checked-item {
   color: #9ca3af;
   text-decoration: line-through;
+}
+
+.removal-row {
+  border-color: #ead8ad;
+  background: #fffdf7;
+}
+
+.removal-row > span {
+  display: grid;
+  gap: 2px;
+}
+
+.removal-row span span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 740;
 }
 
 .done-section,

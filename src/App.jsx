@@ -90,6 +90,13 @@ function getGeneratedShoppingSignature(items) {
     .join("||");
 }
 
+function getShoppingPlanSignature(items, removals) {
+  return [
+    getGeneratedShoppingSignature(items),
+    getGeneratedShoppingSignature(removals),
+  ].join("::remove::");
+}
+
 const durableInventoryItemsByName = new Map(
   commonInventoryItems.map((item) => [normaliseItemName(item.name), item])
 );
@@ -402,8 +409,11 @@ function App() {
   const activeInventoryCount = inventory.filter(
     (item) => item.active !== false
   ).length;
-  const shoppingItemsCount = shoppingItems.length;
-  const pendingShoppingItemsCount = shoppingItems.filter(
+  const visibleShoppingItems = shoppingItems.filter(
+    (item) => item.source !== "Recurring buy"
+  );
+  const shoppingItemsCount = visibleShoppingItems.length;
+  const pendingShoppingItemsCount = visibleShoppingItems.filter(
     (item) => !item.checked
   ).length;
   const checkedShoppingItemsCount = shoppingItemsCount - pendingShoppingItemsCount;
@@ -412,30 +422,33 @@ function App() {
   const currentGeneratedShoppingSignature = getGeneratedShoppingSignature(
     shoppingItems.filter((item) => generatedShoppingSources.includes(item.source))
   );
+  const hasGeneratedShoppingRows = shoppingItems.some((item) =>
+    generatedShoppingSources.includes(item.source)
+  );
+  const hasGeneratedShopPlan =
+    hasGeneratedShoppingRows || Boolean(shoppingListMeta);
   const shoppingListIsCurrent =
-    shoppingItemsCount > 0 &&
+    hasGeneratedShopPlan &&
     shoppingListMeta?.signature === shoppingListPlan.signature &&
-    currentGeneratedShoppingSignature === shoppingListPlan.signature;
+    currentGeneratedShoppingSignature === shoppingListPlan.itemsSignature;
   const shoppingListNeedsUpdate =
-    shoppingItemsCount > 0 && !shoppingListIsCurrent;
+    hasGeneratedShopPlan && !shoppingListIsCurrent;
   const shoppingActionLabel =
-    shoppingItemsCount === 0
+    !hasGeneratedShopPlan
       ? "Generate list"
       : shoppingListNeedsUpdate
         ? "Update list"
         : "Refresh list";
   const shoppingStatusLabel =
-    shoppingItemsCount === 0
+    !hasGeneratedShopPlan
       ? "Not generated"
       : shoppingListNeedsUpdate
         ? "Needs update"
         : "Current";
-  const stockRestockItemsCount = shoppingItems.filter(
-    (item) => item.source === "Restock"
+  const manualShoppingItemsCount = visibleShoppingItems.filter(
+    (item) => item.source === "Manual" && !item.checked
   ).length;
-  const manualShoppingItemsCount = shoppingItems.filter(
-    (item) => item.source === "Manual"
-  ).length;
+  const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
   const shoppingLastUpdatedText = shoppingListMeta?.generatedAt
     ? new Date(shoppingListMeta.generatedAt).toLocaleString("en-AU", {
       day: "numeric",
@@ -665,13 +678,14 @@ function App() {
   }
 
   function createShoppingListPlan() {
-    const dueStaples = staples
+    const recurringBuys = staples
       .filter(
         (staple) =>
           staple.active !== false &&
           stapleIsDueThisWeek(staple)
       )
       .map((staple) => ({
+        id: staple.id,
         name: staple.quantity
           ? `${staple.quantity} ${staple.unit} ${staple.name}`
           : staple.name,
@@ -704,8 +718,44 @@ function App() {
       }));
     });
 
+    const recurringBuyNames = new Set(
+      recurringBuys.flatMap((item) => [
+        normaliseItemName(item.name),
+        normaliseItemName(item.sourceDetail),
+      ])
+    );
+    const activeStockItems = inventory.filter((item) => item.active !== false);
+    const activeStockNames = new Set(
+      activeStockItems.map((item) => normaliseItemName(item.name))
+    );
+    const removeFromRecurring = recurringBuys
+      .filter((item) => {
+        const itemName = normaliseItemName(item.name);
+        const sourceName = normaliseItemName(item.sourceDetail);
+
+        return activeStockItems.some((stockItem) => {
+          const stockName = normaliseItemName(stockItem.name);
+          const categoriesMatch =
+            stockItem.category &&
+            item.category &&
+            stockItem.category === item.category;
+
+          if (itemName === stockName || sourceName === stockName) return true;
+
+          return (
+            categoriesMatch &&
+            stockName.length >= 4 &&
+            (itemName.includes(stockName) || sourceName.includes(stockName))
+          );
+        });
+      })
+      .map((item) => ({
+        ...item,
+        source: "Woolworths list",
+        sourceDetail: "Already in stock",
+      }));
+
     const allNewItems = [
-      ...dueStaples,
       ...restockInventory,
       ...mealIngredients,
     ];
@@ -725,24 +775,24 @@ function App() {
     const retainedNames = new Set(
       retainedShoppingItems.map((item) => normaliseItemName(item.name))
     );
-    const activeStockNames = new Set(
-      inventory
-        .filter((item) => item.active !== false)
-        .map((item) => normaliseItemName(item.name))
-    );
     const summary = {
       mealIngredientsFound: mealIngredients.length,
-      recurringBuysFound: dueStaples.length,
+      recurringBuysFound: recurringBuys.length,
       stockRestocksFound: restockInventory.length,
       mealIngredientsAdded: 0,
-      recurringBuysAdded: 0,
       stockRestocksAdded: 0,
+      recurringRemovalsFound: removeFromRecurring.length,
       skippedInStock: 0,
+      skippedRecurringList: 0,
       skippedDuplicates: 0,
       manualItemsKept: retainedShoppingItems.length,
     };
 
-    const seenNames = new Set([...retainedNames, ...activeStockNames]);
+    const seenNames = new Set([
+      ...retainedNames,
+      ...activeStockNames,
+      ...recurringBuyNames,
+    ]);
 
     const newItems = allNewItems
       .filter((item) => {
@@ -753,6 +803,8 @@ function App() {
         if (seenNames.has(normalisedName)) {
           if (activeStockNames.has(normalisedName)) {
             summary.skippedInStock += 1;
+          } else if (recurringBuyNames.has(normalisedName)) {
+            summary.skippedRecurringList += 1;
           } else {
             summary.skippedDuplicates += 1;
           }
@@ -780,9 +832,6 @@ function App() {
     summary.mealIngredientsAdded = newItems.filter(
       (item) => item.source === "Meal"
     ).length;
-    summary.recurringBuysAdded = newItems.filter(
-      (item) => item.source === "Recurring buy"
-    ).length;
     summary.stockRestocksAdded = newItems.filter(
       (item) => item.source === "Restock"
     ).length;
@@ -790,7 +839,9 @@ function App() {
     return {
       newItems,
       retainedShoppingItems,
-      signature: getGeneratedShoppingSignature(newItems),
+      removeFromRecurring,
+      itemsSignature: getGeneratedShoppingSignature(newItems),
+      signature: getShoppingPlanSignature(newItems, removeFromRecurring),
       summary,
     };
   }
@@ -999,14 +1050,14 @@ function App() {
               </h2>
               <p>
                 {mealsPlannedCount} of {days.length} meals planned,{" "}
-                {dueStaplesCount} regular buys due, {pendingShoppingItemsCount} items
-                still to buy.
+                {dueStaplesCount} Woolworths list items,{" "}
+                {pendingShoppingItemsCount} additions to buy.
               </p>
             </div>
 
             <div className="home-status">
               <strong>{pendingShoppingItemsCount}</strong>
-              <span>to buy</span>
+              <span>additions</span>
             </div>
           </div>
 
@@ -1075,7 +1126,7 @@ function App() {
                 </div>
 
                 <span className="workflow-count">
-                  {shoppingItemsCount}
+                  {shoppingItemsCount + recurringRemovalItems.length}
                 </span>
               </div>
 
@@ -1086,7 +1137,7 @@ function App() {
                 </div>
 
                 <div>
-                  <span>Regular buys due</span>
+                  <span>Woolworths baseline</span>
                   <strong>{dueStaplesCount}</strong>
                 </div>
 
@@ -1187,7 +1238,7 @@ function App() {
           newItem={newItem}
           setNewItem={setNewItem}
           addShoppingItem={addShoppingItem}
-          shoppingItems={shoppingItems}
+          shoppingItems={visibleShoppingItems}
           toggleShoppingItem={toggleShoppingItem}
           deleteShoppingItem={deleteShoppingItem}
           buildShoppingList={buildShoppingList}
@@ -1196,9 +1247,9 @@ function App() {
           shoppingListNeedsUpdate={shoppingListNeedsUpdate}
           shoppingListSummary={shoppingListMeta?.summary || null}
           shoppingLastUpdatedText={shoppingLastUpdatedText}
+          recurringRemovalItems={recurringRemovalItems}
           pendingShoppingItemsCount={pendingShoppingItemsCount}
           checkedShoppingItemsCount={checkedShoppingItemsCount}
-          stockRestockItemsCount={stockRestockItemsCount}
           manualShoppingItemsCount={manualShoppingItemsCount}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
