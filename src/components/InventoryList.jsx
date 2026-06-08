@@ -44,19 +44,22 @@ function InventoryList({
                 <h2>Inventory</h2>
             </div>
 
-            <p className="small-text">Groceries you already have at home.</p>
+            <p className="small-text">
+                Household staples you normally keep stocked. Untick an item when it
+                runs out and it will be added to the shopping list.
+            </p>
 
             <button
                 type="button"
                 className="secondary"
                 onClick={loadStarterInventory}
             >
-                Load starter inventory
+                Load household staples
             </button>
 
             <input
                 type="text"
-                placeholder="Search inventory..."
+                placeholder="Search household staples..."
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
             />
@@ -64,7 +67,7 @@ function InventoryList({
             <div className="add-item-row">
                 <input
                     type="text"
-                    placeholder="Add inventory item..."
+                    placeholder="Add household staple..."
                     value={newInventoryItem}
                     onChange={(event) => setNewInventoryItem(event.target.value)}
                     onKeyDown={(event) => {
@@ -108,7 +111,7 @@ function InventoryList({
                                                         checked={item.active !== false}
                                                         onChange={() => toggleInventoryActive(item.id)}
                                                     />
-                                                    Have this
+                                                    In stock
                                                 </label>
 
                                                 <strong>{item.name}</strong>

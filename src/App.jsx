@@ -57,6 +57,39 @@ function createCollectionId(prefix, collection, name) {
   return nextId;
 }
 
+const durableInventoryItemsByName = new Map(
+  commonInventoryItems.map((item) => [normaliseItemName(item.name), item])
+);
+
+function normaliseInventoryItems(inventoryItems) {
+  if (!Array.isArray(inventoryItems)) return [];
+
+  return inventoryItems
+    .filter((item) => {
+      const isStarterInventoryItem = String(item.id || "").startsWith(
+        "starter-inventory-"
+      );
+      const starterItem = durableInventoryItemsByName.get(
+        normaliseItemName(item.name || "")
+      );
+
+      if (!isStarterInventoryItem) return true;
+
+      return Boolean(starterItem);
+    })
+    .map((item) => ({
+      ...item,
+      category:
+        String(item.id || "").startsWith("starter-inventory-")
+          ? durableInventoryItemsByName.get(normaliseItemName(item.name || ""))
+            ?.category || item.category
+          : item.category,
+      active: String(item.id || "").startsWith("starter-inventory-")
+        ? true
+        : item.active ?? true,
+    }));
+}
+
 function normaliseRecipe(recipe, index) {
   const recipeId = recipeIdAliases[recipe.id] || recipe.id;
   const starterRecipe = initialRecipes.find(
@@ -129,7 +162,9 @@ function App() {
 
   const [inventory, setInventory] = useState(() => {
     const savedInventory = localStorage.getItem("inventory");
-    return savedInventory ? JSON.parse(savedInventory) : [];
+    return savedInventory
+      ? normaliseInventoryItems(JSON.parse(savedInventory))
+      : [];
   });
 
   const [newInventoryItem, setNewInventoryItem] = useState("");
@@ -543,6 +578,17 @@ function App() {
         sourceDetail: staple.name,
       }));
 
+    const restockInventory = inventory
+      .filter((item) => item.active === false)
+      .map((item) => ({
+        name: item.quantity
+          ? `${item.quantity} ${item.unit} ${item.name}`
+          : item.name,
+        category: item.category || "Household",
+        source: "Restock",
+        sourceDetail: "Inventory",
+      }));
+
     const mealIngredients = days.flatMap((day) => {
       const daySummary = getMealSummary(day, shoppingWeekMeals[day], shoppingWeekMeals);
       const sourceDetail = daySummary.hasMeal ? daySummary.name : day;
@@ -558,10 +604,11 @@ function App() {
 
     const allNewItems = [
       ...dueStaples,
+      ...restockInventory,
       ...mealIngredients,
     ];
 
-    const generatedSources = ["Meal", "Staple", "Generated"];
+    const generatedSources = ["Meal", "Staple", "Restock", "Generated"];
     const existingGeneratedItems = shoppingItems.filter((item) =>
       generatedSources.includes(item.source)
     );
@@ -628,7 +675,7 @@ function App() {
       {
         id: createCollectionId("inventory", inventory, cleanedItem),
         name: cleanedItem,
-        category: "Other",
+        category: "Pantry",
         quantity: null,
         unit: "",
         active: true,
@@ -676,7 +723,7 @@ function App() {
         category: item.category,
         quantity: null,
         unit: "",
-        active: false,
+        active: true,
       }));
 
     setInventory([...inventory, ...starterItems]);
@@ -888,7 +935,7 @@ function App() {
                 </div>
 
                 <div>
-                  <span>Inventory active</span>
+                  <span>In stock</span>
                   <strong>{activeInventoryCount}</strong>
                 </div>
 
@@ -1071,7 +1118,7 @@ function App() {
                 <span>
                   <strong>Inventory</strong>
                   <span>
-                    {activeInventoryCount} active of {inventoryItemsCount} items
+                    {activeInventoryCount} in stock of {inventoryItemsCount} items
                   </span>
                 </span>
                 <span className="manager-action">Manage</span>

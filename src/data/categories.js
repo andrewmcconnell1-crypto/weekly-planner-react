@@ -3,8 +3,11 @@ export const categories = [
   "Dairy",
   "Bakery",
   "Meat",
+  "Herbs & Spices",
+  "Condiments",
   "Pantry",
   "Frozen",
   "Household",
+  "Toiletries",
   "Other",
 ];
