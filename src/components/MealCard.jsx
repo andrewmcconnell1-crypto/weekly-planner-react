@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { groupRecipesByCategory } from "../utils/recipeUtils";
+import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
 
 function MealCard({
   day,
@@ -15,15 +15,57 @@ function MealCard({
   updateMeal,
   isExpanded,
   toggleExpanded,
+  weekDaySummaries = [],
 }) {
   const [newIngredient, setNewIngredient] = useState("");
+  const [recipeSearchText, setRecipeSearchText] = useState("");
+  const wasExpandedRef = useRef(false);
   const manualIngredients = Array.isArray(meal.ingredients)
     ? meal.ingredients
     : [];
   const linkedRecipeIngredients = linkedRecipe?.ingredients || [];
   const mealType = meal.mealType || "cook";
-  const repeatDayOptions = days.filter((optionDay) => optionDay !== day);
   const recipeGroups = groupRecipesByCategory(recipes);
+  const selectedRecipeId = meal.recipeId || linkedRecipe?.id || "";
+  const derivedEditorMode =
+    mealType === "cook"
+      ? selectedRecipeId
+        ? "recipe"
+        : "custom"
+      : mealType;
+  const [editorMode, setEditorMode] = useState(derivedEditorMode);
+  const repeatDaySummaries =
+    weekDaySummaries.length > 0
+      ? weekDaySummaries.filter((daySummary) => daySummary.day !== day)
+      : days
+        .filter((optionDay) => optionDay !== day)
+        .map((optionDay) => ({
+          day: optionDay,
+          name: "No meal planned",
+          hasMeal: false,
+        }));
+  const cleanedRecipeSearch = recipeSearchText.trim().toLowerCase();
+  const filteredRecipeGroups = recipeGroups
+    .map((group) => ({
+      ...group,
+      recipes: group.recipes.filter((recipe) => {
+        if (!cleanedRecipeSearch) return true;
+
+        return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
+          .toLowerCase()
+          .includes(cleanedRecipeSearch);
+      }),
+    }))
+    .filter((group) => group.recipes.length > 0);
+
+  useEffect(() => {
+    if (isExpanded && !wasExpandedRef.current) {
+      setEditorMode(derivedEditorMode);
+      setRecipeSearchText("");
+    }
+
+    wasExpandedRef.current = isExpanded;
+  }, [derivedEditorMode, isExpanded]);
 
   function changeMealType(nextMealType) {
     if (nextMealType === "cook") {
@@ -64,6 +106,31 @@ function MealCard({
     });
   }
 
+  function selectEditorMode(nextEditorMode) {
+    setEditorMode(nextEditorMode);
+
+    if (nextEditorMode === "recipe") {
+      changeMealType("cook");
+      return;
+    }
+
+    if (nextEditorMode === "custom") {
+      updateMeal(day, {
+        ...meal,
+        mealType: "cook",
+        recipeId: "",
+        repeatFromDay: "",
+        name:
+          mealType !== "cook" || selectedRecipeId
+            ? ""
+            : meal.name,
+      });
+      return;
+    }
+
+    changeMealType(nextEditorMode);
+  }
+
   function addIngredient() {
     const cleanedIngredient = newIngredient.trim();
 
@@ -92,6 +159,7 @@ function MealCard({
 
   function selectRecipe(recipeId) {
     const selectedRecipe = recipes.find((recipe) => recipe.id === recipeId);
+    setEditorMode("recipe");
 
     if (!selectedRecipe) {
       updateMeal(day, {
@@ -109,9 +177,13 @@ function MealCard({
       recipeId: selectedRecipe.id,
       repeatFromDay: "",
     });
+
+    setRecipeSearchText("");
   }
 
   function selectRepeatFromDay(repeatFromDay) {
+    setEditorMode("repeat");
+
     updateMeal(day, {
       ...meal,
       mealType: "repeat",
@@ -120,6 +192,59 @@ function MealCard({
       name: "",
       ingredients: [],
     });
+  }
+
+  function renderExtraIngredients(placeholder) {
+    return (
+      <details className="meal-details">
+        <summary>
+          Extra ingredients ({manualIngredients.length})
+        </summary>
+
+        <div className="add-item-row">
+          <input
+            type="text"
+            placeholder={placeholder}
+            value={newIngredient}
+            onChange={(event) =>
+              setNewIngredient(event.target.value)
+            }
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                addIngredient();
+              }
+            }}
+          />
+
+          <button type="button" onClick={addIngredient}>
+            Add
+          </button>
+        </div>
+
+        {manualIngredients.length > 0 && (
+          <ul className="ingredient-list">
+            {manualIngredients.map((ingredient, index) => (
+              <li
+                className="ingredient-row"
+                key={index}
+              >
+                <span>{ingredient}</span>
+
+                <button
+                  type="button"
+                  className="delete-button"
+                  onClick={() =>
+                    deleteIngredient(index)
+                  }
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
+    );
   }
 
   const mealName = displayName || (meal.name || "").trim() || "No meal planned";
@@ -136,7 +261,6 @@ function MealCard({
         : mealType === "takeaway"
           ? "Takeaway"
           : "Out";
-  const selectedRecipeId = meal.recipeId || linkedRecipe?.id || "";
   const hasPlannedMeal =
     mealType !== "cook" || selectedRecipeId || (meal.name || "").trim();
 
@@ -165,77 +289,50 @@ function MealCard({
 
       {isExpanded && (
         <div className="meal-editor">
-          <div className="meal-type-tabs" aria-label={`${day} meal type`}>
+          <div className="meal-action-grid" aria-label={`${day} meal type`}>
             <button
               type="button"
-              className={mealType === "cook" ? "active" : ""}
-              onClick={() => changeMealType("cook")}
+              className={editorMode === "recipe" ? "active" : ""}
+              onClick={() => selectEditorMode("recipe")}
             >
-              Cook
+              Recipe
             </button>
 
             <button
               type="button"
-              className={mealType === "repeat" ? "active" : ""}
-              onClick={() => changeMealType("repeat")}
+              className={editorMode === "custom" ? "active" : ""}
+              onClick={() => selectEditorMode("custom")}
             >
-              Same as
+              Custom
             </button>
 
             <button
               type="button"
-              className={mealType === "takeaway" ? "active" : ""}
-              onClick={() => changeMealType("takeaway")}
+              className={editorMode === "repeat" ? "active" : ""}
+              onClick={() => selectEditorMode("repeat")}
+            >
+              Repeat
+            </button>
+
+            <button
+              type="button"
+              className={editorMode === "takeaway" ? "active" : ""}
+              onClick={() => selectEditorMode("takeaway")}
             >
               Takeaway
             </button>
 
             <button
               type="button"
-              className={mealType === "eating-out" ? "active" : ""}
-              onClick={() => changeMealType("eating-out")}
+              className={editorMode === "eating-out" ? "active" : ""}
+              onClick={() => selectEditorMode("eating-out")}
             >
-              Eating out
+              Out
             </button>
           </div>
 
-          {mealType === "cook" && (
-            <>
-              <label className="field-stack">
-                <span>Meal</span>
-
-                <select
-                  value={selectedRecipeId}
-                  onChange={(event) => selectRecipe(event.target.value)}
-                >
-                  <option value="">Custom meal</option>
-                  {recipeGroups.map((group) => (
-                    <optgroup key={group.category} label={group.category}>
-                      {group.recipes.map((recipe) => (
-                        <option key={recipe.id} value={recipe.id}>
-                          {recipe.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </label>
-
-              {!selectedRecipeId && (
-                <input
-                  type="text"
-                  placeholder="Enter custom meal..."
-                  value={meal.name}
-                  onChange={(event) =>
-                    updateMeal(day, {
-                      ...meal,
-                      mealType: "cook",
-                      name: event.target.value,
-                    })
-                  }
-                />
-              )}
-
+          {editorMode === "recipe" && (
+            <div className="meal-mode-panel">
               {linkedRecipe && (
                 <div className="linked-recipe-panel">
                   <div className="linked-recipe-header">
@@ -276,83 +373,109 @@ function MealCard({
                 </div>
               )}
 
-              <details className="meal-details">
-                <summary>
-                  Extra ingredients ({manualIngredients.length})
-                </summary>
+              <input
+                type="text"
+                placeholder="Search recipes..."
+                value={recipeSearchText}
+                onChange={(event) => setRecipeSearchText(event.target.value)}
+              />
 
-                <div className="add-item-row">
-                  <input
-                    type="text"
-                    placeholder={
-                      linkedRecipe ? "Add extra ingredient..." : "Add ingredient..."
-                    }
-                    value={newIngredient}
-                    onChange={(event) =>
-                      setNewIngredient(event.target.value)
-                    }
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        addIngredient();
-                      }
-                    }}
-                  />
+              <div className="recipe-picker-results">
+                {filteredRecipeGroups.length === 0 ? (
+                  <p className="empty-state">No matching recipes.</p>
+                ) : (
+                  filteredRecipeGroups.map((group) => (
+                    <details
+                      className="recipe-picker-group"
+                      key={group.category}
+                      open={Boolean(cleanedRecipeSearch)}
+                    >
+                      <summary>
+                        <span>{group.category}</span>
+                        <span>{group.recipes.length}</span>
+                      </summary>
 
-                  <button type="button" onClick={addIngredient}>
-                    Add
-                  </button>
-                </div>
+                      <div className="recipe-choice-list">
+                        {group.recipes.map((recipe) => (
+                          <button
+                            type="button"
+                            className={`recipe-choice ${
+                              selectedRecipeId === recipe.id ? "active" : ""
+                            }`}
+                            data-tone={getRecipeTone(recipe.category)}
+                            key={recipe.id}
+                            onClick={() => selectRecipe(recipe.id)}
+                          >
+                            <span>
+                              <strong>{recipe.name}</strong>
+                              <span>{recipe.category}</span>
+                            </span>
 
-                {manualIngredients.length > 0 && (
-                  <ul className="ingredient-list">
-                    {manualIngredients.map((ingredient, index) => (
-                      <li
-                        className="ingredient-row"
-                        key={index}
-                      >
-                        <span>{ingredient}</span>
-
-                        <button
-                          type="button"
-                          className="delete-button"
-                          onClick={() =>
-                            deleteIngredient(index)
-                          }
-                        >
-                          Delete
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                            <span className="recipe-choice-count">
+                              {recipe.ingredients.length}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  ))
                 )}
-              </details>
-            </>
+              </div>
+
+              {renderExtraIngredients(
+                linkedRecipe ? "Add extra ingredient..." : "Add ingredient..."
+              )}
+            </div>
           )}
 
-          {mealType === "repeat" && (
-            <label className="field-stack">
-              <span>Use the same meal as</span>
+          {editorMode === "custom" && (
+            <div className="meal-mode-panel">
+              <input
+                type="text"
+                placeholder="Meal name..."
+                value={meal.name}
+                onChange={(event) =>
+                  updateMeal(day, {
+                    ...meal,
+                    mealType: "cook",
+                    recipeId: "",
+                    repeatFromDay: "",
+                    name: event.target.value,
+                  })
+                }
+              />
 
-              <select
-                value={meal.repeatFromDay || ""}
-                onChange={(event) => selectRepeatFromDay(event.target.value)}
-              >
-                <option value="">Choose a night...</option>
-                {repeatDayOptions.map((optionDay) => (
-                  <option key={optionDay} value={optionDay}>
-                    {optionDay}
-                  </option>
-                ))}
-              </select>
-            </label>
+              {renderExtraIngredients("Add ingredient...")}
+            </div>
           )}
 
-          {(mealType === "takeaway" || mealType === "eating-out") && (
-            <p className="meal-note">
-              {mealType === "takeaway"
-                ? "Marked as takeaway. No ingredients will be added to the shopping list."
-                : "Marked as eating out. No ingredients will be added to the shopping list."}
-            </p>
+          {editorMode === "repeat" && (
+            <div className="day-choice-grid">
+              {repeatDaySummaries.map((daySummary) => (
+                <button
+                  type="button"
+                  className={
+                    meal.repeatFromDay === daySummary.day ? "active" : ""
+                  }
+                  key={daySummary.day}
+                  onClick={() => selectRepeatFromDay(daySummary.day)}
+                >
+                  <strong>{daySummary.day.slice(0, 3)}</strong>
+                  <span>
+                    {daySummary.hasMeal ? daySummary.name : "No meal planned"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {(editorMode === "takeaway" || editorMode === "eating-out") && (
+            <div className="meal-status-card">
+              <strong>
+                {editorMode === "takeaway" ? "Takeaway" : "Eating out"}
+              </strong>
+              <span>No shopping needed</span>
+            </div>
           )}
         </div>
       )}

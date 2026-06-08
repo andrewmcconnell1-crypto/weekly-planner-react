@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
 import ShoppingList from "./components/ShoppingList";
-import StaplesList from "./components/StaplesList";
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 
@@ -17,7 +17,6 @@ import {
 import { initialStaples } from "./data/initialStaples";
 
 import { normaliseItemName } from "./utils/itemUtils";
-import InventoryList from "./components/InventoryList";
 import { commonInventoryItems } from "./data/commonInventory";
 
 import RecipesList from "./components/RecipesList";
@@ -135,6 +134,7 @@ function loadRecipes() {
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [moreSection, setMoreSection] = useState("overview");
+  const [householdSection, setHouseholdSection] = useState("stock");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
 
   const [currentWeekStart] = useState(getSunday);
@@ -348,7 +348,6 @@ function App() {
     (staple) => staple.active !== false && stapleIsDueThisWeek(staple)
   ).length;
 
-  const inventoryItemsCount = inventory.length;
   const activeInventoryCount = inventory.filter(
     (item) => item.active !== false
   ).length;
@@ -445,6 +444,12 @@ function App() {
   function openPlanDay(day) {
     setExpandedMealDay(day);
     setActiveTab("plan");
+  }
+
+  function openHousehold(section) {
+    setHouseholdSection(section);
+    setMoreSection("household");
+    setActiveTab("more");
   }
 
   function addShoppingItem() {
@@ -574,7 +579,7 @@ function App() {
           ? `${staple.quantity} ${staple.unit} ${staple.name}`
           : staple.name,
         category: staple.category || "Other",
-        source: "Staple",
+        source: "Recurring buy",
         sourceDetail: staple.name,
       }));
 
@@ -586,7 +591,7 @@ function App() {
           : item.name,
         category: item.category || "Household",
         source: "Restock",
-        sourceDetail: "Inventory",
+        sourceDetail: "Stock",
       }));
 
     const mealIngredients = days.flatMap((day) => {
@@ -608,7 +613,13 @@ function App() {
       ...mealIngredients,
     ];
 
-    const generatedSources = ["Meal", "Staple", "Restock", "Generated"];
+    const generatedSources = [
+      "Meal",
+      "Staple",
+      "Recurring buy",
+      "Restock",
+      "Generated",
+    ];
     const existingGeneratedItems = shoppingItems.filter((item) =>
       generatedSources.includes(item.source)
     );
@@ -843,7 +854,7 @@ function App() {
               </h2>
               <p>
                 {mealsPlannedCount} of {days.length} meals planned,{" "}
-                {dueStaplesCount} staples due, {pendingShoppingItemsCount} items
+                {dueStaplesCount} regular buys due, {pendingShoppingItemsCount} items
                 still to buy.
               </p>
             </div>
@@ -930,7 +941,7 @@ function App() {
                 </div>
 
                 <div>
-                  <span>Staples due</span>
+                  <span>Regular buys due</span>
                   <strong>{dueStaplesCount}</strong>
                 </div>
 
@@ -948,22 +959,16 @@ function App() {
               <div className="home-actions">
                 <button
                   className="secondary"
-                  onClick={() => {
-                    setMoreSection("inventory");
-                    setActiveTab("more");
-                  }}
+                  onClick={() => openHousehold("stock")}
                 >
-                  Check inventory
+                  Check stock
                 </button>
 
                 <button
                   className="secondary"
-                  onClick={() => {
-                    setMoreSection("staples");
-                    setActiveTab("more");
-                  }}
+                  onClick={() => openHousehold("recurring")}
                 >
-                  Manage staples
+                  Recurring buys
                 </button>
 
                 <button
@@ -1032,6 +1037,7 @@ function App() {
                   updateMeal={updateMeal}
                   isExpanded={expandedMealDay === day}
                   toggleExpanded={() => toggleExpandedMealDay(day)}
+                  weekDaySummaries={planningDaySummaries}
                 />
               );
             })}
@@ -1070,13 +1076,13 @@ function App() {
               <h2>
                 {moreSection === "overview"
                   ? "More"
-                  : moreSection === "inventory"
-                    ? "Inventory"
+                  : moreSection === "household"
+                    ? "Household basics"
                     : moreSection === "recipes"
                       ? "Recipes"
                       : moreSection === "settings"
                         ? "Settings"
-                        : "Staples"}
+                        : "More"}
               </h2>
             </div>
           </div>
@@ -1101,24 +1107,12 @@ function App() {
               <button
                 className="manager-row"
                 type="button"
-                onClick={() => setMoreSection("staples")}
+                onClick={() => setMoreSection("household")}
               >
                 <span>
-                  <strong>Staples</strong>
-                  <span>{activeStaplesCount} active regular buys</span>
-                </span>
-                <span className="manager-action">Manage</span>
-              </button>
-
-              <button
-                className="manager-row"
-                type="button"
-                onClick={() => setMoreSection("inventory")}
-              >
-                <span>
-                  <strong>Inventory</strong>
+                  <strong>Household basics</strong>
                   <span>
-                    {activeInventoryCount} in stock of {inventoryItemsCount} items
+                    {activeStaplesCount} recurring, {activeInventoryCount} in stock
                   </span>
                 </span>
                 <span className="manager-action">Manage</span>
@@ -1146,9 +1140,14 @@ function App() {
                 Back to More
               </button>
 
-              {moreSection === "staples" && (
-                <StaplesList
+              {moreSection === "household" && (
+                <HouseholdBasics
+                  activeSection={householdSection}
+                  setActiveSection={setHouseholdSection}
                   staples={staples}
+                  activeStaplesCount={activeStaplesCount}
+                  inventory={inventory}
+                  activeInventoryCount={activeInventoryCount}
                   newStaple={newStaple}
                   setNewStaple={setNewStaple}
                   addStaple={addStaple}
@@ -1156,12 +1155,6 @@ function App() {
                   updateStapleFrequency={updateStapleFrequency}
                   updateStapleCategory={updateStapleCategory}
                   toggleStapleActive={toggleStapleActive}
-                />
-              )}
-
-              {moreSection === "inventory" && (
-                <InventoryList
-                  inventory={inventory}
                   newInventoryItem={newInventoryItem}
                   setNewInventoryItem={setNewInventoryItem}
                   addInventoryItem={addInventoryItem}

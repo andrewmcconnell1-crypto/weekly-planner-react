@@ -41,12 +41,11 @@ function InventoryList({
     return (
         <section className="section">
             <div className="section-header">
-                <h2>Inventory</h2>
+                <h2>Stock</h2>
             </div>
 
             <p className="small-text">
-                Household staples you normally keep stocked. Untick an item when it
-                runs out and it will be added to the shopping list.
+                Pantry, household, and toiletry items you keep stocked.
             </p>
 
             <button
@@ -54,12 +53,12 @@ function InventoryList({
                 className="secondary"
                 onClick={loadStarterInventory}
             >
-                Load household staples
+                Load stock list
             </button>
 
             <input
                 type="text"
-                placeholder="Search household staples..."
+                placeholder="Search stock..."
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
             />
@@ -67,7 +66,7 @@ function InventoryList({
             <div className="add-item-row">
                 <input
                     type="text"
-                    placeholder="Add household staple..."
+                    placeholder="Add stock item..."
                     value={newInventoryItem}
                     onChange={(event) => setNewInventoryItem(event.target.value)}
                     onKeyDown={(event) => {
@@ -81,7 +80,7 @@ function InventoryList({
             </div>
 
             {filteredInventory.length === 0 ? (
-                <p className="empty-state">No matching inventory items.</p>
+                <p className="empty-state">No matching stock items.</p>
             ) : (
                 Object.entries(groupedInventory).map(([category, items]) => {
                     const isOpen = openCategories[category] ?? false;

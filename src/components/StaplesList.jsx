@@ -15,7 +15,7 @@ function StaplesList({
       <div className="add-item-row">
         <input
           type="text"
-          placeholder="Add staple..."
+          placeholder="Add recurring buy..."
           value={newStaple}
           onChange={(event) => setNewStaple(event.target.value)}
           onKeyDown={(event) => {
