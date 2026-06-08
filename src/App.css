@@ -521,25 +521,38 @@ textarea:focus-visible {
   font-size: 1rem;
 }
 
-.week-nav {
+.week-controls {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
-.shop-screen .week-nav button:nth-child(2) {
-  grid-column: 1 / -1;
-  grid-row: 1;
+.week-preset-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  border-radius: 8px;
+  background: var(--soft);
+  padding: 4px;
 }
 
-.shop-screen .week-nav button:nth-child(1) {
-  grid-column: 1;
-  grid-row: 2;
+.week-preset-tabs button {
+  min-height: 40px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 10px;
 }
 
-.shop-screen .week-nav button:nth-child(3) {
-  grid-column: 2;
-  grid-row: 2;
+.week-preset-tabs button.active {
+  background: var(--panel);
+  color: var(--primary-strong);
+  box-shadow: 0 3px 12px rgba(34, 42, 38, 0.08);
+}
+
+.week-stepper {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .meal-grid,
@@ -1457,19 +1470,9 @@ input::placeholder {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .week-nav {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .shop-screen .week-nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .shop-screen .week-nav button:nth-child(1),
-  .shop-screen .week-nav button:nth-child(2),
-  .shop-screen .week-nav button:nth-child(3) {
-    grid-column: auto;
-    grid-row: auto;
+  .week-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr);
+    align-items: center;
   }
 
   .add-item-row {

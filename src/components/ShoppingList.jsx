@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import WeekControls from "./WeekControls";
+
 function ShoppingList({
   newItem,
   setNewItem,
@@ -13,7 +15,9 @@ function ShoppingList({
   checkedShoppingItemsCount,
   shoppingWeekStart,
   shoppingWeekEnd,
+  shoppingWeekMode,
   goToPreviousShoppingWeek,
+  goToThisShoppingWeek,
   goToNextShoppingWeekDefault,
   goToNextShoppingWeek,
 }) {
@@ -60,17 +64,13 @@ function ShoppingList({
         </div>
       </div>
 
-      <div className="week-nav">
-        <button className="secondary" onClick={goToPreviousShoppingWeek}>
-          Previous
-        </button>
-
-        <button onClick={goToNextShoppingWeekDefault}>Next Sunday</button>
-
-        <button className="secondary" onClick={goToNextShoppingWeek}>
-          Next
-        </button>
-      </div>
+      <WeekControls
+        activePreset={shoppingWeekMode}
+        onThisWeek={goToThisShoppingWeek}
+        onNextWeekPreset={goToNextShoppingWeekDefault}
+        onPreviousWeek={goToPreviousShoppingWeek}
+        onNextWeek={goToNextShoppingWeek}
+      />
 
       <div className="primary-action-card">
         <div>

@@ -4,6 +4,7 @@ import "./App.css";
 import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
 import ShoppingList from "./components/ShoppingList";
+import WeekControls from "./components/WeekControls";
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 
@@ -190,6 +191,18 @@ function App() {
     mealWeekKey === currentWeekKey && shoppingWeekKey === currentWeekKey
       ? "current"
       : mealWeekKey === nextWeekKey && shoppingWeekKey === nextWeekKey
+        ? "next"
+        : "custom";
+  const mealWeekMode =
+    mealWeekKey === currentWeekKey
+      ? "current"
+      : mealWeekKey === nextWeekKey
+        ? "next"
+        : "custom";
+  const shoppingWeekMode =
+    shoppingWeekKey === currentWeekKey
+      ? "current"
+      : shoppingWeekKey === nextWeekKey
         ? "next"
         : "custom";
 
@@ -432,6 +445,10 @@ function App() {
     const nextWeek = new Date(shoppingWeekStart);
     nextWeek.setDate(shoppingWeekStart.getDate() + 7);
     setShoppingWeekStart(nextWeek);
+  }
+
+  function goToThisShoppingWeek() {
+    setShoppingWeekStart(getSunday());
   }
 
   function goToNextShoppingWeekDefault() {
@@ -862,7 +879,7 @@ function App() {
                 </button>
               </div>
 
-              <p className="section-kicker">Next shop</p>
+              <p className="section-kicker">Shopping week</p>
               <h2>
                 {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
               </h2>
@@ -1015,21 +1032,13 @@ function App() {
             </div>
           </div>
 
-          <div className="week-nav">
-            <button className="secondary" onClick={goToPreviousMealWeek}>
-              Previous
-            </button>
-
-            <button onClick={goToNextMealWeekDefault}>Next shop</button>
-
-            <button className="secondary" onClick={goToThisMealWeek}>
-              This week
-            </button>
-
-            <button className="secondary" onClick={goToNextMealWeek}>
-              Next
-            </button>
-          </div>
+          <WeekControls
+            activePreset={mealWeekMode}
+            onThisWeek={goToThisMealWeek}
+            onNextWeekPreset={goToNextMealWeekDefault}
+            onPreviousWeek={goToPreviousMealWeek}
+            onNextWeek={goToNextMealWeek}
+          />
 
           <div className="meal-grid">
             {days.map((day) => {
@@ -1073,7 +1082,9 @@ function App() {
           checkedShoppingItemsCount={checkedShoppingItemsCount}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
+          shoppingWeekMode={shoppingWeekMode}
           goToPreviousShoppingWeek={goToPreviousShoppingWeek}
+          goToThisShoppingWeek={goToThisShoppingWeek}
           goToNextShoppingWeekDefault={goToNextShoppingWeekDefault}
           goToNextShoppingWeek={goToNextShoppingWeek}
         />
