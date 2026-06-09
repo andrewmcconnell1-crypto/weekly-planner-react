@@ -165,7 +165,7 @@ textarea:focus-visible {
   min-height: 100vh;
   margin: 0 auto;
   background: linear-gradient(180deg, var(--tab-soft) 0, var(--bg) 340px);
-  padding: 14px 14px 96px;
+  padding: 14px 14px calc(96px + env(safe-area-inset-bottom));
 }
 
 .tab-home {
@@ -283,14 +283,18 @@ textarea:focus-visible {
 
 .bottom-nav {
   position: fixed;
-  right: max(14px, calc((100vw - 960px) / 2 + 14px));
-  bottom: 12px;
-  left: max(14px, calc((100vw - 960px) / 2 + 14px));
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 10;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid rgba(34, 42, 38, 0.08);
+  border: none;
+  border-top: 1px solid rgba(34, 42, 38, 0.08);
+  border-radius: 0;
   background: rgba(255, 254, 250, 0.96);
-  box-shadow: 0 12px 34px rgba(34, 42, 38, 0.18);
+  box-shadow: 0 -10px 30px rgba(34, 42, 38, 0.14);
+  padding: 6px max(14px, calc((100vw - 960px) / 2 + 14px));
+  padding-bottom: calc(6px + env(safe-area-inset-bottom));
 }
 
 .more-tabs {
@@ -2059,7 +2063,7 @@ input::placeholder {
 
 @media (min-width: 620px) {
   .app-shell {
-    padding: 22px 22px 104px;
+    padding: 22px 22px calc(104px + env(safe-area-inset-bottom));
   }
 
   .app-header {
