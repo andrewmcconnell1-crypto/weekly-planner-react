@@ -1005,7 +1005,7 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell tab-${activeTab}`}>
       <header className="app-header">
         <div>
           <p className="eyebrow">Family meals</p>
@@ -1183,7 +1183,7 @@ function App() {
       )}
 
       {activeTab === "plan" && (
-        <section className="screen">
+        <section className="screen plan-screen">
           <div className="screen-header">
             <div>
               <p className="section-kicker">Planning week</p>
@@ -1262,7 +1262,7 @@ function App() {
       )}
 
       {activeTab === "more" && (
-        <section className="screen">
+        <section className="screen more-screen">
           <div className="screen-header">
             <div>
               <p className="section-kicker">
@@ -1388,6 +1388,7 @@ function App() {
 
       <nav className="bottom-nav" aria-label="Primary">
         <button
+          data-tab="home"
           className={activeTab === "home" ? "active" : ""}
           onClick={() => setActiveTab("home")}
         >
@@ -1395,6 +1396,7 @@ function App() {
         </button>
 
         <button
+          data-tab="plan"
           className={activeTab === "plan" ? "active" : ""}
           onClick={() => setActiveTab("plan")}
         >
@@ -1402,6 +1404,7 @@ function App() {
         </button>
 
         <button
+          data-tab="shop"
           className={activeTab === "shop" ? "active" : ""}
           onClick={() => setActiveTab("shop")}
         >
@@ -1409,6 +1412,7 @@ function App() {
         </button>
 
         <button
+          data-tab="more"
           className={activeTab === "more" ? "active" : ""}
           onClick={() => {
             setMoreSection("overview");
