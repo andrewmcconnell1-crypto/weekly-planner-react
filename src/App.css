@@ -1854,6 +1854,44 @@ input::placeholder {
   padding: 16px;
 }
 
+.settings-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.settings-group {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf9;
+  padding: 12px;
+}
+
+.settings-group .small-text {
+  margin: 0;
+}
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-file-input {
+  display: none;
+}
+
+.settings-status {
+  margin: 0;
+  font-weight: 740;
+  color: var(--primary-strong);
+}
+
+.settings-status-error {
+  color: var(--danger);
+}
+
 .more-summary-grid {
   display: grid;
   gap: 10px;

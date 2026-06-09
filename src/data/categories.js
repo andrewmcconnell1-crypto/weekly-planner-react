@@ -6,6 +6,7 @@ export const categories = [
   "Herbs & Spices",
   "Condiments",
   "Pantry",
+  "Snacks",
   "Frozen",
   "Household",
   "Toiletries",

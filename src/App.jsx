@@ -1,176 +1,37 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import "./App.css";
 
 import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
 import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
+import RecipesList from "./components/RecipesList";
+import SettingsPanel from "./components/SettingsPanel";
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
-
 import {
   getSunday,
   getNextSunday,
   formatDate,
   getWeekKey,
 } from "./utils/dateUtils";
+import { normaliseItemName, createCollectionId } from "./utils/itemUtils";
+import { isStapleDueThisWeek } from "./utils/stapleUtils";
+import { createMealHelpers } from "./utils/mealPlanning";
+import {
+  buildShoppingPlan,
+  generatedShoppingSources,
+  getGeneratedShoppingSignature,
+} from "./utils/shoppingPlan";
+import {
+  createStarterInventoryItems,
+  normaliseInventoryItems,
+  mergeSavedRecipes,
+} from "./utils/dataLoaders";
+import { useLocalStorageState } from "./hooks/useLocalStorageState";
 
 import { initialStaples } from "./data/initialStaples";
-
-import { normaliseItemName } from "./utils/itemUtils";
-import { commonInventoryItems } from "./data/commonInventory";
-
-import RecipesList from "./components/RecipesList";
 import { initialRecipes } from "./data/initialRecipes";
-import { getRecipeTone } from "./utils/recipeUtils";
-
-const recipeIdAliases = {
-  "spaghetti-bolognese": "bolognese",
-};
-
-const emptyMeal = {
-  name: "",
-  recipeId: "",
-  mealType: "cook",
-  repeatFromDay: "",
-  ingredients: [],
-};
-
-const generatedShoppingSources = [
-  "Meal",
-  "Staple",
-  "Recurring buy",
-  "Restock",
-  "Generated",
-];
-
-function slugifyIdPart(value) {
-  return normaliseItemName(value).replace(/\s+/g, "-") || "item";
-}
-
-function createCollectionId(prefix, collection, name) {
-  const existingIds = new Set(collection.map((item) => item.id));
-  const baseId = `${prefix}-${slugifyIdPart(name)}`;
-
-  if (!existingIds.has(baseId)) return baseId;
-
-  let suffix = 2;
-  let nextId = `${baseId}-${suffix}`;
-
-  while (existingIds.has(nextId)) {
-    suffix += 1;
-    nextId = `${baseId}-${suffix}`;
-  }
-
-  return nextId;
-}
-
-function createStarterInventoryItems() {
-  return commonInventoryItems.map((item) => ({
-    id: `starter-inventory-${slugifyIdPart(item.name)}`,
-    name: item.name,
-    category: item.category,
-    quantity: null,
-    unit: "",
-    active: true,
-  }));
-}
-
-function getGeneratedShoppingSignature(items) {
-  return items
-    .map((item) =>
-      [
-        normaliseItemName(item.name || ""),
-        item.category || "",
-        item.source || "",
-        item.sourceDetail || "",
-      ].join("|")
-    )
-    .sort()
-    .join("||");
-}
-
-function getShoppingPlanSignature(items, removals) {
-  return [
-    getGeneratedShoppingSignature(items),
-    getGeneratedShoppingSignature(removals),
-  ].join("::remove::");
-}
-
-const durableInventoryItemsByName = new Map(
-  commonInventoryItems.map((item) => [normaliseItemName(item.name), item])
-);
-
-function normaliseInventoryItems(inventoryItems) {
-  if (!Array.isArray(inventoryItems)) return [];
-
-  return inventoryItems
-    .filter((item) => {
-      const isStarterInventoryItem = String(item.id || "").startsWith(
-        "starter-inventory-"
-      );
-      const starterItem = durableInventoryItemsByName.get(
-        normaliseItemName(item.name || "")
-      );
-
-      if (!isStarterInventoryItem) return true;
-
-      return Boolean(starterItem);
-    })
-    .map((item) => ({
-      ...item,
-      category:
-        String(item.id || "").startsWith("starter-inventory-")
-          ? durableInventoryItemsByName.get(normaliseItemName(item.name || ""))
-            ?.category || item.category
-          : item.category,
-      active: String(item.id || "").startsWith("starter-inventory-")
-        ? true
-        : item.active ?? true,
-    }));
-}
-
-function normaliseRecipe(recipe, index) {
-  const recipeId = recipeIdAliases[recipe.id] || recipe.id;
-  const starterRecipe = initialRecipes.find(
-    (initialRecipe) => initialRecipe.id === recipeId
-  );
-
-  if (starterRecipe) {
-    return starterRecipe;
-  }
-
-  return {
-    id:
-      recipeId ||
-      `recipe-${index}-${recipe.name || "untitled"}`,
-    name: recipe.name || "Untitled recipe",
-    category: recipe.category || "Family favourites",
-    source: recipe.source || "",
-    sourceUrl: recipe.sourceUrl || "",
-    ingredients: Array.isArray(recipe.ingredients)
-      ? recipe.ingredients
-      : [],
-    method: recipe.method || "",
-  };
-}
-
-function loadRecipes() {
-  const savedRecipes = localStorage.getItem("recipes");
-
-  if (!savedRecipes) return initialRecipes;
-
-  const parsedRecipes = JSON.parse(savedRecipes);
-  const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
-  const savedRecipeIds = new Set(
-    normalisedRecipes.map((recipe) => recipe.id)
-  );
-  const missingStarterRecipes = initialRecipes.filter(
-    (recipe) => !savedRecipeIds.has(recipe.id)
-  );
-
-  return [...normalisedRecipes, ...missingStarterRecipes];
-}
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -183,39 +44,28 @@ function App() {
   const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
 
-  const [mealsByWeek, setMealsByWeek] = useState(() => {
-    const savedMeals = localStorage.getItem("mealsByWeek");
-    return savedMeals ? JSON.parse(savedMeals) : {};
+  const [mealsByWeek, setMealsByWeek] = useLocalStorageState("mealsByWeek", {});
+  const [shoppingItemsByWeek, setShoppingItemsByWeek] = useLocalStorageState(
+    "shoppingItemsByWeek",
+    {}
+  );
+  const [shoppingListMetaByWeek, setShoppingListMetaByWeek] =
+    useLocalStorageState("shoppingListMetaByWeek", {});
+  const [staples, setStaples] = useLocalStorageState("staples", initialStaples);
+  const [inventory, setInventory] = useLocalStorageState("inventory", [], {
+    deserialize: normaliseInventoryItems,
   });
-
-  const [shoppingItemsByWeek, setShoppingItemsByWeek] = useState(() => {
-    const savedItems = localStorage.getItem("shoppingItemsByWeek");
-    return savedItems ? JSON.parse(savedItems) : {};
-  });
-
-  const [shoppingListMetaByWeek, setShoppingListMetaByWeek] = useState(() => {
-    const savedMeta = localStorage.getItem("shoppingListMetaByWeek");
-    return savedMeta ? JSON.parse(savedMeta) : {};
-  });
-
-  const [staples, setStaples] = useState(() => {
-    const savedStaples = localStorage.getItem("staples");
-    return savedStaples ? JSON.parse(savedStaples) : initialStaples;
+  const [recipes, setRecipes] = useLocalStorageState("recipes", initialRecipes, {
+    deserialize: mergeSavedRecipes,
   });
 
   const [newItem, setNewItem] = useState("");
   const [newStaple, setNewStaple] = useState("");
-
-  const [inventory, setInventory] = useState(() => {
-    const savedInventory = localStorage.getItem("inventory");
-    return savedInventory
-      ? normaliseInventoryItems(JSON.parse(savedInventory))
-      : [];
-  });
-
   const [newInventoryItem, setNewInventoryItem] = useState("");
-  const [recipes, setRecipes] = useState(loadRecipes);
   const [newRecipeName, setNewRecipeName] = useState("");
+
+  const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
+  const { getMealSummary } = mealHelpers;
 
   const mealWeekKey = getWeekKey(mealWeekStart);
   const shoppingWeekKey = getWeekKey(shoppingWeekStart);
@@ -245,139 +95,6 @@ function App() {
     mealsByWeek[shoppingWeekKey] || createEmptyMeals();
   const shoppingItems = shoppingItemsByWeek[shoppingWeekKey] || [];
 
-  function getMealType(meal) {
-    if (!meal) return "cook";
-    if (meal.mealType) return meal.mealType;
-    return "cook";
-  }
-
-  function getRecipeForMeal(meal) {
-    if (!meal) return null;
-    if (getMealType(meal) !== "cook") return null;
-
-    if (meal.recipeId) {
-      const linkedRecipe = recipes.find((recipe) => recipe.id === meal.recipeId);
-
-      if (linkedRecipe) return linkedRecipe;
-    }
-
-    const normalisedMealName = normaliseItemName(meal.name || "");
-
-    if (!normalisedMealName) return null;
-
-    return (
-      recipes.find(
-        (recipe) => normaliseItemName(recipe.name) === normalisedMealName
-      ) || null
-    );
-  }
-
-  function getIngredientsForMeal(meal) {
-    if (getMealType(meal) !== "cook") return [];
-
-    const linkedRecipe = getRecipeForMeal(meal);
-    const recipeIngredients = linkedRecipe?.ingredients || [];
-    const mealIngredients = Array.isArray(meal?.ingredients)
-      ? meal.ingredients
-      : [];
-    const seenIngredients = new Set();
-
-    return [...recipeIngredients, ...mealIngredients].filter((ingredient) => {
-      const cleanedIngredient = String(ingredient).trim();
-
-      if (!cleanedIngredient) return false;
-
-      const normalisedIngredient = normaliseItemName(cleanedIngredient);
-
-      if (seenIngredients.has(normalisedIngredient)) {
-        return false;
-      }
-
-      seenIngredients.add(normalisedIngredient);
-      return true;
-    });
-  }
-
-  function getMealDisplayName(meal, linkedRecipe, weekMeals) {
-    const mealType = getMealType(meal);
-
-    if (mealType === "takeaway") return "Takeaway";
-    if (mealType === "eating-out") return "Eating out";
-
-    if (mealType === "repeat") {
-      const repeatFromDay = meal?.repeatFromDay;
-      const sourceMeal = repeatFromDay ? weekMeals[repeatFromDay] : null;
-      const sourceMealType = getMealType(sourceMeal);
-      const sourceRecipe = getRecipeForMeal(sourceMeal);
-      const sourceName =
-        sourceMeal && sourceMealType !== "repeat"
-          ? getMealDisplayName(sourceMeal, sourceRecipe, weekMeals)
-          : "";
-
-      if (sourceName && sourceName !== "No meal planned") {
-        return `Same as ${repeatFromDay}: ${sourceName}`;
-      }
-
-      return repeatFromDay ? `Same as ${repeatFromDay}` : "Same as another night";
-    }
-
-    return linkedRecipe?.name || (meal?.name || "").trim() || "No meal planned";
-  }
-
-  function getMealLabel(meal, linkedRecipe) {
-    const mealType = getMealType(meal);
-    const hasCustomMeal =
-      (meal?.name || "").trim() !== "" || Boolean(meal?.ingredients?.length);
-
-    if (mealType === "takeaway") return "No shopping needed";
-    if (mealType === "eating-out") return "No shopping needed";
-    if (mealType === "repeat") return "Repeat meal";
-    if (linkedRecipe) return linkedRecipe.category || "Recipe";
-    return hasCustomMeal ? "Custom meal" : "Unplanned";
-  }
-
-  function getMealTone(meal, linkedRecipe, hasMeal) {
-    const mealType = getMealType(meal);
-
-    if (!hasMeal) return "empty";
-    if (mealType === "repeat") return "repeat";
-    if (mealType === "takeaway") return "takeaway";
-    if (mealType === "eating-out") return "out";
-    if (linkedRecipe) return getRecipeTone(linkedRecipe.category);
-
-    return "custom";
-  }
-
-  function mealHasPlan(meal) {
-    const mealType = getMealType(meal);
-
-    if (mealType === "takeaway" || mealType === "eating-out") return true;
-    if (mealType === "repeat") return Boolean(meal?.repeatFromDay);
-
-    return (
-      (meal?.name || "").trim() !== "" ||
-      getIngredientsForMeal(meal).length > 0
-    );
-  }
-
-  function getMealSummary(day, meal, weekMeals = meals) {
-    const normalisedMeal = meal || emptyMeal;
-    const linkedRecipe = getRecipeForMeal(normalisedMeal);
-    const ingredients = getIngredientsForMeal(normalisedMeal);
-    const hasMeal = mealHasPlan(normalisedMeal);
-
-    return {
-      day,
-      meal: normalisedMeal,
-      linkedRecipe,
-      ingredients,
-      hasMeal,
-      name: getMealDisplayName(normalisedMeal, linkedRecipe, weekMeals),
-      label: getMealLabel(normalisedMeal, linkedRecipe),
-      tone: getMealTone(normalisedMeal, linkedRecipe, hasMeal),
-    };
-  }
-
   const mealWeekEnd = new Date(mealWeekStart);
   mealWeekEnd.setDate(mealWeekStart.getDate() + 6);
 
@@ -403,7 +120,8 @@ function App() {
   ).length;
 
   const dueStaplesCount = staples.filter(
-    (staple) => staple.active !== false && stapleIsDueThisWeek(staple)
+    (staple) =>
+      staple.active !== false && isStapleDueThisWeek(staple, shoppingWeekKey)
   ).length;
 
   const activeInventoryCount = inventory.filter(
@@ -417,7 +135,14 @@ function App() {
     (item) => !item.checked
   ).length;
   const checkedShoppingItemsCount = shoppingItemsCount - pendingShoppingItemsCount;
-  const shoppingListPlan = createShoppingListPlan();
+  const shoppingListPlan = buildShoppingPlan({
+    staples,
+    inventory,
+    shoppingItems,
+    weekMeals: shoppingWeekMeals,
+    weekKey: shoppingWeekKey,
+    getMealSummary,
+  });
   const shoppingListMeta = shoppingListMetaByWeek[shoppingWeekKey] || null;
   const currentGeneratedShoppingSignature = getGeneratedShoppingSignature(
     shoppingItems.filter((item) => generatedShoppingSources.includes(item.source))
@@ -457,36 +182,6 @@ function App() {
       minute: "2-digit",
     })
     : "";
-
-  useEffect(() => {
-    localStorage.setItem("mealsByWeek", JSON.stringify(mealsByWeek));
-  }, [mealsByWeek]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "shoppingItemsByWeek",
-      JSON.stringify(shoppingItemsByWeek)
-    );
-  }, [shoppingItemsByWeek]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "shoppingListMetaByWeek",
-      JSON.stringify(shoppingListMetaByWeek)
-    );
-  }, [shoppingListMetaByWeek]);
-
-  useEffect(() => {
-    localStorage.setItem("staples", JSON.stringify(staples));
-  }, [staples]);
-
-  useEffect(() => {
-    localStorage.setItem("inventory", JSON.stringify(inventory));
-  }, [inventory]);
-
-  useEffect(() => {
-    localStorage.setItem("recipes", JSON.stringify(recipes));
-  }, [recipes]);
 
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
@@ -654,206 +349,12 @@ function App() {
     );
   }
 
-  function stapleIsDueThisWeek(staple) {
-    if (staple.frequency === "ad-hoc") return false;
-    if (!staple.frequency) return true;
-    if (!staple.startDate) return true;
-
-    const start = new Date(staple.startDate);
-    const current = new Date(shoppingWeekKey);
-
-    if (Number.isNaN(start.getTime())) return true;
-
-    const weeksSinceStart = Math.floor(
-      (current - start) / (7 * 24 * 60 * 60 * 1000)
-    );
-
-    if (weeksSinceStart < 0) return false;
-
-    if (staple.frequency === "weekly") return true;
-    if (staple.frequency === "fortnightly") return weeksSinceStart % 2 === 0;
-    if (staple.frequency === "four-weekly") return weeksSinceStart % 4 === 0;
-
-    return true;
-  }
-
-  function createShoppingListPlan() {
-    const recurringBuys = staples
-      .filter(
-        (staple) =>
-          staple.active !== false &&
-          stapleIsDueThisWeek(staple)
-      )
-      .map((staple) => ({
-        id: staple.id,
-        name: staple.quantity
-          ? `${staple.quantity} ${staple.unit} ${staple.name}`
-          : staple.name,
-        category: staple.category || "Other",
-        source: "Recurring buy",
-        sourceDetail: staple.name,
-      }));
-
-    const restockInventory = inventory
-      .filter((item) => item.active === false)
-      .map((item) => ({
-        name: item.quantity
-          ? `${item.quantity} ${item.unit} ${item.name}`
-          : item.name,
-        category: item.category || "Household",
-        source: "Restock",
-        sourceDetail: "Stock",
-      }));
-
-    const mealIngredients = days.flatMap((day) => {
-      const daySummary = getMealSummary(day, shoppingWeekMeals[day], shoppingWeekMeals);
-      const sourceDetail = daySummary.hasMeal ? daySummary.name : day;
-
-      return daySummary.ingredients.map((ingredient) => ({
-        name: ingredient,
-        category: "Meal ingredients",
-        source: "Meal",
-        sourceDetail,
-        day,
-      }));
-    });
-
-    const recurringBuyNames = new Set(
-      recurringBuys.flatMap((item) => [
-        normaliseItemName(item.name),
-        normaliseItemName(item.sourceDetail),
-      ])
-    );
-    const activeStockItems = inventory.filter((item) => item.active !== false);
-    const activeStockNames = new Set(
-      activeStockItems.map((item) => normaliseItemName(item.name))
-    );
-    const removeFromRecurring = recurringBuys
-      .filter((item) => {
-        const itemName = normaliseItemName(item.name);
-        const sourceName = normaliseItemName(item.sourceDetail);
-
-        return activeStockItems.some((stockItem) => {
-          const stockName = normaliseItemName(stockItem.name);
-          const categoriesMatch =
-            stockItem.category &&
-            item.category &&
-            stockItem.category === item.category;
-
-          if (itemName === stockName || sourceName === stockName) return true;
-
-          return (
-            categoriesMatch &&
-            stockName.length >= 4 &&
-            (itemName.includes(stockName) || sourceName.includes(stockName))
-          );
-        });
-      })
-      .map((item) => ({
-        ...item,
-        source: "Woolworths list",
-        sourceDetail: "Already in stock",
-      }));
-
-    const allNewItems = [
-      ...restockInventory,
-      ...mealIngredients,
-    ];
-
-    const existingGeneratedItems = shoppingItems.filter((item) =>
-      generatedShoppingSources.includes(item.source)
-    );
-    const retainedShoppingItems = shoppingItems.filter(
-      (item) => !generatedShoppingSources.includes(item.source)
-    );
-    const existingGeneratedItemsByName = new Map(
-      existingGeneratedItems.map((item) => [
-        normaliseItemName(item.name),
-        item,
-      ])
-    );
-    const retainedNames = new Set(
-      retainedShoppingItems.map((item) => normaliseItemName(item.name))
-    );
-    const summary = {
-      mealIngredientsFound: mealIngredients.length,
-      recurringBuysFound: recurringBuys.length,
-      stockRestocksFound: restockInventory.length,
-      mealIngredientsAdded: 0,
-      stockRestocksAdded: 0,
-      recurringRemovalsFound: removeFromRecurring.length,
-      skippedInStock: 0,
-      skippedRecurringList: 0,
-      skippedDuplicates: 0,
-      manualItemsKept: retainedShoppingItems.length,
-    };
-
-    const seenNames = new Set([
-      ...retainedNames,
-      ...activeStockNames,
-      ...recurringBuyNames,
-    ]);
-
-    const newItems = allNewItems
-      .filter((item) => {
-        const normalisedName = normaliseItemName(
-          item.name
-        );
-
-        if (seenNames.has(normalisedName)) {
-          if (activeStockNames.has(normalisedName)) {
-            summary.skippedInStock += 1;
-          } else if (recurringBuyNames.has(normalisedName)) {
-            summary.skippedRecurringList += 1;
-          } else {
-            summary.skippedDuplicates += 1;
-          }
-
-          return false;
-        }
-
-        seenNames.add(normalisedName);
-        return true;
-      })
-      .map((item) => ({
-        id:
-          existingGeneratedItemsByName.get(normaliseItemName(item.name))?.id ||
-          `generated-${slugifyIdPart(item.name)}`,
-        name: item.name,
-        category: item.category,
-        source: item.source || "Generated",
-        sourceDetail: item.sourceDetail || "",
-        day: item.day || "",
-        checked:
-          existingGeneratedItemsByName.get(normaliseItemName(item.name))
-            ?.checked || false,
-      }));
-
-    summary.mealIngredientsAdded = newItems.filter(
-      (item) => item.source === "Meal"
-    ).length;
-    summary.stockRestocksAdded = newItems.filter(
-      (item) => item.source === "Restock"
-    ).length;
-
-    return {
-      newItems,
-      retainedShoppingItems,
-      removeFromRecurring,
-      itemsSignature: getGeneratedShoppingSignature(newItems),
-      signature: getShoppingPlanSignature(newItems, removeFromRecurring),
-      summary,
-    };
-  }
-
   function buildShoppingList() {
-    const listPlan = createShoppingListPlan();
-
     setShoppingItemsByWeek({
       ...shoppingItemsByWeek,
       [shoppingWeekKey]: [
-        ...listPlan.retainedShoppingItems,
-        ...listPlan.newItems,
+        ...shoppingListPlan.retainedShoppingItems,
+        ...shoppingListPlan.newItems,
       ],
     });
 
@@ -861,8 +362,8 @@ function App() {
       ...shoppingListMetaByWeek,
       [shoppingWeekKey]: {
         generatedAt: new Date().toISOString(),
-        signature: listPlan.signature,
-        summary: listPlan.summary,
+        signature: shoppingListPlan.signature,
+        summary: shoppingListPlan.summary,
       },
     });
 
@@ -1002,6 +503,29 @@ function App() {
         recipe.id === recipeId ? { ...recipe, method } : recipe
       )
     );
+  }
+
+  function applyImportedData(backup) {
+    if (Object.prototype.hasOwnProperty.call(backup, "mealsByWeek")) {
+      setMealsByWeek(backup.mealsByWeek);
+    }
+    if (Object.prototype.hasOwnProperty.call(backup, "shoppingItemsByWeek")) {
+      setShoppingItemsByWeek(backup.shoppingItemsByWeek);
+    }
+    if (Object.prototype.hasOwnProperty.call(backup, "shoppingListMetaByWeek")) {
+      setShoppingListMetaByWeek(backup.shoppingListMetaByWeek);
+    }
+    if (Object.prototype.hasOwnProperty.call(backup, "staples")) {
+      setStaples(backup.staples);
+    }
+    // Run imported inventory / recipes through the same migration helpers the
+    // app uses when loading from localStorage, so they normalise consistently.
+    if (Object.prototype.hasOwnProperty.call(backup, "inventory")) {
+      setInventory(normaliseInventoryItems(backup.inventory));
+    }
+    if (Object.prototype.hasOwnProperty.call(backup, "recipes")) {
+      setRecipes(mergeSavedRecipes(backup.recipes));
+    }
   }
 
   return (
@@ -1321,7 +845,7 @@ function App() {
               >
                 <span>
                   <strong>Settings</strong>
-                  <span>Preferences placeholder</span>
+                  <span>Backup &amp; restore</span>
                 </span>
                 <span className="manager-action">Open</span>
               </button>
@@ -1376,10 +900,7 @@ function App() {
               )}
 
               {moreSection === "settings" && (
-                <div className="settings-placeholder">
-                  <strong>Settings</strong>
-                  <p className="small-text">Settings will live here later.</p>
-                </div>
+                <SettingsPanel onImport={applyImportedData} />
               )}
             </>
           )}
