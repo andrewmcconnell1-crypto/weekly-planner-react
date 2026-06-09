@@ -1,0 +1,19 @@
+{
+  "name": "Meal Planner",
+  "short_name": "Meals",
+  "description": "Plan your week's meals and generate a shopping list.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f6f1",
+  "theme_color": "#1f4f42",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ]
+}

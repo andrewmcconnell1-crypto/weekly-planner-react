@@ -8,6 +8,7 @@ function StaplesList({
   deleteStaple,
   updateStapleFrequency,
   updateStapleCategory,
+  updateStapleDetails,
   toggleStapleActive,
 }) {
   return (
@@ -45,9 +46,37 @@ function StaplesList({
                 </label>
               </div>
 
-              <p className="small-text">
-                {staple.quantity ? `${staple.quantity} ${staple.unit}` : "No quantity set"}
-              </p>
+              <div className="staple-quantity-row">
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  inputMode="decimal"
+                  placeholder="Qty"
+                  aria-label={`${staple.name} quantity`}
+                  value={staple.quantity ?? ""}
+                  onChange={(event) =>
+                    updateStapleDetails(staple.id, {
+                      quantity:
+                        event.target.value === ""
+                          ? null
+                          : Number(event.target.value),
+                    })
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="unit (e.g. pack)"
+                  aria-label={`${staple.name} unit`}
+                  value={staple.unit || ""}
+                  onChange={(event) =>
+                    updateStapleDetails(staple.id, {
+                      unit: event.target.value,
+                    })
+                  }
+                />
+              </div>
 
               <p className="small-text">
                 Starts: {staple.startDate}

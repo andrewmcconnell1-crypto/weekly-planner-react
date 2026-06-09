@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
+import {
+  getRecipeTone,
+  groupRecipesByCategory,
+  recipeCategories,
+} from "../utils/recipeUtils";
 
 function RecipesList({
   recipes,
@@ -10,7 +14,7 @@ function RecipesList({
   deleteRecipe,
   addIngredientToRecipe,
   deleteIngredientFromRecipe,
-  updateRecipeMethod,
+  updateRecipe,
 }) {
   const [expandedRecipeId, setExpandedRecipeId] = useState(null);
   const [ingredientTextByRecipe, setIngredientTextByRecipe] = useState({});
@@ -108,6 +112,11 @@ function RecipesList({
                     {group.recipes.map((recipe) => {
                       const isExpanded = expandedRecipeId === recipe.id;
                       const ingredientCount = recipe.ingredients.length;
+                      const categoryOptions =
+                        recipe.category &&
+                        !recipeCategories.includes(recipe.category)
+                          ? [...recipeCategories, recipe.category]
+                          : recipeCategories;
 
                       return (
                         <li
@@ -141,19 +150,75 @@ function RecipesList({
 
                           {isExpanded && (
                             <div className="recipe-editor">
-                              <div className="recipe-meta">
-                                <span>{recipe.category || "Uncategorised"}</span>
+                              <div className="recipe-detail-fields">
+                                <label>
+                                  <span>Name</span>
+                                  <input
+                                    type="text"
+                                    value={recipe.name}
+                                    onChange={(event) =>
+                                      updateRecipe(recipe.id, {
+                                        name: event.target.value,
+                                      })
+                                    }
+                                  />
+                                </label>
 
-                                {recipe.sourceUrl ? (
+                                <label>
+                                  <span>Category</span>
+                                  <select
+                                    value={recipe.category || "Other"}
+                                    onChange={(event) =>
+                                      updateRecipe(recipe.id, {
+                                        category: event.target.value,
+                                      })
+                                    }
+                                  >
+                                    {categoryOptions.map((category) => (
+                                      <option key={category} value={category}>
+                                        {category}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+
+                                <label>
+                                  <span>Source</span>
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. RecipeTin Eats"
+                                    value={recipe.source || ""}
+                                    onChange={(event) =>
+                                      updateRecipe(recipe.id, {
+                                        source: event.target.value,
+                                      })
+                                    }
+                                  />
+                                </label>
+
+                                <label>
+                                  <span>Source link</span>
+                                  <input
+                                    type="url"
+                                    placeholder="https://..."
+                                    value={recipe.sourceUrl || ""}
+                                    onChange={(event) =>
+                                      updateRecipe(recipe.id, {
+                                        sourceUrl: event.target.value,
+                                      })
+                                    }
+                                  />
+                                </label>
+
+                                {recipe.sourceUrl && (
                                   <a
+                                    className="recipe-source-link"
                                     href={recipe.sourceUrl}
                                     target="_blank"
                                     rel="noreferrer"
                                   >
-                                    {recipe.source || "Open source"}
+                                    Open source link
                                   </a>
-                                ) : (
-                                  <span>{recipe.source || "No source set"}</span>
                                 )}
                               </div>
 
@@ -214,10 +279,9 @@ function RecipesList({
                                   value={recipe.method || ""}
                                   placeholder="Add method steps..."
                                   onChange={(event) =>
-                                    updateRecipeMethod(
-                                      recipe.id,
-                                      event.target.value
-                                    )
+                                    updateRecipe(recipe.id, {
+                                      method: event.target.value,
+                                    })
                                   }
                                 />
                               </label>

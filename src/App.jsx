@@ -203,6 +203,36 @@ function App() {
     setMealWeekStart(getNextSunday());
   }
 
+  function copyPreviousWeekMeals() {
+    const previousWeekStart = new Date(mealWeekStart);
+    previousWeekStart.setDate(mealWeekStart.getDate() - 7);
+    const previousWeekKey = getWeekKey(previousWeekStart);
+    const previousMeals = mealsByWeek[previousWeekKey];
+
+    if (!previousMeals) {
+      window.alert("There's no meal plan for the previous week to copy.");
+      return;
+    }
+
+    const hasExistingPlan = planningDaySummaries.some(
+      (daySummary) => daySummary.hasMeal
+    );
+
+    if (
+      hasExistingPlan &&
+      !window.confirm(
+        "Replace this week's meal plan with a copy of last week's?"
+      )
+    ) {
+      return;
+    }
+
+    setMealsByWeek({
+      ...mealsByWeek,
+      [mealWeekKey]: structuredClone(previousMeals),
+    });
+  }
+
   function showHomeWeek(weekStart) {
     const nextMealWeekStart = new Date(weekStart);
     const nextShoppingWeekStart = new Date(weekStart);
@@ -341,6 +371,14 @@ function App() {
     );
   }
 
+  function updateStapleDetails(id, updates) {
+    setStaples(
+      staples.map((staple) =>
+        staple.id === id ? { ...staple, ...updates } : staple
+      )
+    );
+  }
+
   function toggleStapleActive(id) {
     setStaples(
       staples.map((staple) =>
@@ -459,7 +497,22 @@ function App() {
   }
 
   function deleteRecipe(id) {
-    setRecipes(recipes.filter((recipe) => recipe.id !== id));
+    const recipe = recipes.find((item) => item.id === id);
+    const shouldDelete = window.confirm(
+      `Delete "${recipe?.name || "this recipe"}"? Its ingredients and method will be removed. This can't be undone.`
+    );
+
+    if (!shouldDelete) return;
+
+    setRecipes(recipes.filter((item) => item.id !== id));
+  }
+
+  function updateRecipe(recipeId, updates) {
+    setRecipes(
+      recipes.map((recipe) =>
+        recipe.id === recipeId ? { ...recipe, ...updates } : recipe
+      )
+    );
   }
 
   function addIngredientToRecipe(recipeId, ingredientName) {
@@ -497,13 +550,6 @@ function App() {
     );
   }
 
-  function updateRecipeMethod(recipeId, method) {
-    setRecipes(
-      recipes.map((recipe) =>
-        recipe.id === recipeId ? { ...recipe, method } : recipe
-      )
-    );
-  }
 
   function applyImportedData(backup) {
     if (Object.prototype.hasOwnProperty.call(backup, "mealsByWeek")) {
@@ -729,6 +775,14 @@ function App() {
             onNextWeek={goToNextMealWeek}
           />
 
+          <button
+            className="secondary copy-week-button"
+            type="button"
+            onClick={copyPreviousWeekMeals}
+          >
+            Copy last week's plan
+          </button>
+
           <div className="meal-grid">
             {days.map((day) => {
               const meal = meals[day];
@@ -874,6 +928,7 @@ function App() {
                   deleteStaple={deleteStaple}
                   updateStapleFrequency={updateStapleFrequency}
                   updateStapleCategory={updateStapleCategory}
+                  updateStapleDetails={updateStapleDetails}
                   toggleStapleActive={toggleStapleActive}
                   newInventoryItem={newInventoryItem}
                   setNewInventoryItem={setNewInventoryItem}
@@ -895,7 +950,7 @@ function App() {
                   deleteRecipe={deleteRecipe}
                   addIngredientToRecipe={addIngredientToRecipe}
                   deleteIngredientFromRecipe={deleteIngredientFromRecipe}
-                  updateRecipeMethod={updateRecipeMethod}
+                  updateRecipe={updateRecipe}
                 />
               )}
 

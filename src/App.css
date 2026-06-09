@@ -1850,6 +1850,40 @@ input::placeholder {
   width: 100%;
 }
 
+.recipe-detail-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.recipe-detail-fields label {
+  display: grid;
+  gap: 6px;
+}
+
+.recipe-detail-fields label span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.recipe-source-link {
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.staple-quantity-row {
+  display: grid;
+  grid-template-columns: minmax(0, 90px) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.copy-week-button {
+  width: 100%;
+}
+
 .settings-placeholder {
   padding: 16px;
 }

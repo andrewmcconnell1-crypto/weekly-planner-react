@@ -14,6 +14,9 @@ const categoryOrder = [
   "Other",
 ];
 
+// The known recipe categories, used to populate category pickers.
+export const recipeCategories = categoryOrder;
+
 export function getRecipeCategory(recipe) {
   return recipe.category || "Other";
 }
