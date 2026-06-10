@@ -26,12 +26,6 @@ jobs:
           node-version: 20
           cache: npm
 
-      # Enables GitHub Pages for the repo on the first run (source: Actions),
-      # so no manual repo-settings change is needed.
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - run: npm ci
       - run: npm run build
 
