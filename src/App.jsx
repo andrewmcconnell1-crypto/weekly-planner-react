@@ -7,6 +7,7 @@ import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
 import RecipesList from "./components/RecipesList";
 import SettingsPanel from "./components/SettingsPanel";
+import SignInScreen from "./components/SignInScreen";
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 import {
@@ -28,10 +29,19 @@ import {
   normaliseInventoryItems,
   mergeSavedRecipes,
 } from "./utils/dataLoaders";
-import { useLocalStorageState } from "./hooks/useLocalStorageState";
+import { isSupabaseConfigured } from "./lib/supabase";
+import { useAuth } from "./hooks/useAuth";
+import { usePlannerStore } from "./hooks/usePlannerStore";
 
-import { initialStaples } from "./data/initialStaples";
-import { initialRecipes } from "./data/initialRecipes";
+function LoadingScreen({ message }) {
+  return (
+    <main className="app-shell tab-home auth-shell">
+      <section className="auth-card">
+        <p className="small-text">{message}</p>
+      </section>
+    </main>
+  );
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -44,20 +54,24 @@ function App() {
   const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
 
-  const [mealsByWeek, setMealsByWeek] = useLocalStorageState("mealsByWeek", {});
-  const [shoppingItemsByWeek, setShoppingItemsByWeek] = useLocalStorageState(
-    "shoppingItemsByWeek",
-    {}
-  );
-  const [shoppingListMetaByWeek, setShoppingListMetaByWeek] =
-    useLocalStorageState("shoppingListMetaByWeek", {});
-  const [staples, setStaples] = useLocalStorageState("staples", initialStaples);
-  const [inventory, setInventory] = useLocalStorageState("inventory", [], {
-    deserialize: normaliseInventoryItems,
-  });
-  const [recipes, setRecipes] = useLocalStorageState("recipes", initialRecipes, {
-    deserialize: mergeSavedRecipes,
-  });
+  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const {
+    mealsByWeek,
+    setMealsByWeek,
+    shoppingItemsByWeek,
+    setShoppingItemsByWeek,
+    shoppingListMetaByWeek,
+    setShoppingListMetaByWeek,
+    staples,
+    setStaples,
+    inventory,
+    setInventory,
+    recipes,
+    setRecipes,
+    loading: dataLoading,
+    syncError,
+    cloud,
+  } = usePlannerStore(user);
 
   const [newItem, setNewItem] = useState("");
   const [newStaple, setNewStaple] = useState("");
@@ -66,6 +80,19 @@ function App() {
 
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
   const { getMealSummary } = mealHelpers;
+
+  // ---- Auth / loading gates (after all hooks, before any data-derived work) ----
+  if (isSupabaseConfigured && authLoading) {
+    return <LoadingScreen message="Loading…" />;
+  }
+
+  if (isSupabaseConfigured && !user) {
+    return <SignInScreen onSignIn={signInWithGoogle} />;
+  }
+
+  if (dataLoading) {
+    return <LoadingScreen message="Loading your plan…" />;
+  }
 
   const mealWeekKey = getWeekKey(mealWeekStart);
   const shoppingWeekKey = getWeekKey(shoppingWeekStart);
@@ -592,6 +619,13 @@ function App() {
         </div>
       </header>
 
+      {syncError && (
+        <p className="sync-banner" role="status">
+          Couldn't sync with the cloud — your latest changes may not be saved.
+          Check your connection.
+        </p>
+      )}
+
       {activeTab === "home" && (
         <section className="screen home-screen">
           <div className="home-hero">
@@ -955,7 +989,12 @@ function App() {
               )}
 
               {moreSection === "settings" && (
-                <SettingsPanel onImport={applyImportedData} />
+                <SettingsPanel
+                  onImport={applyImportedData}
+                  user={user}
+                  cloud={cloud}
+                  onSignOut={signOut}
+                />
               )}
             </>
           )}

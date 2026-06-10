@@ -28,6 +28,12 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          # Set these in repo Settings -> Secrets and variables -> Actions ->
+          # Variables. Safe to be public (data is protected by row-level
+          # security). If unset, the deployed app runs in local-only mode.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

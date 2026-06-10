@@ -35,7 +35,7 @@ function validateBackup(parsed) {
   );
 }
 
-function SettingsPanel({ onImport }) {
+function SettingsPanel({ onImport, user, cloud, onSignOut }) {
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
 
@@ -119,6 +119,22 @@ function SettingsPanel({ onImport }) {
 
   return (
     <div className="settings-panel">
+      {cloud && user && (
+        <section className="settings-group">
+          <strong>Account</strong>
+          <p className="small-text">
+            Signed in as {user.email || "your account"}. Your data syncs across
+            your devices automatically.
+          </p>
+
+          <div className="settings-actions">
+            <button type="button" className="secondary" onClick={onSignOut}>
+              Sign out
+            </button>
+          </div>
+        </section>
+      )}
+
       <section className="settings-group">
         <strong>Backup &amp; restore</strong>
         <p className="small-text">

@@ -1888,6 +1888,53 @@ input::placeholder {
   width: 100%;
 }
 
+.auth-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.auth-card {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 420px);
+  padding: 28px 22px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.auth-card h1 {
+  margin: 0;
+}
+
+.auth-intro {
+  color: var(--muted);
+}
+
+.auth-card .primary-button {
+  margin-top: 6px;
+}
+
+.auth-note {
+  margin: 0;
+}
+
+.sync-banner {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fbeceb;
+  color: var(--danger);
+  border: 1px solid #f0cfca;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
 .settings-placeholder {
   padding: 16px;
 }
