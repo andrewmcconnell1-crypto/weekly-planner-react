@@ -17,7 +17,6 @@ import {
   getWeekKey,
 } from "./utils/dateUtils";
 import { normaliseItemName, createCollectionId } from "./utils/itemUtils";
-import { isStapleDueThisWeek } from "./utils/stapleUtils";
 import { createMealHelpers } from "./utils/mealPlanning";
 import {
   buildShoppingPlan,
@@ -131,24 +130,12 @@ function App() {
   const planningDaySummaries = days.map((day) =>
     getMealSummary(day, meals[day], meals)
   );
-  const shoppingDaySummaries = days.map((day) =>
-    getMealSummary(day, shoppingWeekMeals[day], shoppingWeekMeals)
-  );
   const mealsPlannedCount = planningDaySummaries.filter(
     (daySummary) => daySummary.hasMeal
   ).length;
-  const shoppingMealIngredientsCount = shoppingDaySummaries.reduce(
-    (total, daySummary) => total + daySummary.ingredients.length,
-    0
-  );
 
   const activeStaplesCount = staples.filter(
     (staple) => staple.active !== false
-  ).length;
-
-  const dueStaplesCount = staples.filter(
-    (staple) =>
-      staple.active !== false && isStapleDueThisWeek(staple, shoppingWeekKey)
   ).length;
 
   const activeInventoryCount = inventory.filter(
@@ -301,11 +288,6 @@ function App() {
 
   function toggleExpandedMealDay(day) {
     setExpandedMealDay(expandedMealDay === day ? null : day);
-  }
-
-  function openPlanDay(day) {
-    setExpandedMealDay(day);
-    setActiveTab("plan");
   }
 
   function openHousehold(section) {
@@ -629,154 +611,126 @@ function App() {
       {activeTab === "home" && (
         <section className="screen home-screen">
           <div className="home-hero">
-            <div>
-              <div className="home-week-switch" aria-label="Home week">
-                <button
-                  type="button"
-                  className={homeWeekMode === "current" ? "active" : ""}
-                  onClick={() => showHomeWeek(currentWeekStart)}
-                >
-                  This week
-                </button>
-
-                <button
-                  type="button"
-                  className={homeWeekMode === "next" ? "active" : ""}
-                  onClick={() => showHomeWeek(nextWeekStart)}
-                >
-                  Next week
-                </button>
-              </div>
-
-              <p className="section-kicker">Shopping week</p>
-              <h2>
-                {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
-              </h2>
-              <p>
-                {mealsPlannedCount} of {days.length} meals planned,{" "}
-                {dueStaplesCount} Woolworths list items,{" "}
-                {pendingShoppingItemsCount} additions to buy.
-              </p>
-            </div>
-          </div>
-
-          <div className="home-primary-row">
-            <button className="primary-button" onClick={buildShoppingList}>
-              {shoppingActionLabel}
-            </button>
-
-            <button className="secondary" onClick={() => setActiveTab("shop")}>
-              Open list
-            </button>
-          </div>
-
-          <div className="home-workflow">
-            <section className="workflow-panel">
-              <div className="workflow-heading">
-                <div>
-                  <p className="section-kicker">Meals</p>
-                  <h2>Plan</h2>
-                </div>
-
-                <span className="workflow-count">
-                  {mealsPlannedCount}/{days.length}
-                </span>
-              </div>
-
-              <div className="date-line">
-                {formatDate(mealWeekStart)} to {formatDate(mealWeekEnd)}
-              </div>
-
-              <div className="home-week-list">
-                {planningDaySummaries.map((daySummary) => (
-                  <button
-                    className={`home-day-row ${
-                      daySummary.hasMeal ? "" : "empty"
-                    }`}
-                    data-tone={daySummary.tone}
-                    type="button"
-                    key={daySummary.day}
-                    onClick={() => openPlanDay(daySummary.day)}
-                  >
-                    <span className="home-day">{daySummary.day.slice(0, 3)}</span>
-
-                    <span className="home-meal">
-                      <strong>{daySummary.name}</strong>
-                      <span>{daySummary.label}</span>
-                    </span>
-
-                    <span className="meal-row-count">
-                      {daySummary.ingredients.length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              <button className="secondary" onClick={() => setActiveTab("plan")}>
-                Edit meal plan
+            <div className="home-week-switch" aria-label="Home week">
+              <button
+                type="button"
+                className={homeWeekMode === "current" ? "active" : ""}
+                onClick={() => showHomeWeek(currentWeekStart)}
+              >
+                This week
               </button>
-            </section>
 
-            <section className="workflow-panel">
-              <div className="workflow-heading">
-                <div>
-                  <p className="section-kicker">Shop</p>
-                  <h2>Readiness</h2>
-                </div>
+              <button
+                type="button"
+                className={homeWeekMode === "next" ? "active" : ""}
+                onClick={() => showHomeWeek(nextWeekStart)}
+              >
+                Next week
+              </button>
+            </div>
 
-                <span className="workflow-count">
-                  {shoppingItemsCount + recurringRemovalItems.length}
+            <p className="section-kicker">Shopping week</p>
+            <h2>
+              {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
+            </h2>
+          </div>
+
+          <div className="home-steps">
+            <button
+              className="home-step"
+              type="button"
+              onClick={() => setActiveTab("plan")}
+            >
+              <span className="home-step-num">1</span>
+
+              <span className="home-step-body">
+                <strong>Plan meals</strong>
+                <span>
+                  {mealsPlannedCount} of {days.length} dinners planned
+                </span>
+              </span>
+
+              <span className="home-step-chevron">›</span>
+            </button>
+
+            <div className="home-step-action">
+              <div className="home-step-head">
+                <span className="home-step-num">2</span>
+
+                <span className="home-step-body">
+                  <strong>Generate shopping list</strong>
+                  <span>
+                    {shoppingLastUpdatedText
+                      ? `Last updated ${shoppingLastUpdatedText}`
+                      : "From meals, recurring buys & stock"}
+                  </span>
+                </span>
+
+                <span
+                  className={`list-status-pill ${
+                    shoppingListNeedsUpdate ? "needs-update" : ""
+                  }`}
+                >
+                  {shoppingStatusLabel}
                 </span>
               </div>
 
-              <div className="readiness-list">
-                <div>
-                  <span>Meal ingredients</span>
-                  <strong>{shoppingMealIngredientsCount}</strong>
-                </div>
+              <button
+                className="primary-button"
+                type="button"
+                onClick={buildShoppingList}
+              >
+                {shoppingActionLabel}
+              </button>
+            </div>
 
-                <div>
-                  <span>Woolworths baseline</span>
-                  <strong>{dueStaplesCount}</strong>
-                </div>
+            <button
+              className="home-step"
+              type="button"
+              onClick={() => setActiveTab("shop")}
+            >
+              <span className="home-step-num">3</span>
 
-                <div>
-                  <span>In stock</span>
-                  <strong>{activeInventoryCount}</strong>
-                </div>
+              <span className="home-step-body">
+                <strong>Shop</strong>
+                <span>
+                  {pendingShoppingItemsCount} to buy · {checkedShoppingItemsCount}{" "}
+                  done
+                </span>
+              </span>
 
-                <div>
-                  <span>Checked off</span>
-                  <strong>{checkedShoppingItemsCount}</strong>
-                </div>
-              </div>
+              <span className="home-step-chevron">›</span>
+            </button>
+          </div>
 
-              <div className="home-actions">
-                <button
-                  className="secondary"
-                  onClick={() => openHousehold("stock")}
-                >
-                  Check stock
-                </button>
+          <div className="home-quicklinks">
+            <p className="section-kicker">Set up</p>
 
-                <button
-                  className="secondary"
-                  onClick={() => openHousehold("recurring")}
-                >
-                  Recurring buys
-                </button>
+            <div className="home-actions">
+              <button
+                className="secondary"
+                onClick={() => openHousehold("stock")}
+              >
+                Check stock
+              </button>
 
-                <button
-                  className="secondary"
-                  onClick={() => {
-                    setMoreSection("recipes");
-                    setActiveTab("more");
-                  }}
-                >
-                  Recipes
-                </button>
-              </div>
-            </section>
+              <button
+                className="secondary"
+                onClick={() => openHousehold("recurring")}
+              >
+                Recurring buys
+              </button>
+
+              <button
+                className="secondary"
+                onClick={() => {
+                  setMoreSection("recipes");
+                  setActiveTab("more");
+                }}
+              >
+                Recipes
+              </button>
+            </div>
           </div>
         </section>
       )}

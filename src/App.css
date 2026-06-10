@@ -446,6 +446,96 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+/* Home guided 3-step flow */
+.home-steps {
+  display: grid;
+  gap: 10px;
+}
+
+.home-step,
+.home-step-action {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.home-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  color: var(--ink);
+}
+
+.home-step:hover {
+  background: var(--soft);
+}
+
+.home-step-action {
+  display: grid;
+  gap: 12px;
+}
+
+.home-step-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-step-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--tab-soft);
+  color: var(--tab-accent-strong);
+  font-size: 0.9rem;
+  font-weight: 850;
+}
+
+.home-step-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.home-step-body strong {
+  font-size: 1.02rem;
+}
+
+.home-step-body > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.home-step-chevron {
+  color: var(--muted);
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.home-step-action .primary-button {
+  width: 100%;
+}
+
+.home-quicklinks {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.home-quicklinks .home-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .home-hero,
 .workflow-panel {
   border: 1px solid var(--line);
@@ -1575,8 +1665,14 @@ input::placeholder {
 
 .done-section,
 .manual-add-panel {
-  padding: 0;
-  overflow: hidden;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.meal-extra-ingredients {
+  display: grid;
+  gap: 8px;
 }
 
 .done-section summary,
@@ -1612,8 +1708,7 @@ input::placeholder {
   border-bottom: 1px solid var(--line);
 }
 
-.done-section .clean-list,
-.manual-add-panel .add-item-row {
+.done-section .clean-list {
   padding: 11px;
 }
 

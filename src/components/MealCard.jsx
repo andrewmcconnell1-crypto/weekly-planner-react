@@ -222,10 +222,8 @@ function MealCard({
 
   function renderExtraIngredients(placeholder) {
     return (
-      <details className="meal-details">
-        <summary>
-          Extra ingredients ({manualIngredients.length})
-        </summary>
+      <div className="meal-extra-ingredients">
+        <p className="section-kicker">Extra ingredients</p>
 
         <div className="add-item-row">
           <input
@@ -269,7 +267,7 @@ function MealCard({
             ))}
           </ul>
         )}
-      </details>
+      </div>
     );
   }
 

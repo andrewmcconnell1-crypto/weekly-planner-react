@@ -287,13 +287,13 @@ function ShoppingList({
         </>
       )}
 
-      <details className="manual-add-panel">
-        <summary>Add item</summary>
+      <div className="manual-add-panel">
+        <p className="section-kicker">Add an item</p>
 
         <div className="add-item-row">
           <input
             type="text"
-            placeholder="Add shopping item..."
+            placeholder="e.g. Coffee"
             value={newItem}
             onChange={(event) => setNewItem(event.target.value)}
             onKeyDown={(event) => {
@@ -305,7 +305,7 @@ function ShoppingList({
             Add
           </button>
         </div>
-      </details>
+      </div>
     </section>
   );
 }

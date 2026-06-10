@@ -25,19 +25,15 @@ function WeekControls({
         </button>
       </div>
 
-      <details className="week-more">
-        <summary>Other weeks</summary>
+      <div className="week-stepper" aria-label="Move by one week">
+        <button type="button" className="secondary" onClick={onPreviousWeek}>
+          ‹ Back a week
+        </button>
 
-        <div className="week-stepper" aria-label="Move by one week">
-          <button type="button" className="secondary" onClick={onPreviousWeek}>
-            Back 1 week
-          </button>
-
-          <button type="button" className="secondary" onClick={onNextWeek}>
-            Forward 1 week
-          </button>
-        </div>
-      </details>
+        <button type="button" className="secondary" onClick={onNextWeek}>
+          Forward a week ›
+        </button>
+      </div>
     </div>
   );
 }
