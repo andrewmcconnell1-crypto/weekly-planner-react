@@ -7,6 +7,10 @@
 
 const CACHE = "meal-planner-v1";
 
+// The app root, derived from where this service worker is served, so it works
+// at the domain root or under a subpath (e.g. GitHub Pages).
+const APP_SHELL = new URL("./", self.location).href;
+
 self.addEventListener("install", () => {
   self.skipWaiting();
 });
@@ -38,7 +42,7 @@ self.addEventListener("fetch", (event) => {
       .catch(() =>
         caches.match(request).then((cached) => {
           if (cached) return cached;
-          if (request.mode === "navigate") return caches.match("/");
+          if (request.mode === "navigate") return caches.match(APP_SHELL);
           return Response.error();
         })
       )
