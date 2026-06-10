@@ -115,13 +115,6 @@ function ShoppingList({
 
   return (
     <section className="screen shop-screen">
-      <div className="screen-header">
-        <div>
-          <p className="section-kicker">Shopping week</p>
-          <h2>Shop</h2>
-        </div>
-      </div>
-
       <div
         className={`shop-status-panel ${
           shoppingListNeedsUpdate ? "needs-update" : ""
@@ -179,7 +172,6 @@ function ShoppingList({
         }`}
       >
         <div>
-          <strong>Shopping list</strong>
           <p className="small-text">
             {shoppingLastUpdatedText
               ? `Last updated ${shoppingLastUpdatedText}`

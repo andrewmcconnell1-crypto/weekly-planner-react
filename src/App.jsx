@@ -658,11 +658,6 @@ function App() {
                 {pendingShoppingItemsCount} additions to buy.
               </p>
             </div>
-
-            <div className="home-status">
-              <strong>{pendingShoppingItemsCount}</strong>
-              <span>additions</span>
-            </div>
           </div>
 
           <div className="home-primary-row">

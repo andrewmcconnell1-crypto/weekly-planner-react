@@ -632,7 +632,7 @@ textarea:focus-visible {
 
 .home-day-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -643,6 +643,15 @@ textarea:focus-visible {
   color: var(--ink);
   padding: 10px;
   text-align: left;
+}
+
+/* Chevron = this row is tappable. */
+.home-day-row::after {
+  content: "›";
+  color: var(--muted);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .home-day-row:hover {
@@ -1305,30 +1314,11 @@ input::placeholder {
   gap: 7px;
 }
 
+/* Read-only stats: flat and plain so they don't read as tappable buttons. */
 .shop-stat-grid div {
   display: grid;
-  gap: 3px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fffdf9;
-  padding: 9px;
-}
-
-.shop-screen .shop-stat-grid div {
-  border-top: 4px solid #245f75;
-  background: #f9fdfe;
-}
-
-.shop-screen .shop-stat-grid div:nth-child(2) {
-  border-top-color: #2f7d6a;
-}
-
-.shop-screen .shop-stat-grid div:nth-child(3) {
-  border-top-color: #c08328;
-}
-
-.shop-screen .shop-stat-grid div:nth-child(4) {
-  border-top-color: #65548f;
+  gap: 2px;
+  padding: 2px 0;
 }
 
 .shop-stat-grid strong {
@@ -2111,9 +2101,8 @@ input::placeholder {
   font-weight: 840;
 }
 
-.household-summary div {
-  border-top: 4px solid var(--tab-accent);
-  background: linear-gradient(180deg, var(--tab-soft), #fffefa 52%);
+.manager-action::after {
+  content: " ›";
 }
 
 .more-summary-card {
