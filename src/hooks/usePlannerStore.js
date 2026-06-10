@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { isSupabaseConfigured } from "../lib/supabase";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import {
   defaultData,
   normaliseData,
@@ -34,6 +34,8 @@ export function usePlannerStore(user) {
   // immediately write the same data straight back out).
   const skipNextSaveRef = useRef(true);
   const saveTimerRef = useRef(null);
+  // updated_at of our most recent write, so realtime can ignore our own echo.
+  const lastWrittenAtRef = useRef(null);
 
   // Load from the cloud (state updates happen inside the async callback, never
   // synchronously in the effect body).
@@ -55,8 +57,9 @@ export function usePlannerStore(user) {
           // First sign-in: seed the account from existing local data if there
           // is any on this device, otherwise from the bundled defaults.
           const seed = hasLocalData() ? loadLocalData() : defaultData();
-          await saveCloudData(userId, seed);
+          const writtenAt = await saveCloudData(userId, seed);
           if (cancelled) return;
+          lastWrittenAtRef.current = writtenAt;
           skipNextSaveRef.current = true;
           setData(normaliseData(seed));
         }
@@ -91,7 +94,11 @@ export function usePlannerStore(user) {
 
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveCloudData(userId, data).catch(() => setSyncError(true));
+      saveCloudData(userId, data)
+        .then((writtenAt) => {
+          lastWrittenAtRef.current = writtenAt;
+        })
+        .catch(() => setSyncError(true));
     }, SAVE_DEBOUNCE_MS);
 
     return () => {
@@ -115,6 +122,40 @@ export function usePlannerStore(user) {
 
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
+  }, [cloud, userId]);
+
+  // Live updates: when another device writes our row, reflect it immediately.
+  // (Requires the table to be in the supabase_realtime publication; if it's not,
+  // this simply never fires and focus-refresh above still keeps things current.)
+  useEffect(() => {
+    if (!cloud) return;
+
+    const channel = supabase
+      .channel(`app_data:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "app_data",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const row = payload.new;
+          if (!row || !row.data) return;
+          // Ignore the echo of our own write.
+          if (row.updated_at && row.updated_at === lastWrittenAtRef.current) {
+            return;
+          }
+          skipNextSaveRef.current = true;
+          setData(normaliseData(row.data));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [cloud, userId]);
 
   const setters = useMemo(() => {

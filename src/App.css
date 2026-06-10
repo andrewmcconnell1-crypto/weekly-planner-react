@@ -1854,6 +1854,18 @@ input::placeholder {
   width: 100%;
 }
 
+.recipe-editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.recipe-editor-actions > button {
+  flex: 1;
+}
+
 .recipe-detail-fields {
   display: grid;
   gap: 10px;
@@ -1886,6 +1898,18 @@ input::placeholder {
 
 .copy-week-button {
   width: 100%;
+}
+
+.meal-editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.meal-editor-actions > button {
+  flex: 1;
 }
 
 .auth-shell {

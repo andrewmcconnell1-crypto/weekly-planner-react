@@ -85,12 +85,15 @@ export async function fetchCloudData(userId) {
 }
 
 export async function saveCloudData(userId, data) {
+  const updatedAt = new Date().toISOString();
+
   const { error } = await supabase
     .from(TABLE)
     .upsert(
-      { user_id: userId, data, updated_at: new Date().toISOString() },
+      { user_id: userId, data, updated_at: updatedAt },
       { onConflict: "user_id" }
     );
 
   if (error) throw error;
+  return updatedAt;
 }

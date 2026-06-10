@@ -286,13 +286,23 @@ function RecipesList({
                                 />
                               </label>
 
-                              <button
-                                type="button"
-                                className="delete-button recipe-delete-button"
-                                onClick={() => deleteRecipe(recipe.id)}
-                              >
-                                Delete Recipe
-                              </button>
+                              <div className="recipe-editor-actions">
+                                <button
+                                  type="button"
+                                  className="secondary"
+                                  onClick={() => toggleRecipe(recipe.id)}
+                                >
+                                  Done
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="delete-button recipe-delete-button"
+                                  onClick={() => deleteRecipe(recipe.id)}
+                                >
+                                  Delete recipe
+                                </button>
+                              </div>
                             </div>
                           )}
                         </li>

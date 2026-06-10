@@ -818,9 +818,10 @@ function App() {
           </button>
 
           <div className="meal-grid">
-            {days.map((day) => {
+            {days.map((day, index) => {
               const meal = meals[day];
               const daySummary = getMealSummary(day, meal, meals);
+              const nextDay = days[index + 1];
 
               return (
                 <MealCard
@@ -837,6 +838,9 @@ function App() {
                   updateMeal={updateMeal}
                   isExpanded={expandedMealDay === day}
                   toggleExpanded={() => toggleExpandedMealDay(day)}
+                  onNextDay={
+                    nextDay ? () => setExpandedMealDay(nextDay) : undefined
+                  }
                   weekDaySummaries={planningDaySummaries}
                 />
               );

@@ -15,11 +15,14 @@ function MealCard({
   updateMeal,
   isExpanded,
   toggleExpanded,
+  onNextDay,
   weekDaySummaries = [],
 }) {
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
   const wasExpandedRef = useRef(false);
+  const articleRef = useRef(null);
+  const nameInputRef = useRef(null);
   const manualIngredients = Array.isArray(meal.ingredients)
     ? meal.ingredients
     : [];
@@ -66,6 +69,29 @@ function MealCard({
 
     wasExpandedRef.current = isExpanded;
   }, [derivedEditorMode, isExpanded]);
+
+  // Bring the editor into view when it opens (e.g. when jumping to the next day).
+  useEffect(() => {
+    if (isExpanded) {
+      articleRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [isExpanded]);
+
+  // Put the cursor straight in the name field when entering custom mode.
+  useEffect(() => {
+    if (isExpanded && editorMode === "custom") {
+      nameInputRef.current?.focus();
+    }
+  }, [isExpanded, editorMode]);
+
+  // "Done" collapses the card; "Next day" jumps to the following day's editor.
+  function finishDay() {
+    if (onNextDay) {
+      onNextDay();
+    } else {
+      toggleExpanded();
+    }
+  }
 
   function changeMealType(nextMealType) {
     if (nextMealType === "cook") {
@@ -266,6 +292,7 @@ function MealCard({
 
   return (
     <article
+      ref={articleRef}
       className={`card meal-card ${isExpanded ? "expanded" : ""}`}
       data-tone={mealTone}
     >
@@ -431,6 +458,7 @@ function MealCard({
           {editorMode === "custom" && (
             <div className="meal-mode-panel">
               <input
+                ref={nameInputRef}
                 type="text"
                 placeholder="Meal name..."
                 value={meal.name}
@@ -443,6 +471,12 @@ function MealCard({
                     name: event.target.value,
                   })
                 }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    finishDay();
+                  }
+                }}
               />
 
               {renderExtraIngredients("Add ingredient...")}
@@ -477,6 +511,22 @@ function MealCard({
               <span>No shopping needed</span>
             </div>
           )}
+
+          <div className="meal-editor-actions">
+            <button type="button" className="secondary" onClick={toggleExpanded}>
+              Done
+            </button>
+
+            {onNextDay && (
+              <button
+                type="button"
+                className="primary-button"
+                onClick={onNextDay}
+              >
+                Next day
+              </button>
+            )}
+          </div>
         </div>
       )}
     </article>
