@@ -947,7 +947,6 @@ function App() {
                   updateInventoryCategory={updateInventoryCategory}
                   toggleInventoryActive={toggleInventoryActive}
                   loadStarterInventory={loadStarterInventory}
-                  resetStockToStarterList={resetStockToStarterList}
                 />
               )}
 
@@ -970,6 +969,7 @@ function App() {
                   user={user}
                   cloud={cloud}
                   onSignOut={signOut}
+                  resetStockToStarterList={resetStockToStarterList}
                 />
               )}
             </>

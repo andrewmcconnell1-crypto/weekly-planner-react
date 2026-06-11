@@ -35,7 +35,13 @@ function validateBackup(parsed) {
   );
 }
 
-function SettingsPanel({ onImport, user, cloud, onSignOut }) {
+function SettingsPanel({
+  onImport,
+  user,
+  cloud,
+  onSignOut,
+  resetStockToStarterList,
+}) {
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
 
@@ -179,6 +185,26 @@ function SettingsPanel({ onImport, user, cloud, onSignOut }) {
             </p>
           )}
         </section>
+
+        {resetStockToStarterList && (
+          <section className="settings-group">
+            <strong>Reset stock list</strong>
+            <p className="small-text">
+              Replace your stock list with the current starter set. Removes any
+              custom stock items and marks the starter items as in stock.
+            </p>
+
+            <div className="settings-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={resetStockToStarterList}
+              >
+                Reset stock list
+              </button>
+            </div>
+          </section>
+        )}
       </details>
     </div>
   );
