@@ -1,3 +1,5 @@
+import { aiRecipes } from "./aiRecipes";
+
 const RECIPETIN_SOURCE = "RecipeTin Eats";
 const METHOD_NOTE = "Open source link for full method.";
 
@@ -816,4 +818,7 @@ export const initialRecipes = [
       "1 bunch coriander",
     ],
   }),
+
+  // AI "good-consensus" recipes — own full method, no source link. See aiRecipes.js.
+  ...aiRecipes,
 ];
