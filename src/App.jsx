@@ -3,6 +3,7 @@ import "./App.css";
 
 import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
+import MealEditorSheet from "./components/MealEditorSheet";
 import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
 import RecipesList from "./components/RecipesList";
@@ -133,6 +134,21 @@ function App() {
   const mealsPlannedCount = planningDaySummaries.filter(
     (daySummary) => daySummary.hasMeal
   ).length;
+
+  // Details for the day whose editor sheet is open (if any).
+  const expandedDayIndex = expandedMealDay ? days.indexOf(expandedMealDay) : -1;
+  const expandedMeal = expandedMealDay ? meals[expandedMealDay] : null;
+  const expandedDaySummary = expandedMealDay
+    ? getMealSummary(expandedMealDay, expandedMeal, meals)
+    : null;
+  const expandedNextDay =
+    expandedDayIndex >= 0 ? days[expandedDayIndex + 1] : undefined;
+  let expandedDayLabel = "";
+  if (expandedDayIndex >= 0) {
+    const expandedDate = new Date(mealWeekStart);
+    expandedDate.setDate(mealWeekStart.getDate() + expandedDayIndex);
+    expandedDayLabel = formatDate(expandedDate);
+  }
 
   const activeStaplesCount = staples.filter(
     (staple) => staple.active !== false
@@ -284,10 +300,6 @@ function App() {
         [day]: updatedMeal,
       },
     });
-  }
-
-  function toggleExpandedMealDay(day) {
-    setExpandedMealDay(expandedMealDay === day ? null : day);
   }
 
   function openHousehold(section) {
@@ -767,34 +779,45 @@ function App() {
           </button>
 
           <div className="meal-grid">
-            {days.map((day, index) => {
+            {days.map((day) => {
               const meal = meals[day];
               const daySummary = getMealSummary(day, meal, meals);
-              const nextDay = days[index + 1];
 
               return (
                 <MealCard
                   key={day}
                   day={day}
                   meal={meal}
-                  days={days}
-                  recipes={recipes}
-                  linkedRecipe={daySummary.linkedRecipe}
                   displayName={daySummary.name}
                   mealLabel={daySummary.label}
                   mealTone={daySummary.tone}
                   ingredientCount={daySummary.ingredients.length}
-                  updateMeal={updateMeal}
-                  isExpanded={expandedMealDay === day}
-                  toggleExpanded={() => toggleExpandedMealDay(day)}
-                  onNextDay={
-                    nextDay ? () => setExpandedMealDay(nextDay) : undefined
-                  }
-                  weekDaySummaries={planningDaySummaries}
+                  hasMeal={daySummary.hasMeal}
+                  onOpen={() => setExpandedMealDay(day)}
                 />
               );
             })}
           </div>
+
+          {expandedMealDay && (
+            <MealEditorSheet
+              key={expandedMealDay}
+              day={expandedMealDay}
+              dateLabel={expandedDayLabel}
+              meal={expandedMeal}
+              days={days}
+              recipes={recipes}
+              linkedRecipe={expandedDaySummary?.linkedRecipe}
+              weekDaySummaries={planningDaySummaries}
+              updateMeal={updateMeal}
+              onClose={() => setExpandedMealDay(null)}
+              onNextDay={
+                expandedNextDay
+                  ? () => setExpandedMealDay(expandedNextDay)
+                  : undefined
+              }
+            />
+          )}
         </section>
       )}
 
