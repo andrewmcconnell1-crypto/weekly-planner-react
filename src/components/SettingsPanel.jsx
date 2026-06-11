@@ -135,51 +135,51 @@ function SettingsPanel({ onImport, user, cloud, onSignOut }) {
         </section>
       )}
 
-      <section className="settings-group">
-        <strong>Backup &amp; restore</strong>
-        <p className="small-text">
-          Your meals, shopping lists, stock and recipes are stored only on this
-          device. Export a backup file so you can restore everything if the
-          browser data is cleared.
-        </p>
+      <details className="settings-advanced">
+        <summary>Advanced</summary>
 
-        <div className="settings-actions">
-          <button
-            type="button"
-            className="primary-button"
-            onClick={exportData}
-          >
-            Export data
-          </button>
-
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Import data
-          </button>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json,.json"
-            className="settings-file-input"
-            onChange={handleFileChange}
-          />
-        </div>
-
-        {status && (
-          <p
-            className={`small-text settings-status ${
-              status.tone === "error" ? "settings-status-error" : ""
-            }`}
-            role="status"
-          >
-            {status.message}
+        <section className="settings-group">
+          <strong>Export &amp; import data</strong>
+          <p className="small-text">
+            {cloud
+              ? "Your data is backed up to your account and synced across your devices automatically. You can still export a manual snapshot, or import one to restore or move data."
+              : "Export a snapshot of your data to a file, or import one to restore it."}
           </p>
-        )}
-      </section>
+
+          <div className="settings-actions">
+            <button type="button" className="secondary" onClick={exportData}>
+              Export data
+            </button>
+
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Import data
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/json,.json"
+              className="settings-file-input"
+              onChange={handleFileChange}
+            />
+          </div>
+
+          {status && (
+            <p
+              className={`small-text settings-status ${
+                status.tone === "error" ? "settings-status-error" : ""
+              }`}
+              role="status"
+            >
+              {status.message}
+            </p>
+          )}
+        </section>
+      </details>
     </div>
   );
 }
