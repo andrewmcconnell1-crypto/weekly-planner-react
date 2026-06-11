@@ -23,6 +23,8 @@ function MealCard({
   const wasExpandedRef = useRef(false);
   const articleRef = useRef(null);
   const nameInputRef = useRef(null);
+  const modeButtonRefs = useRef([]);
+  const modes = ["recipe", "custom", "repeat", "takeaway", "eating-out"];
   const manualIngredients = Array.isArray(meal.ingredients)
     ? meal.ingredients
     : [];
@@ -207,6 +209,33 @@ function MealCard({
     setRecipeSearchText("");
   }
 
+  function handleModeGridKeyDown(event) {
+    const currentIndex = modes.indexOf(editorMode);
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % modes.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + modes.length) % modes.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = modes.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    modeButtonRefs.current[nextIndex]?.focus();
+    selectEditorMode(modes[nextIndex]);
+  }
+
+  function handleEditorKeyDown(event) {
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    const shortcutMap = { r: "recipe", c: "custom", p: "repeat", t: "takeaway", o: "eating-out" };
+    const mode = shortcutMap[event.key.toLowerCase()];
+    if (mode) selectEditorMode(mode);
+  }
+
   function selectRepeatFromDay(repeatFromDay) {
     setEditorMode("repeat");
 
@@ -313,47 +342,31 @@ function MealCard({
       </button>
 
       {isExpanded && (
-        <div className="meal-editor">
-          <div className="meal-action-grid" aria-label={`${day} meal type`}>
-            <button
-              type="button"
-              className={editorMode === "recipe" ? "active" : ""}
-              onClick={() => selectEditorMode("recipe")}
-            >
-              Recipe
-            </button>
-
-            <button
-              type="button"
-              className={editorMode === "custom" ? "active" : ""}
-              onClick={() => selectEditorMode("custom")}
-            >
-              Custom
-            </button>
-
-            <button
-              type="button"
-              className={editorMode === "repeat" ? "active" : ""}
-              onClick={() => selectEditorMode("repeat")}
-            >
-              Repeat
-            </button>
-
-            <button
-              type="button"
-              className={editorMode === "takeaway" ? "active" : ""}
-              onClick={() => selectEditorMode("takeaway")}
-            >
-              Takeaway
-            </button>
-
-            <button
-              type="button"
-              className={editorMode === "eating-out" ? "active" : ""}
-              onClick={() => selectEditorMode("eating-out")}
-            >
-              Out
-            </button>
+        <div className="meal-editor" onKeyDown={handleEditorKeyDown}>
+          <div
+            className="meal-action-grid"
+            role="radiogroup"
+            aria-label={`${day} meal type`}
+            onKeyDown={handleModeGridKeyDown}
+          >
+            {modes.map((mode, i) => (
+              <button
+                key={mode}
+                type="button"
+                role="radio"
+                aria-checked={editorMode === mode}
+                className={editorMode === mode ? "active" : ""}
+                tabIndex={editorMode === mode ? 0 : -1}
+                ref={(el) => (modeButtonRefs.current[i] = el)}
+                onClick={() => selectEditorMode(mode)}
+              >
+                {mode === "recipe" && "Recipe"}
+                {mode === "custom" && "Custom"}
+                {mode === "repeat" && "Repeat"}
+                {mode === "takeaway" && "Takeaway"}
+                {mode === "eating-out" && "Out"}
+              </button>
+            ))}
           </div>
 
           {editorMode === "recipe" && (
