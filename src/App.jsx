@@ -487,7 +487,7 @@ function App() {
 
   function resetStockToStarterList() {
     const shouldReset = window.confirm(
-      "Replace this device's stock list with the current starter stock list? This removes custom stock items on this device and marks starter stock as in stock."
+      "Restore the default stock list? This removes your custom stock items and marks the default items as in stock."
     );
 
     if (!shouldReset) return;

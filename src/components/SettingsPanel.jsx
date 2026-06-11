@@ -188,10 +188,10 @@ function SettingsPanel({
 
         {resetStockToStarterList && (
           <section className="settings-group">
-            <strong>Reset stock list</strong>
+            <strong>Restore default stock list</strong>
             <p className="small-text">
-              Replace your stock list with the current starter set. Removes any
-              custom stock items and marks the starter items as in stock.
+              Replace your stock list with the app's default set. Removes any
+              custom stock items and marks the default items as in stock.
             </p>
 
             <div className="settings-actions">
@@ -200,7 +200,7 @@ function SettingsPanel({
                 className="secondary"
                 onClick={resetStockToStarterList}
               >
-                Reset stock list
+                Restore default stock list
               </button>
             </div>
           </section>
