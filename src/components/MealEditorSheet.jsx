@@ -302,21 +302,21 @@ function MealEditorSheet({
   return (
     <div className="sheet-backdrop" role="presentation" onClick={onClose}>
       <div
-        className="meal-sheet"
+        className="sheet"
         role="dialog"
         aria-modal="true"
         aria-label={`${day} meal`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="meal-sheet-header">
-          <div className="meal-sheet-title">
+        <div className="sheet-header">
+          <div className="sheet-title">
             <strong>{day}</strong>
             {dateLabel && <span>{dateLabel}</span>}
           </div>
 
           <button
             type="button"
-            className="meal-sheet-close"
+            className="sheet-close"
             aria-label="Close"
             onClick={onClose}
           >
@@ -324,7 +324,7 @@ function MealEditorSheet({
           </button>
         </div>
 
-        <div className="meal-sheet-body" onKeyDown={handleEditorKeyDown}>
+        <div className="sheet-body" onKeyDown={handleEditorKeyDown}>
           <div
             className="meal-action-grid"
             role="radiogroup"
@@ -502,7 +502,7 @@ function MealEditorSheet({
           )}
         </div>
 
-        <div className="meal-sheet-footer">
+        <div className="sheet-footer">
           <button type="button" className="secondary" onClick={onClose}>
             Done
           </button>

@@ -523,9 +523,10 @@ function App() {
       `Delete "${recipe?.name || "this recipe"}"? Its ingredients and method will be removed. This can't be undone.`
     );
 
-    if (!shouldDelete) return;
+    if (!shouldDelete) return false;
 
     setRecipes(recipes.filter((item) => item.id !== id));
+    return true;
   }
 
   function updateRecipe(recipeId, updates) {
