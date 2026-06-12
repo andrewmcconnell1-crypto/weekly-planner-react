@@ -835,7 +835,29 @@ textarea:focus-visible {
 
 .meal-or-row {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Editorial "— or instead —" rule between the recipe list and the
+   secondary choices. */
+.meal-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  color: var(--olive);
+  font-size: 0.72rem;
+  font-weight: 840;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.meal-or-divider::before,
+.meal-or-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
 }
 
 .meal-or-options {
@@ -849,9 +871,9 @@ textarea:focus-visible {
   align-items: center;
   gap: 7px;
   min-height: 42px;
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: #ffffff;
+  background: var(--soft);
   color: var(--ink);
   padding: 9px 14px;
   font-size: 0.85rem;
@@ -859,7 +881,7 @@ textarea:focus-visible {
 }
 
 .meal-or-options button:hover {
-  background: var(--soft);
+  background: #e9dfca;
 }
 
 .meal-or-options button.active {

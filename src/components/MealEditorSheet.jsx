@@ -425,7 +425,9 @@ function MealEditorSheet({
           </div>
 
           <div className="meal-or-row">
-            <p className="section-kicker">Or…</p>
+            <p className="meal-or-divider">
+              <span>Or instead</span>
+            </p>
 
             <div className="meal-or-options">
               <button
