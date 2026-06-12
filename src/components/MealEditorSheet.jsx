@@ -18,8 +18,6 @@ function MealEditorSheet({
 }) {
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
-  const [undoSnapshot, setUndoSnapshot] = useState(null);
-  const undoTimerRef = useRef(null);
   const nameInputRef = useRef(null);
   const modeButtonRefs = useRef([]);
   const modes = ["recipe", "custom", "repeat", "takeaway", "eating-out"];
@@ -95,22 +93,6 @@ function MealEditorSheet({
     }
   }, [editorMode]);
 
-  function snapshotForUndo() {
-    const hadMeal =
-      (mealType === "cook" && (selectedRecipeId || (meal.name || "").trim())) ||
-      mealType === "repeat";
-    if (!hadMeal) return;
-    clearTimeout(undoTimerRef.current);
-    setUndoSnapshot({ ...meal });
-    undoTimerRef.current = setTimeout(() => setUndoSnapshot(null), 5000);
-  }
-
-  function handleUndo() {
-    clearTimeout(undoTimerRef.current);
-    updateMeal(day, undoSnapshot);
-    setUndoSnapshot(null);
-  }
-
   function changeMealType(nextMealType) {
     if (nextMealType === "cook") {
       updateMeal(day, {
@@ -124,7 +106,6 @@ function MealEditorSheet({
     }
 
     if (nextMealType === "repeat") {
-      snapshotForUndo();
       updateMeal(day, {
         ...meal,
         mealType: "repeat",
@@ -139,7 +120,6 @@ function MealEditorSheet({
       return;
     }
 
-    snapshotForUndo();
     updateMeal(day, {
       ...meal,
       mealType: nextMealType,
@@ -345,15 +325,6 @@ function MealEditorSheet({
         </div>
 
         <div className="sheet-body" onKeyDown={handleEditorKeyDown}>
-          {undoSnapshot && (
-            <div className="undo-toast">
-              <span>Meal cleared</span>
-              <button type="button" className="undo-toast-button" onClick={handleUndo}>
-                Undo
-              </button>
-            </div>
-          )}
-
           <div
             className="meal-action-grid"
             role="radiogroup"

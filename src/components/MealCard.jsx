@@ -7,7 +7,6 @@ function MealCard({
   mealTone,
   ingredientCount,
   hasMeal,
-  isToday,
   onOpen,
 }) {
   const mealType = meal.mealType || "cook";
@@ -26,28 +25,17 @@ function MealCard({
   const mealName = displayName || (meal.name || "").trim();
 
   return (
-    <article
-      className={`card meal-card${isToday ? " meal-card-today" : ""}`}
-      data-tone={mealTone}
-    >
+    <article className="card meal-card" data-tone={mealTone}>
       <button
         className="meal-row-button"
         type="button"
         onClick={onOpen}
       >
-        <span className="meal-row-day">
-          {isToday ? <span className="today-label">Today</span> : day.slice(0, 3)}
-        </span>
+        <span className="meal-row-day">{day.slice(0, 3)}</span>
 
         <span className="meal-row-main">
-          {hasMeal ? (
-            <>
-              <strong>{mealName}</strong>
-              {mealLabel && <span>{mealLabel}</span>}
-            </>
-          ) : (
-            <span className="meal-row-empty">Add meal</span>
-          )}
+          <strong className={hasMeal ? "" : "muted-title"}>{mealName}</strong>
+          {mealLabel && <span>{mealLabel}</span>}
         </span>
 
         <span className="meal-row-count">{rowBadge}</span>

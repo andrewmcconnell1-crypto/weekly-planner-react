@@ -137,12 +137,6 @@ function App() {
   const planningDaySummaries = days.map((day) =>
     getMealSummary(day, meals[day], meals)
   );
-  const todayDayName =
-    mealWeekMode === "current"
-      ? ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][
-          new Date().getDay()
-        ]
-      : null;
   const mealsPlannedCount = planningDaySummaries.filter(
     (daySummary) => daySummary.hasMeal
   ).length;
@@ -357,18 +351,6 @@ function App() {
   function deleteShoppingItem(id) {
     const updatedItems = shoppingItems.filter((item) => item.id !== id);
 
-    setShoppingItemsByWeek({
-      ...shoppingItemsByWeek,
-      [shoppingWeekKey]: updatedItems,
-    });
-  }
-
-  function renameShoppingItem(id, newName) {
-    const trimmed = newName.trim();
-    if (!trimmed) return;
-    const updatedItems = shoppingItems.map((item) =>
-      item.id === id ? { ...item, name: trimmed } : item
-    );
     setShoppingItemsByWeek({
       ...shoppingItemsByWeek,
       [shoppingWeekKey]: updatedItems,
@@ -818,7 +800,6 @@ function App() {
                   mealTone={daySummary.tone}
                   ingredientCount={daySummary.ingredients.length}
                   hasMeal={daySummary.hasMeal}
-                  isToday={day === todayDayName}
                   onOpen={() => setExpandedMealDay(day)}
                 />
               );
@@ -855,7 +836,6 @@ function App() {
           shoppingItems={visibleShoppingItems}
           toggleShoppingItem={toggleShoppingItem}
           deleteShoppingItem={deleteShoppingItem}
-          renameShoppingItem={renameShoppingItem}
           buildShoppingList={buildShoppingList}
           shoppingActionLabel={shoppingActionLabel}
           shoppingStatusLabel={shoppingStatusLabel}

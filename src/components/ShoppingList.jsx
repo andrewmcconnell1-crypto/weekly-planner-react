@@ -22,7 +22,6 @@ function ShoppingList({
   shoppingItems,
   toggleShoppingItem,
   deleteShoppingItem,
-  renameShoppingItem,
   buildShoppingList,
   shoppingActionLabel,
   shoppingStatusLabel,
@@ -42,8 +41,6 @@ function ShoppingList({
   goToNextShoppingWeek,
 }) {
   const [collapsedCategories, setCollapsedCategories] = useState({});
-  const [editingItemId, setEditingItemId] = useState(null);
-  const [editingValue, setEditingValue] = useState("");
 
   const pendingItems = shoppingItems.filter((item) => !item.checked);
   const doneItems = shoppingItems.filter((item) => item.checked);
@@ -74,14 +71,7 @@ function ShoppingList({
     });
   }
 
-  function commitEdit(item) {
-    renameShoppingItem(item.id, editingValue || item.name);
-    setEditingItemId(null);
-  }
-
   function renderShoppingItem(item, index) {
-    const isEditing = editingItemId === item.id;
-
     return (
       <li
         className={`card shopping-row ${item.checked ? "checked-row" : ""}`}
@@ -95,39 +85,7 @@ function ShoppingList({
           />
 
           <span className="shopping-item-content">
-            {isEditing ? (
-              <input
-                className="shopping-item-edit"
-                type="text"
-                autoFocus
-                value={editingValue}
-                onChange={(e) => setEditingValue(e.target.value)}
-                onBlur={() => commitEdit(item)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitEdit(item);
-                  if (e.key === "Escape") setEditingItemId(null);
-                }}
-                onClick={(e) => e.preventDefault()}
-              />
-            ) : (
-              <span
-                className="shopping-item-name"
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  setEditingItemId(item.id);
-                  setEditingValue(item.name);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    setEditingItemId(item.id);
-                    setEditingValue(item.name);
-                  }
-                }}
-              >
-                {item.name}
-              </span>
-            )}
+            <span className="shopping-item-name">{item.name}</span>
 
             <span className="shopping-item-meta">
               <span className={`source-chip ${getSourceClass(item.source)}`}>
