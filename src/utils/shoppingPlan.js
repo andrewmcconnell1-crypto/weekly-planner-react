@@ -110,6 +110,9 @@ export function buildShoppingPlan({
       sourceDetail: "Turned off",
     }));
 
+  // Exact-name matches only: substring matching ("Rice" in stock swallowing
+  // "Woolworths Microwave White Long Grain Rice 450g") flagged removals the
+  // user couldn't trace, and a generic pantry item isn't the same product.
   const inStockRecurring = recurringBuys
     .filter((item) => {
       const itemName = normaliseItemName(item.name);
@@ -117,18 +120,8 @@ export function buildShoppingPlan({
 
       return activeStockItems.some((stockItem) => {
         const stockName = normaliseItemName(stockItem.name);
-        const categoriesMatch =
-          stockItem.category &&
-          item.category &&
-          stockItem.category === item.category;
 
-        if (itemName === stockName || sourceName === stockName) return true;
-
-        return (
-          categoriesMatch &&
-          stockName.length >= 4 &&
-          (itemName.includes(stockName) || sourceName.includes(stockName))
-        );
+        return itemName === stockName || sourceName === stockName;
       });
     })
     .map((item) => ({
