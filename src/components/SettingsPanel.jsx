@@ -205,6 +205,26 @@ function SettingsPanel({
             </div>
           </section>
         )}
+
+        <section className="settings-group">
+          <strong>Welcome guide</strong>
+          <p className="small-text">
+            Re-show the getting started card on the home screen.
+          </p>
+
+          <div className="settings-actions">
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => {
+                localStorage.removeItem("planner-welcome-done");
+                window.location.reload();
+              }}
+            >
+              Reset welcome card
+            </button>
+          </div>
+        </section>
       </details>
     </div>
   );
