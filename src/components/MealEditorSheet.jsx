@@ -56,16 +56,13 @@ function MealEditorSheet({
   const daySummary = weekDaySummaries.find((summary) => summary.day === day);
   const hasMeal = daySummary?.hasMeal ?? false;
 
-  const repeatDaySummaries =
-    weekDaySummaries.length > 0
-      ? weekDaySummaries.filter((summary) => summary.day !== day)
-      : days
-          .filter((optionDay) => optionDay !== day)
-          .map((optionDay) => ({
-            day: optionDay,
-            name: "No meal planned",
-            hasMeal: false,
-          }));
+  // Only cooked meals (recipe or custom) can be repeated as leftovers — not
+  // takeaway / eating out / other repeats / unplanned days.
+  const repeatDaySummaries = weekDaySummaries.filter((summary) => {
+    if (summary.day === day) return false;
+
+    return (summary.meal?.mealType || "cook") === "cook" && summary.hasMeal;
+  });
 
   // Flat recipe list, kept in the familiar category order.
   const cleanedRecipeSearch = recipeSearchText.trim().toLowerCase();
@@ -129,21 +126,6 @@ function MealEditorSheet({
       return;
     }
 
-    if (nextMealType === "repeat") {
-      updateMeal(day, {
-        ...meal,
-        mealType: "repeat",
-        recipeId: "",
-        repeatFromDay:
-          meal.repeatFromDay && meal.repeatFromDay !== day
-            ? meal.repeatFromDay
-            : "",
-        name: "",
-        ingredients: [],
-      });
-      return;
-    }
-
     updateMeal(day, {
       ...meal,
       mealType: nextMealType,
@@ -175,11 +157,11 @@ function MealEditorSheet({
     changeMealType(nextMealType);
   }
 
+  // Open the day picker without touching the meal — the day stays as it is
+  // until a source day is actually chosen.
   function chooseRepeat() {
     setShowCustomInput(false);
     setShowDayPicker(true);
-
-    if (mealType !== "repeat") changeMealType("repeat");
   }
 
   function selectRecipe(recipeId) {
@@ -510,21 +492,31 @@ function MealEditorSheet({
             </div>
           )}
 
-          {showDayPicker && mealType === "repeat" && (
+          {showDayPicker && (
             <div className="day-choice-grid">
-              {repeatDaySummaries.map((summary) => (
-                <button
-                  type="button"
-                  className={meal.repeatFromDay === summary.day ? "active" : ""}
-                  key={summary.day}
-                  onClick={() => selectRepeatFromDay(summary.day)}
-                >
-                  <strong>{summary.day.slice(0, 3)}</strong>
-                  <span>
-                    {summary.hasMeal ? summary.name : "No meal planned"}
-                  </span>
-                </button>
-              ))}
+              {repeatDaySummaries.length === 0 ? (
+                <p className="empty-state">
+                  Nothing to repeat yet — plan a cooked meal on another day
+                  first.
+                </p>
+              ) : (
+                repeatDaySummaries.map((summary) => (
+                  <button
+                    type="button"
+                    className={
+                      mealType === "repeat" &&
+                      meal.repeatFromDay === summary.day
+                        ? "active"
+                        : ""
+                    }
+                    key={summary.day}
+                    onClick={() => selectRepeatFromDay(summary.day)}
+                  >
+                    <strong>{summary.day.slice(0, 3)}</strong>
+                    <span>{summary.name}</span>
+                  </button>
+                ))
+              )}
             </div>
           )}
 
