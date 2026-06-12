@@ -1,22 +1,26 @@
 :root {
-  --bg: #f7f7f7;
-  --surface: #ffffff;
-  --panel: #ffffff;
-  --ink: #1a1a1a;
-  --muted: #717171;
-  --line: #e6e6e6;
-  --soft: #f2f2f2;
-  --accent: #e0464c;
-  --accent-strong: #c23b41;
-  --primary: #e0464c;
-  --primary-strong: #c23b41;
-  --danger: #c23b41;
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
-  --radius: 16px;
-  --meal-tone: #e3e3e3;
-  --meal-soft: #f3f3f3;
-  --meal-ink: #6b6b6b;
+  --bg: #faf6ee;
+  --surface: #fffdf7;
+  --panel: #fffdf7;
+  --ink: #2a2420;
+  --muted: #8c8175;
+  --line: #e8e0d2;
+  --soft: #f1eadd;
+  --accent: #bf5840;
+  --accent-strong: #9c4632;
+  --accent-soft: #f6e7df;
+  --olive: #5f6a3a;
+  --olive-soft: #edefdf;
+  --primary: #bf5840;
+  --primary-strong: #9c4632;
+  --danger: #a23b2b;
+  --shadow: 0 6px 22px rgba(74, 48, 26, 0.08);
+  --shadow-lg: 0 16px 40px rgba(74, 48, 26, 0.12);
+  --radius: 14px;
+  --font-display: "Fraunces", Georgia, serif;
+  --meal-tone: #e3d8c6;
+  --meal-soft: #f1eadd;
+  --meal-ink: #8c8175;
 }
 
 
@@ -70,15 +74,15 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(224, 70, 76, 0.35);
+  outline: 3px solid rgba(191, 88, 64, 0.32);
   outline-offset: 2px;
 }
 
 .app-shell {
   --tab-accent: var(--accent);
   --tab-accent-strong: var(--accent-strong);
-  --tab-soft: #fdeded;
-  --tab-wash: #fdeded;
+  --tab-soft: var(--accent-soft);
+  --tab-wash: var(--accent-soft);
   --tab-line: var(--line);
   --primary: var(--tab-accent);
   --primary-strong: var(--tab-accent-strong);
@@ -117,7 +121,7 @@ textarea:focus-visible {
 .eyebrow,
 .section-kicker {
   margin: 0 0 5px;
-  color: var(--muted);
+  color: var(--olive);
   font-size: 0.72rem;
   font-weight: 840;
   letter-spacing: 0.1em;
@@ -128,13 +132,15 @@ textarea:focus-visible {
 .screen h2 {
   margin: 0;
   color: var(--ink);
-  line-height: 1.05;
-  letter-spacing: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
 }
 
 .app-header h1 {
   color: var(--ink);
-  font-size: clamp(1.7rem, 7vw, 2.4rem);
+  font-size: clamp(2rem, 8vw, 2.9rem);
 }
 
 .screen h2 {
@@ -158,7 +164,7 @@ textarea:focus-visible {
   z-index: 10;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border: none;
-  border-top: 1px solid rgba(34, 42, 38, 0.08);
+  border-top: 1px solid var(--line);
   border-radius: 0;
   background: rgba(255, 254, 250, 0.96);
   box-shadow: 0 -10px 30px rgba(34, 42, 38, 0.14);
@@ -200,9 +206,34 @@ textarea:focus-visible {
 .bottom-nav button.active,
 .more-tabs button.active {
   border-color: var(--nav-accent, var(--tab-accent));
-  background: var(--nav-soft, var(--panel));
+  background: var(--accent-soft);
   color: var(--nav-accent, var(--primary-strong));
   box-shadow: 0 3px 12px rgba(34, 42, 38, 0.08);
+}
+
+.bottom-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 50px;
+  border-radius: 12px;
+}
+
+.bottom-nav button span {
+  font-size: 0.68rem;
+  font-weight: 740;
+  letter-spacing: 0.01em;
+}
+
+.bottom-nav button::before {
+  display: none;
+}
+
+.bottom-nav button.active {
+  border-color: transparent;
+  color: var(--accent);
 }
 
 .screen {
@@ -233,7 +264,7 @@ textarea:focus-visible {
 .plan-screen .section-kicker,
 .shop-screen .section-kicker,
 .more-screen .section-kicker {
-  color: var(--tab-accent);
+  color: var(--olive);
 }
 
 .date-card {
@@ -405,7 +436,9 @@ textarea:focus-visible {
 
 .home-hero h2 {
   margin: 0;
-  font-size: 1.35rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.5rem;
   line-height: 1.12;
 }
 

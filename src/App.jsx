@@ -1,4 +1,10 @@
 import { useMemo, useState } from "react";
+import {
+  House,
+  CalendarDays,
+  ShoppingBasket,
+  LayoutGrid,
+} from "lucide-react";
 import "./App.css";
 
 import HouseholdBasics from "./components/HouseholdBasics";
@@ -984,7 +990,8 @@ function App() {
           className={activeTab === "home" ? "active" : ""}
           onClick={() => setActiveTab("home")}
         >
-          Home
+          <House size={21} strokeWidth={2} aria-hidden="true" />
+          <span>Home</span>
         </button>
 
         <button
@@ -992,7 +999,8 @@ function App() {
           className={activeTab === "plan" ? "active" : ""}
           onClick={() => setActiveTab("plan")}
         >
-          Plan
+          <CalendarDays size={21} strokeWidth={2} aria-hidden="true" />
+          <span>Plan</span>
         </button>
 
         <button
@@ -1000,7 +1008,8 @@ function App() {
           className={activeTab === "shop" ? "active" : ""}
           onClick={() => setActiveTab("shop")}
         >
-          Shop
+          <ShoppingBasket size={21} strokeWidth={2} aria-hidden="true" />
+          <span>Shop</span>
         </button>
 
         <button
@@ -1011,7 +1020,8 @@ function App() {
             setActiveTab("more");
           }}
         >
-          More
+          <LayoutGrid size={21} strokeWidth={2} aria-hidden="true" />
+          <span>More</span>
         </button>
       </nav>
     </main>
