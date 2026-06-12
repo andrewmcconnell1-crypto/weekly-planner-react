@@ -11,8 +11,8 @@ function MealCard({
 }) {
   const mealType = meal.mealType || "cook";
   const visibleIngredientCount = ingredientCount ?? 0;
-  const rowBadge =
-    mealType === "cook"
+  const rowBadge = hasMeal
+    ? mealType === "cook"
       ? `${visibleIngredientCount} ingredient${
           visibleIngredientCount === 1 ? "" : "s"
         }`
@@ -20,8 +20,9 @@ function MealCard({
         ? "Repeat"
         : mealType === "takeaway"
           ? "Takeaway"
-          : "Out";
-  const mealName = displayName || (meal.name || "").trim() || "No meal planned";
+          : "Out"
+    : null;
+  const mealName = displayName || (meal.name || "").trim();
 
   return (
     <article className="card meal-card" data-tone={mealTone}>
