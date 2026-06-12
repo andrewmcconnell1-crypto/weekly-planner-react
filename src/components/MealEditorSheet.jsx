@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { PencilLine, Repeat2, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import {
+  PencilLine,
+  Repeat2,
+  ShoppingBag,
+  UtensilsCrossed,
+  X,
+} from "lucide-react";
 
 import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
 
@@ -20,6 +26,7 @@ function MealEditorSheet({
   leftoverNights = 1,
   maxNights = 1,
   onSetNights,
+  onClearDay,
   updateMeal,
   onClose,
   onNextDay,
@@ -194,6 +201,13 @@ function MealEditorSheet({
     setRecipeSearchText("");
   }
 
+  function clearDay() {
+    setShowCustomInput(false);
+    setShowDayPicker(false);
+    setRecipeSearchText("");
+    onClearDay();
+  }
+
   function selectRepeatFromDay(repeatFromDay) {
     updateMeal(day, {
       ...meal,
@@ -313,15 +327,28 @@ function MealEditorSheet({
                   <span className="meal-current-label">{daySummary.label}</span>
                 </div>
 
-                {linkedRecipe?.sourceUrl && (
-                  <a
-                    href={linkedRecipe.sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Source
-                  </a>
-                )}
+                <div className="meal-current-actions">
+                  {linkedRecipe?.sourceUrl && (
+                    <a
+                      href={linkedRecipe.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Source
+                    </a>
+                  )}
+
+                  {onClearDay && (
+                    <button
+                      type="button"
+                      className="meal-current-clear"
+                      onClick={clearDay}
+                    >
+                      <X size={14} aria-hidden="true" />
+                      Clear
+                    </button>
+                  )}
+                </div>
               </div>
 
               {linkedRecipeIngredients.length > 0 && (

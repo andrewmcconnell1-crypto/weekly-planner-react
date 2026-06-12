@@ -751,6 +751,32 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
+.meal-current-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.meal-current-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--danger);
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 760;
+}
+
+.meal-current-clear:hover {
+  border-color: var(--danger);
+  background: #fdeded;
+}
+
 .nights-panel {
   display: grid;
   gap: 8px;

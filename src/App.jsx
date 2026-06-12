@@ -393,6 +393,28 @@ function App() {
     });
   }
 
+  // Reset a day to unplanned, along with any repeat days that pointed at it
+  // (otherwise they'd dangle as "Same as <day>" with no source meal).
+  function clearMealDay(day) {
+    const updatedMeals = { ...meals, [day]: createEmptyMeal() };
+
+    for (const otherDay of days) {
+      const otherMeal = updatedMeals[otherDay];
+
+      if (
+        otherMeal?.mealType === "repeat" &&
+        otherMeal.repeatFromDay === day
+      ) {
+        updatedMeals[otherDay] = createEmptyMeal();
+      }
+    }
+
+    setMealsByWeek({
+      ...mealsByWeek,
+      [mealWeekKey]: updatedMeals,
+    });
+  }
+
   function updateMeal(day, updatedMeal) {
     setMealsByWeek({
       ...mealsByWeek,
@@ -942,6 +964,7 @@ function App() {
               onSetNights={(nights) =>
                 setLeftoverNights(expandedMealDay, nights)
               }
+              onClearDay={() => clearMealDay(expandedMealDay)}
               updateMeal={updateMeal}
               onClose={() => setExpandedMealDay(null)}
               onNextDay={
