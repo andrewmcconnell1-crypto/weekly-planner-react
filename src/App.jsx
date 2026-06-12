@@ -16,7 +16,7 @@ import RecipesList from "./components/RecipesList";
 import SettingsPanel from "./components/SettingsPanel";
 import SignInScreen from "./components/SignInScreen";
 
-import { createEmptyMeals, days } from "./utils/mealUtils";
+import { createEmptyMeal, createEmptyMeals, days } from "./utils/mealUtils";
 import {
   getSunday,
   getNextSunday,
@@ -186,6 +186,26 @@ function App() {
     expandedDayLabel = formatDate(expandedDate);
   }
 
+  // "How many nights?" for the open day: 1 (cook night) + the consecutive run
+  // of following days that repeat this day's meal as leftovers.
+  let expandedLeftoverNights = 1;
+  if (expandedDayIndex >= 0) {
+    for (let index = expandedDayIndex + 1; index < days.length; index += 1) {
+      const followingMeal = meals[days[index]];
+
+      if (
+        followingMeal?.mealType === "repeat" &&
+        followingMeal.repeatFromDay === expandedMealDay
+      ) {
+        expandedLeftoverNights += 1;
+      } else {
+        break;
+      }
+    }
+  }
+  const expandedMaxNights =
+    expandedDayIndex >= 0 ? Math.min(7, days.length - expandedDayIndex) : 1;
+
   const activeStaplesCount = staples.filter(
     (staple) => staple.active !== false
   ).length;
@@ -332,6 +352,45 @@ function App() {
 
   function goToNextShoppingWeekDefault() {
     setShoppingWeekStart(getNextSunday());
+  }
+
+  // Cook once, eat for `nights` nights: keep the meal on startDay and mark the
+  // next nights-1 consecutive days as repeats of it. Shrinking clears the
+  // trailing repeat days that pointed back at startDay; never spills past
+  // Saturday.
+  function setLeftoverNights(startDay, nights) {
+    const startIndex = days.indexOf(startDay);
+
+    if (startIndex === -1) return;
+
+    const updatedMeals = { ...meals };
+
+    for (let index = startIndex + 1; index < days.length; index += 1) {
+      const day = days[index];
+      const existingMeal = updatedMeals[day];
+      const repeatsStartDay =
+        existingMeal?.mealType === "repeat" &&
+        existingMeal.repeatFromDay === startDay;
+
+      if (index - startIndex < nights) {
+        updatedMeals[day] = {
+          name: "",
+          recipeId: "",
+          mealType: "repeat",
+          repeatFromDay: startDay,
+          ingredients: [],
+        };
+      } else if (repeatsStartDay) {
+        updatedMeals[day] = createEmptyMeal();
+      } else {
+        break;
+      }
+    }
+
+    setMealsByWeek({
+      ...mealsByWeek,
+      [mealWeekKey]: updatedMeals,
+    });
   }
 
   function updateMeal(day, updatedMeal) {
@@ -878,6 +937,11 @@ function App() {
               recipes={recipes}
               linkedRecipe={expandedDaySummary?.linkedRecipe}
               weekDaySummaries={planningDaySummaries}
+              leftoverNights={expandedLeftoverNights}
+              maxNights={expandedMaxNights}
+              onSetNights={(nights) =>
+                setLeftoverNights(expandedMealDay, nights)
+              }
               updateMeal={updateMeal}
               onClose={() => setExpandedMealDay(null)}
               onNextDay={

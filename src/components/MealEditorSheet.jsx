@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from "react";
+import { PencilLine, Repeat2, ShoppingBag, UtensilsCrossed } from "lucide-react";
 
 import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
 
 // Full-height bottom-sheet editor for a single day's meal. Mounted (keyed by
 // day) only while a day is open, so its internal state resets per day.
+//
+// Content-first layout: the current pick sits at the top, the recipe list is
+// immediately tappable below a search box, and the non-recipe choices
+// (custom / takeaway / eating out / repeat) live in a secondary "Or…" row.
 function MealEditorSheet({
   day,
   dateLabel,
@@ -12,6 +17,9 @@ function MealEditorSheet({
   recipes,
   linkedRecipe,
   weekDaySummaries = [],
+  leftoverNights = 1,
+  maxNights = 1,
+  onSetNights,
   updateMeal,
   onClose,
   onNextDay,
@@ -19,34 +27,31 @@ function MealEditorSheet({
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
   const nameInputRef = useRef(null);
-  const modeButtonRefs = useRef([]);
-  const modes = ["recipe", "custom", "repeat", "takeaway", "eating-out"];
-  const modeLabels = {
-    recipe: "Recipe",
-    custom: "Custom",
-    repeat: "Repeat",
-    takeaway: "Takeaway",
-    "eating-out": "Out",
-  };
 
   const manualIngredients = Array.isArray(meal.ingredients)
     ? meal.ingredients
     : [];
   const linkedRecipeIngredients = linkedRecipe?.ingredients || [];
   const mealType = meal.mealType || "cook";
-  const recipeGroups = groupRecipesByCategory(recipes);
   const selectedRecipeId = meal.recipeId || linkedRecipe?.id || "";
-  const derivedEditorMode =
-    mealType === "cook"
-      ? selectedRecipeId
-        ? "recipe"
-        : "custom"
-      : mealType;
-  const [editorMode, setEditorMode] = useState(derivedEditorMode);
+  const isCustomMeal = mealType === "cook" && !selectedRecipeId;
+  const isCookedMeal =
+    mealType === "cook" &&
+    (Boolean(selectedRecipeId) || (meal.name || "").trim() !== "");
+
+  // Secondary panels open from the "Or…" row, and start open when the day is
+  // already that kind of meal.
+  const [showCustomInput, setShowCustomInput] = useState(
+    isCustomMeal && (meal.name || "").trim() !== ""
+  );
+  const [showDayPicker, setShowDayPicker] = useState(mealType === "repeat");
+
+  const daySummary = weekDaySummaries.find((summary) => summary.day === day);
+  const hasMeal = daySummary?.hasMeal ?? false;
 
   const repeatDaySummaries =
     weekDaySummaries.length > 0
-      ? weekDaySummaries.filter((daySummary) => daySummary.day !== day)
+      ? weekDaySummaries.filter((summary) => summary.day !== day)
       : days
           .filter((optionDay) => optionDay !== day)
           .map((optionDay) => ({
@@ -55,19 +60,31 @@ function MealEditorSheet({
             hasMeal: false,
           }));
 
+  // Flat recipe list, kept in the familiar category order.
   const cleanedRecipeSearch = recipeSearchText.trim().toLowerCase();
-  const filteredRecipeGroups = recipeGroups
-    .map((group) => ({
-      ...group,
-      recipes: group.recipes.filter((recipe) => {
-        if (!cleanedRecipeSearch) return true;
+  const sortedRecipes = groupRecipesByCategory(recipes).flatMap(
+    (group) => group.recipes
+  );
+  const filteredRecipes = sortedRecipes.filter((recipe) => {
+    if (!cleanedRecipeSearch) return true;
 
-        return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
-          .toLowerCase()
-          .includes(cleanedRecipeSearch);
-      }),
-    }))
-    .filter((group) => group.recipes.length > 0);
+    return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
+      .toLowerCase()
+      .includes(cleanedRecipeSearch);
+  });
+
+  // "How many nights?" only makes sense for a cooked meal with nights left in
+  // the week to fill with leftovers.
+  const showNights = isCookedMeal && Boolean(onSetNights) && maxNights > 1;
+  const dayIndex = days.indexOf(day);
+  const leftoverDays =
+    dayIndex >= 0 ? days.slice(dayIndex + 1, dayIndex + leftoverNights) : [];
+  const leftoverDaysLabel =
+    leftoverDays.length === 1
+      ? leftoverDays[0]
+      : `${leftoverDays[0]?.slice(0, 3)} – ${leftoverDays[
+          leftoverDays.length - 1
+        ]?.slice(0, 3)}`;
 
   // Lock background scroll and close on Escape while the sheet is open.
   useEffect(() => {
@@ -86,12 +103,12 @@ function MealEditorSheet({
     };
   }, [onClose]);
 
-  // Put the cursor straight in the name field when in custom mode.
+  // Put the cursor straight in the name field when the custom panel opens.
   useEffect(() => {
-    if (editorMode === "custom") {
+    if (showCustomInput) {
       nameInputRef.current?.focus();
     }
-  }, [editorMode]);
+  }, [showCustomInput]);
 
   function changeMealType(nextMealType) {
     if (nextMealType === "cook") {
@@ -130,26 +147,62 @@ function MealEditorSheet({
     });
   }
 
-  function selectEditorMode(nextEditorMode) {
-    setEditorMode(nextEditorMode);
+  function chooseCustom() {
+    setShowDayPicker(false);
+    setShowCustomInput(true);
 
-    if (nextEditorMode === "recipe") {
-      changeMealType("cook");
-      return;
-    }
-
-    if (nextEditorMode === "custom") {
+    if (mealType !== "cook" || selectedRecipeId) {
       updateMeal(day, {
         ...meal,
         mealType: "cook",
         recipeId: "",
         repeatFromDay: "",
-        name: mealType !== "cook" || selectedRecipeId ? "" : meal.name,
+        name: "",
       });
-      return;
     }
+  }
 
-    changeMealType(nextEditorMode);
+  function chooseAway(nextMealType) {
+    setShowCustomInput(false);
+    setShowDayPicker(false);
+    changeMealType(nextMealType);
+  }
+
+  function chooseRepeat() {
+    setShowCustomInput(false);
+    setShowDayPicker(true);
+
+    if (mealType !== "repeat") changeMealType("repeat");
+  }
+
+  function selectRecipe(recipeId) {
+    const selectedRecipe = recipes.find((recipe) => recipe.id === recipeId);
+
+    if (!selectedRecipe) return;
+
+    setShowCustomInput(false);
+    setShowDayPicker(false);
+
+    updateMeal(day, {
+      ...meal,
+      mealType: "cook",
+      name: selectedRecipe.name,
+      recipeId: selectedRecipe.id,
+      repeatFromDay: "",
+    });
+
+    setRecipeSearchText("");
+  }
+
+  function selectRepeatFromDay(repeatFromDay) {
+    updateMeal(day, {
+      ...meal,
+      mealType: "repeat",
+      recipeId: "",
+      repeatFromDay,
+      name: "",
+      ingredients: [],
+    });
   }
 
   function addIngredient() {
@@ -175,86 +228,12 @@ function MealEditorSheet({
     });
   }
 
-  function selectRecipe(recipeId) {
-    const selectedRecipe = recipes.find((recipe) => recipe.id === recipeId);
-    setEditorMode("recipe");
-
-    if (!selectedRecipe) {
-      updateMeal(day, { ...meal, mealType: "cook", recipeId: "" });
-      return;
-    }
-
-    updateMeal(day, {
-      ...meal,
-      mealType: "cook",
-      name: selectedRecipe.name,
-      recipeId: selectedRecipe.id,
-      repeatFromDay: "",
-    });
-
-    setRecipeSearchText("");
-  }
-
-  function selectRepeatFromDay(repeatFromDay) {
-    setEditorMode("repeat");
-
-    updateMeal(day, {
-      ...meal,
-      mealType: "repeat",
-      recipeId: "",
-      repeatFromDay,
-      name: "",
-      ingredients: [],
-    });
-  }
-
   function finishDay() {
     if (onNextDay) {
       onNextDay();
     } else {
       onClose();
     }
-  }
-
-  // Arrow / Home / End keys move between meal-type options (radiogroup).
-  function handleModeGridKeyDown(event) {
-    const currentIndex = modes.indexOf(editorMode);
-    let nextIndex;
-
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      nextIndex = (currentIndex + 1) % modes.length;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      nextIndex = (currentIndex - 1 + modes.length) % modes.length;
-    } else if (event.key === "Home") {
-      nextIndex = 0;
-    } else if (event.key === "End") {
-      nextIndex = modes.length - 1;
-    } else {
-      return;
-    }
-
-    event.preventDefault();
-    modeButtonRefs.current[nextIndex]?.focus();
-    selectEditorMode(modes[nextIndex]);
-  }
-
-  // Single-key shortcuts (R/C/P/T/O) to switch mode when not typing.
-  function handleEditorKeyDown(event) {
-    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
-      return;
-    }
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-
-    const shortcutMap = {
-      r: "recipe",
-      c: "custom",
-      p: "repeat",
-      t: "takeaway",
-      o: "eating-out",
-    };
-    const mode = shortcutMap[event.key.toLowerCase()];
-
-    if (mode) selectEditorMode(mode);
   }
 
   function renderExtraIngredients(placeholder) {
@@ -324,127 +303,161 @@ function MealEditorSheet({
           </button>
         </div>
 
-        <div className="sheet-body" onKeyDown={handleEditorKeyDown}>
-          <div
-            className="meal-action-grid"
-            role="radiogroup"
-            aria-label={`${day} meal type`}
-            onKeyDown={handleModeGridKeyDown}
-          >
-            {modes.map((mode, index) => (
-              <button
-                key={mode}
-                type="button"
-                role="radio"
-                aria-checked={editorMode === mode}
-                className={editorMode === mode ? "active" : ""}
-                tabIndex={editorMode === mode ? 0 : -1}
-                ref={(el) => (modeButtonRefs.current[index] = el)}
-                onClick={() => selectEditorMode(mode)}
-              >
-                {modeLabels[mode]}
-              </button>
-            ))}
-          </div>
-
-          {editorMode === "recipe" && (
-            <div className="meal-mode-panel">
-              {linkedRecipe && (
-                <div className="linked-recipe-panel">
-                  <div className="linked-recipe-header">
-                    <div>
-                      <span>Linked recipe</span>
-                      <strong>{linkedRecipe.name}</strong>
-                    </div>
-
-                    {linkedRecipe.sourceUrl && (
-                      <a
-                        href={linkedRecipe.sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Source
-                      </a>
-                    )}
-                  </div>
-
-                  {linkedRecipeIngredients.length > 0 && (
-                    <details className="meal-details">
-                      <summary>
-                        Recipe ingredients ({linkedRecipeIngredients.length})
-                      </summary>
-
-                      <ul className="ingredient-list recipe-ingredient-list">
-                        {linkedRecipeIngredients.map((ingredient, index) => (
-                          <li
-                            className="ingredient-row read-only-row"
-                            key={index}
-                          >
-                            <span>{ingredient}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
+        <div className="sheet-body">
+          {hasMeal && daySummary && (
+            <div className="meal-current" data-tone={daySummary.tone}>
+              <div className="meal-current-header">
+                <div>
+                  <span className="section-kicker">Selected</span>
+                  <strong>{daySummary.name}</strong>
+                  <span className="meal-current-label">{daySummary.label}</span>
                 </div>
-              )}
 
-              <input
-                type="text"
-                placeholder="Search recipes..."
-                value={recipeSearchText}
-                onChange={(event) => setRecipeSearchText(event.target.value)}
-              />
-
-              <div className="recipe-picker-results">
-                {filteredRecipeGroups.length === 0 ? (
-                  <p className="empty-state">No matching recipes.</p>
-                ) : (
-                  filteredRecipeGroups.map((group) => (
-                    <details
-                      className="recipe-picker-group"
-                      key={group.category}
-                      open={Boolean(cleanedRecipeSearch)}
-                    >
-                      <summary>
-                        <span>{group.category}</span>
-                        <span>{group.recipes.length}</span>
-                      </summary>
-
-                      <div className="recipe-choice-list">
-                        {group.recipes.map((recipe) => (
-                          <button
-                            type="button"
-                            className={`recipe-choice ${
-                              selectedRecipeId === recipe.id ? "active" : ""
-                            }`}
-                            data-tone={getRecipeTone(recipe.category)}
-                            key={recipe.id}
-                            onClick={() => selectRecipe(recipe.id)}
-                          >
-                            <span>
-                              <strong>{recipe.name}</strong>
-                              <span>{recipe.category}</span>
-                            </span>
-
-                            <span className="recipe-choice-count">
-                              {recipe.ingredients.length}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </details>
-                  ))
+                {linkedRecipe?.sourceUrl && (
+                  <a
+                    href={linkedRecipe.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Source
+                  </a>
                 )}
               </div>
 
-              {renderExtraIngredients(
-                linkedRecipe ? "Add extra ingredient..." : "Add ingredient..."
+              {linkedRecipeIngredients.length > 0 && (
+                <details className="meal-details">
+                  <summary>
+                    Recipe ingredients ({linkedRecipeIngredients.length})
+                  </summary>
+
+                  <ul className="ingredient-list recipe-ingredient-list">
+                    {linkedRecipeIngredients.map((ingredient, index) => (
+                      <li className="ingredient-row read-only-row" key={index}>
+                        <span>{ingredient}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               )}
             </div>
           )}
 
-          {editorMode === "custom" && (
+          {showNights && (
+            <div className="nights-panel">
+              <p className="section-kicker">How many nights?</p>
+
+              <div
+                className="nights-buttons"
+                role="radiogroup"
+                aria-label={`How many nights for ${day}'s meal`}
+              >
+                {Array.from({ length: maxNights }, (_, index) => index + 1).map(
+                  (nights) => (
+                    <button
+                      key={nights}
+                      type="button"
+                      role="radio"
+                      aria-checked={leftoverNights === nights}
+                      className={leftoverNights === nights ? "active" : ""}
+                      onClick={() => onSetNights(nights)}
+                    >
+                      {nights}
+                    </button>
+                  )
+                )}
+              </div>
+
+              <p className="nights-hint">
+                {leftoverNights > 1
+                  ? `Cook once — leftovers cover ${leftoverDaysLabel}, no extra shopping.`
+                  : "Pick more nights to fill the next days with leftovers."}
+              </p>
+            </div>
+          )}
+
+          <div className="meal-picker">
+            <p className="section-kicker">
+              {hasMeal ? "Change meal" : "Pick a recipe"}
+            </p>
+
+            <input
+              type="text"
+              placeholder="Search recipes..."
+              value={recipeSearchText}
+              onChange={(event) => setRecipeSearchText(event.target.value)}
+            />
+
+            <div className="recipe-picker-results recipe-picker-flat">
+              {filteredRecipes.length === 0 ? (
+                <p className="empty-state">No matching recipes.</p>
+              ) : (
+                filteredRecipes.map((recipe) => (
+                  <button
+                    type="button"
+                    className={`recipe-choice ${
+                      selectedRecipeId === recipe.id ? "active" : ""
+                    }`}
+                    data-tone={getRecipeTone(recipe.category)}
+                    key={recipe.id}
+                    onClick={() => selectRecipe(recipe.id)}
+                  >
+                    <span>
+                      <strong>{recipe.name}</strong>
+                      <span>{recipe.category}</span>
+                    </span>
+
+                    <span className="recipe-choice-count">
+                      {recipe.ingredients.length}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="meal-or-row">
+            <p className="section-kicker">Or…</p>
+
+            <div className="meal-or-options">
+              <button
+                type="button"
+                className={showCustomInput && isCustomMeal ? "active" : ""}
+                onClick={chooseCustom}
+              >
+                <PencilLine size={16} aria-hidden="true" />
+                Custom meal
+              </button>
+
+              <button
+                type="button"
+                className={mealType === "takeaway" ? "active" : ""}
+                onClick={() => chooseAway("takeaway")}
+              >
+                <ShoppingBag size={16} aria-hidden="true" />
+                Takeaway
+              </button>
+
+              <button
+                type="button"
+                className={mealType === "eating-out" ? "active" : ""}
+                onClick={() => chooseAway("eating-out")}
+              >
+                <UtensilsCrossed size={16} aria-hidden="true" />
+                Eating out
+              </button>
+
+              <button
+                type="button"
+                className={mealType === "repeat" ? "active" : ""}
+                onClick={chooseRepeat}
+              >
+                <Repeat2 size={16} aria-hidden="true" />
+                Same as another day
+              </button>
+            </div>
+          </div>
+
+          {showCustomInput && isCustomMeal && (
             <div className="meal-mode-panel">
               <input
                 ref={nameInputRef}
@@ -467,39 +480,32 @@ function MealEditorSheet({
                   }
                 }}
               />
-
-              {renderExtraIngredients("Add ingredient...")}
             </div>
           )}
 
-          {editorMode === "repeat" && (
+          {showDayPicker && mealType === "repeat" && (
             <div className="day-choice-grid">
-              {repeatDaySummaries.map((daySummary) => (
+              {repeatDaySummaries.map((summary) => (
                 <button
                   type="button"
-                  className={
-                    meal.repeatFromDay === daySummary.day ? "active" : ""
-                  }
-                  key={daySummary.day}
-                  onClick={() => selectRepeatFromDay(daySummary.day)}
+                  className={meal.repeatFromDay === summary.day ? "active" : ""}
+                  key={summary.day}
+                  onClick={() => selectRepeatFromDay(summary.day)}
                 >
-                  <strong>{daySummary.day.slice(0, 3)}</strong>
+                  <strong>{summary.day.slice(0, 3)}</strong>
                   <span>
-                    {daySummary.hasMeal ? daySummary.name : "No meal planned"}
+                    {summary.hasMeal ? summary.name : "No meal planned"}
                   </span>
                 </button>
               ))}
             </div>
           )}
 
-          {(editorMode === "takeaway" || editorMode === "eating-out") && (
-            <div className="meal-status-card">
-              <strong>
-                {editorMode === "takeaway" ? "Takeaway" : "Eating out"}
-              </strong>
-              <span>No shopping needed</span>
-            </div>
-          )}
+          {mealType === "cook" &&
+            (isCookedMeal || showCustomInput) &&
+            renderExtraIngredients(
+              linkedRecipe ? "Add extra ingredient..." : "Add ingredient..."
+            )}
         </div>
 
         <div className="sheet-footer">
