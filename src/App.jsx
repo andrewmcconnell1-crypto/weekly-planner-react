@@ -56,6 +56,7 @@ function App() {
   const [expandedMealDay, setExpandedMealDay] = useState(null);
   const [welcomeDismissed, setWelcomeDismissed] = useState(
     () => localStorage.getItem("planner-welcome-done") === "1"
+      && localStorage.getItem("planner-welcome-preview") !== "1"
   );
 
   const [currentWeekStart] = useState(getSunday);
@@ -91,9 +92,10 @@ function App() {
   const { getMealSummary } = mealHelpers;
 
   // Auto-dismiss welcome once the user has completed the full workflow.
-  // Runs against raw store data so it fires correctly after data loads.
+  // Skips when preview mode is active (triggered by the Settings reset button).
   useEffect(() => {
     if (welcomeDismissed) return;
+    if (localStorage.getItem("planner-welcome-preview") === "1") return;
     const hasPlanned = Object.values(mealsByWeek).some((weekMeals) =>
       days.some((d) => {
         const m = weekMeals?.[d];
@@ -302,6 +304,7 @@ function App() {
   }
 
   function dismissWelcome() {
+    localStorage.removeItem("planner-welcome-preview");
     localStorage.setItem("planner-welcome-done", "1");
     setWelcomeDismissed(true);
   }

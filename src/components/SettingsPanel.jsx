@@ -217,6 +217,7 @@ function SettingsPanel({
               type="button"
               className="secondary"
               onClick={() => {
+                localStorage.setItem("planner-welcome-preview", "1");
                 localStorage.removeItem("planner-welcome-done");
                 window.location.reload();
               }}
