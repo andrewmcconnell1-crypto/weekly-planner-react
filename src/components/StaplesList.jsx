@@ -42,7 +42,7 @@ function StaplesList({
                   checked={staple.active}
                   onChange={() => toggleStapleActive(staple.id)}
                 />
-                Active
+                On Woolworths list
                 </label>
               </div>
 
