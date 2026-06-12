@@ -1993,3 +1993,29 @@ input::placeholder {
   align-items: center;
   margin-top: 12px;
 }
+
+/* Unplanned day = a clearly empty, fillable slot (single "needs action" cue) */
+.plan-screen .meal-card.meal-card-empty {
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.meal-card-empty .meal-row-button {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.meal-row-add {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.meal-row-addicon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}

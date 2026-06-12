@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+
 // The tappable summary row for one day. Tapping it opens the meal editor sheet.
 function MealCard({
   day,
@@ -11,8 +13,8 @@ function MealCard({
 }) {
   const mealType = meal.mealType || "cook";
   const visibleIngredientCount = ingredientCount ?? 0;
-  const rowBadge = hasMeal
-    ? mealType === "cook"
+  const rowBadge =
+    mealType === "cook"
       ? `${visibleIngredientCount} ingredient${
           visibleIngredientCount === 1 ? "" : "s"
         }`
@@ -20,21 +22,35 @@ function MealCard({
         ? "Repeat"
         : mealType === "takeaway"
           ? "Takeaway"
-          : "Out"
-    : null;
+          : "Out";
   const mealName = displayName || (meal.name || "").trim();
+
+  // Unplanned day: a single clear "needs action" prompt, no redundant labels.
+  if (!hasMeal) {
+    return (
+      <article className="card meal-card meal-card-empty" data-tone={mealTone}>
+        <button className="meal-row-button" type="button" onClick={onOpen}>
+          <span className="meal-row-day">{day.slice(0, 3)}</span>
+
+          <span className="meal-row-main">
+            <strong className="meal-row-add">Add a meal</strong>
+          </span>
+
+          <span className="meal-row-addicon" aria-hidden="true">
+            <Plus size={18} strokeWidth={2.5} />
+          </span>
+        </button>
+      </article>
+    );
+  }
 
   return (
     <article className="card meal-card" data-tone={mealTone}>
-      <button
-        className="meal-row-button"
-        type="button"
-        onClick={onOpen}
-      >
+      <button className="meal-row-button" type="button" onClick={onOpen}>
         <span className="meal-row-day">{day.slice(0, 3)}</span>
 
         <span className="meal-row-main">
-          <strong className={hasMeal ? "" : "muted-title"}>{mealName}</strong>
+          <strong>{mealName}</strong>
           {mealLabel && <span>{mealLabel}</span>}
         </span>
 

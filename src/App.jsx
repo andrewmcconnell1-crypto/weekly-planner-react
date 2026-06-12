@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   House,
   CalendarDays,
@@ -57,7 +57,7 @@ function App() {
   const [welcomeDismissed, setWelcomeDismissed] = useState(
     () => localStorage.getItem("planner-welcome-done") === "1"
   );
-  const welcomePreviewRef = useRef(false);
+  const [welcomePreview, setWelcomePreview] = useState(false);
 
   const [currentWeekStart] = useState(getSunday);
   const [nextWeekStart] = useState(getNextSunday);
@@ -91,25 +91,31 @@ function App() {
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
   const { getMealSummary } = mealHelpers;
 
-  // Auto-dismiss welcome once the user has completed the full workflow.
-  // Skips when preview mode is active (triggered by the Settings reset button).
-  useEffect(() => {
-    if (welcomeDismissed || welcomePreviewRef.current) return;
-    const hasPlanned = Object.values(mealsByWeek).some((weekMeals) =>
+  // Whether the user has completed the full workflow (plan -> generate -> check).
+  // Derived rather than stored, so we never call setState inside an effect.
+  const welcomeWorkflowComplete =
+    Object.values(mealsByWeek).some((weekMeals) =>
       days.some((d) => {
         const m = weekMeals?.[d];
-        return m && (m.name || m.recipeId || (m.mealType && m.mealType !== "cook"));
+        return (
+          m && (m.name || m.recipeId || (m.mealType && m.mealType !== "cook"))
+        );
       })
-    );
-    const hasGenerated = Object.keys(shoppingListMetaByWeek).length > 0;
-    const hasChecked = Object.values(shoppingItemsByWeek).some(
+    ) &&
+    Object.keys(shoppingListMetaByWeek).length > 0 &&
+    Object.values(shoppingItemsByWeek).some(
       (items) => Array.isArray(items) && items.some((i) => i.checked)
     );
-    if (hasPlanned && hasGenerated && hasChecked) {
+
+  // Persist that the welcome has served its purpose (side-effect only).
+  useEffect(() => {
+    if (welcomeWorkflowComplete && !welcomePreview) {
       localStorage.setItem("planner-welcome-done", "1");
-      setWelcomeDismissed(true);
     }
-  }, [mealsByWeek, shoppingListMetaByWeek, shoppingItemsByWeek, welcomeDismissed]);
+  }, [welcomeWorkflowComplete, welcomePreview]);
+
+  const showWelcome =
+    !welcomeDismissed && (welcomePreview || !welcomeWorkflowComplete);
 
   // ---- Auth / loading gates (after all hooks, before any data-derived work) ----
   if (isSupabaseConfigured && authLoading) {
@@ -303,7 +309,7 @@ function App() {
   }
 
   function dismissWelcome() {
-    welcomePreviewRef.current = false;
+    setWelcomePreview(false);
     localStorage.setItem("planner-welcome-done", "1");
     setWelcomeDismissed(true);
   }
@@ -645,7 +651,7 @@ function App() {
               ? "Shopping list"
               : activeTab === "more"
                 ? "More"
-                : "Meal plan"}
+                : "Meals"}
           </h1>
         </div>
       </header>
@@ -684,7 +690,7 @@ function App() {
             </h2>
           </div>
 
-          {!welcomeDismissed && (
+          {showWelcome && (
             <div className="welcome-card">
               <button
                 type="button"
@@ -819,13 +825,9 @@ function App() {
           <div className="screen-header">
             <div>
               <p className="section-kicker">Planning week</p>
-              <h2>Meals</h2>
-            </div>
-
-            <div className="date-card">
-              <span>{formatDate(mealWeekStart)}</span>
-              <span>to</span>
-              <span>{formatDate(mealWeekEnd)}</span>
+              <h2>
+                {formatDate(mealWeekStart)} – {formatDate(mealWeekEnd)}
+              </h2>
             </div>
           </div>
 
@@ -1038,7 +1040,7 @@ function App() {
                   onSignOut={signOut}
                   resetStockToStarterList={resetStockToStarterList}
                   onResetWelcome={() => {
-                    welcomePreviewRef.current = true;
+                    setWelcomePreview(true);
                     localStorage.removeItem("planner-welcome-done");
                     setWelcomeDismissed(false);
                     setActiveTab("home");
@@ -1066,7 +1068,7 @@ function App() {
           onClick={() => setActiveTab("plan")}
         >
           <CalendarDays size={21} strokeWidth={2} aria-hidden="true" />
-          <span>Plan</span>
+          <span>Meals</span>
         </button>
 
         <button
