@@ -256,9 +256,6 @@ function App() {
       : shoppingListNeedsUpdate
         ? "Needs update"
         : "Current";
-  const manualShoppingItemsCount = visibleShoppingItems.filter(
-    (item) => item.source === "Manual" && !item.checked
-  ).length;
   const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
   const shoppingLastUpdatedText = shoppingListMeta?.generatedAt
     ? new Date(shoppingListMeta.generatedAt).toLocaleString("en-AU", {
@@ -819,9 +816,27 @@ function App() {
               <span className="home-step-chevron">›</span>
             </button>
 
+            <button
+              className="home-step"
+              type="button"
+              onClick={() => openHousehold("stock")}
+            >
+              <span className="home-step-num">2</span>
+
+              <span className="home-step-body">
+                <strong>Check stock &amp; recurring buys</strong>
+                <span>
+                  {activeInventoryCount} in stock · {activeStaplesCount}{" "}
+                  recurring
+                </span>
+              </span>
+
+              <span className="home-step-chevron">›</span>
+            </button>
+
             <div className="home-step-action">
               <div className="home-step-head">
-                <span className="home-step-num">2</span>
+                <span className="home-step-num">3</span>
 
                 <span className="home-step-body">
                   <strong>Generate shopping list</strong>
@@ -855,7 +870,7 @@ function App() {
               type="button"
               onClick={() => setActiveTab("shop")}
             >
-              <span className="home-step-num">3</span>
+              <span className="home-step-num">4</span>
 
               <span className="home-step-body">
                 <strong>Shop</strong>
@@ -873,20 +888,6 @@ function App() {
             <p className="section-kicker">Set up</p>
 
             <div className="home-actions">
-              <button
-                className="secondary"
-                onClick={() => openHousehold("stock")}
-              >
-                Check stock
-              </button>
-
-              <button
-                className="secondary"
-                onClick={() => openHousehold("recurring")}
-              >
-                Recurring buys
-              </button>
-
               <button
                 className="secondary"
                 onClick={() => {
@@ -987,14 +988,10 @@ function App() {
           deleteShoppingItem={deleteShoppingItem}
           buildShoppingList={buildShoppingList}
           shoppingActionLabel={shoppingActionLabel}
-          shoppingStatusLabel={shoppingStatusLabel}
           shoppingListNeedsUpdate={shoppingListNeedsUpdate}
-          shoppingListSummary={shoppingListMeta?.summary || null}
+          hasGeneratedShopPlan={hasGeneratedShopPlan}
           shoppingLastUpdatedText={shoppingLastUpdatedText}
           recurringRemovalItems={recurringRemovalItems}
-          pendingShoppingItemsCount={pendingShoppingItemsCount}
-          checkedShoppingItemsCount={checkedShoppingItemsCount}
-          manualShoppingItemsCount={manualShoppingItemsCount}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
           shoppingWeekMode={shoppingWeekMode}

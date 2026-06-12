@@ -1,18 +1,14 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 
 import WeekControls from "./WeekControls";
 
-function getSourceLabel(source) {
-  if (source === "Restock") return "Stock";
-  if (source === "Recurring buy") return "Recurring";
-  if (source === "Generated") return "Generated";
-  return source || "Manual";
-}
-
-function getSourceClass(source) {
-  return `source-${String(source || "manual")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")}`;
+// What a row needs to say in the supermarket: the item, and (for meal
+// ingredients) which meal it's for. Everything else is noise.
+function getItemDetail(item) {
+  if (item.source === "Meal") return item.sourceDetail || "";
+  if (item.source === "Restock") return "Restock";
+  return "";
 }
 
 function ShoppingList({
@@ -24,14 +20,10 @@ function ShoppingList({
   deleteShoppingItem,
   buildShoppingList,
   shoppingActionLabel,
-  shoppingStatusLabel,
   shoppingListNeedsUpdate,
-  shoppingListSummary,
+  hasGeneratedShopPlan,
   shoppingLastUpdatedText,
   recurringRemovalItems,
-  pendingShoppingItemsCount,
-  checkedShoppingItemsCount,
-  manualShoppingItemsCount,
   shoppingWeekStart,
   shoppingWeekEnd,
   shoppingWeekMode,
@@ -54,12 +46,10 @@ function ShoppingList({
     groups[category].push(item);
     return groups;
   }, {});
-  const formattedShoppingRange = `${shoppingWeekStart.toLocaleDateString("en-AU", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  })} to ${shoppingWeekEnd.toLocaleDateString("en-AU", {
-    weekday: "short",
+  const formattedShoppingRange = `${shoppingWeekStart.toLocaleDateString(
+    "en-AU",
+    { day: "numeric", month: "short" }
+  )} – ${shoppingWeekEnd.toLocaleDateString("en-AU", {
     day: "numeric",
     month: "short",
   })}`;
@@ -72,6 +62,8 @@ function ShoppingList({
   }
 
   function renderShoppingItem(item, index) {
+    const detail = getItemDetail(item);
+
     return (
       <li
         className={`card shopping-row ${item.checked ? "checked-row" : ""}`}
@@ -87,27 +79,19 @@ function ShoppingList({
           <span className="shopping-item-content">
             <span className="shopping-item-name">{item.name}</span>
 
-            <span className="shopping-item-meta">
-              <span className={`source-chip ${getSourceClass(item.source)}`}>
-                {getSourceLabel(item.source)}
-              </span>
-
-              {item.sourceDetail && (
-                <span className="shopping-source-detail">
-                  {item.sourceDetail}
-                </span>
-              )}
-            </span>
+            {detail && (
+              <span className="shopping-source-detail">{detail}</span>
+            )}
           </span>
         </label>
 
         <button
           type="button"
-          className="delete-button"
+          className="shopping-row-delete"
           aria-label={`Delete ${item.name}`}
           onClick={() => deleteShoppingItem(item.id)}
         >
-          Delete
+          <X size={16} aria-hidden="true" />
         </button>
       </li>
     );
@@ -115,46 +99,10 @@ function ShoppingList({
 
   return (
     <section className="screen shop-screen">
-      <div
-        className={`shop-status-panel ${
-          shoppingListNeedsUpdate ? "needs-update" : ""
-        }`}
-      >
-        <div className="shop-status-heading">
-          <div>
-            <span>Shopping week</span>
-            <strong>{formattedShoppingRange}</strong>
-          </div>
-
-          <span
-            className={`list-status-pill ${
-              shoppingListNeedsUpdate ? "needs-update" : ""
-            }`}
-          >
-            {shoppingStatusLabel}
-          </span>
-        </div>
-
-        <div className="shop-stat-grid">
-          <div>
-            <span>Additions</span>
-            <strong>{pendingShoppingItemsCount}</strong>
-          </div>
-
-          <div>
-            <span>Done</span>
-            <strong>{checkedShoppingItemsCount}</strong>
-          </div>
-
-          <div>
-            <span>Remove</span>
-            <strong>{recurringRemovalItems.length}</strong>
-          </div>
-
-          <div>
-            <span>Manual</span>
-            <strong>{manualShoppingItemsCount}</strong>
-          </div>
+      <div className="screen-header">
+        <div>
+          <p className="section-kicker">Shopping week</p>
+          <h2>{formattedShoppingRange}</h2>
         </div>
       </div>
 
@@ -166,39 +114,38 @@ function ShoppingList({
         onNextWeek={goToNextShoppingWeek}
       />
 
-      <div
-        className={`primary-action-card shop-action-card ${
-          shoppingListNeedsUpdate ? "needs-update" : ""
-        }`}
-      >
-        <div>
-          <p className="small-text">
+      {!hasGeneratedShopPlan || shoppingListNeedsUpdate ? (
+        <div
+          className={`shop-update-bar ${
+            shoppingListNeedsUpdate ? "needs-update" : ""
+          }`}
+        >
+          <span>
+            {hasGeneratedShopPlan
+              ? "Your meals, stock or recurring buys have changed since this list was made."
+              : "Check your stock and recurring buys first, then build the list from your meals."}
+          </span>
+
+          <button
+            className="primary-button"
+            type="button"
+            onClick={buildShoppingList}
+          >
+            {shoppingActionLabel}
+          </button>
+        </div>
+      ) : (
+        <p className="shop-refresh-line">
+          <span>
             {shoppingLastUpdatedText
-              ? `Last updated ${shoppingLastUpdatedText}`
-              : "Generate additions and Woolworths list removals from meals and stock."}
-          </p>
-        </div>
+              ? `Up to date · ${shoppingLastUpdatedText}`
+              : "Up to date"}
+          </span>
 
-        <button className="primary-button" type="button" onClick={buildShoppingList}>
-          {shoppingActionLabel}
-        </button>
-      </div>
-
-      {shoppingListSummary && (
-        <div className="generation-summary">
-          <span>
-            {shoppingListSummary.mealIngredientsAdded} meal
-          </span>
-          <span>
-            {shoppingListSummary.stockRestocksAdded} stock
-          </span>
-          <span>
-            {shoppingListSummary.recurringRemovalsFound} removals
-          </span>
-          <span>
-            {shoppingListSummary.skippedRecurringList} already on Woolworths
-          </span>
-        </div>
+          <button type="button" onClick={buildShoppingList}>
+            Refresh
+          </button>
+        </p>
       )}
 
       {recurringRemovalItems.length > 0 && (
@@ -210,10 +157,7 @@ function ShoppingList({
 
           <ul className="clean-list">
             {recurringRemovalItems.map((item, index) => (
-              <li
-                className="card removal-row"
-                key={`${item.id}-${index}`}
-              >
+              <li className="card removal-row" key={`${item.id}-${index}`}>
                 <span>
                   <strong>{item.name}</strong>
                   <span>Already in stock</span>
@@ -226,13 +170,13 @@ function ShoppingList({
 
       {shoppingItems.length === 0 ? (
         <p className="empty-state">
-          No additions yet. Generate additions or add an item manually.
+          No items yet — generate the list or add one below.
         </p>
       ) : (
         <>
           <section className="shopping-section">
             <div className="shopping-section-header">
-              <h3>Additional items</h3>
+              <h3>To buy</h3>
               <span>{pendingItems.length}</span>
             </div>
 
@@ -268,19 +212,14 @@ function ShoppingList({
           </section>
 
           {doneItems.length > 0 && (
-            <details
-              className="done-section"
-              open={pendingItems.length === 0}
-            >
+            <details className="done-section" open={pendingItems.length === 0}>
               <summary>
                 <span>Done</span>
                 <span>{doneItems.length}</span>
               </summary>
 
               <ul className="clean-list">
-                {doneItems.map((item, index) =>
-                  renderShoppingItem(item, index)
-                )}
+                {doneItems.map((item, index) => renderShoppingItem(item, index))}
               </ul>
             </details>
           )}

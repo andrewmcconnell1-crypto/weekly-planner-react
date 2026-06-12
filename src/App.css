@@ -1148,58 +1148,67 @@ input::placeholder {
   gap: 9px;
 }
 
-.shop-status-panel,
 .shopping-section,
 .woolworths-removal-section,
 .done-section,
 .manual-add-panel,
-.generation-summary {
+.shop-update-bar {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
   box-shadow: var(--shadow);
 }
 
-.shop-status-panel {
+/* Slim prompt shown only when the list is missing or stale. */
+.shop-update-bar {
   display: grid;
-  gap: 12px;
-  padding: 13px;
+  gap: 10px;
+  padding: 12px;
 }
 
-.tab-shop .shop-status-panel {
-  border-color: var(--line);
-  background: var(--surface);
-}
-
-.shop-status-panel.needs-update {
+.shop-update-bar.needs-update {
   border-color: #e1c38f;
   background: #fffaf0;
 }
 
-.shop-status-heading {
+.shop-update-bar > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 720;
+}
+
+/* One quiet line when the list is current. */
+.shop-refresh-line {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  margin: 0;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 720;
 }
 
-.shop-status-heading div {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
+.shop-refresh-line button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--primary-strong);
+  padding: 6px 12px;
+  font-size: 0.8rem;
 }
 
-.shop-status-heading span:first-child,
-.shop-stat-grid span,
+.shop-refresh-line button:hover {
+  background: var(--soft);
+}
+
 .shopping-section-header span {
   color: var(--muted);
   font-size: 0.76rem;
   font-weight: 820;
   text-transform: uppercase;
-}
-
-.shop-status-heading strong {
-  line-height: 1.25;
 }
 
 .list-status-pill {
@@ -1215,44 +1224,6 @@ input::placeholder {
 .list-status-pill.needs-update {
   background: #fff1cf;
   color: #775118;
-}
-
-.shop-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
-}
-
-/* Read-only stats: flat and plain so they don't read as tappable buttons. */
-.shop-stat-grid div {
-  display: grid;
-  gap: 2px;
-  padding: 2px 0;
-}
-
-.shop-stat-grid strong {
-  font-size: 1.15rem;
-  line-height: 1;
-}
-
-.shop-action-card.needs-update {
-  border-color: #e1c38f;
-}
-
-.generation-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding: 10px;
-}
-
-.generation-summary span {
-  border-radius: 999px;
-  background: var(--soft);
-  color: var(--muted);
-  padding: 4px 8px;
-  font-size: 0.76rem;
-  font-weight: 800;
 }
 
 .shopping-section {
@@ -1332,43 +1303,6 @@ input::placeholder {
   min-width: 0;
 }
 
-.shopping-item-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 5px;
-  min-width: 0;
-}
-
-.source-chip {
-  border-radius: 999px;
-  background: var(--soft);
-  color: var(--primary-strong);
-  padding: 2px 7px;
-  font-size: 0.7rem;
-  font-weight: 850;
-}
-
-.source-meal {
-  background: var(--soft);
-  color: var(--muted);
-}
-
-.source-restock {
-  background: var(--soft);
-  color: var(--muted);
-}
-
-.source-recurring-buy {
-  background: var(--soft);
-  color: var(--muted);
-}
-
-.source-manual {
-  background: var(--soft);
-  color: var(--muted);
-}
-
 .shopping-source-detail {
   color: var(--muted);
   font-size: 0.75rem;
@@ -1389,17 +1323,23 @@ input::placeholder {
   background: var(--muted);
 }
 
-.shop-screen .delete-button {
-  border-color: transparent;
+.shopping-row-delete {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  min-height: 34px;
+  border: none;
+  border-radius: 999px;
   background: transparent;
-  color: var(--danger);
-  padding: 6px 8px;
-  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 0;
 }
 
-.shop-screen .delete-button:hover {
-  border-color: #e1b2ac;
+.shopping-row-delete:hover {
   background: var(--soft);
+  color: var(--danger);
 }
 
 .primary-action-card {
