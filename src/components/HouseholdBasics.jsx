@@ -14,6 +14,7 @@ function HouseholdBasics({
   deleteStaple,
   updateStapleFrequency,
   updateStapleCategory,
+  updateStapleDetails,
   toggleStapleActive,
   newInventoryItem,
   setNewInventoryItem,
@@ -68,6 +69,7 @@ function HouseholdBasics({
           deleteStaple={deleteStaple}
           updateStapleFrequency={updateStapleFrequency}
           updateStapleCategory={updateStapleCategory}
+          updateStapleDetails={updateStapleDetails}
           toggleStapleActive={toggleStapleActive}
         />
       ) : (
