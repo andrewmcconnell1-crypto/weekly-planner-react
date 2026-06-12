@@ -160,7 +160,7 @@ function ShoppingList({
               <li className="card removal-row" key={`${item.id}-${index}`}>
                 <span>
                   <strong>{item.name}</strong>
-                  <span>Already in stock</span>
+                  <span>{item.sourceDetail || "Already in stock"}</span>
                 </span>
               </li>
             ))}

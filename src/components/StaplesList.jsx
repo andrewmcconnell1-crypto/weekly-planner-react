@@ -82,6 +82,13 @@ function StaplesList({
                 Starts: {staple.startDate}
               </p>
 
+              {staple.active === false && (
+                <p className="small-text staple-off-note">
+                  Off — flagged on the Shop page to remove from your
+                  Woolworths list
+                </p>
+              )}
+
               <div className="staple-controls">
                 <select
                   value={staple.frequency}

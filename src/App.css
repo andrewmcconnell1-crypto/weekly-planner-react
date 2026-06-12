@@ -1652,6 +1652,11 @@ input::placeholder {
   overflow-wrap: anywhere;
 }
 
+.staple-off-note {
+  color: var(--accent-strong);
+  font-weight: 740;
+}
+
 .staple-quantity-row {
   display: grid;
   grid-template-columns: minmax(0, 90px) minmax(0, 1fr);

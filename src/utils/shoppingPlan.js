@@ -92,7 +92,25 @@ export function buildShoppingPlan({
   const activeStockNames = new Set(
     activeStockItems.map((item) => normaliseItemName(item.name))
   );
-  const removeFromRecurring = recurringBuys
+  // Recurring buys the user has switched off still sit on the standing
+  // Woolworths list, so flag them for removal too (only in weeks they'd
+  // otherwise be due, so fortnightly off-weeks don't nag).
+  const pausedRecurring = staples
+    .filter(
+      (staple) =>
+        staple.active === false && isStapleDueThisWeek(staple, weekKey)
+    )
+    .map((staple) => ({
+      id: staple.id,
+      name: staple.quantity
+        ? `${staple.quantity} ${staple.unit} ${staple.name}`
+        : staple.name,
+      category: staple.category || "Other",
+      source: "Woolworths list",
+      sourceDetail: "Turned off",
+    }));
+
+  const inStockRecurring = recurringBuys
     .filter((item) => {
       const itemName = normaliseItemName(item.name);
       const sourceName = normaliseItemName(item.sourceDetail);
@@ -118,6 +136,8 @@ export function buildShoppingPlan({
       source: "Woolworths list",
       sourceDetail: "Already in stock",
     }));
+
+  const removeFromRecurring = [...inStockRecurring, ...pausedRecurring];
 
   const allNewItems = [...restockInventory, ...mealIngredients];
 
