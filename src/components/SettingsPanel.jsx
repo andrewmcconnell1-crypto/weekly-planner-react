@@ -41,6 +41,7 @@ function SettingsPanel({
   cloud,
   onSignOut,
   resetStockToStarterList,
+  onResetWelcome,
 }) {
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
@@ -216,11 +217,7 @@ function SettingsPanel({
             <button
               type="button"
               className="secondary"
-              onClick={() => {
-                localStorage.setItem("planner-welcome-preview", "1");
-                localStorage.removeItem("planner-welcome-done");
-                window.location.reload();
-              }}
+              onClick={onResetWelcome}
             >
               Reset welcome card
             </button>

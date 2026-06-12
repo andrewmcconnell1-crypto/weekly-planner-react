@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   House,
   CalendarDays,
@@ -56,8 +56,8 @@ function App() {
   const [expandedMealDay, setExpandedMealDay] = useState(null);
   const [welcomeDismissed, setWelcomeDismissed] = useState(
     () => localStorage.getItem("planner-welcome-done") === "1"
-      && localStorage.getItem("planner-welcome-preview") !== "1"
   );
+  const welcomePreviewRef = useRef(false);
 
   const [currentWeekStart] = useState(getSunday);
   const [nextWeekStart] = useState(getNextSunday);
@@ -94,8 +94,7 @@ function App() {
   // Auto-dismiss welcome once the user has completed the full workflow.
   // Skips when preview mode is active (triggered by the Settings reset button).
   useEffect(() => {
-    if (welcomeDismissed) return;
-    if (localStorage.getItem("planner-welcome-preview") === "1") return;
+    if (welcomeDismissed || welcomePreviewRef.current) return;
     const hasPlanned = Object.values(mealsByWeek).some((weekMeals) =>
       days.some((d) => {
         const m = weekMeals?.[d];
@@ -304,7 +303,7 @@ function App() {
   }
 
   function dismissWelcome() {
-    localStorage.removeItem("planner-welcome-preview");
+    welcomePreviewRef.current = false;
     localStorage.setItem("planner-welcome-done", "1");
     setWelcomeDismissed(true);
   }
@@ -1038,6 +1037,12 @@ function App() {
                   cloud={cloud}
                   onSignOut={signOut}
                   resetStockToStarterList={resetStockToStarterList}
+                  onResetWelcome={() => {
+                    welcomePreviewRef.current = true;
+                    localStorage.removeItem("planner-welcome-done");
+                    setWelcomeDismissed(false);
+                    setActiveTab("home");
+                  }}
                 />
               )}
             </>
