@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   House,
   CalendarDays,
@@ -54,6 +54,9 @@ function App() {
   const [moreSection, setMoreSection] = useState("overview");
   const [householdSection, setHouseholdSection] = useState("stock");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
+  const [welcomeDismissed, setWelcomeDismissed] = useState(
+    () => localStorage.getItem("planner-welcome-done") === "1"
+  );
 
   const [currentWeekStart] = useState(getSunday);
   const [nextWeekStart] = useState(getNextSunday);
@@ -86,6 +89,26 @@ function App() {
 
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
   const { getMealSummary } = mealHelpers;
+
+  // Auto-dismiss welcome once the user has completed the full workflow.
+  // Runs against raw store data so it fires correctly after data loads.
+  useEffect(() => {
+    if (welcomeDismissed) return;
+    const hasPlanned = Object.values(mealsByWeek).some((weekMeals) =>
+      days.some((d) => {
+        const m = weekMeals?.[d];
+        return m && (m.name || m.recipeId || (m.mealType && m.mealType !== "cook"));
+      })
+    );
+    const hasGenerated = Object.keys(shoppingListMetaByWeek).length > 0;
+    const hasChecked = Object.values(shoppingItemsByWeek).some(
+      (items) => Array.isArray(items) && items.some((i) => i.checked)
+    );
+    if (hasPlanned && hasGenerated && hasChecked) {
+      localStorage.setItem("planner-welcome-done", "1");
+      setWelcomeDismissed(true);
+    }
+  }, [mealsByWeek, shoppingListMetaByWeek, shoppingItemsByWeek, welcomeDismissed]);
 
   // ---- Auth / loading gates (after all hooks, before any data-derived work) ----
   if (isSupabaseConfigured && authLoading) {
@@ -276,6 +299,11 @@ function App() {
     setMealWeekStart(nextMealWeekStart);
     setShoppingWeekStart(nextShoppingWeekStart);
     setExpandedMealDay(null);
+  }
+
+  function dismissWelcome() {
+    localStorage.setItem("planner-welcome-done", "1");
+    setWelcomeDismissed(true);
   }
 
   function goToPreviousShoppingWeek() {
@@ -653,6 +681,36 @@ function App() {
               {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
             </h2>
           </div>
+
+          {!welcomeDismissed && (
+            <div className="welcome-card">
+              <button
+                type="button"
+                className="welcome-dismiss"
+                aria-label="Dismiss"
+                onClick={dismissWelcome}
+              >
+                ✕
+              </button>
+
+              <p className="section-kicker">Getting started</p>
+              <strong>Here's how it works</strong>
+
+              <ol className="welcome-steps">
+                <li><span>Plan</span> your dinners for the week</li>
+                <li><span>Generate</span> a shopping list from your meals and recurring buys</li>
+                <li><span>Shop</span> and check items off as you go</li>
+              </ol>
+
+              <button
+                type="button"
+                className="primary-button welcome-cta"
+                onClick={() => setActiveTab("plan")}
+              >
+                Start planning
+              </button>
+            </div>
+          )}
 
           <div className="home-steps">
             <button

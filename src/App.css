@@ -327,6 +327,59 @@ textarea:focus-visible {
 }
 
 /* Home guided 3-step flow */
+.welcome-card {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 16px 16px 16px 14px;
+}
+
+.welcome-card strong {
+  font-size: 1.05rem;
+}
+
+.welcome-dismiss {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-height: auto;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.welcome-dismiss:hover {
+  color: var(--ink);
+  background: var(--soft);
+}
+
+.welcome-steps {
+  margin: 2px 0 0;
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.welcome-steps span {
+  font-weight: 760;
+  color: var(--accent);
+}
+
+.welcome-cta {
+  justify-self: start;
+}
+
 .home-steps {
   display: grid;
   gap: 10px;
