@@ -1,6 +1,7 @@
 import { normaliseItemName, slugifyIdPart } from "./itemUtils";
 import { days } from "./mealUtils";
 import { isStapleDueThisWeek } from "./stapleUtils";
+import { buildCoverageIndex, isIngredientCovered } from "./ingredientMatch";
 
 // Sources that the generator owns. Rows with these sources are regenerated each
 // time the list is built; any other source (e.g. "Manual") is preserved.
@@ -92,6 +93,15 @@ export function buildShoppingPlan({
   const activeStockNames = new Set(
     activeStockItems.map((item) => normaliseItemName(item.name))
   );
+  // Fuzzy coverage: a meal ingredient is "already covered" if its core food
+  // words match anything you keep in stock or buy recurringly (active staples,
+  // regardless of whether they're due this week — you have them either way).
+  const coverageIndex = buildCoverageIndex([
+    ...activeStockItems.map((item) => item.name),
+    ...staples
+      .filter((staple) => staple.active !== false)
+      .map((staple) => staple.name),
+  ]);
   // Recurring buys the user has switched off still sit on the standing
   // Woolworths list, so flag them for removal too (only in weeks they'd
   // otherwise be due, so fortnightly off-weeks don't nag).
@@ -156,6 +166,7 @@ export function buildShoppingPlan({
     skippedInStock: 0,
     skippedRecurringList: 0,
     skippedDuplicates: 0,
+    skippedAlreadyHave: 0,
     manualItemsKept: retainedShoppingItems.length,
   };
 
@@ -178,6 +189,16 @@ export function buildShoppingPlan({
           summary.skippedDuplicates += 1;
         }
 
+        return false;
+      }
+
+      // Fuzzy coverage applies to meal ingredients only — restock rows are the
+      // stock you're deliberately rebuying, so they must never be suppressed.
+      if (
+        item.source === "Meal" &&
+        isIngredientCovered(item.name, coverageIndex)
+      ) {
+        summary.skippedAlreadyHave += 1;
         return false;
       }
 
