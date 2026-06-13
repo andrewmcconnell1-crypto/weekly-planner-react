@@ -45,15 +45,7 @@ function InventoryList({
   }
 
   return (
-    <section className="section">
-      <div className="section-header">
-        <h2>Stock</h2>
-      </div>
-
-      <p className="small-text">
-        Pantry, household, and toiletry items you keep stocked.
-      </p>
-
+    <section className="inventory-panel">
       <input
         type="text"
         placeholder="Search stock..."

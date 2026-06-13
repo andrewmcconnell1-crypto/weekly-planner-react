@@ -1848,7 +1848,7 @@ input::placeholder {
 
 /* Adding items is rare, so the add box sits below the list, behind a divider. */
 .basics-add-row {
-  margin-top: 16px;
+  margin-top: 4px;
   padding-top: 14px;
   border-top: 1px solid var(--line);
 }
@@ -2286,14 +2286,24 @@ input::placeholder {
 }
 
 .household-summary span {
-  color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 820;
+  color: var(--olive);
+  font-size: 0.72rem;
+  font-weight: 840;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .household-summary strong {
-  font-size: 1.15rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.household-summary small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 720;
 }
 
 .manager-row {
@@ -2426,12 +2436,11 @@ input::placeholder {
 .category-toggle {
   width: 100%;
   background: #ffffff;
-  color: #263238;
+  color: var(--ink);
   border: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
 }
 
 /* Collapse affordance shared by stock + shopping category headers */

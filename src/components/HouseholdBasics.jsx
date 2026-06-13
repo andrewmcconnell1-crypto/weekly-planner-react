@@ -46,17 +46,15 @@ function HouseholdBasics({
 
       <div className="household-summary">
         <div>
-          <span>Recurring buys</span>
-          <strong>
-            {activeStaplesCount}/{staples.length}
-          </strong>
+          <span>On Woolworths list</span>
+          <strong>{activeStaplesCount}</strong>
+          <small>of {staples.length} recurring</small>
         </div>
 
         <div>
           <span>In stock</span>
-          <strong>
-            {activeInventoryCount}/{inventory.length}
-          </strong>
+          <strong>{activeInventoryCount}</strong>
+          <small>of {inventory.length} items</small>
         </div>
       </div>
 
