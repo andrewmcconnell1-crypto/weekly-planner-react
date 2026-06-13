@@ -872,7 +872,7 @@ function App() {
 
           <h1>
             {activeTab === "home"
-              ? "Weekly shop"
+              ? "Today"
               : activeTab === "shop"
               ? "Shopping list"
               : activeTab === "more"
