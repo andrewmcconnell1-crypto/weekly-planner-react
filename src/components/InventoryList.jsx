@@ -54,16 +54,6 @@ function InventoryList({
         Pantry, household, and toiletry items you keep stocked.
       </p>
 
-      <div className="stock-maintenance">
-        <button
-          type="button"
-          className="secondary"
-          onClick={loadStarterInventory}
-        >
-          Add missing stock items
-        </button>
-      </div>
-
       <input
         type="text"
         placeholder="Search stock..."
@@ -198,6 +188,16 @@ function InventoryList({
           );
         })
       )}
+
+      <div className="stock-maintenance">
+        <button
+          type="button"
+          className="tertiary-button"
+          onClick={loadStarterInventory}
+        >
+          Add missing stock items
+        </button>
+      </div>
     </section>
   );
 }

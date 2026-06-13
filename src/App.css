@@ -1741,43 +1741,34 @@ input::placeholder {
   line-height: 1;
 }
 
+/* De-emphasised footer action — rarely used, so it sits at the bottom. */
 .stock-maintenance {
   display: grid;
-  gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 11px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 
-.stock-maintenance .small-text {
-  margin: 0;
+.tertiary-button {
+  justify-self: center;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 740;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.staples-hint,
+.tertiary-button:hover {
+  background: transparent;
+  color: var(--accent-strong);
+}
+
 .stock-hint {
   margin: 0;
   padding: 0 2px;
-}
-
-/* Category sections shared by recurring buys + stock */
-.basics-group {
-  display: grid;
-  gap: 8px;
-}
-
-.basics-group + .basics-group {
-  margin-top: 14px;
-}
-
-.basics-group-title {
-  margin: 0;
-  padding: 0 2px;
-  color: var(--olive);
-  font-size: 0.72rem;
-  font-weight: 840;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 /* Compact, expandable item rows shared by recurring buys + stock */
@@ -2314,15 +2305,6 @@ input::placeholder {
 
   .staple-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .stock-maintenance {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  .stock-maintenance .small-text {
-    grid-column: 1 / -1;
   }
 }
 
