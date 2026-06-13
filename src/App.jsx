@@ -10,6 +10,7 @@ import "./App.css";
 import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
 import MealEditorSheet from "./components/MealEditorSheet";
+import TonightCard from "./components/TonightCard";
 import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
 import RecipesList from "./components/RecipesList";
@@ -163,6 +164,47 @@ function App() {
   const shoppingWeekMeals =
     mealsByWeek[shoppingWeekKey] || createEmptyMeals();
   const shoppingItems = shoppingItemsByWeek[shoppingWeekKey] || [];
+
+  // "Tonight" on Home: today's meal, drawn from the current week's plan.
+  const today = new Date();
+  const todayDayName = days[today.getDay()];
+  const currentWeekMeals = mealsByWeek[currentWeekKey] || createEmptyMeals();
+  const tonightSummary = getMealSummary(
+    todayDayName,
+    currentWeekMeals[todayDayName],
+    currentWeekMeals
+  );
+  const todayIndex = days.indexOf(todayDayName);
+  let tonightCovers = 1;
+  if (
+    tonightSummary.hasMeal &&
+    (currentWeekMeals[todayDayName]?.mealType || "cook") === "cook"
+  ) {
+    for (let i = todayIndex + 1; i < days.length; i += 1) {
+      const followingMeal = currentWeekMeals[days[i]];
+
+      if (
+        followingMeal?.mealType === "repeat" &&
+        followingMeal.repeatFromDay === todayDayName
+      ) {
+        tonightCovers += 1;
+      } else {
+        break;
+      }
+    }
+  }
+  const tonightLeftoverDays = days.slice(todayIndex + 1, todayIndex + tonightCovers);
+  const tonightLeftoverLabel =
+    tonightLeftoverDays.length === 1
+      ? tonightLeftoverDays[0]
+      : `${tonightLeftoverDays[0]?.slice(0, 3)}–${tonightLeftoverDays[
+          tonightLeftoverDays.length - 1
+        ]?.slice(0, 3)}`;
+  const tonightDateLabel = today.toLocaleDateString("en-AU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   const mealWeekEnd = new Date(mealWeekStart);
   mealWeekEnd.setDate(mealWeekStart.getDate() + 6);
@@ -360,6 +402,12 @@ function App() {
     setMealWeekStart(nextMealWeekStart);
     setShoppingWeekStart(nextShoppingWeekStart);
     setExpandedMealDay(null);
+  }
+
+  function openTonightInPlan() {
+    setMealWeekStart(new Date(currentWeekStart));
+    setExpandedMealDay(todayDayName);
+    setActiveTab("plan");
   }
 
   function dismissWelcome() {
@@ -831,6 +879,15 @@ function App() {
 
       {activeTab === "home" && (
         <section className="screen home-screen">
+          <TonightCard
+            dayName={todayDayName}
+            dateLabel={tonightDateLabel}
+            summary={tonightSummary}
+            coversNights={tonightCovers}
+            leftoverDaysLabel={tonightLeftoverLabel}
+            onOpenPlan={openTonightInPlan}
+          />
+
           <div className="home-hero">
             <div className="home-week-switch" aria-label="Home week">
               <button
