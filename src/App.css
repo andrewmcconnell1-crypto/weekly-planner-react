@@ -596,6 +596,148 @@ textarea:focus-visible {
   width: 100%;
 }
 
+/* "This week" cooking dashboard (replaces the setup checklist) */
+.home-dashboard {
+  display: grid;
+  gap: 12px;
+}
+
+.home-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.home-section-head .section-kicker {
+  margin: 0;
+}
+
+.home-link {
+  min-height: auto;
+  border: 0;
+  background: transparent;
+  color: var(--primary-strong);
+  padding: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.home-link:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+
+.week-ahead-list {
+  display: grid;
+  gap: 8px;
+}
+
+.week-ahead-row {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 12px;
+  text-align: left;
+  color: var(--ink);
+}
+
+.week-ahead-row:hover {
+  background: var(--soft);
+}
+
+.week-ahead-empty {
+  border-left-color: var(--line);
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+}
+
+.week-ahead-day {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 860;
+  text-transform: uppercase;
+}
+
+.week-ahead-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.week-ahead-main strong,
+.week-ahead-main span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.week-ahead-empty .week-ahead-main strong {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.week-ahead-main > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 740;
+}
+
+.home-topup {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.home-topup.needs {
+  border-color: #e1c38f;
+  background: #fffaf0;
+}
+
+.home-topup.done {
+  background: var(--olive-soft);
+  border-color: #d6dcbe;
+}
+
+.home-topup-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.home-topup-body .section-kicker {
+  margin: 0;
+}
+
+.home-topup-body strong {
+  font-size: 1.02rem;
+}
+
+.home-topup-body > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 720;
+}
+
+.home-topup .primary-button,
+.home-topup .secondary {
+  width: 100%;
+}
+
 .home-quicklinks {
   display: grid;
   gap: 8px;

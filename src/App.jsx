@@ -339,6 +339,14 @@ function App() {
         : "Current";
   const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
   const skippedShoppingItems = shoppingListPlan.skippedItems;
+  // Items the current plan would add that aren't already on the list — i.e. what
+  // a meal change since you shopped means you still need to grab.
+  const currentShoppingNames = new Set(
+    shoppingItems.map((item) => normaliseItemName(item.name))
+  );
+  const topUpItemCount = shoppingListPlan.newItems.filter(
+    (item) => !currentShoppingNames.has(normaliseItemName(item.name))
+  ).length;
   // Which removals the user has ticked off (handled in their Woolworths list),
   // limited to removals still present this week.
   const currentRemovalIds = new Set(
@@ -421,6 +429,12 @@ function App() {
   function openTonightInPlan() {
     setMealWeekStart(new Date(currentWeekStart));
     setExpandedMealDay(todayDayName);
+    setActiveTab("plan");
+  }
+
+  function openHomeDayInPlan(day) {
+    setMealWeekStart(new Date(currentWeekStart));
+    setExpandedMealDay(day);
     setActiveTab("plan");
   }
 
@@ -893,6 +907,46 @@ function App() {
     }
   }
 
+  // "This week" shopping status: nag only when a plan change actually created a
+  // top-up need; otherwise stay quiet (you've usually already shopped).
+  let homeShopStatus;
+  if (!hasGeneratedShopPlan) {
+    homeShopStatus = {
+      tone: "",
+      title: "No shopping list yet",
+      sub: "Make one from this week's meals",
+      actionLabel: "Generate list",
+      onAction: buildShoppingList,
+    };
+  } else if (topUpItemCount > 0) {
+    homeShopStatus = {
+      tone: "needs",
+      title: "Plan changed since you shopped",
+      sub: `${topUpItemCount} new item${topUpItemCount === 1 ? "" : "s"} to top up`,
+      actionLabel: "Update list",
+      onAction: buildShoppingList,
+    };
+  } else if (pendingShoppingItemsCount > 0) {
+    homeShopStatus = {
+      tone: "",
+      title: "Shopping list ready",
+      sub: `${pendingShoppingItemsCount} left to buy`,
+      actionLabel: "Open list",
+      onAction: () => setActiveTab("shop"),
+    };
+  } else {
+    homeShopStatus = {
+      tone: "done",
+      title: "Shopping sorted",
+      sub: "Your list matches this week's plan",
+      actionLabel: null,
+      onAction: null,
+    };
+  }
+
+  const comingUpSummaries =
+    todayIndex >= 0 ? planningDaySummaries.slice(todayIndex + 1) : [];
+
   return (
     <main className={`app-shell tab-${activeTab}`}>
       <header className="app-header">
@@ -984,91 +1038,160 @@ function App() {
             </div>
           )}
 
-          <div className="home-steps">
-            <button
-              className="home-step"
-              type="button"
-              onClick={() => setActiveTab("plan")}
-            >
-              <span className="home-step-num">1</span>
+          {homeWeekMode === "current" ? (
+            <div className="home-dashboard">
+              {comingUpSummaries.length > 0 && (
+                <div className="home-week-ahead">
+                  <div className="home-section-head">
+                    <p className="section-kicker">Coming up this week</p>
+                    <button
+                      type="button"
+                      className="home-link"
+                      onClick={() => setActiveTab("plan")}
+                    >
+                      Full plan ›
+                    </button>
+                  </div>
 
-              <span className="home-step-body">
-                <strong>Plan meals</strong>
-                <span>
-                  {mealsPlannedCount} of {days.length} dinners planned
-                </span>
-              </span>
+                  <div className="week-ahead-list">
+                    {comingUpSummaries.map((summary) => (
+                      <button
+                        key={summary.day}
+                        type="button"
+                        className={`week-ahead-row ${
+                          summary.hasMeal ? "" : "week-ahead-empty"
+                        }`}
+                        onClick={() => openHomeDayInPlan(summary.day)}
+                      >
+                        <span className="week-ahead-day">
+                          {summary.day.slice(0, 3)}
+                        </span>
 
-              <span className="home-step-chevron">›</span>
-            </button>
+                        <span className="week-ahead-main">
+                          <strong>
+                            {summary.hasMeal ? summary.name : "No meal planned"}
+                          </strong>
+                          {summary.hasMeal && summary.label && (
+                            <span>{summary.label}</span>
+                          )}
+                        </span>
 
-            <button
-              className="home-step"
-              type="button"
-              onClick={() => openHousehold("stock")}
-            >
-              <span className="home-step-num">2</span>
+                        <span className="home-step-chevron">›</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              <span className="home-step-body">
-                <strong>Check stock &amp; recurring buys</strong>
-                <span>
-                  {activeInventoryCount} in stock · {activeStaplesCount}{" "}
-                  recurring
-                </span>
-              </span>
+              <div className={`home-topup ${homeShopStatus.tone}`}>
+                <div className="home-topup-body">
+                  <p className="section-kicker">Shopping</p>
+                  <strong>{homeShopStatus.title}</strong>
+                  <span>{homeShopStatus.sub}</span>
+                </div>
 
-              <span className="home-step-chevron">›</span>
-            </button>
-
-            <div className="home-step-action">
-              <div className="home-step-head">
-                <span className="home-step-num">3</span>
+                {homeShopStatus.actionLabel && (
+                  <button
+                    type="button"
+                    className={
+                      homeShopStatus.tone === "needs"
+                        ? "primary-button"
+                        : "secondary"
+                    }
+                    onClick={homeShopStatus.onAction}
+                  >
+                    {homeShopStatus.actionLabel}
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="home-steps">
+              <button
+                className="home-step"
+                type="button"
+                onClick={() => setActiveTab("plan")}
+              >
+                <span className="home-step-num">1</span>
 
                 <span className="home-step-body">
-                  <strong>Generate shopping list</strong>
+                  <strong>Plan meals</strong>
                   <span>
-                    {shoppingLastUpdatedText
-                      ? `Last updated ${shoppingLastUpdatedText}`
-                      : "From meals, recurring buys & stock"}
+                    {mealsPlannedCount} of {days.length} dinners planned
                   </span>
                 </span>
 
-                <span
-                  className={`list-status-pill ${
-                    shoppingListNeedsUpdate ? "needs-update" : ""
-                  }`}
-                >
-                  {shoppingStatusLabel}
+                <span className="home-step-chevron">›</span>
+              </button>
+
+              <button
+                className="home-step"
+                type="button"
+                onClick={() => openHousehold("stock")}
+              >
+                <span className="home-step-num">2</span>
+
+                <span className="home-step-body">
+                  <strong>Check stock &amp; recurring buys</strong>
+                  <span>
+                    {activeInventoryCount} in stock · {activeStaplesCount}{" "}
+                    recurring
+                  </span>
                 </span>
+
+                <span className="home-step-chevron">›</span>
+              </button>
+
+              <div className="home-step-action">
+                <div className="home-step-head">
+                  <span className="home-step-num">3</span>
+
+                  <span className="home-step-body">
+                    <strong>Generate shopping list</strong>
+                    <span>
+                      {shoppingLastUpdatedText
+                        ? `Last updated ${shoppingLastUpdatedText}`
+                        : "From meals, recurring buys & stock"}
+                    </span>
+                  </span>
+
+                  <span
+                    className={`list-status-pill ${
+                      shoppingListNeedsUpdate ? "needs-update" : ""
+                    }`}
+                  >
+                    {shoppingStatusLabel}
+                  </span>
+                </div>
+
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={buildShoppingList}
+                >
+                  {shoppingActionLabel}
+                </button>
               </div>
 
               <button
-                className="primary-button"
+                className="home-step"
                 type="button"
-                onClick={buildShoppingList}
+                onClick={() => setActiveTab("shop")}
               >
-                {shoppingActionLabel}
+                <span className="home-step-num">4</span>
+
+                <span className="home-step-body">
+                  <strong>Shop</strong>
+                  <span>
+                    {pendingShoppingItemsCount} to buy ·{" "}
+                    {checkedShoppingItemsCount} done
+                  </span>
+                </span>
+
+                <span className="home-step-chevron">›</span>
               </button>
             </div>
-
-            <button
-              className="home-step"
-              type="button"
-              onClick={() => setActiveTab("shop")}
-            >
-              <span className="home-step-num">4</span>
-
-              <span className="home-step-body">
-                <strong>Shop</strong>
-                <span>
-                  {pendingShoppingItemsCount} to buy · {checkedShoppingItemsCount}{" "}
-                  done
-                </span>
-              </span>
-
-              <span className="home-step-chevron">›</span>
-            </button>
-          </div>
+          )}
 
           <div className="home-quicklinks">
             <p className="section-kicker">Set up</p>
