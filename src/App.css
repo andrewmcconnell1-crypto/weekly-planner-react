@@ -764,9 +764,10 @@ textarea:focus-visible {
   background: var(--surface);
 }
 
-/* Cooking days are emphasised with an accent rail. */
-.meal-card-cook {
-  border-left: 3px solid var(--accent);
+/* Cooking days are emphasised with an accent rail (scoped above
+   `.plan-screen .meal-card` so its border-color doesn't override the accent). */
+.plan-screen .meal-card-cook {
+  border-left: 4px solid var(--accent);
 }
 
 .group-count,
