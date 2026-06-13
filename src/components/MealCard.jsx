@@ -8,21 +8,28 @@ function MealCard({
   mealLabel,
   mealTone,
   ingredientCount,
+  coversNights = 1,
   hasMeal,
   onOpen,
 }) {
   const mealType = meal.mealType || "cook";
   const visibleIngredientCount = ingredientCount ?? 0;
+  const feedsLeftovers = mealType === "cook" && coversNights > 1;
   const rowBadge =
     mealType === "cook"
-      ? `${visibleIngredientCount} ingredient${
-          visibleIngredientCount === 1 ? "" : "s"
-        }`
+      ? feedsLeftovers
+        ? `${coversNights} nights`
+        : `${visibleIngredientCount} ingredient${
+            visibleIngredientCount === 1 ? "" : "s"
+          }`
       : mealType === "repeat"
-        ? "Repeat"
+        ? "Leftovers"
         : mealType === "takeaway"
           ? "Takeaway"
           : "Out";
+  const secondaryLabel = feedsLeftovers
+    ? `${mealLabel} · cook once, eat ${coversNights} nights`
+    : mealLabel;
   const mealName = displayName || (meal.name || "").trim();
 
   // Unplanned day: a single clear "needs action" prompt, no redundant labels.
@@ -51,7 +58,7 @@ function MealCard({
 
         <span className="meal-row-main">
           <strong>{mealName}</strong>
-          {mealLabel && <span>{mealLabel}</span>}
+          {secondaryLabel && <span>{secondaryLabel}</span>}
         </span>
 
         <span className="meal-row-count">{rowBadge}</span>

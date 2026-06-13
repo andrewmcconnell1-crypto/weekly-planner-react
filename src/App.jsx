@@ -413,12 +413,37 @@ function App() {
   }
 
   function updateMeal(day, updatedMeal) {
+    const nextMeals = { ...meals, [day]: updatedMeal };
+
+    // If this day is no longer a cooked meal, it can't feed leftovers — clear
+    // the trailing days that were repeats pointing back at it, so they don't
+    // dangle as "Leftovers from <day>" with no source dish.
+    const stillCooked =
+      (updatedMeal.mealType || "cook") === "cook" &&
+      ((updatedMeal.name || "").trim() !== "" ||
+        updatedMeal.recipeId ||
+        (Array.isArray(updatedMeal.ingredients) &&
+          updatedMeal.ingredients.length > 0));
+    const dayIndex = days.indexOf(day);
+
+    if (dayIndex >= 0 && !stillCooked) {
+      for (let index = dayIndex + 1; index < days.length; index += 1) {
+        const followingMeal = nextMeals[days[index]];
+
+        if (
+          followingMeal?.mealType === "repeat" &&
+          followingMeal.repeatFromDay === day
+        ) {
+          nextMeals[days[index]] = createEmptyMeal();
+        } else {
+          break;
+        }
+      }
+    }
+
     setMealsByWeek({
       ...mealsByWeek,
-      [mealWeekKey]: {
-        ...meals,
-        [day]: updatedMeal,
-      },
+      [mealWeekKey]: nextMeals,
     });
   }
 
@@ -930,9 +955,27 @@ function App() {
           </button>
 
           <div className="meal-grid">
-            {days.map((day) => {
+            {days.map((day, dayIndex) => {
               const meal = meals[day];
               const daySummary = getMealSummary(day, meal, meals);
+
+              // How many nights this cooked meal feeds: itself plus the run of
+              // following days that repeat it as leftovers.
+              let coversNights = 1;
+              if (daySummary.hasMeal && (meal.mealType || "cook") === "cook") {
+                for (let i = dayIndex + 1; i < days.length; i += 1) {
+                  const followingMeal = meals[days[i]];
+
+                  if (
+                    followingMeal?.mealType === "repeat" &&
+                    followingMeal.repeatFromDay === day
+                  ) {
+                    coversNights += 1;
+                  } else {
+                    break;
+                  }
+                }
+              }
 
               return (
                 <MealCard
@@ -943,6 +986,7 @@ function App() {
                   mealLabel={daySummary.label}
                   mealTone={daySummary.tone}
                   ingredientCount={daySummary.ingredients.length}
+                  coversNights={coversNights}
                   hasMeal={daySummary.hasMeal}
                   onOpen={() => setExpandedMealDay(day)}
                 />

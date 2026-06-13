@@ -82,11 +82,13 @@ export function createMealHelpers(recipes) {
           ? getMealDisplayName(sourceMeal, sourceRecipe, weekMeals)
           : "";
 
+      // Lead with the dish you'll actually eat; the "Leftovers from X" framing
+      // lives in the label so the card reads like a meal, not a pointer.
       if (sourceName && sourceName !== "No meal planned") {
-        return `Same as ${repeatFromDay}: ${sourceName}`;
+        return sourceName;
       }
 
-      return repeatFromDay ? `Same as ${repeatFromDay}` : "Same as another night";
+      return "Leftovers";
     }
 
     return linkedRecipe?.name || (meal?.name || "").trim() || "No meal planned";
@@ -99,7 +101,11 @@ export function createMealHelpers(recipes) {
 
     if (mealType === "takeaway") return "No shopping needed";
     if (mealType === "eating-out") return "No shopping needed";
-    if (mealType === "repeat") return "Repeat meal";
+    if (mealType === "repeat") {
+      return meal?.repeatFromDay
+        ? `Leftovers from ${meal.repeatFromDay}`
+        : "Leftovers";
+    }
     if (linkedRecipe) return linkedRecipe.category || "Recipe";
     return hasCustomMeal ? "Custom meal" : "Unplanned";
   }
