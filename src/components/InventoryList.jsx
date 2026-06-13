@@ -102,12 +102,17 @@ function InventoryList({
               <button
                 type="button"
                 className="category-toggle"
+                aria-expanded={isOpen}
                 onClick={() => toggleCategory(category)}
               >
                 <span>{category}</span>
-                <span>
-                  {items.length} item{items.length === 1 ? "" : "s"}{" "}
-                  {isOpen ? "▲" : "▼"}
+                <span className="category-toggle-meta">
+                  {items.length} item{items.length === 1 ? "" : "s"}
+                  {isOpen ? (
+                    <ChevronUp size={16} aria-hidden="true" />
+                  ) : (
+                    <ChevronDown size={16} aria-hidden="true" />
+                  )}
                 </span>
               </button>
 

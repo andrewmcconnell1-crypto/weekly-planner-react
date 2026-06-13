@@ -2121,6 +2121,20 @@ input::placeholder {
   margin-top: 12px;
 }
 
+/* Collapse affordance shared by stock + shopping category headers */
+.category-toggle-meta,
+.group-heading-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.category-toggle-meta svg,
+.group-heading-meta svg {
+  flex-shrink: 0;
+}
+
 /* Unplanned day = a clearly empty, fillable slot (single "needs action" cue) */
 .plan-screen .meal-card.meal-card-empty {
   border-style: dashed;

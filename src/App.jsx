@@ -173,6 +173,26 @@ function App() {
     (daySummary) => daySummary.hasMeal
   ).length;
 
+  // Is there a previous week worth copying? (Drives whether we offer the
+  // "Copy last week's plan" shortcut at all.)
+  const previousMealWeekStart = new Date(mealWeekStart);
+  previousMealWeekStart.setDate(mealWeekStart.getDate() - 7);
+  const previousMealWeekMeals =
+    mealsByWeek[getWeekKey(previousMealWeekStart)];
+  const hasPreviousWeekPlan = Boolean(
+    previousMealWeekMeals &&
+      days.some((day) => {
+        const previousMeal = previousMealWeekMeals[day];
+
+        return (
+          previousMeal &&
+          (previousMeal.name ||
+            previousMeal.recipeId ||
+            (previousMeal.mealType && previousMeal.mealType !== "cook"))
+        );
+      })
+  );
+
   // Details for the day whose editor sheet is open (if any).
   const expandedDayIndex = expandedMealDay ? days.indexOf(expandedMealDay) : -1;
   const expandedMeal = expandedMealDay ? meals[expandedMealDay] : null;
@@ -979,13 +999,15 @@ function App() {
             onNextWeek={goToNextMealWeek}
           />
 
-          <button
-            className="secondary copy-week-button"
-            type="button"
-            onClick={copyPreviousWeekMeals}
-          >
-            Copy last week's plan
-          </button>
+          {hasPreviousWeekPlan && (
+            <button
+              className="secondary copy-week-button"
+              type="button"
+              onClick={copyPreviousWeekMeals}
+            >
+              Copy last week's plan
+            </button>
+          )}
 
           <div className="meal-grid">
             {days.map((day, dayIndex) => {

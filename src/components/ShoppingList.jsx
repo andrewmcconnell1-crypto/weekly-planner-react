@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 import WeekControls from "./WeekControls";
 
@@ -228,7 +228,14 @@ function ShoppingList({
                       onClick={() => toggleCategory(category)}
                     >
                       <span className="group-title">{category}</span>
-                      <span className="group-count">{items.length}</span>
+                      <span className="group-heading-meta">
+                        <span className="group-count">{items.length}</span>
+                        {isCollapsed ? (
+                          <ChevronDown size={16} aria-hidden="true" />
+                        ) : (
+                          <ChevronUp size={16} aria-hidden="true" />
+                        )}
+                      </span>
                     </button>
 
                     {!isCollapsed && (
