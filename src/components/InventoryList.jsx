@@ -66,7 +66,11 @@ function InventoryList({
       </p>
 
       {filteredInventory.length === 0 ? (
-        <p className="empty-state">No matching stock items.</p>
+        <p className="empty-state">
+          {inventory.length === 0
+            ? "No stock items yet."
+            : "No matching stock items."}
+        </p>
       ) : (
         Object.entries(groupedInventory).map(([category, items]) => {
           const isOpen = openCategories[category] ?? false;
@@ -189,20 +193,22 @@ function InventoryList({
         </button>
       </div>
 
-      <div className="stock-maintenance">
-        <button
-          type="button"
-          className="tertiary-button"
-          onClick={loadStarterInventory}
-        >
-          Add the app's common household items
-        </button>
+      {inventory.length === 0 && (
+        <div className="stock-maintenance">
+          <button
+            type="button"
+            className="tertiary-button"
+            onClick={loadStarterInventory}
+          >
+            Add the app's common household items
+          </button>
 
-        <p className="small-text stock-maintenance-note">
-          Bulk-adds suggested pantry, household and toiletry staples you don't
-          already have.
-        </p>
-      </div>
+          <p className="small-text stock-maintenance-note">
+            Bulk-adds suggested pantry, household and toiletry staples to get
+            you started.
+          </p>
+        </div>
+      )}
     </section>
   );
 }
