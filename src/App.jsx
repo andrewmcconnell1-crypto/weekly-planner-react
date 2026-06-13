@@ -10,6 +10,7 @@ import "./App.css";
 import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
 import MealEditorSheet from "./components/MealEditorSheet";
+import MealLeftoverCluster from "./components/MealLeftoverCluster";
 import TonightCard from "./components/TonightCard";
 import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
@@ -1147,43 +1148,70 @@ function App() {
           )}
 
           <div className="meal-grid">
-            {days.map((day, dayIndex) => {
-              const meal = meals[day];
-              const daySummary = getMealSummary(day, meal, meals);
+            {(() => {
+              // Group each cook day with the run of leftover (repeat) days that
+              // immediately follow it, so they render as one merged cluster.
+              const groups = [];
+              for (let i = 0; i < days.length; ) {
+                const day = days[i];
+                const meal = meals[day];
+                const repeatDays = [];
 
-              // How many nights this cooked meal feeds: itself plus the run of
-              // following days that repeat it as leftovers.
-              let coversNights = 1;
-              if (daySummary.hasMeal && (meal.mealType || "cook") === "cook") {
-                for (let i = dayIndex + 1; i < days.length; i += 1) {
-                  const followingMeal = meals[days[i]];
+                if (
+                  planningDaySummaries[i].hasMeal &&
+                  (meal?.mealType || "cook") === "cook"
+                ) {
+                  for (let j = i + 1; j < days.length; j += 1) {
+                    const next = meals[days[j]];
 
-                  if (
-                    followingMeal?.mealType === "repeat" &&
-                    followingMeal.repeatFromDay === day
-                  ) {
-                    coversNights += 1;
-                  } else {
-                    break;
+                    if (
+                      next?.mealType === "repeat" &&
+                      next.repeatFromDay === day
+                    ) {
+                      repeatDays.push(days[j]);
+                    } else {
+                      break;
+                    }
                   }
                 }
+
+                groups.push({ leadDay: day, repeatDays });
+                i += 1 + repeatDays.length;
               }
 
-              return (
-                <MealCard
-                  key={day}
-                  day={day}
-                  meal={meal}
-                  displayName={daySummary.name}
-                  mealLabel={daySummary.label}
-                  mealTone={daySummary.tone}
-                  ingredientCount={daySummary.ingredients.length}
-                  coversNights={coversNights}
-                  hasMeal={daySummary.hasMeal}
-                  onOpen={() => setExpandedMealDay(day)}
-                />
-              );
-            })}
+              return groups.map((group) => {
+                const leadSummary = getMealSummary(
+                  group.leadDay,
+                  meals[group.leadDay],
+                  meals
+                );
+
+                if (group.repeatDays.length === 0) {
+                  return (
+                    <MealCard
+                      key={group.leadDay}
+                      day={group.leadDay}
+                      meal={meals[group.leadDay]}
+                      displayName={leadSummary.name}
+                      mealLabel={leadSummary.label}
+                      mealTone={leadSummary.tone}
+                      hasMeal={leadSummary.hasMeal}
+                      onOpen={() => setExpandedMealDay(group.leadDay)}
+                    />
+                  );
+                }
+
+                return (
+                  <MealLeftoverCluster
+                    key={group.leadDay}
+                    leadDay={group.leadDay}
+                    leadSummary={leadSummary}
+                    repeatDays={group.repeatDays}
+                    onOpenDay={(targetDay) => setExpandedMealDay(targetDay)}
+                  />
+                );
+              });
+            })()}
           </div>
 
           {expandedMealDay && (

@@ -764,6 +764,11 @@ textarea:focus-visible {
   background: var(--surface);
 }
 
+/* Cooking days are emphasised with an accent rail. */
+.meal-card-cook {
+  border-left: 3px solid var(--accent);
+}
+
 .group-count,
 .meal-row-count {
   border-radius: 999px;
@@ -787,6 +792,55 @@ textarea:focus-visible {
   color: var(--ink);
   padding: 12px;
   text-align: left;
+}
+
+.meal-row-button-nobadge {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+/* Merged leftovers: cook day on top, leftover nights recessed beneath it. */
+.meal-cluster-repeat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--soft);
+  color: var(--muted);
+  padding: 7px 12px;
+  text-align: left;
+}
+
+.meal-cluster-repeat:hover {
+  background: #e9dfca;
+}
+
+.meal-cluster-repeat-day {
+  width: 3.1rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.meal-cluster-repeat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 740;
+}
+
+.meal-cluster-repeat-label svg {
+  flex-shrink: 0;
+  color: var(--accent);
+  opacity: 0.75;
 }
 
 .meal-row-chevron {

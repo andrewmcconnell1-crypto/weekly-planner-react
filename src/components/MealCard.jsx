@@ -7,29 +7,21 @@ function MealCard({
   displayName,
   mealLabel,
   mealTone,
-  ingredientCount,
-  coversNights = 1,
   hasMeal,
   onOpen,
 }) {
   const mealType = meal.mealType || "cook";
-  const visibleIngredientCount = ingredientCount ?? 0;
-  const feedsLeftovers = mealType === "cook" && coversNights > 1;
+  const isCook = mealType === "cook";
+  // Cook days carry no badge (the recipe name + category say enough); other
+  // types get a short status badge.
   const rowBadge =
-    mealType === "cook"
-      ? feedsLeftovers
-        ? `${coversNights} nights`
-        : `${visibleIngredientCount} ingredient${
-            visibleIngredientCount === 1 ? "" : "s"
-          }`
-      : mealType === "repeat"
-        ? "Leftovers"
-        : mealType === "takeaway"
-          ? "Takeaway"
-          : "Out";
-  const secondaryLabel = feedsLeftovers
-    ? `${mealLabel} · cook once, eat ${coversNights} nights`
-    : mealLabel;
+    mealType === "repeat"
+      ? "Leftovers"
+      : mealType === "takeaway"
+        ? "Takeaway"
+        : mealType === "eating-out"
+          ? "Out"
+          : "";
   const mealName = displayName || (meal.name || "").trim();
 
   // Unplanned day: a single clear "needs action" prompt, no redundant labels.
@@ -52,16 +44,23 @@ function MealCard({
   }
 
   return (
-    <article className="card meal-card" data-tone={mealTone}>
-      <button className="meal-row-button" type="button" onClick={onOpen}>
+    <article
+      className={`card meal-card ${isCook ? "meal-card-cook" : ""}`}
+      data-tone={mealTone}
+    >
+      <button
+        className={`meal-row-button ${rowBadge ? "" : "meal-row-button-nobadge"}`}
+        type="button"
+        onClick={onOpen}
+      >
         <span className="meal-row-day">{day.slice(0, 3)}</span>
 
         <span className="meal-row-main">
           <strong>{mealName}</strong>
-          {secondaryLabel && <span>{secondaryLabel}</span>}
+          {mealLabel && <span>{mealLabel}</span>}
         </span>
 
-        <span className="meal-row-count">{rowBadge}</span>
+        {rowBadge && <span className="meal-row-count">{rowBadge}</span>}
 
         <span className="meal-row-chevron">›</span>
       </button>
