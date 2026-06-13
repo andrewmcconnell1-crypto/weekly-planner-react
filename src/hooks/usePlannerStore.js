@@ -171,6 +171,7 @@ export function usePlannerStore(user) {
       setMealsByWeek: makeSetter("mealsByWeek"),
       setShoppingItemsByWeek: makeSetter("shoppingItemsByWeek"),
       setShoppingListMetaByWeek: makeSetter("shoppingListMetaByWeek"),
+      setRemovalAcksByWeek: makeSetter("removalAcksByWeek"),
       setStaples: makeSetter("staples"),
       setInventory: makeSetter("inventory"),
       setRecipes: makeSetter("recipes"),

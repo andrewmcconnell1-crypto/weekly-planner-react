@@ -8,6 +8,7 @@ export const DATA_KEYS = [
   "mealsByWeek",
   "shoppingItemsByWeek",
   "shoppingListMetaByWeek",
+  "removalAcksByWeek",
   "staples",
   "inventory",
   "recipes",
@@ -20,6 +21,7 @@ export function defaultData() {
     mealsByWeek: {},
     shoppingItemsByWeek: {},
     shoppingListMetaByWeek: {},
+    removalAcksByWeek: {},
     staples: initialStaples,
     inventory: [],
     recipes: initialRecipes,
@@ -37,6 +39,7 @@ export function normaliseData(raw) {
     shoppingItemsByWeek: data.shoppingItemsByWeek ?? base.shoppingItemsByWeek,
     shoppingListMetaByWeek:
       data.shoppingListMetaByWeek ?? base.shoppingListMetaByWeek,
+    removalAcksByWeek: data.removalAcksByWeek ?? base.removalAcksByWeek,
     staples: Array.isArray(data.staples) ? data.staples : base.staples,
     inventory: normaliseInventoryItems(
       Array.isArray(data.inventory) ? data.inventory : []

@@ -72,6 +72,8 @@ function App() {
     setShoppingItemsByWeek,
     shoppingListMetaByWeek,
     setShoppingListMetaByWeek,
+    removalAcksByWeek,
+    setRemovalAcksByWeek,
     staples,
     setStaples,
     inventory,
@@ -257,6 +259,17 @@ function App() {
         ? "Needs update"
         : "Current";
   const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
+  // Which removals the user has ticked off (handled in their Woolworths list),
+  // limited to removals still present this week.
+  const currentRemovalIds = new Set(
+    recurringRemovalItems.map((item) => item.id)
+  );
+  const removalAckIds = (removalAcksByWeek[shoppingWeekKey] || []).filter((id) =>
+    currentRemovalIds.has(id)
+  );
+  const pendingRemovalCount = recurringRemovalItems.filter(
+    (item) => !removalAckIds.includes(item.id)
+  ).length;
   const shoppingLastUpdatedText = shoppingListMeta?.generatedAt
     ? new Date(shoppingListMeta.generatedAt).toLocaleString("en-AU", {
       day: "numeric",
@@ -496,6 +509,23 @@ function App() {
     });
   }
 
+  // Tick a "remove from Woolworths list" item off once it's been handled. We
+  // prune acks down to removals still present, so the stored set can't grow
+  // stale or silently dismiss a removal that later returns.
+  function toggleRemovalAck(id) {
+    const current = (removalAcksByWeek[shoppingWeekKey] || []).filter((ackId) =>
+      currentRemovalIds.has(ackId)
+    );
+    const next = current.includes(id)
+      ? current.filter((ackId) => ackId !== id)
+      : [...current, id];
+
+    setRemovalAcksByWeek({
+      ...removalAcksByWeek,
+      [shoppingWeekKey]: next,
+    });
+  }
+
   function addStaple() {
     const cleanedStaple = newStaple.trim();
     if (cleanedStaple === "") return;
@@ -727,6 +757,9 @@ function App() {
     }
     if (Object.prototype.hasOwnProperty.call(backup, "shoppingListMetaByWeek")) {
       setShoppingListMetaByWeek(backup.shoppingListMetaByWeek);
+    }
+    if (Object.prototype.hasOwnProperty.call(backup, "removalAcksByWeek")) {
+      setRemovalAcksByWeek(backup.removalAcksByWeek);
     }
     if (Object.prototype.hasOwnProperty.call(backup, "staples")) {
       setStaples(backup.staples);
@@ -1036,6 +1069,9 @@ function App() {
           hasGeneratedShopPlan={hasGeneratedShopPlan}
           shoppingLastUpdatedText={shoppingLastUpdatedText}
           recurringRemovalItems={recurringRemovalItems}
+          removalAckIds={removalAckIds}
+          pendingRemovalCount={pendingRemovalCount}
+          onToggleRemoval={toggleRemovalAck}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
           shoppingWeekMode={shoppingWeekMode}

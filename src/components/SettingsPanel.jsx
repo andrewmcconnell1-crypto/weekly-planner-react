@@ -6,6 +6,7 @@ const BACKUP_KEYS = [
   { key: "mealsByWeek", shape: "object" },
   { key: "shoppingItemsByWeek", shape: "object" },
   { key: "shoppingListMetaByWeek", shape: "object" },
+  { key: "removalAcksByWeek", shape: "object" },
   { key: "staples", shape: "array" },
   { key: "inventory", shape: "array" },
   { key: "recipes", shape: "array" },

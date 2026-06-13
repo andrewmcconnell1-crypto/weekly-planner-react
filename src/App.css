@@ -1399,20 +1399,18 @@ input::placeholder {
   text-decoration: line-through;
 }
 
-.removal-row {
+.removal-hint {
+  margin: 0;
+  padding: 0 2px;
+}
+
+.shop-screen .removal-row {
   border-color: #ead8ad;
+  background: #fffaf0;
+}
+
+.shop-screen .removal-row.checked-row {
   background: #ffffff;
-}
-
-.removal-row > span {
-  display: grid;
-  gap: 2px;
-}
-
-.removal-row span span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 740;
 }
 
 .done-section,

@@ -24,6 +24,9 @@ function ShoppingList({
   hasGeneratedShopPlan,
   shoppingLastUpdatedText,
   recurringRemovalItems,
+  removalAckIds = [],
+  pendingRemovalCount,
+  onToggleRemoval,
   shoppingWeekStart,
   shoppingWeekEnd,
   shoppingWeekMode,
@@ -152,18 +155,48 @@ function ShoppingList({
         <section className="woolworths-removal-section">
           <div className="shopping-section-header">
             <h3>Remove from Woolworths list</h3>
-            <span>{recurringRemovalItems.length}</span>
+            <span>{pendingRemovalCount ?? recurringRemovalItems.length}</span>
           </div>
 
+          <p className="small-text removal-hint">
+            Already covered by stock or turned off — tick each one once you've
+            removed it from your standing Woolworths list.
+          </p>
+
           <ul className="clean-list">
-            {recurringRemovalItems.map((item, index) => (
-              <li className="card removal-row" key={`${item.id}-${index}`}>
-                <span>
-                  <strong>{item.name}</strong>
-                  <span>{item.sourceDetail || "Already in stock"}</span>
-                </span>
-              </li>
-            ))}
+            {[...recurringRemovalItems]
+              .sort(
+                (a, b) =>
+                  Number(removalAckIds.includes(a.id)) -
+                  Number(removalAckIds.includes(b.id))
+              )
+              .map((item, index) => {
+                const done = removalAckIds.includes(item.id);
+
+                return (
+                  <li
+                    className={`card shopping-row removal-row ${
+                      done ? "checked-row" : ""
+                    }`}
+                    key={`${item.id}-${index}`}
+                  >
+                    <label className={done ? "checked-item" : ""}>
+                      <input
+                        type="checkbox"
+                        checked={done}
+                        onChange={() => onToggleRemoval(item.id)}
+                      />
+
+                      <span className="shopping-item-content">
+                        <span className="shopping-item-name">{item.name}</span>
+                        <span className="shopping-source-detail">
+                          {item.sourceDetail || "Already in stock"}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
           </ul>
         </section>
       )}
