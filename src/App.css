@@ -1741,12 +1741,16 @@ input::placeholder {
   line-height: 1;
 }
 
-/* De-emphasised footer action — rarely used, so it sits at the bottom. */
+/* Adding items is rare, so the add box sits below the list, behind a divider. */
+.basics-add-row {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
 .stock-maintenance {
   display: grid;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
+  margin-top: 8px;
 }
 
 .tertiary-button {

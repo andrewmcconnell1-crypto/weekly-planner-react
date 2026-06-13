@@ -59,22 +59,6 @@ function StaplesList({
 
   return (
     <div className="staples-panel">
-      <div className="add-item-row">
-        <input
-          type="text"
-          placeholder="Add recurring buy..."
-          value={newStaple}
-          onChange={(event) => setNewStaple(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              addStaple();
-            }
-          }}
-        />
-
-        <button onClick={addStaple}>Add</button>
-      </div>
-
       <p className="small-text stock-hint">
         Ticked items stay on your Woolworths list. Untick one to flag it for
         removal this week.
@@ -247,6 +231,22 @@ function StaplesList({
           );
         })
       )}
+
+      <div className="add-item-row basics-add-row">
+        <input
+          type="text"
+          placeholder="Add recurring buy..."
+          value={newStaple}
+          onChange={(event) => setNewStaple(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              addStaple();
+            }
+          }}
+        />
+
+        <button onClick={addStaple}>Add</button>
+      </div>
     </div>
   );
 }

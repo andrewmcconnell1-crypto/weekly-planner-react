@@ -61,22 +61,6 @@ function InventoryList({
         onChange={(event) => setSearchText(event.target.value)}
       />
 
-      <div className="add-item-row">
-        <input
-          type="text"
-          placeholder="Add stock item..."
-          value={newInventoryItem}
-          onChange={(event) => setNewInventoryItem(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") addInventoryItem();
-          }}
-        />
-
-        <button type="button" onClick={addInventoryItem}>
-          Add
-        </button>
-      </div>
-
       <p className="small-text stock-hint">
         Ticked items are in stock. Untick one to add it to your shopping list.
       </p>
@@ -188,6 +172,22 @@ function InventoryList({
           );
         })
       )}
+
+      <div className="add-item-row basics-add-row">
+        <input
+          type="text"
+          placeholder="Add stock item..."
+          value={newInventoryItem}
+          onChange={(event) => setNewInventoryItem(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") addInventoryItem();
+          }}
+        />
+
+        <button type="button" onClick={addInventoryItem}>
+          Add
+        </button>
+      </div>
 
       <div className="stock-maintenance">
         <button
