@@ -1281,57 +1281,107 @@ input::placeholder {
 .shopping-section,
 .woolworths-removal-section,
 .done-section,
-.manual-add-panel,
-.shop-update-bar {
+.manual-add-panel {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
   box-shadow: var(--shadow);
 }
 
-/* Slim prompt shown only when the list is missing or stale. */
-.shop-update-bar {
+/* Lighter page heroes (Meals + Shop). The bold dark hero is reserved for
+   Home's "Tonight" card; these give each page its own tone + headline. */
+.page-hero {
   display: grid;
-  gap: 10px;
-  padding: 12px;
+  gap: 7px;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
 }
 
-.shop-update-bar.needs-update {
+.plan-hero {
+  border: 1px solid #d6dcbe;
+  background: linear-gradient(152deg, var(--olive-soft) 0%, #fffdf7 88%);
+}
+
+.shop-hero {
+  border: 1px solid #ead2c6;
+  background: linear-gradient(152deg, var(--accent-soft) 0%, #fffdf7 88%);
+}
+
+.shop-hero.needs-update {
   border-color: #e1c38f;
-  background: #fffaf0;
+  background: linear-gradient(152deg, #fdeccb 0%, #fffdf7 88%);
 }
 
-.shop-update-bar > span {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 720;
-}
-
-/* One quiet line when the list is current. */
-.shop-refresh-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+.page-hero-kicker {
   margin: 0;
-  padding: 0 4px;
+  font-size: 0.72rem;
+  font-weight: 840;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.plan-hero .page-hero-kicker {
+  color: var(--olive);
+}
+
+.shop-hero .page-hero-kicker {
+  color: var(--accent-strong);
+}
+
+.page-hero-count {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.page-hero-sub {
+  margin: 0;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 720;
 }
 
-.shop-refresh-line button {
-  min-height: 34px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--primary-strong);
-  padding: 6px 12px;
-  font-size: 0.8rem;
+.page-hero-action {
+  justify-self: start;
+  margin-top: 5px;
+  padding: 10px 18px;
+  color: #fff;
 }
 
-.shop-refresh-line button:hover {
-  background: var(--soft);
+.plan-hero .page-hero-action {
+  background: var(--olive);
+}
+
+.plan-hero .page-hero-action:hover {
+  background: #525c33;
+}
+
+.shop-hero .page-hero-action {
+  background: var(--accent);
+}
+
+.shop-hero .page-hero-action:hover {
+  background: #cf6249;
+}
+
+.shop-hero-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(156, 70, 50, 0.16);
+  overflow: hidden;
+}
+
+.shop-hero-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.2s ease;
 }
 
 .shopping-section-header span {

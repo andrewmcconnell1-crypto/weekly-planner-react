@@ -218,6 +218,18 @@ function App() {
   const mealsPlannedCount = planningDaySummaries.filter(
     (daySummary) => daySummary.hasMeal
   ).length;
+  const unplannedDays = planningDaySummaries
+    .filter((daySummary) => !daySummary.hasMeal)
+    .map((daySummary) => daySummary.day);
+  const firstUnplannedDay = unplannedDays[0] || null;
+  const planGapsLabel =
+    unplannedDays.length === 0
+      ? "Every night is planned."
+      : unplannedDays.length <= 2
+        ? `${unplannedDays.join(" and ")} still need${
+            unplannedDays.length === 1 ? "s" : ""
+          } a meal.`
+        : `${unplannedDays.length} nights still need a meal.`;
 
   // Is there a previous week worth copying? (Drives whether we offer the
   // "Copy last week's plan" shortcut at all.)
@@ -1049,13 +1061,26 @@ function App() {
 
       {activeTab === "plan" && (
         <section className="screen plan-screen">
-          <div className="screen-header">
-            <div>
-              <p className="section-kicker">Planning week</p>
-              <h2>
-                {formatDate(mealWeekStart)} – {formatDate(mealWeekEnd)}
-              </h2>
-            </div>
+          <div className="page-hero plan-hero">
+            <p className="page-hero-kicker">
+              Meal plan · {formatDate(mealWeekStart)} – {formatDate(mealWeekEnd)}
+            </p>
+
+            <strong className="page-hero-count">
+              {mealsPlannedCount} of {days.length} dinners planned
+            </strong>
+
+            <p className="page-hero-sub">{planGapsLabel}</p>
+
+            {firstUnplannedDay && (
+              <button
+                type="button"
+                className="page-hero-action"
+                onClick={() => setExpandedMealDay(firstUnplannedDay)}
+              >
+                Plan {firstUnplannedDay}
+              </button>
+            )}
           </div>
 
           <WeekControls

@@ -42,6 +42,9 @@ function ShoppingList({
 
   const pendingItems = shoppingItems.filter((item) => !item.checked);
   const doneItems = shoppingItems.filter((item) => item.checked);
+  const totalItems = shoppingItems.length;
+  const donePct =
+    totalItems > 0 ? Math.round((doneItems.length / totalItems) * 100) : 0;
   const groupedPendingItems = pendingItems.reduce((groups, item) => {
     const category = item.category || "Other";
 
@@ -105,11 +108,66 @@ function ShoppingList({
 
   return (
     <section className="screen shop-screen">
-      <div className="screen-header">
-        <div>
-          <p className="section-kicker">Shopping week</p>
-          <h2>{formattedShoppingRange}</h2>
-        </div>
+      <div
+        className={`page-hero shop-hero ${
+          shoppingListNeedsUpdate ? "needs-update" : ""
+        }`}
+      >
+        <p className="page-hero-kicker">Shopping list · {formattedShoppingRange}</p>
+
+        {hasGeneratedShopPlan ? (
+          <>
+            <strong className="page-hero-count">
+              {pendingItems.length} to buy
+            </strong>
+
+            <p className="page-hero-sub">
+              {doneItems.length} done · {totalItems} total
+              {shoppingListNeedsUpdate
+                ? " · needs update"
+                : shoppingLastUpdatedText
+                  ? ` · updated ${shoppingLastUpdatedText}`
+                  : ""}
+            </p>
+
+            {totalItems > 0 && (
+              <div
+                className="shop-hero-progress"
+                role="progressbar"
+                aria-valuenow={donePct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <span style={{ width: `${donePct}%` }} />
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="page-hero-action"
+              onClick={buildShoppingList}
+            >
+              {shoppingActionLabel}
+            </button>
+          </>
+        ) : (
+          <>
+            <strong className="page-hero-count">No list yet</strong>
+
+            <p className="page-hero-sub">
+              Check your stock and recurring buys first, then build the list
+              from your meals.
+            </p>
+
+            <button
+              type="button"
+              className="page-hero-action"
+              onClick={buildShoppingList}
+            >
+              {shoppingActionLabel}
+            </button>
+          </>
+        )}
       </div>
 
       <WeekControls
@@ -131,40 +189,6 @@ function ShoppingList({
             Shop the planned week
           </button>
         </div>
-      )}
-
-      {!hasGeneratedShopPlan || shoppingListNeedsUpdate ? (
-        <div
-          className={`shop-update-bar ${
-            shoppingListNeedsUpdate ? "needs-update" : ""
-          }`}
-        >
-          <span>
-            {hasGeneratedShopPlan
-              ? "Your meals, stock or recurring buys have changed since this list was made."
-              : "Check your stock and recurring buys first, then build the list from your meals."}
-          </span>
-
-          <button
-            className="primary-button"
-            type="button"
-            onClick={buildShoppingList}
-          >
-            {shoppingActionLabel}
-          </button>
-        </div>
-      ) : (
-        <p className="shop-refresh-line">
-          <span>
-            {shoppingLastUpdatedText
-              ? `Up to date · ${shoppingLastUpdatedText}`
-              : "Up to date"}
-          </span>
-
-          <button type="button" onClick={buildShoppingList}>
-            Refresh
-          </button>
-        </p>
       )}
 
       {recurringRemovalItems.length > 0 && (
