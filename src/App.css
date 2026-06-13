@@ -1300,18 +1300,18 @@ input::placeholder {
 }
 
 .plan-hero {
-  border: 1px solid #d6dcbe;
-  background: linear-gradient(152deg, var(--olive-soft) 0%, #fffdf7 88%);
+  border: 1px solid #bcc795;
+  background: linear-gradient(152deg, #ccd6a4 0%, #e4e9c3 100%);
 }
 
 .shop-hero {
-  border: 1px solid #ead2c6;
-  background: linear-gradient(152deg, var(--accent-soft) 0%, #fffdf7 88%);
+  border: 1px solid #e0b6a1;
+  background: linear-gradient(152deg, #f0c0a8 0%, #f6dccd 100%);
 }
 
 .shop-hero.needs-update {
-  border-color: #e1c38f;
-  background: linear-gradient(152deg, #fdeccb 0%, #fffdf7 88%);
+  border-color: #d9b471;
+  background: linear-gradient(152deg, #f6d79b 0%, #fce7c2 100%);
 }
 
 .page-hero-kicker {
