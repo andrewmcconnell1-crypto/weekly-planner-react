@@ -21,8 +21,9 @@ export function createStarterInventoryItems() {
   }));
 }
 
-// Drop starter items that no longer exist in the bundled list, and keep starter
-// items' category/active state in sync with the current bundled data.
+// Drop starter items that no longer exist in the bundled list. Preserve the
+// user's own category / in-stock choices — only fall back to the bundled
+// category when a (legacy) item has none stored.
 export function normaliseInventoryItems(inventoryItems) {
   if (!Array.isArray(inventoryItems)) return [];
 
@@ -39,16 +40,17 @@ export function normaliseInventoryItems(inventoryItems) {
 
       return Boolean(starterItem);
     })
-    .map((item) => ({
-      ...item,
-      category: String(item.id || "").startsWith("starter-inventory-")
-        ? durableInventoryItemsByName.get(normaliseItemName(item.name || ""))
-            ?.category || item.category
-        : item.category,
-      active: String(item.id || "").startsWith("starter-inventory-")
-        ? true
-        : item.active ?? true,
-    }));
+    .map((item) => {
+      const starterItem = durableInventoryItemsByName.get(
+        normaliseItemName(item.name || "")
+      );
+
+      return {
+        ...item,
+        category: item.category || starterItem?.category || "Other",
+        active: item.active ?? true,
+      };
+    });
 }
 
 function normaliseRecipe(recipe, index) {
