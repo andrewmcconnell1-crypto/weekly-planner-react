@@ -154,6 +154,10 @@ function App() {
       : shoppingWeekKey === nextWeekKey
         ? "next"
         : "custom";
+  // The planning week (Meals tab) and shopping week (Shop tab) move
+  // independently; flag when they've drifted apart so each screen can offer to
+  // realign them.
+  const weeksDiverged = mealWeekKey !== shoppingWeekKey;
 
   const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
   const shoppingWeekMeals =
@@ -382,6 +386,12 @@ function App() {
 
   function goToNextShoppingWeekDefault() {
     setShoppingWeekStart(getNextSunday());
+  }
+
+  // Pull the shopping week onto the planning week, so the list reflects the
+  // meals you've just been editing.
+  function alignShoppingToPlan() {
+    setShoppingWeekStart(new Date(mealWeekStart));
   }
 
   // Cook once, eat for `nights` nights: keep the meal on startDay and mark the
@@ -999,6 +1009,24 @@ function App() {
             onNextWeek={goToNextMealWeek}
           />
 
+          {weeksDiverged && (
+            <div className="week-mismatch" role="status">
+              <span>
+                You're planning {formatDate(mealWeekStart)} –{" "}
+                {formatDate(mealWeekEnd)}, but your shopping list is set to{" "}
+                {formatDate(shoppingWeekStart)} – {formatDate(shoppingWeekEnd)}.
+              </span>
+
+              <button
+                type="button"
+                className="secondary"
+                onClick={alignShoppingToPlan}
+              >
+                Shop this week
+              </button>
+            </div>
+          )}
+
           {hasPreviousWeekPlan && (
             <button
               className="secondary copy-week-button"
@@ -1094,6 +1122,11 @@ function App() {
           removalAckIds={removalAckIds}
           pendingRemovalCount={pendingRemovalCount}
           onToggleRemoval={toggleRemovalAck}
+          weeksDiverged={weeksDiverged}
+          plannedWeekLabel={`${formatDate(mealWeekStart)} – ${formatDate(
+            mealWeekEnd
+          )}`}
+          onShopPlannedWeek={alignShoppingToPlan}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
           shoppingWeekMode={shoppingWeekMode}
