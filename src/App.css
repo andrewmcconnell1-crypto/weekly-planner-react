@@ -2269,6 +2269,15 @@ input::placeholder {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* Clear active state — the shared accent-soft was too close to the container's
+   sand background to read as selected. */
+.household-tabs button.active {
+  border-color: var(--accent);
+  background: var(--panel);
+  color: var(--accent-strong);
+  box-shadow: 0 2px 8px rgba(74, 48, 26, 0.12);
+}
+
 .household-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -65,7 +65,7 @@ function InventoryList({
         </p>
       ) : (
         Object.entries(groupedInventory).map(([category, items]) => {
-          const isOpen = openCategories[category] ?? false;
+          const isOpen = searchText ? true : openCategories[category] ?? false;
 
           return (
             <div className="shopping-group" key={category}>

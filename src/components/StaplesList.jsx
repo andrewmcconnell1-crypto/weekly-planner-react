@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { categories } from "../data/categories";
+import { normaliseItemName } from "../utils/itemUtils";
 
 const frequencyLabels = {
   weekly: "Weekly",
@@ -46,9 +47,14 @@ function StaplesList({
   updateStapleDetails,
   toggleStapleActive,
 }) {
+  const [searchText, setSearchText] = useState("");
   const [openCategories, setOpenCategories] = useState({});
   const [expandedStapleId, setExpandedStapleId] = useState(null);
-  const groupedStaples = groupByCategory(staples);
+
+  const filteredStaples = staples.filter((staple) =>
+    normaliseItemName(staple.name).includes(normaliseItemName(searchText))
+  );
+  const groupedStaples = groupByCategory(filteredStaples);
 
   function toggleCategory(category) {
     setOpenCategories({
@@ -59,6 +65,13 @@ function StaplesList({
 
   return (
     <div className="staples-panel">
+      <input
+        type="text"
+        placeholder="Search recurring buys..."
+        value={searchText}
+        onChange={(event) => setSearchText(event.target.value)}
+      />
+
       <p className="small-text stock-hint">
         Ticked items stay on your Woolworths list. Untick one to flag it for
         removal this week.
@@ -66,9 +79,11 @@ function StaplesList({
 
       {staples.length === 0 ? (
         <p className="empty-state">No recurring buys yet.</p>
+      ) : filteredStaples.length === 0 ? (
+        <p className="empty-state">No matching recurring buys.</p>
       ) : (
         groupedStaples.map(([category, items]) => {
-          const isOpen = openCategories[category] ?? false;
+          const isOpen = searchText ? true : openCategories[category] ?? false;
 
           return (
             <div className="shopping-group" key={category}>
