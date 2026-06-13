@@ -337,6 +337,7 @@ function App() {
         ? "Needs update"
         : "Current";
   const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
+  const skippedShoppingItems = shoppingListPlan.skippedItems;
   // Which removals the user has ticked off (handled in their Woolworths list),
   // limited to removals still present this week.
   const currentRemovalIds = new Set(
@@ -577,6 +578,32 @@ function App() {
     });
 
     setNewItem("");
+  }
+
+  // Override the "already have" smarts: put a skipped ingredient back on the
+  // list as a manual item (which the generator then preserves).
+  function addSkippedShoppingItem(name) {
+    const cleanedItem = name.trim();
+    if (cleanedItem === "") return;
+
+    const alreadyOnList = shoppingItems.some(
+      (item) => normaliseItemName(item.name) === normaliseItemName(cleanedItem)
+    );
+    if (alreadyOnList) return;
+
+    setShoppingItemsByWeek({
+      ...shoppingItemsByWeek,
+      [shoppingWeekKey]: [
+        ...shoppingItems,
+        {
+          id: createCollectionId("shopping", shoppingItems, cleanedItem),
+          name: cleanedItem,
+          category: "Meal ingredients",
+          source: "Manual",
+          checked: false,
+        },
+      ],
+    });
   }
 
   function toggleShoppingItem(id) {
@@ -1204,6 +1231,8 @@ function App() {
           removalAckIds={removalAckIds}
           pendingRemovalCount={pendingRemovalCount}
           onToggleRemoval={toggleRemovalAck}
+          skippedItems={skippedShoppingItems}
+          onAddSkipped={addSkippedShoppingItem}
           weeksDiverged={weeksDiverged}
           plannedWeekLabel={`${formatDate(mealWeekStart)} – ${formatDate(
             mealWeekEnd

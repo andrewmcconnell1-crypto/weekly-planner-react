@@ -1,7 +1,7 @@
 import { normaliseItemName, slugifyIdPart } from "./itemUtils";
 import { days } from "./mealUtils";
 import { isStapleDueThisWeek } from "./stapleUtils";
-import { buildCoverageIndex, isIngredientCovered } from "./ingredientMatch";
+import { buildCoverageIndex, findCoverage } from "./ingredientMatch";
 
 // Sources that the generator owns. Rows with these sources are regenerated each
 // time the list is built; any other source (e.g. "Manual") is preserved.
@@ -176,9 +176,36 @@ export function buildShoppingPlan({
     ...recurringBuyNames,
   ]);
 
+  // Meal ingredients suppressed because you already have them — surfaced so the
+  // user can review and override. Deduped by name.
+  const skippedItems = [];
+  const skippedSeen = new Set();
+
   const newItems = allNewItems
     .filter((item) => {
       const normalisedName = normaliseItemName(item.name);
+
+      // Fuzzy coverage applies to meal ingredients only — restock rows are the
+      // stock you're deliberately rebuying, so they must never be suppressed.
+      if (item.source === "Meal") {
+        const coveredBy = findCoverage(item.name, coverageIndex);
+
+        if (coveredBy) {
+          summary.skippedAlreadyHave += 1;
+
+          if (!skippedSeen.has(normalisedName)) {
+            skippedSeen.add(normalisedName);
+            skippedItems.push({
+              name: item.name,
+              day: item.day || "",
+              sourceDetail: item.sourceDetail || "",
+              coveredBy,
+            });
+          }
+
+          return false;
+        }
+      }
 
       if (seenNames.has(normalisedName)) {
         if (activeStockNames.has(normalisedName)) {
@@ -189,16 +216,6 @@ export function buildShoppingPlan({
           summary.skippedDuplicates += 1;
         }
 
-        return false;
-      }
-
-      // Fuzzy coverage applies to meal ingredients only — restock rows are the
-      // stock you're deliberately rebuying, so they must never be suppressed.
-      if (
-        item.source === "Meal" &&
-        isIngredientCovered(item.name, coverageIndex)
-      ) {
-        summary.skippedAlreadyHave += 1;
         return false;
       }
 
@@ -230,6 +247,7 @@ export function buildShoppingPlan({
     newItems,
     retainedShoppingItems,
     removeFromRecurring,
+    skippedItems,
     itemsSignature: getGeneratedShoppingSignature(newItems),
     signature: getShoppingPlanSignature(newItems, removeFromRecurring),
     summary,

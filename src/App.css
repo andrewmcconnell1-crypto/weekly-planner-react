@@ -1281,6 +1281,7 @@ input::placeholder {
 .shopping-section,
 .woolworths-removal-section,
 .done-section,
+.skipped-section,
 .manual-add-panel {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1442,7 +1443,8 @@ input::placeholder {
 }
 
 .shopping-section-header > span,
-.done-section summary span:last-child {
+.done-section summary span:last-child,
+.skipped-section summary span:last-child {
   border-radius: 999px;
   background: var(--soft);
   color: var(--primary-strong);
@@ -1601,6 +1603,7 @@ input::placeholder {
 }
 
 .done-section,
+.skipped-section,
 .manual-add-panel {
   display: grid;
   gap: 8px;
@@ -1613,6 +1616,7 @@ input::placeholder {
 }
 
 .done-section summary,
+.skipped-section summary,
 .manual-add-panel summary {
   display: flex;
   align-items: center;
@@ -1627,8 +1631,54 @@ input::placeholder {
 }
 
 .done-section summary::-webkit-details-marker,
+.skipped-section summary::-webkit-details-marker,
 .manual-add-panel summary::-webkit-details-marker {
   display: none;
+}
+
+.skipped-section .small-text {
+  margin: 0 11px;
+}
+
+.skipped-section .clean-list {
+  padding: 0 11px 4px;
+}
+
+.skipped-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.skipped-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.skipped-main strong {
+  overflow-wrap: anywhere;
+}
+
+.skipped-main span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 720;
+}
+
+.skipped-row .secondary {
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+}
+
+.skipped-added {
+  flex-shrink: 0;
+  color: var(--olive);
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .manual-add-panel summary::after {

@@ -95,16 +95,27 @@ function coversTokens(a, b) {
   return true;
 }
 
-// Pre-compute the core token sets for the things you already have, once.
+// Pre-compute the core token sets for the things you already have, once. Keeps
+// the original name so we can tell the user what covered an ingredient.
 export function buildCoverageIndex(names) {
   return names
-    .map((name) => extractCoreTokens(name))
-    .filter((tokens) => tokens.size > 0);
+    .map((name) => ({ name, tokens: extractCoreTokens(name) }))
+    .filter((entry) => entry.tokens.size > 0);
+}
+
+// Returns the name of the stock / recurring item covering this ingredient, or
+// null if nothing covers it.
+export function findCoverage(ingredientName, coverageIndex) {
+  const ingredientTokens = extractCoreTokens(ingredientName);
+  if (ingredientTokens.size === 0) return null;
+
+  const match = coverageIndex.find((entry) =>
+    coversTokens(ingredientTokens, entry.tokens)
+  );
+
+  return match ? match.name : null;
 }
 
 export function isIngredientCovered(ingredientName, coverageIndex) {
-  const ingredientTokens = extractCoreTokens(ingredientName);
-  if (ingredientTokens.size === 0) return false;
-
-  return coverageIndex.some((tokens) => coversTokens(ingredientTokens, tokens));
+  return findCoverage(ingredientName, coverageIndex) !== null;
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 import WeekControls from "./WeekControls";
+import { normaliseItemName } from "../utils/itemUtils";
 
 // What a row needs to say in the supermarket: the item, and (for meal
 // ingredients) which meal it's for. Everything else is noise.
@@ -27,6 +28,8 @@ function ShoppingList({
   removalAckIds = [],
   pendingRemovalCount,
   onToggleRemoval,
+  skippedItems = [],
+  onAddSkipped,
   weeksDiverged,
   plannedWeekLabel,
   onShopPlannedWeek,
@@ -304,6 +307,53 @@ function ShoppingList({
             </details>
           )}
         </>
+      )}
+
+      {skippedItems.length > 0 && (
+        <details className="skipped-section">
+          <summary>
+            <span>Already have</span>
+            <span>{skippedItems.length}</span>
+          </summary>
+
+          <p className="small-text">
+            Skipped from your meals because they match something in your stock
+            or recurring buys. Add any the smarts got wrong.
+          </p>
+
+          <ul className="clean-list">
+            {skippedItems.map((skipped, index) => {
+              const onList = shoppingItems.some(
+                (item) =>
+                  normaliseItemName(item.name) ===
+                  normaliseItemName(skipped.name)
+              );
+
+              return (
+                <li className="card skipped-row" key={`${skipped.name}-${index}`}>
+                  <span className="skipped-main">
+                    <strong>{skipped.name}</strong>
+                    {skipped.coveredBy && (
+                      <span>You have: {skipped.coveredBy}</span>
+                    )}
+                  </span>
+
+                  {onList ? (
+                    <span className="skipped-added">Added</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => onAddSkipped(skipped.name)}
+                    >
+                      Add anyway
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
 
       <div className="manual-add-panel">
