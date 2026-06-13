@@ -804,7 +804,7 @@ function App() {
         sourceUrl: "",
         ingredients: [],
         method: "",
-        serves: null,
+        serves: 4,
       },
     ]);
 

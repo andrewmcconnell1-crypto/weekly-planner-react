@@ -60,11 +60,12 @@ function normaliseRecipe(recipe, index) {
   );
 
   if (starterRecipe) {
-    // Starter recipes are otherwise kept in sync with the bundled set, but the
-    // user's own "serves" edit is preserved.
-    return recipe.serves != null && recipe.serves !== ""
-      ? { ...starterRecipe, serves: recipe.serves }
-      : starterRecipe;
+    // Bundled recipes don't ship with serving sizes, so default to a sensible
+    // family-dinner yield. The user's own "serves" edit always wins.
+    const userServes =
+      recipe.serves != null && recipe.serves !== "" ? recipe.serves : null;
+
+    return { ...starterRecipe, serves: userServes ?? starterRecipe.serves ?? 4 };
   }
 
   return {
@@ -84,9 +85,9 @@ function normaliseRecipe(recipe, index) {
 export function mergeSavedRecipes(parsedRecipes) {
   const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
   const savedRecipeIds = new Set(normalisedRecipes.map((recipe) => recipe.id));
-  const missingStarterRecipes = initialRecipes.filter(
-    (recipe) => !savedRecipeIds.has(recipe.id)
-  );
+  const missingStarterRecipes = initialRecipes
+    .filter((recipe) => !savedRecipeIds.has(recipe.id))
+    .map((recipe) => ({ ...recipe, serves: recipe.serves ?? 4 }));
 
   return [...normalisedRecipes, ...missingStarterRecipes];
 }
