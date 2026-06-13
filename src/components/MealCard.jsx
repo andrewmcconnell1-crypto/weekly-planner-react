@@ -12,8 +12,9 @@ function MealCard({
 }) {
   const mealType = meal.mealType || "cook";
   const isCook = mealType === "cook";
-  // Cook days carry no badge (the recipe name + category say enough); other
-  // types get a short status badge.
+  const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
+  // Cook days carry no badge unless cooked as a multi batch; other types get a
+  // short status badge.
   const rowBadge =
     mealType === "repeat"
       ? "Leftovers"
@@ -21,7 +22,9 @@ function MealCard({
         ? "Takeaway"
         : mealType === "eating-out"
           ? "Out"
-          : "";
+          : isCook && batches > 1
+            ? `×${batches}`
+            : "";
   const mealName = displayName || (meal.name || "").trim();
 
   // Unplanned day: a single clear "needs action" prompt, no redundant labels.

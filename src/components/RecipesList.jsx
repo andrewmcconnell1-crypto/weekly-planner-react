@@ -108,6 +108,7 @@ function RecipesList({
                       <strong>{recipe.name}</strong>
                       <span>
                         {recipe.category || "Uncategorised"}
+                        {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
                         {recipe.source ? ` · ${recipe.source}` : ""}
                       </span>
                     </span>

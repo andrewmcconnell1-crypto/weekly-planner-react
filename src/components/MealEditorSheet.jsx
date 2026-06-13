@@ -45,6 +45,8 @@ function MealEditorSheet({
   const isCookedMeal =
     mealType === "cook" &&
     (Boolean(selectedRecipeId) || (meal.name || "").trim() !== "");
+  const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
+  const recipeServes = linkedRecipe?.serves || null;
 
   // Secondary panels open from the "Or…" row, and start open when the day is
   // already that kind of meal.
@@ -306,7 +308,10 @@ function MealEditorSheet({
                 <div>
                   <span className="section-kicker">Selected</span>
                   <strong>{daySummary.name}</strong>
-                  <span className="meal-current-label">{daySummary.label}</span>
+                  <span className="meal-current-label">
+                    {daySummary.label}
+                    {recipeServes ? ` · Serves ${recipeServes}` : ""}
+                  </span>
                 </div>
 
                 <div className="meal-current-actions">
@@ -380,6 +385,45 @@ function MealEditorSheet({
                 {leftoverNights > 1
                   ? `Cook once — leftovers cover ${leftoverDaysLabel}, no extra shopping.`
                   : "Pick more nights to fill the next days with leftovers."}
+              </p>
+            </div>
+          )}
+
+          {isCookedMeal && (
+            <div className="batch-panel">
+              <p className="section-kicker">Batch size</p>
+
+              <div
+                className="nights-buttons"
+                role="radiogroup"
+                aria-label="Batch size"
+              >
+                {[1, 2, 3].map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    role="radio"
+                    aria-checked={batches === size}
+                    className={batches === size ? "active" : ""}
+                    onClick={() => updateMeal(day, { ...meal, batches: size })}
+                  >
+                    ×{size}
+                  </button>
+                ))}
+              </div>
+
+              <p className="nights-hint">
+                {batches > 1
+                  ? `${
+                      batches === 2 ? "Double" : batches === 3 ? "Triple" : `×${batches}`
+                    } batch${
+                      recipeServes
+                        ? ` — serves ${recipeServes} → ${recipeServes * batches}`
+                        : ""
+                    }. Shopping amounts scaled ×${batches}.`
+                  : recipeServes
+                    ? `Single batch — serves ${recipeServes}.`
+                    : "Cooking a single batch."}
               </p>
             </div>
           )}

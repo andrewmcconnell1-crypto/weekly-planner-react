@@ -6,6 +6,7 @@ import { CornerDownRight } from "lucide-react";
 function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
   const coversNights = repeatDays.length + 1;
   const leadName = leadSummary.name || "No meal planned";
+  const batches = Math.max(1, Math.round(Number(leadSummary.meal?.batches) || 1));
 
   return (
     <article className="card meal-card meal-card-cook meal-cluster">
@@ -20,6 +21,7 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
           <strong>{leadName}</strong>
           <span>
             {leadSummary.label} · cook once, eat {coversNights} nights
+            {batches > 1 ? ` · ×${batches} batch` : ""}
           </span>
         </span>
 

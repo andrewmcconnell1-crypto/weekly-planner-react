@@ -60,7 +60,11 @@ function normaliseRecipe(recipe, index) {
   );
 
   if (starterRecipe) {
-    return starterRecipe;
+    // Starter recipes are otherwise kept in sync with the bundled set, but the
+    // user's own "serves" edit is preserved.
+    return recipe.serves != null && recipe.serves !== ""
+      ? { ...starterRecipe, serves: recipe.serves }
+      : starterRecipe;
   }
 
   return {
@@ -71,6 +75,7 @@ function normaliseRecipe(recipe, index) {
     sourceUrl: recipe.sourceUrl || "",
     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
     method: recipe.method || "",
+    serves: recipe.serves ?? null,
   };
 }
 

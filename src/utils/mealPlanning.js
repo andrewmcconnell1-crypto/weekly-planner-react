@@ -7,6 +7,7 @@ export const emptyMeal = {
   mealType: "cook",
   repeatFromDay: "",
   ingredients: [],
+  batches: 1,
 };
 
 // Builds a set of meal-summary helpers bound to the current recipe list.

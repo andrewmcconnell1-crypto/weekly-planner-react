@@ -2,6 +2,7 @@ import { normaliseItemName, slugifyIdPart } from "./itemUtils";
 import { days } from "./mealUtils";
 import { isStapleDueThisWeek } from "./stapleUtils";
 import { buildCoverageIndex, findCoverage } from "./ingredientMatch";
+import { scaleIngredient } from "./quantityUtils";
 
 // Sources that the generator owns. Rows with these sources are regenerated each
 // time the list is built; any other source (e.g. "Manual") is preserved.
@@ -73,9 +74,11 @@ export function buildShoppingPlan({
   const mealIngredients = days.flatMap((day) => {
     const daySummary = getMealSummary(day, weekMeals[day], weekMeals);
     const sourceDetail = daySummary.hasMeal ? daySummary.name : day;
+    // Cooking a double (or triple) batch scales this day's ingredient amounts.
+    const batches = Math.max(1, Math.round(Number(weekMeals[day]?.batches) || 1));
 
     return daySummary.ingredients.map((ingredient) => ({
-      name: ingredient,
+      name: batches > 1 ? scaleIngredient(ingredient, batches) : ingredient,
       category: "Meal ingredients",
       source: "Meal",
       sourceDetail,

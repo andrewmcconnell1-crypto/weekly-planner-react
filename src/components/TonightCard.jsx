@@ -28,6 +28,8 @@ function TonightCard({
   const ingredients = summary.ingredients || [];
   const method = linkedRecipe?.method || "";
   const hasRecipeDetail = ingredients.length > 0 || Boolean(method);
+  const recipeServes = linkedRecipe?.serves || null;
+  const batches = Math.max(1, Math.round(Number(summary.meal?.batches) || 1));
 
   let icon = <UtensilsCrossed size={18} aria-hidden="true" />;
   let dish = summary.name;
@@ -51,6 +53,19 @@ function TonightCard({
     sub = "No cooking tonight.";
   } else if (coversNights > 1) {
     note = `Cook once tonight — covers ${leftoverDaysLabel}. Make extra.`;
+  }
+
+  if (summary.hasMeal && mealType === "cook") {
+    if (recipeServes) {
+      sub = `${summary.label} · Serves ${
+        batches > 1 ? recipeServes * batches : recipeServes
+      }`;
+    }
+    if (batches > 1 && coversNights <= 1) {
+      note = `Cooking a ${
+        batches === 2 ? "double" : batches === 3 ? "triple" : `×${batches}`
+      } batch tonight.`;
+    }
   }
 
   return (

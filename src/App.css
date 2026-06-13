@@ -971,6 +971,15 @@ textarea:focus-visible {
   padding: 12px;
 }
 
+.batch-panel {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 12px;
+}
+
 .nights-buttons {
   display: flex;
   gap: 7px;

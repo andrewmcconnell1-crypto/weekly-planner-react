@@ -101,6 +101,26 @@ function RecipeEditorSheet({
             </label>
 
             <label>
+              <span>Serves</span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                inputMode="numeric"
+                placeholder="e.g. 4"
+                value={recipe.serves ?? ""}
+                onChange={(event) =>
+                  updateRecipe(recipe.id, {
+                    serves:
+                      event.target.value === ""
+                        ? null
+                        : Number(event.target.value),
+                  })
+                }
+              />
+            </label>
+
+            <label>
               <span>Source</span>
               <input
                 type="text"
