@@ -15,7 +15,7 @@ function recipe({ id, name, category, sourceUrl, ingredients }) {
   };
 }
 
-export const initialRecipes = [
+const baseRecipes = [
   recipe({
     id: "butter-chicken",
     name: "One-pan Baked Butter Chicken",
@@ -822,3 +822,76 @@ export const initialRecipes = [
   // AI "good-consensus" recipes — own full method, no source link. See aiRecipes.js.
   ...aiRecipes,
 ];
+
+// Servings per recipe. The RecipeTin entries are taken from each recipe's
+// source page, adjusted to the (sometimes simplified) ingredient quantities
+// used here; the AI recipes are estimated from their quantities. Used as the
+// default serving size — the user can override any recipe in the editor.
+const SERVES_BY_ID = {
+  "butter-chicken": 5,
+  bolognese: 5,
+  "fried-rice": 4,
+  "beef-stroganoff": 4,
+  "homemade-pizza": 6,
+  "chicken-wraps": 6,
+  tacos: 4,
+  "sausage-pasta": 5,
+  "chicken-stir-fry": 4,
+  "slow-cooker-pulled-pork": 8,
+  "tuna-pasta-bake": 5,
+  "beef-burgers": 4,
+  "chicken-schnitzel": 4,
+  "mexican-rice-and-beans": 4,
+  "tomato-lentil-eggplant-pasta": 4,
+  "portuguese-chicken-rice": 5,
+  "crispy-chinese-lemon-chicken": 4,
+  "whipped-ricotta-chicken-pasta": 4,
+  "one-pot-chicken-risoni": 4,
+  "chicken-cacciatore": 5,
+  "golden-coconut-chicken-curry": 5,
+  "vietnamese-caramel-ginger-chicken": 5,
+  "crunchy-crumbed-chicken-drumsticks": 4,
+  "beef-black-bean": 4,
+  "thai-sweet-chilli-beef-bowls": 4,
+  "one-pot-cajun-beef-pasta": 5,
+  "one-pot-creamy-tomato-beef-pasta": 5,
+  "salisbury-steak-meatballs": 4,
+  "teriyaki-beef-bowls": 4,
+  "beef-burritos": 5,
+  "chilli-con-carne": 5,
+  "beef-chow-mein": 4,
+  "slow-cooker-shredded-beef-chili": 8,
+  "slow-cooker-beef-stroganoff": 6,
+  carnitas: 8,
+  "mexican-shredded-beef": 7,
+  "beef-stew": 6,
+  "one-pot-mexican-chicken-rice": 5,
+  "beef-steak-fried-rice": 4,
+  "smoked-sausage-rice": 4,
+  "baked-fried-rice": 4,
+  "magic-baked-chicken-fried-rice": 4,
+  "sausage-meatballs": 4,
+  "baked-mac-cheese": 6,
+  "baked-spaghetti": 6,
+  "spinach-ricotta-pasta-bake": 6,
+  "pad-thai": 3,
+  "pad-see-ew": 4,
+  "hokkien-noodles": 4,
+  "thai-chicken-peanut-noodles": 4,
+  // AI recipes
+  "honey-soy-salmon": 4,
+  "crispy-skin-salmon": 4,
+  "garlic-prawn-linguine": 4,
+  "shepherds-pie": 5,
+  "lamb-koftas": 4,
+  "roast-chicken": 5,
+  "pumpkin-soup": 5,
+  shakshuka: 4,
+  "red-lentil-dahl": 5,
+  "bangers-and-mash": 4,
+};
+
+export const initialRecipes = baseRecipes.map((recipeItem) => ({
+  ...recipeItem,
+  serves: SERVES_BY_ID[recipeItem.id] ?? 4,
+}));
