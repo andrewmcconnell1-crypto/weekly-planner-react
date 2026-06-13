@@ -195,8 +195,13 @@ function InventoryList({
           className="tertiary-button"
           onClick={loadStarterInventory}
         >
-          Add missing stock items
+          Add the app's common household items
         </button>
+
+        <p className="small-text stock-maintenance-note">
+          Bulk-adds suggested pantry, household and toiletry staples you don't
+          already have.
+        </p>
       </div>
     </section>
   );

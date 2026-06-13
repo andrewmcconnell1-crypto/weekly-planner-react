@@ -1750,7 +1750,13 @@ input::placeholder {
 
 .stock-maintenance {
   display: grid;
+  gap: 4px;
   margin-top: 8px;
+}
+
+.stock-maintenance-note {
+  margin: 0;
+  text-align: center;
 }
 
 .tertiary-button {
