@@ -4,6 +4,9 @@ import { commonInventoryItems } from "../data/commonInventory";
 
 const recipeIdAliases = {
   "spaghetti-bolognese": "bolognese",
+  // Was mislabelled — the source recipe is just Mexican Red Rice. Migrate saved
+  // copies to the corrected recipe (a proper rice-and-beans is now separate).
+  "mexican-rice-and-beans": "mexican-red-rice",
 };
 
 const durableInventoryItemsByName = new Map(

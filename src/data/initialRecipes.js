@@ -225,20 +225,19 @@ const baseRecipes = [
     ],
   }),
   recipe({
-    id: "mexican-rice-and-beans",
-    name: "Mexican Rice and Beans",
+    id: "mexican-red-rice",
+    name: "Mexican Red Rice",
     category: "Rice",
     sourceUrl: "https://www.recipetineats.com/mexican-red-rice/",
     ingredients: [
       "1 1/2 cups long grain rice",
-      "1 can black beans",
-      "1 can corn",
-      "1 red capsicum",
+      "2 tbsp tomato paste",
+      "1 tomato",
       "1 brown onion",
       "2 garlic cloves",
-      "2 tbsp tomato paste",
       "2 cups chicken or vegetable stock",
-      "1 avocado",
+      "1 cup frozen peas and carrots",
+      "2 tbsp vegetable oil",
     ],
   }),
   recipe({
@@ -841,7 +840,7 @@ const SERVES_BY_ID = {
   "tuna-pasta-bake": 5,
   "beef-burgers": 4,
   "chicken-schnitzel": 4,
-  "mexican-rice-and-beans": 4,
+  "mexican-red-rice": 4,
   "tomato-lentil-eggplant-pasta": 4,
   "portuguese-chicken-rice": 5,
   "crispy-chinese-lemon-chicken": 4,
@@ -889,6 +888,7 @@ const SERVES_BY_ID = {
   shakshuka: 4,
   "red-lentil-dahl": 5,
   "bangers-and-mash": 4,
+  "mexican-rice-beans": 5,
 };
 
 export const initialRecipes = baseRecipes.map((recipeItem) => ({
