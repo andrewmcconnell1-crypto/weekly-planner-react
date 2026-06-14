@@ -1206,8 +1206,15 @@ textarea:focus-visible {
 }
 
 .recipe-picker-results {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+}
+
+/* Cards must keep their content height in the scrollable picker, not shrink to
+   their button min-height and overflow. */
+.recipe-picker-results .recipe-row {
+  flex-shrink: 0;
 }
 
 .recipe-picker-group {
@@ -1900,12 +1907,13 @@ input::placeholder {
   gap: 8px;
 }
 
+/* A <button> set to display:grid won't grow past its min-height to fit taller
+   (wrapped) content, so the grid lives in an inner element and the button is a
+   plain block that grows around it. */
 .recipe-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 10px;
+  display: block;
   width: 100%;
+  height: auto;
   border: 1px solid var(--line);
   border-left: 1px solid var(--line);
   border-radius: 10px;
@@ -1914,6 +1922,13 @@ input::placeholder {
   padding: 12px;
   text-align: left;
   box-shadow: var(--shadow);
+}
+
+.recipe-row-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
 }
 
 .recipe-row:hover {

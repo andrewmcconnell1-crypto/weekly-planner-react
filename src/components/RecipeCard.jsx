@@ -14,19 +14,21 @@ function RecipeCard({ recipe, active = false, onClick }) {
       data-tone={getRecipeTone(recipe.category)}
       onClick={onClick}
     >
-      <span className="recipe-row-main">
-        <strong>{recipe.name}</strong>
-        <span>
-          {recipe.category || "Uncategorised"}
-          {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
+      <span className="recipe-row-inner">
+        <span className="recipe-row-main">
+          <strong>{recipe.name}</strong>
+          <span>
+            {recipe.category || "Uncategorised"}
+            {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
+          </span>
         </span>
-      </span>
 
-      <span className="recipe-source" data-source={recipeSourceKind(recipe)}>
-        {recipeSourceLabel(recipe)}
-      </span>
+        <span className="recipe-source" data-source={recipeSourceKind(recipe)}>
+          {recipeSourceLabel(recipe)}
+        </span>
 
-      <span className="recipe-row-chevron">›</span>
+        <span className="recipe-row-chevron">›</span>
+      </span>
     </button>
   );
 }
