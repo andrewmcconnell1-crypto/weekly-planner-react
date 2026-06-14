@@ -2071,6 +2071,40 @@ input::placeholder {
   white-space: nowrap;
 }
 
+.recipe-source {
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  font-weight: 820;
+  white-space: nowrap;
+}
+
+.recipe-source[data-source="ai"] {
+  background: var(--olive-soft);
+  color: var(--olive);
+}
+
+.recipe-source[data-source="custom"] {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.recipe-filter-group {
+  display: grid;
+  gap: 6px;
+}
+
+.recipe-filter-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 840;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .recipe-method-field {
   display: grid;
   gap: 7px;
