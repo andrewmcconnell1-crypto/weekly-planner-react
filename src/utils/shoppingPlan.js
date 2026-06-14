@@ -105,6 +105,14 @@ export function buildShoppingPlan({
       .filter((staple) => staple.active !== false)
       .map((staple) => staple.name),
   ]);
+  // Out-of-stock items already go on the list as a "Restock" row, so a meal
+  // ingredient that matches one shouldn't be added again (it would appear
+  // twice — once as the restock, once as the meal ingredient).
+  const restockCoverageIndex = buildCoverageIndex(
+    inventory
+      .filter((item) => item.active === false)
+      .map((item) => item.name)
+  );
   // Recurring buys the user has switched off still sit on the standing
   // Woolworths list, so flag them for removal too (only in weeks they'd
   // otherwise be due, so fortnightly off-weeks don't nag).
@@ -206,6 +214,12 @@ export function buildShoppingPlan({
             });
           }
 
+          return false;
+        }
+
+        // Already going on the list as a "Restock" row — don't list it twice.
+        if (findCoverage(item.name, restockCoverageIndex)) {
+          summary.skippedDuplicates += 1;
           return false;
         }
       }
