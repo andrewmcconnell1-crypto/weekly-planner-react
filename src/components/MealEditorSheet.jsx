@@ -47,6 +47,10 @@ function MealEditorSheet({
     (Boolean(selectedRecipeId) || (meal.name || "").trim() !== "");
   const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
   const recipeServes = linkedRecipe?.serves || null;
+  // Show the method inline when the recipe carries its own (AI / custom recipes
+  // with no source link); recipes with a source link point there instead.
+  const recipeMethod =
+    linkedRecipe?.method && !linkedRecipe?.sourceUrl ? linkedRecipe.method : "";
 
   // Secondary panels open from the "Or…" row, and start open when the day is
   // already that kind of meal.
@@ -351,6 +355,13 @@ function MealEditorSheet({
                       </li>
                     ))}
                   </ul>
+                </details>
+              )}
+
+              {recipeMethod && (
+                <details className="meal-details">
+                  <summary>Method</summary>
+                  <p className="meal-method">{recipeMethod}</p>
                 </details>
               )}
             </div>
