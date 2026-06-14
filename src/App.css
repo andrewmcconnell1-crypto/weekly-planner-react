@@ -1920,6 +1920,12 @@ input::placeholder {
   background: var(--soft);
 }
 
+/* Highlight the recipe currently chosen in the meal editor picker. */
+.recipe-row.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .recipe-row-main {
   display: grid;
   gap: 2px;

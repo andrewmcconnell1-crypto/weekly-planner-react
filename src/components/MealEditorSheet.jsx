@@ -7,7 +7,8 @@ import {
   X,
 } from "lucide-react";
 
-import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
+import { groupRecipesByCategory } from "../utils/recipeUtils";
+import RecipeCard from "./RecipeCard";
 
 // Full-height bottom-sheet editor for a single day's meal. Mounted (keyed by
 // day) only while a day is open, so its internal state resets per day.
@@ -456,24 +457,12 @@ function MealEditorSheet({
                 <p className="empty-state">No matching recipes.</p>
               ) : (
                 filteredRecipes.map((recipe) => (
-                  <button
-                    type="button"
-                    className={`recipe-choice ${
-                      selectedRecipeId === recipe.id ? "active" : ""
-                    }`}
-                    data-tone={getRecipeTone(recipe.category)}
+                  <RecipeCard
                     key={recipe.id}
+                    recipe={recipe}
+                    active={selectedRecipeId === recipe.id}
                     onClick={() => selectRecipe(recipe.id)}
-                  >
-                    <span>
-                      <strong>{recipe.name}</strong>
-                      <span>{recipe.category}</span>
-                    </span>
-
-                    <span className="recipe-choice-count">
-                      {recipe.ingredients.length}
-                    </span>
-                  </button>
+                  />
                 ))
               )}
             </div>

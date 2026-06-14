@@ -1,20 +1,10 @@
 import { useState } from "react";
 
-import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
+import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils";
+import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
 
 const SOURCE_ORDER = ["RecipeTin Eats", "AI originals", "Custom"];
-
-function sourceLabel(recipe) {
-  return (recipe.source || "").trim() || "Custom";
-}
-
-function sourceKind(recipe) {
-  const source = (recipe.source || "").trim().toLowerCase();
-  if (source.includes("recipetin")) return "rte";
-  if (source.includes("ai")) return "ai";
-  return "custom";
-}
 
 function RecipesList({
   recipes,
@@ -36,7 +26,9 @@ function RecipesList({
   const categories = ["All", ...recipeGroups.map((group) => group.category)];
   const allRecipes = recipeGroups.flatMap((group) => group.recipes);
 
-  const distinctSources = [...new Set(recipes.map(sourceLabel))].sort((a, b) => {
+  const distinctSources = [
+    ...new Set(recipes.map(recipeSourceLabel)),
+  ].sort((a, b) => {
     const aIndex = SOURCE_ORDER.indexOf(a);
     const bIndex = SOURCE_ORDER.indexOf(b);
 
@@ -60,7 +52,7 @@ function RecipesList({
     const inSource =
       !sourceIsAvailable ||
       activeSource === "All" ||
-      sourceLabel(recipe) === activeSource;
+      recipeSourceLabel(recipe) === activeSource;
 
     if (!inCategory || !inSource) return false;
     if (!cleanedSearch) return true;
@@ -146,27 +138,11 @@ function RecipesList({
           ) : (
             <div className="recipe-list">
               {visibleRecipes.map((recipe) => (
-                <button
+                <RecipeCard
                   key={recipe.id}
-                  type="button"
-                  className="recipe-row"
-                  data-tone={getRecipeTone(recipe.category)}
+                  recipe={recipe}
                   onClick={() => setOpenRecipeId(recipe.id)}
-                >
-                  <span className="recipe-row-main">
-                    <strong>{recipe.name}</strong>
-                    <span>
-                      {recipe.category || "Uncategorised"}
-                      {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
-                    </span>
-                  </span>
-
-                  <span className="recipe-source" data-source={sourceKind(recipe)}>
-                    {sourceLabel(recipe)}
-                  </span>
-
-                  <span className="recipe-row-chevron">›</span>
-                </button>
+                />
               ))}
             </div>
           )}

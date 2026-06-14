@@ -21,6 +21,19 @@ export function getRecipeCategory(recipe) {
   return recipe.category || "Other";
 }
 
+// A recipe's source, with a fallback for user-created recipes.
+export function recipeSourceLabel(recipe) {
+  return (recipe.source || "").trim() || "Custom";
+}
+
+// Coarse source bucket for badge tinting / filtering.
+export function recipeSourceKind(recipe) {
+  const source = (recipe.source || "").trim().toLowerCase();
+  if (source.includes("recipetin")) return "rte";
+  if (source.includes("ai")) return "ai";
+  return "custom";
+}
+
 export function getRecipeTone(category) {
   const normalisedCategory = normaliseItemName(category || "");
 
