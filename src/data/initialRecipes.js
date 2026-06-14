@@ -889,6 +889,16 @@ const SERVES_BY_ID = {
   "red-lentil-dahl": 5,
   "bangers-and-mash": 4,
   "mexican-rice-beans": 5,
+  "chicken-parmigiana": 4,
+  "thai-green-curry": 4,
+  "beef-lasagne": 6,
+  carbonara: 4,
+  "steak-garlic-butter": 4,
+  "sweet-sour-pork": 4,
+  "chicken-fajitas": 4,
+  "falafel-wraps": 4,
+  "halloumi-traybake": 4,
+  minestrone: 6,
 };
 
 export const initialRecipes = baseRecipes.map((recipeItem) => ({

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { getRecipeTone, groupRecipesByCategory } from "../utils/recipeUtils";
 import RecipeEditorSheet from "./RecipeEditorSheet";
 
-const SOURCE_ORDER = ["RecipeTin Eats", "AI consensus", "Custom"];
+const SOURCE_ORDER = ["RecipeTin Eats", "AI originals", "Custom"];
 
 function sourceLabel(recipe) {
   return (recipe.source || "").trim() || "Custom";
