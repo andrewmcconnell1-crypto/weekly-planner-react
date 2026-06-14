@@ -44,10 +44,44 @@ export function useAuth() {
     });
   }
 
+  function signInWithEmail(email, password) {
+    if (!supabase) return Promise.resolve({ error: null });
+    return supabase.auth.signInWithPassword({ email, password });
+  }
+
+  function signUpWithEmail(email, password) {
+    if (!supabase) return Promise.resolve({ error: null });
+    return supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+  }
+
+  function signInWithMagicLink(email) {
+    if (!supabase) return Promise.resolve({ error: null });
+    return supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin + window.location.pathname,
+      },
+    });
+  }
+
   function signOut() {
     if (!supabase) return undefined;
     return supabase.auth.signOut();
   }
 
-  return { user, loading, signInWithGoogle, signOut };
+  return {
+    user,
+    loading,
+    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithMagicLink,
+    signOut,
+  };
 }

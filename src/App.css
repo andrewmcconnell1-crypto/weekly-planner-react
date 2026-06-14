@@ -2384,6 +2384,74 @@ input::placeholder {
   margin: 0;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 820;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+
+.auth-form {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-form .primary-button {
+  margin-top: 2px;
+}
+
+.auth-links {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  margin-top: 2px;
+}
+
+.auth-link {
+  min-height: auto;
+  border: 0;
+  background: transparent;
+  color: var(--primary-strong);
+  padding: 4px;
+  font-size: 0.86rem;
+  font-weight: 760;
+}
+
+.auth-link:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+
+.auth-link:disabled {
+  color: var(--muted);
+}
+
+.auth-status {
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--olive-soft);
+  color: var(--olive);
+  text-align: center;
+}
+
+.auth-status-error {
+  background: #fbeceb;
+  color: var(--danger);
+}
+
 .sync-banner {
   margin: 0 0 12px;
   padding: 10px 14px;

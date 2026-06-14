@@ -96,7 +96,15 @@ function App() {
   const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
   const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
 
-  const { user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    signInWithGoogle,
+    signInWithEmail,
+    signUpWithEmail,
+    signInWithMagicLink,
+    signOut,
+  } = useAuth();
   const {
     mealsByWeek,
     setMealsByWeek,
@@ -157,7 +165,14 @@ function App() {
   }
 
   if (isSupabaseConfigured && !user) {
-    return <SignInScreen onSignIn={signInWithGoogle} />;
+    return (
+      <SignInScreen
+        onGoogle={signInWithGoogle}
+        onEmailSignIn={signInWithEmail}
+        onEmailSignUp={signUpWithEmail}
+        onMagicLink={signInWithMagicLink}
+      />
+    );
   }
 
   if (dataLoading) {
