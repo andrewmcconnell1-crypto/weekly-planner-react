@@ -629,70 +629,6 @@ textarea:focus-visible {
   text-decoration: underline;
 }
 
-.week-ahead-list {
-  display: grid;
-  gap: 8px;
-}
-
-.week-ahead-row {
-  display: grid;
-  grid-template-columns: 3rem minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--accent);
-  border-radius: 12px;
-  background: var(--panel);
-  box-shadow: var(--shadow);
-  padding: 12px;
-  text-align: left;
-  color: var(--ink);
-}
-
-.week-ahead-row:hover {
-  background: var(--soft);
-}
-
-.week-ahead-empty {
-  border-left-color: var(--line);
-  border-style: dashed;
-  background: transparent;
-  box-shadow: none;
-}
-
-.week-ahead-day {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 860;
-  text-transform: uppercase;
-}
-
-.week-ahead-main {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.week-ahead-main strong,
-.week-ahead-main span {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.week-ahead-empty .week-ahead-main strong {
-  color: var(--muted);
-  font-weight: 700;
-}
-
-.week-ahead-main > span {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 740;
-}
-
 .home-topup {
   display: grid;
   gap: 12px;
@@ -908,7 +844,8 @@ textarea:focus-visible {
 
 /* Cooking days are emphasised with an accent rail (scoped above
    `.plan-screen .meal-card` so its border-color doesn't override the accent). */
-.plan-screen .meal-card-cook {
+.plan-screen .meal-card-cook,
+.home-screen .meal-card-cook {
   border-left: 4px solid var(--accent);
 }
 
@@ -2618,7 +2555,8 @@ input::placeholder {
 }
 
 /* Unplanned day = a clearly empty, fillable slot (single "needs action" cue) */
-.plan-screen .meal-card.meal-card-empty {
+.plan-screen .meal-card.meal-card-empty,
+.home-screen .meal-card.meal-card-empty {
   border-style: dashed;
   background: transparent;
   box-shadow: none;

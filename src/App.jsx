@@ -51,6 +51,36 @@ function LoadingScreen({ message }) {
   );
 }
 
+// Group an ordered list of days into render groups: each cook day plus the run
+// of leftover (repeat) days that immediately follow it. Used by both the Meals
+// tab and the Home "coming up" list so they render identically.
+function buildMealGroups(dayList, mealsObj, getSummary) {
+  const groups = [];
+
+  for (let i = 0; i < dayList.length; ) {
+    const day = dayList[i];
+    const leadSummary = getSummary(day, mealsObj[day], mealsObj);
+    const repeatDays = [];
+
+    if (leadSummary.hasMeal && (mealsObj[day]?.mealType || "cook") === "cook") {
+      for (let j = i + 1; j < dayList.length; j += 1) {
+        const nextMeal = mealsObj[dayList[j]];
+
+        if (nextMeal?.mealType === "repeat" && nextMeal.repeatFromDay === day) {
+          repeatDays.push(dayList[j]);
+        } else {
+          break;
+        }
+      }
+    }
+
+    groups.push({ leadDay: day, leadSummary, repeatDays });
+    i += 1 + repeatDays.length;
+  }
+
+  return groups;
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [moreSection, setMoreSection] = useState("overview");
@@ -436,6 +466,33 @@ function App() {
     setMealWeekStart(new Date(currentWeekStart));
     setExpandedMealDay(day);
     setActiveTab("plan");
+  }
+
+  // Render a list of days as MealCards / leftover clusters (shared by the Meals
+  // tab and the Home "coming up" list so the styling matches).
+  function renderMealGroups(dayList, onOpenDay) {
+    return buildMealGroups(dayList, meals, getMealSummary).map((group) =>
+      group.repeatDays.length === 0 ? (
+        <MealCard
+          key={group.leadDay}
+          day={group.leadDay}
+          meal={meals[group.leadDay]}
+          displayName={group.leadSummary.name}
+          mealLabel={group.leadSummary.label}
+          mealTone={group.leadSummary.tone}
+          hasMeal={group.leadSummary.hasMeal}
+          onOpen={() => onOpenDay(group.leadDay)}
+        />
+      ) : (
+        <MealLeftoverCluster
+          key={group.leadDay}
+          leadDay={group.leadDay}
+          leadSummary={group.leadSummary}
+          repeatDays={group.repeatDays}
+          onOpenDay={onOpenDay}
+        />
+      )
+    );
   }
 
   function dismissWelcome() {
@@ -944,8 +1001,7 @@ function App() {
     };
   }
 
-  const comingUpSummaries =
-    todayIndex >= 0 ? planningDaySummaries.slice(todayIndex + 1) : [];
+  const comingUpDays = todayIndex >= 0 ? days.slice(todayIndex + 1) : [];
 
   return (
     <main className={`app-shell tab-${activeTab}`}>
@@ -1040,7 +1096,7 @@ function App() {
 
           {homeWeekMode === "current" ? (
             <div className="home-dashboard">
-              {comingUpSummaries.length > 0 && (
+              {comingUpDays.length > 0 && (
                 <div className="home-week-ahead">
                   <div className="home-section-head">
                     <p className="section-kicker">Coming up this week</p>
@@ -1053,32 +1109,8 @@ function App() {
                     </button>
                   </div>
 
-                  <div className="week-ahead-list">
-                    {comingUpSummaries.map((summary) => (
-                      <button
-                        key={summary.day}
-                        type="button"
-                        className={`week-ahead-row ${
-                          summary.hasMeal ? "" : "week-ahead-empty"
-                        }`}
-                        onClick={() => openHomeDayInPlan(summary.day)}
-                      >
-                        <span className="week-ahead-day">
-                          {summary.day.slice(0, 3)}
-                        </span>
-
-                        <span className="week-ahead-main">
-                          <strong>
-                            {summary.hasMeal ? summary.name : "No meal planned"}
-                          </strong>
-                          {summary.hasMeal && summary.label && (
-                            <span>{summary.label}</span>
-                          )}
-                        </span>
-
-                        <span className="home-step-chevron">›</span>
-                      </button>
-                    ))}
+                  <div className="meal-grid">
+                    {renderMealGroups(comingUpDays, openHomeDayInPlan)}
                   </div>
                 </div>
               )}
@@ -1272,70 +1304,7 @@ function App() {
           )}
 
           <div className="meal-grid">
-            {(() => {
-              // Group each cook day with the run of leftover (repeat) days that
-              // immediately follow it, so they render as one merged cluster.
-              const groups = [];
-              for (let i = 0; i < days.length; ) {
-                const day = days[i];
-                const meal = meals[day];
-                const repeatDays = [];
-
-                if (
-                  planningDaySummaries[i].hasMeal &&
-                  (meal?.mealType || "cook") === "cook"
-                ) {
-                  for (let j = i + 1; j < days.length; j += 1) {
-                    const next = meals[days[j]];
-
-                    if (
-                      next?.mealType === "repeat" &&
-                      next.repeatFromDay === day
-                    ) {
-                      repeatDays.push(days[j]);
-                    } else {
-                      break;
-                    }
-                  }
-                }
-
-                groups.push({ leadDay: day, repeatDays });
-                i += 1 + repeatDays.length;
-              }
-
-              return groups.map((group) => {
-                const leadSummary = getMealSummary(
-                  group.leadDay,
-                  meals[group.leadDay],
-                  meals
-                );
-
-                if (group.repeatDays.length === 0) {
-                  return (
-                    <MealCard
-                      key={group.leadDay}
-                      day={group.leadDay}
-                      meal={meals[group.leadDay]}
-                      displayName={leadSummary.name}
-                      mealLabel={leadSummary.label}
-                      mealTone={leadSummary.tone}
-                      hasMeal={leadSummary.hasMeal}
-                      onOpen={() => setExpandedMealDay(group.leadDay)}
-                    />
-                  );
-                }
-
-                return (
-                  <MealLeftoverCluster
-                    key={group.leadDay}
-                    leadDay={group.leadDay}
-                    leadSummary={leadSummary}
-                    repeatDays={group.repeatDays}
-                    onOpenDay={(targetDay) => setExpandedMealDay(targetDay)}
-                  />
-                );
-              });
-            })()}
+            {renderMealGroups(days, setExpandedMealDay)}
           </div>
 
           {expandedMealDay && (
