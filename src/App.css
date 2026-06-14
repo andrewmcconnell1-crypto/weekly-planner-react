@@ -1318,6 +1318,10 @@ textarea:focus-visible {
 }
 
 input[type="text"],
+input[type="search"],
+input[type="number"],
+input[type="url"],
+input[type="email"],
 select,
 textarea {
   width: 100%;
