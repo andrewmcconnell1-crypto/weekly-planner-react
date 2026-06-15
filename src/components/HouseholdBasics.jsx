@@ -16,6 +16,7 @@ function HouseholdBasics({
   updateStapleCategory,
   updateStapleDetails,
   toggleStapleActive,
+  loadStarterStaples,
   newInventoryItem,
   setNewInventoryItem,
   addInventoryItem,
@@ -69,6 +70,7 @@ function HouseholdBasics({
           updateStapleCategory={updateStapleCategory}
           updateStapleDetails={updateStapleDetails}
           toggleStapleActive={toggleStapleActive}
+          loadStarterStaples={loadStarterStaples}
         />
       ) : (
         <InventoryList

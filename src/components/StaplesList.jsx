@@ -46,6 +46,7 @@ function StaplesList({
   updateStapleCategory,
   updateStapleDetails,
   toggleStapleActive,
+  loadStarterStaples,
 }) {
   const [searchText, setSearchText] = useState("");
   const [openCategories, setOpenCategories] = useState({});
@@ -262,6 +263,23 @@ function StaplesList({
 
         <button onClick={addStaple}>Add</button>
       </div>
+
+      {staples.length === 0 && (
+        <div className="stock-maintenance">
+          <button
+            type="button"
+            className="tertiary-button"
+            onClick={loadStarterStaples}
+          >
+            Add the app's common recurring buys
+          </button>
+
+          <p className="small-text stock-maintenance-note">
+            Bulk-adds a starter list of weekly groceries to get you going — tweak
+            or remove any you don't need.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

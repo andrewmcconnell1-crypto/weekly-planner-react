@@ -37,6 +37,7 @@ import {
   normaliseInventoryItems,
   mergeSavedRecipes,
 } from "./utils/dataLoaders";
+import { initialStaples } from "./data/initialStaples";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { useAuth } from "./hooks/useAuth";
 import { usePlannerStore } from "./hooks/usePlannerStore";
@@ -866,6 +867,18 @@ function App() {
     setInventory([...inventory, ...starterItems]);
   }
 
+  function loadStarterStaples() {
+    const existingNames = staples.map((staple) =>
+      normaliseItemName(staple.name)
+    );
+
+    const starterStaples = initialStaples.filter(
+      (staple) => !existingNames.includes(normaliseItemName(staple.name))
+    );
+
+    setStaples([...staples, ...starterStaples]);
+  }
+
   function resetStockToStarterList() {
     const shouldReset = window.confirm(
       "Restore the default stock list? This removes your custom stock items and marks the default items as in stock."
@@ -1506,6 +1519,7 @@ function App() {
                   updateStapleCategory={updateStapleCategory}
                   updateStapleDetails={updateStapleDetails}
                   toggleStapleActive={toggleStapleActive}
+                  loadStarterStaples={loadStarterStaples}
                   newInventoryItem={newInventoryItem}
                   setNewInventoryItem={setNewInventoryItem}
                   addInventoryItem={addInventoryItem}

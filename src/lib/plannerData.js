@@ -1,5 +1,4 @@
 import { supabase } from "./supabase";
-import { initialStaples } from "../data/initialStaples";
 import { initialRecipes } from "../data/initialRecipes";
 import { normaliseInventoryItems, mergeSavedRecipes } from "../utils/dataLoaders";
 
@@ -22,7 +21,7 @@ export function defaultData() {
     shoppingItemsByWeek: {},
     shoppingListMetaByWeek: {},
     removalAcksByWeek: {},
-    staples: initialStaples,
+    staples: [],
     inventory: [],
     recipes: initialRecipes,
   };
