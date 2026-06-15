@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   House,
   CalendarDays,
@@ -87,9 +87,9 @@ function App() {
   const [moreSection, setMoreSection] = useState("overview");
   const [householdSection, setHouseholdSection] = useState("stock");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
-  const [welcomeDismissed, setWelcomeDismissed] = useState(
-    () => localStorage.getItem("planner-welcome-done") === "1"
-  );
+  // The session the welcome was dismissed for (a user id, "guest", or "local"),
+  // so dismissal is per-account and auto-resets when the account changes.
+  const [welcomeDismissedFor, setWelcomeDismissedFor] = useState(null);
   const [welcomePreview, setWelcomePreview] = useState(false);
   const [guest, setGuest] = useState(false);
 
@@ -151,15 +151,13 @@ function App() {
       (items) => Array.isArray(items) && items.some((i) => i.checked)
     );
 
-  // Persist that the welcome has served its purpose (side-effect only).
-  useEffect(() => {
-    if (welcomeWorkflowComplete && !welcomePreview) {
-      localStorage.setItem("planner-welcome-done", "1");
-    }
-  }, [welcomeWorkflowComplete, welcomePreview]);
-
+  // Identifies the current session so the welcome's dismissed/done state is
+  // per-account: a new sign-in, sign-out, or guest gets a different key and
+  // therefore sees the card again (until their data shows a completed workflow).
+  const welcomeSessionKey = guest ? "guest" : user?.id || "local";
   const showWelcome =
-    !welcomeDismissed && (welcomePreview || !welcomeWorkflowComplete);
+    welcomeDismissedFor !== welcomeSessionKey &&
+    (welcomePreview || !welcomeWorkflowComplete);
 
   // ---- Auth / loading gates (after all hooks, before any data-derived work) ----
   if (isSupabaseConfigured && authLoading) {
@@ -515,8 +513,7 @@ function App() {
 
   function dismissWelcome() {
     setWelcomePreview(false);
-    localStorage.setItem("planner-welcome-done", "1");
-    setWelcomeDismissed(true);
+    setWelcomeDismissedFor(welcomeSessionKey);
   }
 
   function goToPreviousShoppingWeek() {
@@ -1552,8 +1549,7 @@ function App() {
                   resetStockToStarterList={resetStockToStarterList}
                   onResetWelcome={() => {
                     setWelcomePreview(true);
-                    localStorage.removeItem("planner-welcome-done");
-                    setWelcomeDismissed(false);
+                    setWelcomeDismissedFor(null);
                     setActiveTab("home");
                   }}
                 />
