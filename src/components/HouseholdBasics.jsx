@@ -1,13 +1,13 @@
 import InventoryList from "./InventoryList";
 import StaplesList from "./StaplesList";
 
+// Renders just one section (recurring buys or stock). Navigation between the two
+// lives in the Kitchen overview cards, so this no longer carries its own tab
+// switcher or combined summary.
 function HouseholdBasics({
   activeSection,
-  setActiveSection,
   staples,
-  activeStaplesCount,
   inventory,
-  activeInventoryCount,
   newStaple,
   setNewStaple,
   addStaple,
@@ -27,38 +27,6 @@ function HouseholdBasics({
 }) {
   return (
     <div className="household-basics">
-      <div className="more-tabs household-tabs" aria-label="Household basics">
-        <button
-          type="button"
-          className={activeSection === "recurring" ? "active" : ""}
-          onClick={() => setActiveSection("recurring")}
-        >
-          Recurring buys
-        </button>
-
-        <button
-          type="button"
-          className={activeSection === "stock" ? "active" : ""}
-          onClick={() => setActiveSection("stock")}
-        >
-          Stock
-        </button>
-      </div>
-
-      <div className="household-summary">
-        <div>
-          <span>On Woolworths list</span>
-          <strong>{activeStaplesCount}</strong>
-          <small>of {staples.length} recurring</small>
-        </div>
-
-        <div>
-          <span>In stock</span>
-          <strong>{activeInventoryCount}</strong>
-          <small>of {inventory.length} items</small>
-        </div>
-      </div>
-
       {activeSection === "recurring" ? (
         <StaplesList
           staples={staples}

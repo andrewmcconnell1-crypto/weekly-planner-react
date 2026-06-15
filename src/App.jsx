@@ -1579,11 +1579,8 @@ function App() {
               {moreSection === "household" && (
                 <HouseholdBasics
                   activeSection={householdSection}
-                  setActiveSection={setHouseholdSection}
                   staples={staples}
-                  activeStaplesCount={activeStaplesCount}
                   inventory={inventory}
-                  activeInventoryCount={activeInventoryCount}
                   newStaple={newStaple}
                   setNewStaple={setNewStaple}
                   addStaple={addStaple}
