@@ -1903,7 +1903,7 @@ input::placeholder {
   flex-wrap: nowrap;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 12px;
   -webkit-overflow-scrolling: touch;
 }
 
