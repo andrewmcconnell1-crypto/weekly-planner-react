@@ -8,6 +8,7 @@ import {
   BookOpen,
   Repeat2,
   Package,
+  ChevronLeft,
 } from "lucide-react";
 import "./App.css";
 
@@ -1569,10 +1570,11 @@ function App() {
               </div>
 
               <button
-                className="secondary back-button"
+                className="back-button"
                 type="button"
                 onClick={() => setMoreSection("overview")}
               >
+                <ChevronLeft size={18} aria-hidden="true" />
                 Back to Kitchen
               </button>
 
@@ -1621,9 +1623,10 @@ function App() {
         <section className="screen settings-screen">
           <button
             type="button"
-            className="secondary back-button"
+            className="back-button"
             onClick={closeSettings}
           >
+            <ChevronLeft size={18} aria-hidden="true" />
             Back
           </button>
 

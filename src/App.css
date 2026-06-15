@@ -2890,7 +2890,29 @@ input::placeholder {
 
 .more-summary-card button,
 .back-button {
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  justify-self: start;
+  padding-left: 10px;
+  padding-right: 16px;
+  border-radius: 999px;
+  border-color: var(--accent-soft);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.back-button svg {
+  flex-shrink: 0;
+}
+
+.back-button:hover,
+.back-button:focus {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 @media (min-width: 620px) {
