@@ -108,10 +108,31 @@ textarea:focus-visible {
 }
 
 .app-header {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 6px;
   padding: 8px 4px 4px;
+}
+
+.header-settings {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-top: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  padding: 0;
+}
+
+.header-settings:hover {
+  background: var(--soft);
+  color: var(--ink);
 }
 
 .app-header .eyebrow {
@@ -2641,6 +2662,13 @@ input::placeholder {
   gap: 8px;
 }
 
+.more-intro {
+  margin: 0 4px 4px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .household-basics {
   display: grid;
   gap: 14px;
@@ -2700,12 +2728,11 @@ input::placeholder {
   --manager-accent: var(--tab-accent);
   --manager-soft: var(--tab-soft);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   width: 100%;
   border: 1px solid var(--line);
-  border-left: 1px solid var(--line);
   background: var(--panel);
   color: var(--ink);
   padding: 13px;
@@ -2717,36 +2744,37 @@ input::placeholder {
   background: var(--manager-soft);
 }
 
-.manager-row > span:first-child {
+.manager-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--manager-soft);
+  color: var(--manager-accent);
+}
+
+.manager-main {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
-.manager-row strong,
-.manager-row span span {
+.manager-main strong,
+.manager-main span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.manager-row span span {
+.manager-main strong {
+  font-size: 1.02rem;
+}
+
+.manager-main span {
   color: var(--muted);
   font-size: 0.82rem;
   font-weight: 720;
-}
-
-.manager-action {
-  border-radius: 999px;
-  background: var(--manager-soft);
-  color: var(--manager-accent);
-  padding: 4px 9px;
-  font-size: 0.8rem;
-  font-weight: 840;
-}
-
-.manager-action::after {
-  content: " ›";
 }
 
 .more-summary-card {

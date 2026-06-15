@@ -3,7 +3,11 @@ import {
   House,
   CalendarDays,
   ShoppingBasket,
-  LayoutGrid,
+  CookingPot,
+  Settings,
+  BookOpen,
+  Repeat2,
+  Package,
 } from "lucide-react";
 import "./App.css";
 
@@ -92,6 +96,7 @@ function App() {
   const [welcomeDismissedFor, setWelcomeDismissedFor] = useState(null);
   const [welcomePreview, setWelcomePreview] = useState(false);
   const [guest, setGuest] = useState(false);
+  const [settingsReturnTab, setSettingsReturnTab] = useState("home");
 
   const [currentWeekStart] = useState(getSunday);
   const [nextWeekStart] = useState(getNextSunday);
@@ -644,6 +649,15 @@ function App() {
     setActiveTab("more");
   }
 
+  function openSettings() {
+    setSettingsReturnTab(activeTab === "settings" ? "home" : activeTab);
+    setActiveTab("settings");
+  }
+
+  function closeSettings() {
+    setActiveTab(settingsReturnTab);
+  }
+
   function addShoppingItem() {
     const cleanedItem = newItem.trim();
     if (cleanedItem === "") return;
@@ -1042,10 +1056,23 @@ function App() {
               : activeTab === "shop"
               ? "Shopping list"
               : activeTab === "more"
-                ? "More"
-                : "Meals"}
+                ? "Kitchen"
+                : activeTab === "settings"
+                  ? "Settings"
+                  : "Meals"}
           </h1>
         </div>
+
+        {activeTab !== "settings" && (
+          <button
+            type="button"
+            className="header-settings"
+            aria-label="Settings"
+            onClick={openSettings}
+          >
+            <Settings size={20} strokeWidth={2} aria-hidden="true" />
+          </button>
+        )}
       </header>
 
       {syncError && (
@@ -1427,77 +1454,82 @@ function App() {
 
       {activeTab === "more" && (
         <section className="screen more-screen">
-          <div className="screen-header">
-            <div>
-              <p className="section-kicker">
-                {moreSection === "overview" ? "Tools" : "Manage"}
+          {moreSection === "overview" ? (
+            <>
+              <p className="more-intro">
+                Set up the recipes, groceries and stock behind your plan.
               </p>
 
-              <h2>
-                {moreSection === "overview"
-                  ? "More"
-                  : moreSection === "household"
-                    ? "Household basics"
-                    : moreSection === "recipes"
-                      ? "Recipes"
-                      : moreSection === "settings"
-                        ? "Settings"
-                        : "More"}
-              </h2>
-            </div>
-          </div>
-
-          {moreSection === "overview" ? (
-            <div className="manager-list">
-              <button
-                className="manager-row"
-                type="button"
-                onClick={() => setMoreSection("recipes")}
-              >
-                <span>
-                  <strong>Recipes</strong>
-                  <span>
-                    {recipes.length} saved recipe
-                    {recipes.length === 1 ? "" : "s"}
+              <div className="manager-list">
+                <button
+                  className="manager-row"
+                  type="button"
+                  onClick={() => setMoreSection("recipes")}
+                >
+                  <span className="manager-icon" aria-hidden="true">
+                    <BookOpen size={20} strokeWidth={2} />
                   </span>
-                </span>
-                <span className="manager-action">Manage</span>
-              </button>
-
-              <button
-                className="manager-row"
-                type="button"
-                onClick={() => setMoreSection("household")}
-              >
-                <span>
-                  <strong>Household basics</strong>
-                  <span>
-                    {activeStaplesCount} recurring, {activeInventoryCount} in stock
+                  <span className="manager-main">
+                    <strong>Recipes</strong>
+                    <span>
+                      {recipes.length} saved recipe
+                      {recipes.length === 1 ? "" : "s"}
+                    </span>
                   </span>
-                </span>
-                <span className="manager-action">Manage</span>
-              </button>
+                  <span className="home-step-chevron">›</span>
+                </button>
 
-              <button
-                className="manager-row"
-                type="button"
-                onClick={() => setMoreSection("settings")}
-              >
-                <span>
-                  <strong>Settings</strong>
-                  <span>Backup &amp; restore</span>
-                </span>
-                <span className="manager-action">Open</span>
-              </button>
-            </div>
+                <button
+                  className="manager-row"
+                  type="button"
+                  onClick={() => openHousehold("recurring")}
+                >
+                  <span className="manager-icon" aria-hidden="true">
+                    <Repeat2 size={20} strokeWidth={2} />
+                  </span>
+                  <span className="manager-main">
+                    <strong>Recurring buys</strong>
+                    <span>{activeStaplesCount} on your list</span>
+                  </span>
+                  <span className="home-step-chevron">›</span>
+                </button>
+
+                <button
+                  className="manager-row"
+                  type="button"
+                  onClick={() => openHousehold("stock")}
+                >
+                  <span className="manager-icon" aria-hidden="true">
+                    <Package size={20} strokeWidth={2} />
+                  </span>
+                  <span className="manager-main">
+                    <strong>Stock</strong>
+                    <span>{activeInventoryCount} in stock</span>
+                  </span>
+                  <span className="home-step-chevron">›</span>
+                </button>
+              </div>
+            </>
           ) : (
             <>
+              <div className="screen-header">
+                <div>
+                  <h2>
+                    {moreSection === "household"
+                      ? householdSection === "recurring"
+                        ? "Recurring buys"
+                        : "Stock"
+                      : "Recipes"}
+                  </h2>
+                </div>
+              </div>
+
               <button
                 className="secondary back-button"
                 type="button"
                 onClick={() => setMoreSection("overview")}
               >
-                Back to More
+                Back to Kitchen
               </button>
 
               {moreSection === "household" && (
@@ -1539,23 +1571,33 @@ function App() {
                   updateRecipe={updateRecipe}
                 />
               )}
-
-              {moreSection === "settings" && (
-                <SettingsPanel
-                  onImport={applyImportedData}
-                  user={user}
-                  cloud={cloud}
-                  onSignOut={signOut}
-                  resetStockToStarterList={resetStockToStarterList}
-                  onResetWelcome={() => {
-                    setWelcomePreview(true);
-                    setWelcomeDismissedFor(null);
-                    setActiveTab("home");
-                  }}
-                />
-              )}
             </>
           )}
+        </section>
+      )}
+
+      {activeTab === "settings" && (
+        <section className="screen settings-screen">
+          <button
+            type="button"
+            className="secondary back-button"
+            onClick={closeSettings}
+          >
+            Back
+          </button>
+
+          <SettingsPanel
+            onImport={applyImportedData}
+            user={user}
+            cloud={cloud}
+            onSignOut={signOut}
+            resetStockToStarterList={resetStockToStarterList}
+            onResetWelcome={() => {
+              setWelcomePreview(true);
+              setWelcomeDismissedFor(null);
+              setActiveTab("home");
+            }}
+          />
         </section>
       )}
 
@@ -1595,8 +1637,8 @@ function App() {
             setActiveTab("more");
           }}
         >
-          <LayoutGrid size={21} strokeWidth={2} aria-hidden="true" />
-          <span>More</span>
+          <CookingPot size={21} strokeWidth={2} aria-hidden="true" />
+          <span>Kitchen</span>
         </button>
       </nav>
     </main>
