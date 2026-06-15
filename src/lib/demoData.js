@@ -27,7 +27,6 @@ function buildDemoWeek() {
   meals.Sunday = {
     ...meals.Sunday,
     recipeId: "slow-cooker-pulled-pork",
-    batches: 2,
   };
   meals.Monday = { ...meals.Monday, mealType: "repeat", repeatFromDay: "Sunday" };
   meals.Tuesday = { ...meals.Tuesday, recipeId: "tacos" };
