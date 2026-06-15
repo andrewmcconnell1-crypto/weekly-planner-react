@@ -293,26 +293,6 @@ function App() {
           } a meal.`
         : `${unplannedDays.length} nights still need a meal.`;
 
-  // Is there a previous week worth copying? (Drives whether we offer the
-  // "Copy last week's plan" shortcut at all.)
-  const previousMealWeekStart = new Date(mealWeekStart);
-  previousMealWeekStart.setDate(mealWeekStart.getDate() - 7);
-  const previousMealWeekMeals =
-    mealsByWeek[getWeekKey(previousMealWeekStart)];
-  const hasPreviousWeekPlan = Boolean(
-    previousMealWeekMeals &&
-      days.some((day) => {
-        const previousMeal = previousMealWeekMeals[day];
-
-        return (
-          previousMeal &&
-          (previousMeal.name ||
-            previousMeal.recipeId ||
-            (previousMeal.mealType && previousMeal.mealType !== "cook"))
-        );
-      })
-  );
-
   // Details for the day whose editor sheet is open (if any).
   const expandedDayIndex = expandedMealDay ? days.indexOf(expandedMealDay) : -1;
   const expandedMeal = expandedMealDay ? meals[expandedMealDay] : null;
@@ -453,36 +433,6 @@ function App() {
 
   function goToNextMealWeekDefault() {
     setMealWeekStart(getNextSunday());
-  }
-
-  function copyPreviousWeekMeals() {
-    const previousWeekStart = new Date(mealWeekStart);
-    previousWeekStart.setDate(mealWeekStart.getDate() - 7);
-    const previousWeekKey = getWeekKey(previousWeekStart);
-    const previousMeals = mealsByWeek[previousWeekKey];
-
-    if (!previousMeals) {
-      window.alert("There's no meal plan for the previous week to copy.");
-      return;
-    }
-
-    const hasExistingPlan = planningDaySummaries.some(
-      (daySummary) => daySummary.hasMeal
-    );
-
-    if (
-      hasExistingPlan &&
-      !window.confirm(
-        "Replace this week's meal plan with a copy of last week's?"
-      )
-    ) {
-      return;
-    }
-
-    setMealsByWeek({
-      ...mealsByWeek,
-      [mealWeekKey]: structuredClone(previousMeals),
-    });
   }
 
   function showHomeWeek(weekStart) {
@@ -1412,16 +1362,6 @@ function App() {
                 Shop this week
               </button>
             </div>
-          )}
-
-          {hasPreviousWeekPlan && (
-            <button
-              className="secondary copy-week-button"
-              type="button"
-              onClick={copyPreviousWeekMeals}
-            >
-              Copy last week's plan
-            </button>
           )}
 
           <div className="meal-grid">

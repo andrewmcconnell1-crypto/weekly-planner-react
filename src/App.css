@@ -2204,10 +2204,6 @@ input::placeholder {
   gap: 8px;
 }
 
-.copy-week-button {
-  width: 100%;
-}
-
 /* Shown on Meals + Shop when the planning week and shopping week differ. */
 .week-mismatch {
   display: grid;
