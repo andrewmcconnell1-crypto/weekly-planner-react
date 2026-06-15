@@ -17,6 +17,7 @@ import MealEditorSheet from "./components/MealEditorSheet";
 import MealLeftoverCluster from "./components/MealLeftoverCluster";
 import TonightCard from "./components/TonightCard";
 import ShoppingList from "./components/ShoppingList";
+import ShoppingHelpSheet from "./components/ShoppingHelpSheet";
 import WeekControls from "./components/WeekControls";
 import RecipesList from "./components/RecipesList";
 import SettingsPanel from "./components/SettingsPanel";
@@ -121,12 +122,16 @@ function App() {
     setShoppingListMetaByWeek,
     removalAcksByWeek,
     setRemovalAcksByWeek,
+    recurringCheckedByWeek,
+    setRecurringCheckedByWeek,
     staples,
     setStaples,
     inventory,
     setInventory,
     recipes,
     setRecipes,
+    settings,
+    setSettings,
     loading: dataLoading,
     syncError,
     cloud,
@@ -136,6 +141,10 @@ function App() {
   const [newStaple, setNewStaple] = useState("");
   const [newInventoryItem, setNewInventoryItem] = useState("");
   const [newRecipeName, setNewRecipeName] = useState("");
+  const [shopListView, setShopListView] = useState("topup");
+  const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
+
+  const keepStandingList = settings?.keepStandingList !== false;
 
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
   const { getMealSummary } = mealHelpers;
@@ -390,6 +399,13 @@ function App() {
         : "Current";
   const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
   const skippedShoppingItems = shoppingListPlan.skippedItems;
+  // Recurring buys shown (and ticked off) in the "full list" view, with their
+  // checked state tracked per week separately from the generated rows.
+  const recurringBuyItems = shoppingListPlan.recurringBuyItems;
+  const recurringBuyIds = new Set(recurringBuyItems.map((item) => item.id));
+  const recurringCheckedIds = (
+    recurringCheckedByWeek[shoppingWeekKey] || []
+  ).filter((id) => recurringBuyIds.has(id));
   // Items the current plan would add that aren't already on the list — i.e. what
   // a meal change since you shopped means you still need to grab.
   const currentShoppingNames = new Set(
@@ -742,6 +758,26 @@ function App() {
       ...removalAcksByWeek,
       [shoppingWeekKey]: next,
     });
+  }
+
+  // Tick a recurring buy off the full shopping list. Stored per week and pruned
+  // to recurring buys still due, mirroring how removal acks are kept tidy.
+  function toggleRecurringChecked(id) {
+    const current = (recurringCheckedByWeek[shoppingWeekKey] || []).filter(
+      (checkedId) => recurringBuyIds.has(checkedId)
+    );
+    const next = current.includes(id)
+      ? current.filter((checkedId) => checkedId !== id)
+      : [...current, id];
+
+    setRecurringCheckedByWeek({
+      ...recurringCheckedByWeek,
+      [shoppingWeekKey]: next,
+    });
+  }
+
+  function setKeepStandingList(value) {
+    setSettings({ ...settings, keepStandingList: value });
   }
 
   function addStaple() {
@@ -1152,14 +1188,15 @@ function App() {
                   mark a takeaway / night out.
                 </li>
                 <li>
-                  <span>Set up household basics</span> — in More → Household
-                  basics, list your recurring buys (things you get most weeks)
-                  and tick what's already in stock.
+                  <span>Set up household basics</span> — in Kitchen, list your
+                  recurring buys (things you get most weeks) and tick what's
+                  already in stock.
                 </li>
                 <li>
-                  <span>Generate your list</span> — it combines your meal
-                  ingredients with your recurring buys, and skips anything you
-                  already have in stock.
+                  <span>Generate your list</span> — it adds your meal
+                  ingredients, skips anything already in stock, and (if you keep
+                  a standing list) keeps recurring buys separate. Tap “How
+                  shopping works” on the Shop page for the full picture.
                 </li>
                 <li>
                   <span>Shop</span> — check items off as you go. The Today screen
@@ -1449,6 +1486,13 @@ function App() {
           goToThisShoppingWeek={goToThisShoppingWeek}
           goToNextShoppingWeekDefault={goToNextShoppingWeekDefault}
           goToNextShoppingWeek={goToNextShoppingWeek}
+          keepStandingList={keepStandingList}
+          shopListView={shopListView}
+          setShopListView={setShopListView}
+          recurringBuyItems={recurringBuyItems}
+          recurringCheckedIds={recurringCheckedIds}
+          onToggleRecurring={toggleRecurringChecked}
+          onOpenHelp={() => setShoppingHelpOpen(true)}
         />
       )}
 
@@ -1591,6 +1635,9 @@ function App() {
             user={user}
             cloud={cloud}
             onSignOut={signOut}
+            keepStandingList={keepStandingList}
+            onSetKeepStandingList={setKeepStandingList}
+            onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
             resetStockToStarterList={resetStockToStarterList}
             onResetWelcome={() => {
               setWelcomePreview(true);
@@ -1599,6 +1646,13 @@ function App() {
             }}
           />
         </section>
+      )}
+
+      {shoppingHelpOpen && (
+        <ShoppingHelpSheet
+          keepStandingList={keepStandingList}
+          onClose={() => setShoppingHelpOpen(false)}
+        />
       )}
 
       <nav className="bottom-nav" aria-label="Primary">

@@ -7,9 +7,11 @@ const BACKUP_KEYS = [
   { key: "shoppingItemsByWeek", shape: "object" },
   { key: "shoppingListMetaByWeek", shape: "object" },
   { key: "removalAcksByWeek", shape: "object" },
+  { key: "recurringCheckedByWeek", shape: "object" },
   { key: "staples", shape: "array" },
   { key: "inventory", shape: "array" },
   { key: "recipes", shape: "array" },
+  { key: "settings", shape: "object" },
 ];
 
 function isPlainObject(value) {
@@ -41,6 +43,9 @@ function SettingsPanel({
   user,
   cloud,
   onSignOut,
+  keepStandingList = true,
+  onSetKeepStandingList,
+  onOpenShoppingHelp,
   resetStockToStarterList,
   onResetWelcome,
 }) {
@@ -140,6 +145,45 @@ function SettingsPanel({
               Sign out
             </button>
           </div>
+        </section>
+      )}
+
+      {onSetKeepStandingList && (
+        <section className="settings-group">
+          <strong>Shopping style</strong>
+
+          <label className="settings-toggle">
+            <input
+              type="checkbox"
+              checked={keepStandingList}
+              onChange={(event) =>
+                onSetKeepStandingList(event.target.checked)
+              }
+            />
+            <span>
+              <span className="settings-toggle-title">
+                I keep a standing grocery list
+              </span>
+              <span className="small-text">
+                e.g. a saved Woolworths list your recurring buys live on. The
+                Shop page shows a top-up of meal ingredients and restocks, with
+                a Full list toggle when you need everything. Turn this off to
+                make every shop one complete list instead.
+              </span>
+            </span>
+          </label>
+
+          {onOpenShoppingHelp && (
+            <div className="settings-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={onOpenShoppingHelp}
+              >
+                How shopping works
+              </button>
+            </div>
+          )}
         </section>
       )}
 

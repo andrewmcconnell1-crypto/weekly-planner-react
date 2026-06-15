@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { ChevronDown, ChevronUp, HelpCircle, X } from "lucide-react";
 
 import WeekControls from "./WeekControls";
 import { normaliseItemName } from "../utils/itemUtils";
 
 // What a row needs to say in the supermarket: the item, and (for meal
-// ingredients) which meal it's for. Everything else is noise.
+// ingredients) which meal it's for. Everything else is noise. In the flat
+// "full list" view we drop these entirely — it's just a list to shop.
 function getItemDetail(item) {
   if (item.source === "Meal") return item.sourceDetail || "";
   if (item.source === "Restock") return "Restock";
@@ -40,12 +41,36 @@ function ShoppingList({
   goToThisShoppingWeek,
   goToNextShoppingWeekDefault,
   goToNextShoppingWeek,
+  keepStandingList = true,
+  shopListView,
+  setShopListView,
+  recurringBuyItems = [],
+  recurringCheckedIds = [],
+  onToggleRecurring,
+  onOpenHelp,
 }) {
   const [collapsedCategories, setCollapsedCategories] = useState({});
 
-  const pendingItems = shoppingItems.filter((item) => !item.checked);
-  const doneItems = shoppingItems.filter((item) => item.checked);
-  const totalItems = shoppingItems.length;
+  // "Full list" folds recurring buys into one complete list. People who don't
+  // keep a standing list are always in this mode (there's no second list).
+  const fullList = !keepStandingList || shopListView === "full";
+
+  // The recurring buys, as toggleable rows, only when we're showing the full
+  // list. Their checked state is tracked separately from the generated rows.
+  const recurringRows = fullList
+    ? recurringBuyItems.map((item) => ({
+        ...item,
+        source: "Recurring buy",
+        checked: recurringCheckedIds.includes(item.id),
+        isRecurring: true,
+      }))
+    : [];
+
+  const displayItems = [...shoppingItems, ...recurringRows];
+
+  const pendingItems = displayItems.filter((item) => !item.checked);
+  const doneItems = displayItems.filter((item) => item.checked);
+  const totalItems = displayItems.length;
   const donePct =
     totalItems > 0 ? Math.round((doneItems.length / totalItems) * 100) : 0;
   const groupedPendingItems = pendingItems.reduce((groups, item) => {
@@ -73,19 +98,27 @@ function ShoppingList({
     });
   }
 
+  function toggleItem(item) {
+    if (item.isRecurring) {
+      onToggleRecurring(item.id);
+    } else {
+      toggleShoppingItem(item.id);
+    }
+  }
+
   function renderShoppingItem(item, index) {
-    const detail = getItemDetail(item);
+    const detail = fullList ? "" : getItemDetail(item);
 
     return (
       <li
         className={`card shopping-row ${item.checked ? "checked-row" : ""}`}
-        key={`${item.id}-${index}`}
+        key={`${item.isRecurring ? "recurring" : "item"}-${item.id}-${index}`}
       >
         <label className={item.checked ? "checked-item" : ""}>
           <input
             type="checkbox"
             checked={item.checked}
-            onChange={() => toggleShoppingItem(item.id)}
+            onChange={() => toggleItem(item)}
           />
 
           <span className="shopping-item-content">
@@ -97,14 +130,16 @@ function ShoppingList({
           </span>
         </label>
 
-        <button
-          type="button"
-          className="shopping-row-delete"
-          aria-label={`Delete ${item.name}`}
-          onClick={() => deleteShoppingItem(item.id)}
-        >
-          <X size={16} aria-hidden="true" />
-        </button>
+        {!item.isRecurring && (
+          <button
+            type="button"
+            className="shopping-row-delete"
+            aria-label={`Delete ${item.name}`}
+            onClick={() => deleteShoppingItem(item.id)}
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        )}
       </li>
     );
   }
@@ -158,8 +193,9 @@ function ShoppingList({
             <strong className="page-hero-count">No list yet</strong>
 
             <p className="page-hero-sub">
-              Check your stock and recurring buys first, then build the list
-              from your meals.
+              {keepStandingList
+                ? "Check your stock and recurring buys first, then build the list from your meals."
+                : "Check your stock first, then build one complete list from your meals and recurring buys."}
             </p>
 
             <button
@@ -172,6 +208,58 @@ function ShoppingList({
           </>
         )}
       </div>
+
+      <div className="shop-controls-row">
+        {keepStandingList && (
+          <div
+            className="shop-list-toggle"
+            role="tablist"
+            aria-label="Shopping list view"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!fullList}
+              className={!fullList ? "active" : ""}
+              onClick={() => setShopListView("topup")}
+            >
+              Top-up
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={fullList}
+              className={fullList ? "active" : ""}
+              onClick={() => setShopListView("full")}
+            >
+              Full list
+            </button>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="shop-help-link"
+          onClick={onOpenHelp}
+        >
+          <HelpCircle size={15} aria-hidden="true" />
+          How shopping works
+        </button>
+      </div>
+
+      {fullList ? (
+        <p className="small-text shop-mode-note">
+          {keepStandingList
+            ? "Showing everything to buy this week, including your recurring buys — handy for shopping in store."
+            : "One complete list: your meal ingredients, restocks and recurring buys, grouped by aisle."}
+        </p>
+      ) : (
+        <p className="small-text shop-mode-note">
+          Top-up only: meal ingredients and restocks to add to your standing
+          Woolworths list. Your recurring buys aren't repeated here.
+        </p>
+      )}
 
       <WeekControls
         activePreset={shoppingWeekMode}
@@ -194,7 +282,7 @@ function ShoppingList({
         </div>
       )}
 
-      {recurringRemovalItems.length > 0 && (
+      {!fullList && recurringRemovalItems.length > 0 && (
         <section className="woolworths-removal-section">
           <div className="shopping-section-header">
             <h3>Remove from Woolworths list</h3>
@@ -244,7 +332,7 @@ function ShoppingList({
         </section>
       )}
 
-      {shoppingItems.length === 0 ? (
+      {displayItems.length === 0 ? (
         <p className="empty-state">
           No items yet — generate the list or add one below.
         </p>
@@ -309,7 +397,7 @@ function ShoppingList({
         </>
       )}
 
-      {skippedItems.length > 0 && (
+      {!fullList && skippedItems.length > 0 && (
         <details className="skipped-section">
           <summary>
             <span>Already have</span>

@@ -2642,6 +2642,119 @@ input::placeholder {
   display: none;
 }
 
+.settings-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.settings-toggle input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.settings-toggle > span {
+  display: grid;
+  gap: 3px;
+}
+
+.settings-toggle-title {
+  font-weight: 720;
+  color: var(--ink);
+}
+
+/* ---- Shop page: list-view toggle, help link and mode note ---- */
+
+.shop-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.shop-list-toggle {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+  padding: 4px;
+}
+
+.shop-list-toggle button {
+  min-height: 36px;
+  padding: 6px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 760;
+}
+
+.shop-list-toggle button.active {
+  border-color: var(--accent);
+  background: var(--panel);
+  color: var(--accent-strong);
+  box-shadow: 0 1px 4px rgba(74, 48, 26, 0.1);
+}
+
+.shop-help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  font-weight: 720;
+  padding: 4px;
+}
+
+.shop-mode-note {
+  margin: 0;
+}
+
+/* ---- How-shopping-works help sheet ---- */
+
+.help-body {
+  display: grid;
+  gap: 12px;
+}
+
+.help-body p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.help-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.help-list li {
+  line-height: 1.45;
+}
+
+.help-heading {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+}
+
+.help-current {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--soft);
+}
+
 .settings-status {
   margin: 0;
   font-weight: 740;

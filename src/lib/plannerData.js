@@ -8,12 +8,30 @@ export const DATA_KEYS = [
   "shoppingItemsByWeek",
   "shoppingListMetaByWeek",
   "removalAcksByWeek",
+  "recurringCheckedByWeek",
   "staples",
   "inventory",
   "recipes",
+  "settings",
 ];
 
 const TABLE = "app_data";
+
+export const defaultSettings = {
+  // Whether the user keeps a standing grocery list outside the app (e.g. a saved
+  // Woolworths list). When true, recurring buys live on that list and the
+  // generated shopping list is a "top-up" of meal ingredients + restocks. When
+  // false, recurring buys are folded into one complete shopping list.
+  keepStandingList: true,
+};
+
+function normaliseSettings(raw) {
+  const value = raw && typeof raw === "object" ? raw : {};
+
+  return {
+    keepStandingList: value.keepStandingList !== false,
+  };
+}
 
 export function defaultData() {
   return {
@@ -21,9 +39,11 @@ export function defaultData() {
     shoppingItemsByWeek: {},
     shoppingListMetaByWeek: {},
     removalAcksByWeek: {},
+    recurringCheckedByWeek: {},
     staples: [],
     inventory: [],
     recipes: initialRecipes,
+    settings: { ...defaultSettings },
   };
 }
 
@@ -39,6 +59,8 @@ export function normaliseData(raw) {
     shoppingListMetaByWeek:
       data.shoppingListMetaByWeek ?? base.shoppingListMetaByWeek,
     removalAcksByWeek: data.removalAcksByWeek ?? base.removalAcksByWeek,
+    recurringCheckedByWeek:
+      data.recurringCheckedByWeek ?? base.recurringCheckedByWeek,
     staples: Array.isArray(data.staples) ? data.staples : base.staples,
     inventory: normaliseInventoryItems(
       Array.isArray(data.inventory) ? data.inventory : []
@@ -46,6 +68,7 @@ export function normaliseData(raw) {
     recipes: mergeSavedRecipes(
       Array.isArray(data.recipes) ? data.recipes : base.recipes
     ),
+    settings: normaliseSettings(data.settings),
   };
 }
 

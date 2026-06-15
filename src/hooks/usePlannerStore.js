@@ -189,9 +189,11 @@ export function usePlannerStore(user) {
       setShoppingItemsByWeek: makeSetter("shoppingItemsByWeek"),
       setShoppingListMetaByWeek: makeSetter("shoppingListMetaByWeek"),
       setRemovalAcksByWeek: makeSetter("removalAcksByWeek"),
+      setRecurringCheckedByWeek: makeSetter("recurringCheckedByWeek"),
       setStaples: makeSetter("staples"),
       setInventory: makeSetter("inventory"),
       setRecipes: makeSetter("recipes"),
+      setSettings: makeSetter("settings"),
     };
   }, []);
 

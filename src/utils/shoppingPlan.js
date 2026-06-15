@@ -278,10 +278,21 @@ export function buildShoppingPlan({
   summary.duplicateManualDropped =
     retainedShoppingItems.length - dedupedRetainedItems.length;
 
+  // The recurring buys that are active and due this week, as display rows. In
+  // "top-up" mode these stay on the user's standing list and never hit the
+  // shopping list; the "full list" view merges them in so you can shop without
+  // it (e.g. in store). Derived only — never persisted as shopping rows.
+  const recurringBuyItems = recurringBuys.map((item) => ({
+    id: item.id,
+    name: item.name,
+    category: item.category,
+  }));
+
   return {
     newItems,
     retainedShoppingItems: dedupedRetainedItems,
     removeFromRecurring,
+    recurringBuyItems,
     skippedItems,
     itemsSignature: getGeneratedShoppingSignature(newItems),
     signature: getShoppingPlanSignature(newItems, removeFromRecurring),
