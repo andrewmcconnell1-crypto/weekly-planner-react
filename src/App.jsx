@@ -90,6 +90,7 @@ function App() {
     () => localStorage.getItem("planner-welcome-done") === "1"
   );
   const [welcomePreview, setWelcomePreview] = useState(false);
+  const [guest, setGuest] = useState(false);
 
   const [currentWeekStart] = useState(getSunday);
   const [nextWeekStart] = useState(getNextSunday);
@@ -164,13 +165,14 @@ function App() {
     return <LoadingScreen message="Loading…" />;
   }
 
-  if (isSupabaseConfigured && !user) {
+  if (isSupabaseConfigured && !user && !guest) {
     return (
       <SignInScreen
         onGoogle={signInWithGoogle}
         onEmailSignIn={signInWithEmail}
         onEmailSignUp={signUpWithEmail}
         onMagicLink={signInWithMagicLink}
+        onGuest={() => setGuest(true)}
       />
     );
   }
@@ -1043,6 +1045,19 @@ function App() {
         </p>
       )}
 
+      {isSupabaseConfigured && !user && guest && (
+        <div className="guest-banner" role="status">
+          <span>
+            You're just looking around — changes stay on this device. Sign in to
+            save your plan and sync across devices.
+          </span>
+
+          <button type="button" onClick={() => setGuest(false)}>
+            Sign in
+          </button>
+        </div>
+      )}
+
       {activeTab === "home" && (
         <section className="screen home-screen">
           <TonightCard
@@ -1094,9 +1109,25 @@ function App() {
               <strong>Here's how it works</strong>
 
               <ol className="welcome-steps">
-                <li><span>Plan</span> your dinners for the week</li>
-                <li><span>Generate</span> a shopping list from your meals and recurring buys</li>
-                <li><span>Shop</span> and check items off as you go</li>
+                <li>
+                  <span>Plan your week</span> — on Meals, pick a recipe for each
+                  night. Cook once and reuse leftovers across several nights, or
+                  mark a takeaway / night out.
+                </li>
+                <li>
+                  <span>Set up household basics</span> — in More → Household
+                  basics, list your recurring buys (things you get most weeks)
+                  and tick what's already in stock.
+                </li>
+                <li>
+                  <span>Generate your list</span> — it combines your meal
+                  ingredients with your recurring buys, and skips anything you
+                  already have in stock.
+                </li>
+                <li>
+                  <span>Shop</span> — check items off as you go. The Today screen
+                  always shows what's for dinner tonight.
+                </li>
               </ol>
 
               <button

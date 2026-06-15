@@ -2515,6 +2515,48 @@ input::placeholder {
   color: var(--danger);
 }
 
+.auth-guest {
+  min-height: auto;
+  margin-top: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 6px;
+  font-size: 0.88rem;
+  font-weight: 740;
+}
+
+.auth-guest:hover {
+  background: transparent;
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.guest-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d6dcbe;
+  background: var(--olive-soft);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.guest-banner button {
+  flex-shrink: 0;
+  min-height: 36px;
+  border: 1px solid var(--olive);
+  background: var(--olive);
+  color: #fff;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+}
+
 .sync-banner {
   margin: 0 0 12px;
   padding: 10px 14px;

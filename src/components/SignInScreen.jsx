@@ -23,7 +23,13 @@ function GoogleMark() {
   );
 }
 
-function SignInScreen({ onGoogle, onEmailSignIn, onEmailSignUp, onMagicLink }) {
+function SignInScreen({
+  onGoogle,
+  onEmailSignIn,
+  onEmailSignUp,
+  onMagicLink,
+  onGuest,
+}) {
   const [method, setMethod] = useState("password"); // "password" | "link"
   const [mode, setMode] = useState("signin"); // password: "signin" | "signup"
   const [email, setEmail] = useState("");
@@ -206,6 +212,12 @@ function SignInScreen({ onGoogle, onEmailSignIn, onEmailSignUp, onMagicLink }) {
           >
             {status.message}
           </p>
+        )}
+
+        {onGuest && (
+          <button type="button" className="auth-guest" onClick={onGuest}>
+            Just looking? Explore without an account →
+          </button>
         )}
 
         <p className="small-text auth-note">
