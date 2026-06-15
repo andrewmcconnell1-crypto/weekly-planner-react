@@ -2961,6 +2961,14 @@ input::placeholder {
   align-items: center;
 }
 
+/* Without this, the global button:hover (red) outranks .category-toggle and the
+   header sticks red with dark text after a tap — unreadable. Keep it light. */
+.category-toggle:hover,
+.category-toggle:focus {
+  background: var(--soft);
+  color: var(--ink);
+}
+
 /* Collapse affordance shared by stock + shopping category headers */
 .category-toggle-meta,
 .group-heading-meta {
