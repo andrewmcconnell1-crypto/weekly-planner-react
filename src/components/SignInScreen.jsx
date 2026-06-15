@@ -39,6 +39,14 @@ function SignInScreen({
 
   const cleanedEmail = email.trim();
 
+  function friendlyError(error) {
+    const message = error?.message || "Something went wrong. Please try again.";
+    if (/rate limit/i.test(message) || error?.status === 429) {
+      return "Too many emails were just sent. Wait a few minutes, or sign in with a password instead.";
+    }
+    return message;
+  }
+
   function switchMethod(next) {
     setMethod(next);
     setStatus(null);
@@ -62,7 +70,7 @@ function SignInScreen({
     setBusy(false);
 
     if (error) {
-      setStatus({ tone: "error", message: error.message });
+      setStatus({ tone: "error", message: friendlyError(error) });
       return;
     }
 
@@ -91,7 +99,7 @@ function SignInScreen({
     setBusy(false);
     setStatus(
       error
-        ? { tone: "error", message: error.message }
+        ? { tone: "error", message: friendlyError(error) }
         : { tone: "ok", message: `Sign-in link sent to ${cleanedEmail}.` }
     );
   }
