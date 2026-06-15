@@ -36,6 +36,8 @@ export function usePlannerStore(user) {
   const saveTimerRef = useRef(null);
   // updated_at of our most recent write, so realtime can ignore our own echo.
   const lastWrittenAtRef = useRef(null);
+  // Detects sign-out so we can drop the account's in-memory data.
+  const prevUserIdRef = useRef(userId);
 
   // Load from the cloud (state updates happen inside the async callback, never
   // synchronously in the effect body).
@@ -77,6 +79,21 @@ export function usePlannerStore(user) {
       cancelled = true;
     };
   }, [cloud, userId]);
+
+  // On sign-out, discard the account's in-memory data so guest / local mode
+  // starts fresh from defaults instead of showing (or writing locally) the
+  // previous account's plan. Defined before the save effect so the skip flag is
+  // already set when that effect runs in the same pass.
+  useEffect(() => {
+    const prevUserId = prevUserIdRef.current;
+    prevUserIdRef.current = userId;
+
+    if (prevUserId && !userId) {
+      skipNextSaveRef.current = true;
+      setData(defaultData());
+      setLoadedUserId(null);
+    }
+  }, [userId]);
 
   // Persist on change: debounced upsert in cloud mode, immediate in local mode.
   useEffect(() => {
