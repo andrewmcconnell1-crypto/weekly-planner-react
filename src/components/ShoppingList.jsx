@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, HelpCircle, X } from "lucide-react";
 
 import WeekControls from "./WeekControls";
 import { normaliseItemName } from "../utils/itemUtils";
+import { categoriseIngredient } from "../utils/categoriseIngredient";
 
 // What a row needs to say in the supermarket: the item, and (for meal
 // ingredients) which meal it's for. Everything else is noise. In the flat
@@ -66,7 +67,18 @@ function ShoppingList({
       }))
     : [];
 
-  const displayItems = [...shoppingItems, ...recurringRows];
+  // In the full list there are no source labels, so meal ingredients sitting in
+  // the generic "Meal ingredients" bucket are re-filed into their supermarket
+  // aisle (Dairy, Pantry, …) so the by-category grouping is actually useful.
+  const baseItems = fullList
+    ? shoppingItems.map((item) =>
+        item.category === "Meal ingredients"
+          ? { ...item, category: categoriseIngredient(item.name) }
+          : item
+      )
+    : shoppingItems;
+
+  const displayItems = [...baseItems, ...recurringRows];
 
   const pendingItems = displayItems.filter((item) => !item.checked);
   const doneItems = displayItems.filter((item) => item.checked);
