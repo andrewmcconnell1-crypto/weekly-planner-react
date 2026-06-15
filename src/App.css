@@ -1329,6 +1329,8 @@ input[type="search"],
 input[type="number"],
 input[type="url"],
 input[type="email"],
+input[type="password"],
+input[type="tel"],
 select,
 textarea {
   width: 100%;
