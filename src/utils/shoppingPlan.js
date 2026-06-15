@@ -260,9 +260,27 @@ export function buildShoppingPlan({
     (item) => item.source === "Restock"
   ).length;
 
+  // A generated row can duplicate a manually-kept row that names the same food
+  // differently — e.g. an out-of-stock "Paprika" produces a "Paprika" restock
+  // while a "2 tsp paprika" manual override (or hand-typed item) already sits on
+  // the list. Exact-name dedup misses these because they normalise differently,
+  // so drop any retained row already covered (fuzzily) by something we're
+  // generating. The generated row wins: it carries the right category and the
+  // "you need to buy this" meaning. Items the generator suppressed (e.g. an
+  // "already have" override) have no competing row here, so they're preserved.
+  const generatedCoverageIndex = buildCoverageIndex(
+    newItems.map((item) => item.name)
+  );
+  const dedupedRetainedItems = retainedShoppingItems.filter(
+    (item) => !findCoverage(item.name, generatedCoverageIndex)
+  );
+  summary.manualItemsKept = dedupedRetainedItems.length;
+  summary.duplicateManualDropped =
+    retainedShoppingItems.length - dedupedRetainedItems.length;
+
   return {
     newItems,
-    retainedShoppingItems,
+    retainedShoppingItems: dedupedRetainedItems,
     removeFromRecurring,
     skippedItems,
     itemsSignature: getGeneratedShoppingSignature(newItems),

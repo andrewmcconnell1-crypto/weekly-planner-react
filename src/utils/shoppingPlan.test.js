@@ -1,0 +1,157 @@
+import { describe, it, expect } from "vitest";
+
+import { buildShoppingPlan } from "./shoppingPlan";
+
+// A single Sunday meal that needs paprika, plus a filler ingredient that's never
+// covered by stock or recurring buys so the plan always has at least one row.
+const weekMeals = { Sunday: { type: "meal" } };
+const getMealSummary = (day) =>
+  day === "Sunday"
+    ? {
+        hasMeal: true,
+        name: "Beef Tacos",
+        ingredients: ["2 tsp paprika", "500g beef mince"],
+      }
+    : { hasMeal: false, name: day, ingredients: [] };
+
+function plan({ staples = [], inventory = [], shoppingItems = [] }) {
+  return buildShoppingPlan({
+    staples,
+    inventory,
+    shoppingItems,
+    weekMeals,
+    weekKey: "2026-06-14",
+    getMealSummary,
+  });
+}
+
+// The list the app actually renders is retained items followed by generated ones.
+function renderedList(result) {
+  return [...result.retainedShoppingItems, ...result.newItems];
+}
+
+function paprikaRows(result) {
+  return renderedList(result).filter((item) =>
+    item.name.toLowerCase().includes("paprika")
+  );
+}
+
+const paprikaOutOfStock = [
+  { id: "i1", name: "Paprika", active: false, category: "Herbs & Spices" },
+];
+const paprikaInStock = [
+  { id: "i1", name: "Paprika", active: true, category: "Herbs & Spices" },
+];
+
+describe("buildShoppingPlan — already-have suppression", () => {
+  it("keeps a meal ingredient that nothing covers", () => {
+    const result = plan({ inventory: paprikaInStock });
+    const names = renderedList(result).map((i) => i.name.toLowerCase());
+    expect(names.some((n) => n.includes("beef"))).toBe(true);
+  });
+
+  it("suppresses a meal ingredient that's in active stock", () => {
+    const result = plan({ inventory: paprikaInStock });
+    expect(paprikaRows(result)).toHaveLength(0);
+  });
+
+  it("suppresses a meal ingredient that's an active recurring buy", () => {
+    const result = plan({
+      staples: [
+        {
+          id: "s1",
+          name: "Paprika",
+          active: true,
+          frequency: "weekly",
+          startDate: "2026-06-01",
+          category: "Herbs & Spices",
+        },
+      ],
+    });
+    expect(paprikaRows(result)).toHaveLength(0);
+  });
+});
+
+describe("buildShoppingPlan — out-of-stock + meal ingredient", () => {
+  it("lists an out-of-stock meal ingredient exactly once (restock, not meal)", () => {
+    const result = plan({ inventory: paprikaOutOfStock });
+    const rows = paprikaRows(result);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].source).toBe("Restock");
+  });
+
+  it("does not double-list when a stale generated meal row already exists", () => {
+    const result = plan({
+      inventory: paprikaOutOfStock,
+      shoppingItems: [
+        {
+          id: "g1",
+          name: "2 tsp paprika",
+          source: "Meal",
+          category: "Meal ingredients",
+          checked: false,
+        },
+      ],
+    });
+    expect(paprikaRows(result)).toHaveLength(1);
+  });
+
+  it("does not double-list a manual override against a restock row", () => {
+    // The regression: "2 tsp paprika" (manual) normalises differently from the
+    // "Paprika" restock, so exact-name dedup missed it and both appeared.
+    const result = plan({
+      inventory: paprikaOutOfStock,
+      shoppingItems: [
+        {
+          id: "m1",
+          name: "2 tsp paprika",
+          source: "Manual",
+          category: "Meal ingredients",
+          checked: false,
+        },
+      ],
+    });
+    const rows = paprikaRows(result);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].source).toBe("Restock");
+  });
+});
+
+describe("buildShoppingPlan — manual overrides are preserved", () => {
+  it("keeps an 'add it anyway' override when nothing else covers it", () => {
+    // Paprika in stock => meal ingredient suppressed and no restock generated,
+    // so a manual re-add must survive (this is the override's whole point).
+    const result = plan({
+      inventory: paprikaInStock,
+      shoppingItems: [
+        {
+          id: "m1",
+          name: "2 tsp paprika",
+          source: "Manual",
+          category: "Meal ingredients",
+          checked: false,
+        },
+      ],
+    });
+    const rows = paprikaRows(result);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].source).toBe("Manual");
+  });
+
+  it("leaves unrelated manual items untouched", () => {
+    const result = plan({
+      inventory: paprikaOutOfStock,
+      shoppingItems: [
+        {
+          id: "m1",
+          name: "Birthday candles",
+          source: "Manual",
+          category: "Other",
+          checked: false,
+        },
+      ],
+    });
+    const names = renderedList(result).map((i) => i.name);
+    expect(names).toContain("Birthday candles");
+  });
+});
