@@ -136,7 +136,7 @@ function App() {
     loading: dataLoading,
     syncError,
     cloud,
-  } = usePlannerStore(user);
+  } = usePlannerStore(user, guest);
 
   const [newItem, setNewItem] = useState("");
   const [newStaple, setNewStaple] = useState("");
@@ -1122,8 +1122,8 @@ function App() {
       {isSupabaseConfigured && !user && guest && (
         <div className="guest-banner" role="status">
           <span>
-            You're just looking around — changes stay on this device. Sign in to
-            save your plan and sync across devices.
+            Exploring with sample data — nothing here is saved. Sign in to start
+            your own plan from scratch and sync across devices.
           </span>
 
           <button type="button" onClick={() => setGuest(false)}>

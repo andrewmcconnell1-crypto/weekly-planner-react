@@ -10,14 +10,17 @@ import {
   fetchCloudData,
   saveCloudData,
 } from "../lib/plannerData";
+import { demoData } from "../lib/demoData";
 
 const SAVE_DEBOUNCE_MS = 800;
 
 // Single source of truth for all planner data. In cloud mode (Supabase
 // configured + signed in) it loads/saves the user's row and refreshes on focus;
-// otherwise it falls back to localStorage. It exposes the same per-slice setters
-// the app already used, so the rest of the UI is unchanged.
-export function usePlannerStore(user) {
+// otherwise it falls back to localStorage. Guest mode is ephemeral: it shows a
+// populated demo held in memory only, never read from or written to storage, so
+// it can't pollute a real account. It exposes the same per-slice setters the
+// app already used, so the rest of the UI is unchanged.
+export function usePlannerStore(user, guest = false) {
   const cloud = isSupabaseConfigured && Boolean(user);
   const userId = user?.id ?? null;
 
@@ -38,6 +41,9 @@ export function usePlannerStore(user) {
   const lastWrittenAtRef = useRef(null);
   // Detects sign-out so we can drop the account's in-memory data.
   const prevUserIdRef = useRef(userId);
+  // Detects entering/leaving guest mode so we can swap in (and later discard)
+  // the in-memory demo without ever touching storage.
+  const prevGuestRef = useRef(guest);
 
   // Load from the cloud (state updates happen inside the async callback, never
   // synchronously in the effect body).
@@ -95,9 +101,24 @@ export function usePlannerStore(user) {
     }
   }, [userId]);
 
+  // Enter guest mode -> show the in-memory demo; leave it -> fall back to
+  // whatever's in local storage (defaults on a fresh device). Never persisted.
+  useEffect(() => {
+    const wasGuest = prevGuestRef.current;
+    prevGuestRef.current = guest;
+
+    if (guest === wasGuest) return;
+
+    skipNextSaveRef.current = true;
+    setData(guest ? demoData() : loadLocalData());
+  }, [guest]);
+
   // Persist on change: debounced upsert in cloud mode, immediate in local mode.
   useEffect(() => {
     if (loading) return;
+
+    // Guest/demo is in-memory only — never write it anywhere.
+    if (guest) return;
 
     if (skipNextSaveRef.current) {
       skipNextSaveRef.current = false;
@@ -121,7 +142,7 @@ export function usePlannerStore(user) {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [data, cloud, loading, userId]);
+  }, [data, cloud, loading, userId, guest]);
 
   // When you return to the app, pull the latest (e.g. edited on another device).
   useEffect(() => {
