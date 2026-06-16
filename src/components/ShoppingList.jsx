@@ -138,31 +138,18 @@ function ShoppingList({
 
       {keepStandingList && (
         <div className="shop-mode">
-          <div
-            className="shop-list-toggle shop-mode-toggle"
-            role="tablist"
-            aria-label="How you're shopping"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={usingSavedList}
-              className={usingSavedList ? "active" : ""}
-              onClick={() => setUsingSavedList(true)}
-            >
-              Using saved list
-            </button>
-
-            <button
-              type="button"
-              role="tab"
-              aria-selected={!usingSavedList}
-              className={!usingSavedList ? "active" : ""}
-              onClick={() => setUsingSavedList(false)}
-            >
-              Shopping fresh
-            </button>
-          </div>
+          <label className="shop-switch">
+            <span className="shop-switch-text">
+              Using your saved list this shop?
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              className="shop-switch-input"
+              checked={usingSavedList}
+              onChange={(event) => setUsingSavedList(event.target.checked)}
+            />
+          </label>
 
           <p className="small-text shop-mode-note">
             {usingSavedList
