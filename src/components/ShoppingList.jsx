@@ -45,13 +45,18 @@ function ShoppingList({
   recurringBuyItems = [],
   recurringCheckedIds = [],
   onToggleRecurring,
+  priorityTiers = [],
   onOpenHelp,
 }) {
   const [collapsedCategories, setCollapsedCategories] = useState({});
+  // Prototype only: ticking in the priority view is held locally (not saved).
+  const [priorityChecked, setPriorityChecked] = useState({});
+
+  const priorityView = shopListView === "priority";
 
   // "Full list" folds recurring buys into one complete list. People who don't
   // keep a standing list are always in this mode (there's no second list).
-  const fullList = !keepStandingList || shopListView === "full";
+  const fullList = !priorityView && (!keepStandingList || shopListView === "full");
 
   // The recurring buys, as toggleable rows, only when we're showing the full
   // list. Their checked state is tracked separately from the generated rows.
@@ -79,9 +84,24 @@ function ShoppingList({
 
   const pendingItems = displayItems.filter((item) => !item.checked);
   const doneItems = displayItems.filter((item) => item.checked);
-  const totalItems = displayItems.length;
-  const donePct =
-    totalItems > 0 ? Math.round((doneItems.length / totalItems) * 100) : 0;
+
+  // Priority view spans this + next week, so its counts come from the tiers.
+  const priorityAllItems = priorityTiers.flatMap((tier) =>
+    tier.groups.flatMap((group) => group.items)
+  );
+  const priorityDoneCount = priorityAllItems.filter(
+    (item) => priorityChecked[item.id]
+  ).length;
+
+  const heroTotal = priorityView ? priorityAllItems.length : displayItems.length;
+  const heroDone = priorityView ? priorityDoneCount : doneItems.length;
+  const heroPending = heroTotal - heroDone;
+  const totalItems = heroTotal;
+  const donePct = heroTotal > 0 ? Math.round((heroDone / heroTotal) * 100) : 0;
+
+  function togglePriorityItem(id) {
+    setPriorityChecked((current) => ({ ...current, [id]: !current[id] }));
+  }
   const groupedPendingItems = pendingItems.reduce((groups, item) => {
     const category = item.category || "Other";
 
@@ -162,19 +182,19 @@ function ShoppingList({
       >
         <p className="page-hero-kicker">Shopping list · {formattedShoppingRange}</p>
 
-        {hasGeneratedShopPlan ? (
+        {hasGeneratedShopPlan || priorityView ? (
           <>
-            <strong className="page-hero-count">
-              {pendingItems.length} to buy
-            </strong>
+            <strong className="page-hero-count">{heroPending} to buy</strong>
 
             <p className="page-hero-sub">
-              {doneItems.length} done · {totalItems} total
-              {shoppingListNeedsUpdate
-                ? " · needs update"
-                : shoppingLastUpdatedText
-                  ? ` · updated ${shoppingLastUpdatedText}`
-                  : ""}
+              {heroDone} done · {totalItems} total
+              {priorityView
+                ? " · this week + next"
+                : shoppingListNeedsUpdate
+                  ? " · needs update"
+                  : shoppingLastUpdatedText
+                    ? ` · updated ${shoppingLastUpdatedText}`
+                    : ""}
             </p>
 
             {totalItems > 0 && (
@@ -189,13 +209,15 @@ function ShoppingList({
               </div>
             )}
 
-            <button
-              type="button"
-              className="page-hero-action"
-              onClick={buildShoppingList}
-            >
-              {shoppingActionLabel}
-            </button>
+            {!priorityView && (
+              <button
+                type="button"
+                className="page-hero-action"
+                onClick={buildShoppingList}
+              >
+                {shoppingActionLabel}
+              </button>
+            )}
           </>
         ) : (
           <>
@@ -219,33 +241,43 @@ function ShoppingList({
       </div>
 
       <div className="shop-controls-row">
-        {keepStandingList && (
-          <div
-            className="shop-list-toggle"
-            role="tablist"
-            aria-label="Shopping list view"
-          >
+        <div
+          className="shop-list-toggle"
+          role="tablist"
+          aria-label="Shopping list view"
+        >
+          {keepStandingList && (
             <button
               type="button"
               role="tab"
-              aria-selected={!fullList}
-              className={!fullList ? "active" : ""}
+              aria-selected={!fullList && !priorityView}
+              className={!fullList && !priorityView ? "active" : ""}
               onClick={() => setShopListView("topup")}
             >
               Top-up
             </button>
+          )}
 
-            <button
-              type="button"
-              role="tab"
-              aria-selected={fullList}
-              className={fullList ? "active" : ""}
-              onClick={() => setShopListView("full")}
-            >
-              Full list
-            </button>
-          </div>
-        )}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={fullList}
+            className={fullList ? "active" : ""}
+            onClick={() => setShopListView("full")}
+          >
+            Full list
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={priorityView}
+            className={priorityView ? "active" : ""}
+            onClick={() => setShopListView("priority")}
+          >
+            Priority
+          </button>
+        </div>
 
         <button
           type="button"
@@ -257,7 +289,12 @@ function ShoppingList({
         </button>
       </div>
 
-      {fullList ? (
+      {priorityView ? (
+        <p className="small-text shop-mode-note">
+          Preview · one list ordered by when you'll need things — urgent at the
+          top, next week at the bottom. Ticking here isn't saved yet.
+        </p>
+      ) : fullList ? (
         <p className="small-text shop-mode-note">
           {keepStandingList
             ? "Showing everything to buy this week, including your recurring buys — handy for shopping in store."
@@ -270,13 +307,68 @@ function ShoppingList({
         </p>
       )}
 
-      <WeekControls
-        activePreset={shoppingWeekMode}
-        onThisWeek={goToThisShoppingWeek}
-        onNextWeekPreset={goToNextShoppingWeekDefault}
-        onPreviousWeek={goToPreviousShoppingWeek}
-        onNextWeek={goToNextShoppingWeek}
-      />
+      {!priorityView && (
+        <WeekControls
+          activePreset={shoppingWeekMode}
+          onThisWeek={goToThisShoppingWeek}
+          onNextWeekPreset={goToNextShoppingWeekDefault}
+          onPreviousWeek={goToPreviousShoppingWeek}
+          onNextWeek={goToNextShoppingWeek}
+        />
+      )}
+
+      {priorityView ? (
+        priorityTiers.length === 0 ? (
+          <p className="empty-state">
+            Nothing needed right now — plan some meals or mark stock as out.
+          </p>
+        ) : (
+          priorityTiers.map((tier) => (
+            <section className="priority-tier" key={tier.key}>
+              <div className="priority-tier-head">
+                <h3>{tier.title}</h3>
+                <span>{tier.count}</span>
+              </div>
+              <p className="small-text priority-tier-note">{tier.note}</p>
+
+              {tier.groups.map((group) => (
+                <div className="shopping-group" key={group.category}>
+                  <div className="priority-aisle">{group.category}</div>
+                  <ul className="clean-list">
+                    {group.items.map((item) => {
+                      const checked = Boolean(priorityChecked[item.id]);
+
+                      return (
+                        <li
+                          className={`card shopping-row ${
+                            checked ? "checked-row" : ""
+                          }`}
+                          key={item.id}
+                        >
+                          <label className={checked ? "checked-item" : ""}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => togglePriorityItem(item.id)}
+                            />
+                            <span className="shopping-item-content">
+                              <span className="shopping-item-name">
+                                {item.name}
+                              </span>
+                            </span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          ))
+        )
+      ) : (
+        <>
+          {/* PRIORITY_BODY_SPLIT */}
 
       {!fullList && recurringRemovalItems.length > 0 && (
         <section className="woolworths-removal-section">
@@ -459,6 +551,8 @@ function ShoppingList({
           </button>
         </div>
       </div>
+        </>
+      )}
     </section>
   );
 }

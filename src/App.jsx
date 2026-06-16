@@ -38,6 +38,7 @@ import {
   generatedShoppingSources,
   getGeneratedShoppingSignature,
 } from "./utils/shoppingPlan";
+import { buildPriorityShoppingList } from "./utils/priorityShoppingList";
 import {
   createStarterInventoryItems,
   normaliseInventoryItems,
@@ -348,6 +349,19 @@ function App() {
     weekMeals: shoppingWeekMeals,
     weekKey: shoppingWeekKey,
     getMealSummary,
+  });
+  // Prototype: a single urgency-ordered list spanning this week + next, built
+  // from existing data (read-only — see PriorityShoppingList).
+  const priorityTiers = buildPriorityShoppingList({
+    staples,
+    inventory,
+    mealsByWeek,
+    shoppingItemsByWeek,
+    currentWeekKey,
+    nextWeekKey,
+    todayDayName,
+    getMealSummary,
+    keepStandingList,
   });
   const shoppingListMeta = shoppingListMetaByWeek[shoppingWeekKey] || null;
   const currentGeneratedShoppingSignature = getGeneratedShoppingSignature(
@@ -1404,6 +1418,7 @@ function App() {
           recurringBuyItems={recurringBuyItems}
           recurringCheckedIds={recurringCheckedIds}
           onToggleRecurring={toggleRecurringChecked}
+          priorityTiers={priorityTiers}
           onOpenHelp={() => setShoppingHelpOpen(true)}
         />
       )}
