@@ -2696,20 +2696,30 @@ input::placeholder {
   margin: 0;
 }
 
-.shop-topup-filter {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--muted);
+.shop-mode {
+  display: grid;
+  gap: 6px;
 }
 
-.shop-topup-filter input {
-  margin-top: 2px;
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
+.shop-mode-toggle {
+  justify-self: start;
+}
+
+.removal-section {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--accent-soft);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  padding: 12px;
+}
+
+.removal-section .priority-tier-head {
+  border-bottom-color: rgba(156, 70, 50, 0.25);
+}
+
+.removal-row .shopping-source-detail {
+  color: var(--accent-strong);
 }
 
 /* ---- Priority list (prototype): urgency tiers, aisle groups within ---- */

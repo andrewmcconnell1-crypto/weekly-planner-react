@@ -36,7 +36,7 @@ export function buildUnifiedShoppingList({
   todayDayName,
   getMealSummary,
   keepStandingList,
-  topUpOnly = false,
+  usingSavedList = false,
   manualItems = [],
   checkedMap = {},
 }) {
@@ -94,9 +94,11 @@ export function buildUnifiedShoppingList({
     }
   }
 
-  // Recurring buys only appear when you don't keep a separate standing list.
-  // The "top-up only" filter hides them too (they're the standing-list items).
-  if (!keepStandingList && !topUpOnly) {
+  // "Shopping fresh" (no saved list this trip) folds recurring buys into the
+  // list to buy. "Using my saved list" keeps them off — they're already on the
+  // saved list — and instead surfaces the ones to remove (below).
+  const shoppingFresh = !keepStandingList || !usingSavedList;
+  if (shoppingFresh) {
     for (const item of currentPlan.recurringBuyItems) {
       add(item.name, item.category, "week", "Recurring buy");
     }
@@ -127,7 +129,12 @@ export function buildUnifiedShoppingList({
     skipped.push(item);
   }
 
-  return { items: [...byName.values()], skipped };
+  // When using a saved list, the recurring items to take off it this week:
+  // ones you've paused, or that you're already covered for by stock.
+  const removals =
+    keepStandingList && usingSavedList ? currentPlan.removeFromRecurring : [];
+
+  return { items: [...byName.values()], skipped, removals };
 }
 
 // Group items into the urgency tiers, aisle-sorted within each. Empty tiers

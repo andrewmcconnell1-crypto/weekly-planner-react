@@ -20,11 +20,16 @@ export const DATA_KEYS = [
 const TABLE = "app_data";
 
 export const defaultSettings = {
-  // Whether the user keeps a standing grocery list outside the app (e.g. a saved
-  // Woolworths list). When true, recurring buys live on that list and the
-  // generated shopping list is a "top-up" of meal ingredients + restocks. When
-  // false, recurring buys are folded into one complete shopping list.
+  // Whether the user has a saved/standing grocery list outside the app (e.g. a
+  // Woolworths or Coles saved list). Gates the per-trip "using my saved list"
+  // toggle on the Shop page.
   keepStandingList: true,
+  // Per-trip mode, remembered between sessions. When true ("using my saved
+  // list", e.g. an online Woolies order) recurring buys stay off the buy list
+  // and a "take off your saved list" section shows the ones to remove this week.
+  // When false ("shopping fresh", e.g. in store or Coles) recurring buys are
+  // folded into the list to buy.
+  shopUsingSavedList: true,
 };
 
 function normaliseSettings(raw) {
@@ -32,6 +37,7 @@ function normaliseSettings(raw) {
 
   return {
     keepStandingList: value.keepStandingList !== false,
+    shopUsingSavedList: value.shopUsingSavedList !== false,
   };
 }
 

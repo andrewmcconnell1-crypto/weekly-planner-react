@@ -17,10 +17,14 @@ function ShoppingList({
   skippedItems = [],
   onAddSkipped,
   keepStandingList = true,
+  usingSavedList = false,
+  setUsingSavedList,
+  removals = [],
+  removalAckIds = [],
+  pendingRemovalCount = 0,
+  onToggleRemoval,
   shopLayout,
   setShopLayout,
-  topUpOnly,
-  setTopUpOnly,
   onOpenHelp,
 }) {
   const priorityLayout = shopLayout !== "aisle";
@@ -132,15 +136,89 @@ function ShoppingList({
         </button>
       </div>
 
-      {!keepStandingList && (
-        <label className="shop-topup-filter">
-          <input
-            type="checkbox"
-            checked={topUpOnly}
-            onChange={(event) => setTopUpOnly(event.target.checked)}
-          />
-          <span>Top-up only — hide recurring buys you keep on hand</span>
-        </label>
+      {keepStandingList && (
+        <div className="shop-mode">
+          <div
+            className="shop-list-toggle shop-mode-toggle"
+            role="tablist"
+            aria-label="How you're shopping"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={usingSavedList}
+              className={usingSavedList ? "active" : ""}
+              onClick={() => setUsingSavedList(true)}
+            >
+              Using saved list
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!usingSavedList}
+              className={!usingSavedList ? "active" : ""}
+              onClick={() => setUsingSavedList(false)}
+            >
+              Shopping fresh
+            </button>
+          </div>
+
+          <p className="small-text shop-mode-note">
+            {usingSavedList
+              ? "Your recurring buys are already on your saved list, so they're left off here — see what to take off it below."
+              : "Recurring buys are added to the list so you pick up everything (e.g. in store or at another shop)."}
+          </p>
+        </div>
+      )}
+
+      {usingSavedList && removals.length > 0 && (
+        <section className="removal-section">
+          <div className="priority-tier-head">
+            <h3>Take off your saved list</h3>
+            <span>{pendingRemovalCount}</span>
+          </div>
+
+          <p className="small-text priority-tier-note">
+            Paused or already in stock — remove these from your saved order this
+            week, then tick them here.
+          </p>
+
+          <ul className="clean-list">
+            {[...removals]
+              .sort(
+                (a, b) =>
+                  Number(removalAckIds.includes(a.id)) -
+                  Number(removalAckIds.includes(b.id))
+              )
+              .map((item) => {
+                const done = removalAckIds.includes(item.id);
+
+                return (
+                  <li
+                    className={`card shopping-row removal-row ${
+                      done ? "checked-row" : ""
+                    }`}
+                    key={item.id}
+                  >
+                    <label className={done ? "checked-item" : ""}>
+                      <input
+                        type="checkbox"
+                        checked={done}
+                        onChange={() => onToggleRemoval(item.id)}
+                      />
+                      <span className="shopping-item-content">
+                        <span className="shopping-item-name">{item.name}</span>
+                        <span className="shopping-source-detail">
+                          {item.sourceDetail || "Already in stock"}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+          </ul>
+        </section>
       )}
 
       {total === 0 ? (

@@ -65,39 +65,38 @@ function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
             </li>
             <li>
               <strong>Recurring buys</strong> — things you get most weeks (milk,
-              bread, fruit). How these are treated depends on the setting below.
+              bread, fruit). How these show up depends on how you're shopping
+              this trip (see below).
             </li>
           </ul>
+
+          <p>
+            It's one list spanning this week and next, ordered by{" "}
+            <strong>Priority</strong> (urgent at the top) — or switch to{" "}
+            <strong>By aisle</strong> for one flat list to walk the shop.
+          </p>
 
           <h3 className="help-heading">Two ways to shop</h3>
 
           <p>
-            <strong>Standing list (Woolworths-style).</strong> If you keep a
-            saved grocery list outside the app — like a Woolworths saved list —
-            your recurring buys live there. The app then only needs to tell you
-            the <em>extras</em>: a <strong>Top-up</strong> list of meal
-            ingredients and restocks to add, plus a “Remove from Woolworths
-            list” note for anything you're now covered for or have turned off.
+            <strong>Using my saved list</strong> (e.g. an online Woolworths or
+            Coles order). Your recurring buys are already on that saved list, so
+            they're left off here. Instead you get a{" "}
+            <strong>“Take off your saved list”</strong> section — the recurring
+            items to remove this week because you've paused them or you're
+            already covered by stock.
           </p>
 
           <p>
-            Shopping in store or not using that list this week? Switch the Shop
-            page to <strong>Full list</strong> to see everything to buy —
-            including your recurring buys — laid out simply by aisle.
-          </p>
-
-          <p>
-            <strong>One complete list.</strong> If you'd rather not keep a
-            separate standing list at all, turn off{" "}
-            <em>“I keep a standing grocery list”</em> in Settings. Then every
-            shop is one complete list — meals, restocks and recurring buys
-            together, grouped by aisle — and the “remove” note disappears.
+            <strong>Shopping fresh</strong> (in store, or anywhere you're not
+            using a saved list). Now your recurring buys are added to the list so
+            you pick up everything in one go.
           </p>
 
           <p className="small-text help-current">
             {keepStandingList
-              ? "You're set to keep a standing list, so the Shop page defaults to the Top-up view with a Full list toggle."
-              : "You're set to one complete list, so the Shop page always shows everything together."}
+              ? "You have a saved list, so the Shop page shows the Using saved list / Shopping fresh toggle. Switch it per trip — it remembers your last choice."
+              : "You don't keep a saved list, so every shop is one complete list with recurring buys included. You can change this in Settings."}
           </p>
         </div>
       </div>

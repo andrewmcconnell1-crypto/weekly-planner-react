@@ -118,6 +118,8 @@ function App() {
     setMealsByWeek,
     setShoppingItemsByWeek,
     setShoppingListMetaByWeek,
+    removalAcksByWeek,
+    setRemovalAcksByWeek,
     shoppingChecked,
     setShoppingChecked,
     manualShoppingItems,
@@ -140,10 +142,12 @@ function App() {
   const [newInventoryItem, setNewInventoryItem] = useState("");
   const [newRecipeName, setNewRecipeName] = useState("");
   const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
-  const [shopTopUpOnly, setShopTopUpOnly] = useState(false);
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
 
   const keepStandingList = settings?.keepStandingList !== false;
+  // Per-trip: are we using the saved list (online order) or shopping fresh?
+  const usingSavedList =
+    keepStandingList && settings?.shopUsingSavedList !== false;
 
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
   const { getMealSummary } = mealHelpers;
@@ -317,24 +321,33 @@ function App() {
   ).length;
   // One shopping list spanning this week + next, ordered by urgency. Ticks and
   // manual adds are persisted (shoppingChecked / manualShoppingItems).
-  const { items: unifiedItems, skipped: skippedShoppingItems } =
-    buildUnifiedShoppingList({
-      staples,
-      inventory,
-      mealsByWeek,
-      currentWeekKey,
-      nextWeekKey,
-      todayDayName,
-      getMealSummary,
-      keepStandingList,
-      topUpOnly: shopTopUpOnly,
-      manualItems: manualShoppingItems,
-      checkedMap: shoppingChecked,
-    });
+  const {
+    items: unifiedItems,
+    skipped: skippedShoppingItems,
+    removals: recurringRemovals,
+  } = buildUnifiedShoppingList({
+    staples,
+    inventory,
+    mealsByWeek,
+    currentWeekKey,
+    nextWeekKey,
+    todayDayName,
+    getMealSummary,
+    keepStandingList,
+    usingSavedList,
+    manualItems: manualShoppingItems,
+    checkedMap: shoppingChecked,
+  });
   const unifiedPending = unifiedItems.filter((item) => !item.checked).length;
-  const unifiedHasRecurring = unifiedItems.some(
-    (item) => item.source === "Recurring buy"
+  // Removals are about this week's standing order; their "handled" ticks are
+  // kept per week, pruned to removals still present.
+  const removalIds = new Set(recurringRemovals.map((item) => item.id));
+  const removalAckIds = (removalAcksByWeek[currentWeekKey] || []).filter((id) =>
+    removalIds.has(id)
   );
+  const pendingRemovalCount = recurringRemovals.filter(
+    (item) => !removalAckIds.includes(item.id)
+  ).length;
 
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
@@ -565,6 +578,23 @@ function App() {
 
   function setKeepStandingList(value) {
     setSettings({ ...settings, keepStandingList: value });
+  }
+
+  function setUsingSavedList(value) {
+    setSettings({ ...settings, shopUsingSavedList: value });
+  }
+
+  // Tick a "take off your saved list" item once handled. Kept per week and
+  // pruned to removals still present, so the set can't grow stale.
+  function toggleRemovalAck(id) {
+    const current = (removalAcksByWeek[currentWeekKey] || []).filter((ackId) =>
+      removalIds.has(ackId)
+    );
+    const next = current.includes(id)
+      ? current.filter((ackId) => ackId !== id)
+      : [...current, id];
+
+    setRemovalAcksByWeek({ ...removalAcksByWeek, [currentWeekKey]: next });
   }
 
   function addStaple() {
@@ -1177,11 +1207,14 @@ function App() {
           skippedItems={skippedShoppingItems}
           onAddSkipped={addSkippedShoppingItem}
           keepStandingList={keepStandingList}
-          hasRecurring={unifiedHasRecurring}
+          usingSavedList={usingSavedList}
+          setUsingSavedList={setUsingSavedList}
+          removals={recurringRemovals}
+          removalAckIds={removalAckIds}
+          pendingRemovalCount={pendingRemovalCount}
+          onToggleRemoval={toggleRemovalAck}
           shopLayout={shopLayout}
           setShopLayout={setShopLayout}
-          topUpOnly={shopTopUpOnly}
-          setTopUpOnly={setShopTopUpOnly}
           onOpenHelp={() => setShoppingHelpOpen(true)}
         />
       )}

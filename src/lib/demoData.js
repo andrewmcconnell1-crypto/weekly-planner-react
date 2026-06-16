@@ -100,6 +100,6 @@ export function demoData() {
     staples,
     inventory,
     recipes,
-    settings: { keepStandingList: true },
+    settings: { keepStandingList: true, shopUsingSavedList: true },
   };
 }
