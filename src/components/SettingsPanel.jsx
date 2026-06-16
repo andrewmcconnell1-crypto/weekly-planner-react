@@ -8,6 +8,8 @@ const BACKUP_KEYS = [
   { key: "shoppingListMetaByWeek", shape: "object" },
   { key: "removalAcksByWeek", shape: "object" },
   { key: "recurringCheckedByWeek", shape: "object" },
+  { key: "shoppingChecked", shape: "object" },
+  { key: "manualShoppingItems", shape: "array" },
   { key: "staples", shape: "array" },
   { key: "inventory", shape: "array" },
   { key: "recipes", shape: "array" },

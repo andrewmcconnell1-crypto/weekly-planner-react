@@ -9,6 +9,8 @@ export const DATA_KEYS = [
   "shoppingListMetaByWeek",
   "removalAcksByWeek",
   "recurringCheckedByWeek",
+  "shoppingChecked",
+  "manualShoppingItems",
   "staples",
   "inventory",
   "recipes",
@@ -40,6 +42,8 @@ export function defaultData() {
     shoppingListMetaByWeek: {},
     removalAcksByWeek: {},
     recurringCheckedByWeek: {},
+    shoppingChecked: {},
+    manualShoppingItems: [],
     staples: [],
     inventory: [],
     recipes: initialRecipes,
@@ -61,6 +65,13 @@ export function normaliseData(raw) {
     removalAcksByWeek: data.removalAcksByWeek ?? base.removalAcksByWeek,
     recurringCheckedByWeek:
       data.recurringCheckedByWeek ?? base.recurringCheckedByWeek,
+    shoppingChecked:
+      data.shoppingChecked && typeof data.shoppingChecked === "object"
+        ? data.shoppingChecked
+        : base.shoppingChecked,
+    manualShoppingItems: Array.isArray(data.manualShoppingItems)
+      ? data.manualShoppingItems
+      : base.manualShoppingItems,
     staples: Array.isArray(data.staples) ? data.staples : base.staples,
     inventory: normaliseInventoryItems(
       Array.isArray(data.inventory) ? data.inventory : []

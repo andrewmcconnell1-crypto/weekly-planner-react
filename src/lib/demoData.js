@@ -1,10 +1,10 @@
 import { initialRecipes } from "../data/initialRecipes";
 import { initialStaples } from "../data/initialStaples";
 import { commonInventoryItems } from "../data/commonInventory";
-import { createEmptyMeals } from "../utils/mealUtils";
+import { createEmptyMeals, days } from "../utils/mealUtils";
 import { getSunday, getNextSunday, getWeekKey } from "../utils/dateUtils";
 import { createMealHelpers } from "../utils/mealPlanning";
-import { buildShoppingPlan } from "../utils/shoppingPlan";
+import { buildUnifiedShoppingList } from "../utils/priorityShoppingList";
 import { slugifyIdPart } from "../utils/itemUtils";
 
 // A populated sample household for "Explore without an account", so a newcomer
@@ -68,37 +68,35 @@ export function demoData() {
   const recipes = initialRecipes;
   const { getMealSummary } = createMealHelpers(recipes);
 
-  // Pre-generate the shopping list for both weeks (reusing the real generator),
-  // with a few items already ticked so the Shop page shows progress.
-  const shoppingItemsByWeek = {};
-  const shoppingListMetaByWeek = {};
-  const generatedAt = new Date().toISOString();
-
-  for (const weekKey of [currentWeekKey, nextWeekKey]) {
-    const plan = buildShoppingPlan({
-      staples,
-      inventory,
-      shoppingItems: [],
-      weekMeals: mealsByWeek[weekKey],
-      weekKey,
-      getMealSummary,
-    });
-
-    shoppingItemsByWeek[weekKey] = [
-      ...plan.retainedShoppingItems,
-      ...plan.newItems,
-    ].map((item, index) =>
-      index % 4 === 0 ? { ...item, checked: true } : item
-    );
-    shoppingListMetaByWeek[weekKey] = { signature: plan.signature, generatedAt };
-  }
+  // One manual add, plus a couple of items pre-ticked, so the Shop page shows a
+  // populated list with some progress.
+  const manualShoppingItems = [
+    { id: "manual-demo-coffee", name: "Coffee", category: "Pantry" },
+  ];
+  const unified = buildUnifiedShoppingList({
+    staples,
+    inventory,
+    mealsByWeek,
+    currentWeekKey,
+    nextWeekKey,
+    todayDayName: days[new Date().getDay()],
+    getMealSummary,
+    keepStandingList: true,
+    manualItems: manualShoppingItems,
+  });
+  const shoppingChecked = {};
+  unified.items.slice(0, 2).forEach((item) => {
+    shoppingChecked[item.id] = true;
+  });
 
   return {
     mealsByWeek,
-    shoppingItemsByWeek,
-    shoppingListMetaByWeek,
+    shoppingItemsByWeek: {},
+    shoppingListMetaByWeek: {},
     removalAcksByWeek: {},
     recurringCheckedByWeek: {},
+    shoppingChecked,
+    manualShoppingItems,
     staples,
     inventory,
     recipes,

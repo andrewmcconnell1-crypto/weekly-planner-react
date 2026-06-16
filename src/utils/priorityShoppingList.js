@@ -4,45 +4,48 @@ import { normaliseItemName } from "./itemUtils";
 import { days } from "./mealUtils";
 import { categories } from "../data/categories";
 
-// PROTOTYPE (read-only). Produces a single shopping list ordered by urgency
-// rather than split into weekly lists: items for the next day or two (plus
-// restocks and manual adds) float to the top, the rest of this week sits below,
-// and next week's meals come last. Within each tier we still group by aisle so a
-// big shop stays navigable. Reuses the tested per-week generator under the hood.
+// One shopping list spanning this week + next, ordered by urgency rather than
+// split into weekly lists. Returns a flat, de-duplicated item list tagged with
+// an urgency tier and an aisle, so the UI can group it either way (priority
+// tiers, or one flat by-aisle list for a big shop). Reuses the tested per-week
+// generator and the ingredient categoriser.
 
-const TIER_ORDER = ["soon", "week", "next"];
-
-const TIER_META = {
-  soon: {
+export const PRIORITY_TIERS = [
+  {
+    key: "soon",
     title: "Get soon",
     note: "Next day or two, restocks and anything you added.",
   },
-  week: { title: "This week", note: "The rest of this week's meals." },
-  next: { title: "Next week", note: "Lower priority — next week's meals." },
-};
+  { key: "week", title: "This week", note: "The rest of this week's meals." },
+  { key: "next", title: "Next week", note: "Lower priority — next week's meals." },
+];
 
-function categoryRank(category) {
+const TIER_RANK = { soon: 0, week: 1, next: 2 };
+
+export function categoryRank(category) {
   const index = categories.indexOf(category);
   return index === -1 ? categories.length : index;
 }
 
-export function buildPriorityShoppingList({
+export function buildUnifiedShoppingList({
   staples,
   inventory,
   mealsByWeek,
-  shoppingItemsByWeek,
   currentWeekKey,
   nextWeekKey,
   todayDayName,
   getMealSummary,
   keepStandingList,
+  topUpOnly = false,
+  manualItems = [],
+  checkedMap = {},
 }) {
   const todayIndex = days.indexOf(todayDayName);
 
   const currentPlan = buildShoppingPlan({
     staples,
     inventory,
-    shoppingItems: shoppingItemsByWeek[currentWeekKey] || [],
+    shoppingItems: [],
     weekMeals: mealsByWeek[currentWeekKey] || {},
     weekKey: currentWeekKey,
     getMealSummary,
@@ -50,7 +53,7 @@ export function buildPriorityShoppingList({
   const nextPlan = buildShoppingPlan({
     staples,
     inventory,
-    shoppingItems: shoppingItemsByWeek[nextWeekKey] || [],
+    shoppingItems: [],
     weekMeals: mealsByWeek[nextWeekKey] || {},
     weekKey: nextWeekKey,
     getMealSummary,
@@ -62,14 +65,21 @@ export function buildPriorityShoppingList({
     collected.push({ name, category: category || "Other", tier, source });
   }
 
-  // This week's generated items, tiered by how soon the meal is.
+  // A meal's tier from how many days away it is — counted across the week
+  // boundary so "tomorrow" is still urgent on a Saturday.
+  function mealTier(dayName, weekOffset) {
+    const dayIndex = days.indexOf(dayName);
+    if (dayIndex === -1) return null;
+    const daysAway = weekOffset * 7 + dayIndex - todayIndex;
+    if (daysAway < 0) return null; // already passed
+    if (daysAway <= 1) return "soon";
+    return weekOffset === 0 ? "week" : "next";
+  }
+
   for (const item of currentPlan.newItems) {
     if (item.source === "Meal") {
-      const dayIndex = days.indexOf(item.day);
-      if (dayIndex !== -1 && dayIndex < todayIndex) continue; // already passed
-      const tier =
-        dayIndex === todayIndex || dayIndex === todayIndex + 1 ? "soon" : "week";
-      add(item.name, categoriseIngredient(item.name), tier, "Meal");
+      const tier = mealTier(item.day, 0);
+      if (tier) add(item.name, categoriseIngredient(item.name), tier, "Meal");
     } else if (item.source === "Restock") {
       add(item.name, item.category, "soon", "Restock");
     } else {
@@ -77,58 +87,69 @@ export function buildPriorityShoppingList({
     }
   }
 
-  // Manually-kept items are needed now.
-  for (const item of currentPlan.retainedShoppingItems) {
-    const category =
-      item.category === "Meal ingredients"
-        ? categoriseIngredient(item.name)
-        : item.category;
-    add(item.name, category, "soon", "Manual");
-  }
-
-  // Next week's meals are lowest priority. (Restocks are global, already above.)
   for (const item of nextPlan.newItems) {
     if (item.source === "Meal") {
-      add(item.name, categoriseIngredient(item.name), "next", "Meal");
+      const tier = mealTier(item.day, 1) || "next";
+      add(item.name, categoriseIngredient(item.name), tier, "Meal");
     }
   }
 
   // Recurring buys only appear when you don't keep a separate standing list.
-  if (!keepStandingList) {
+  // The "top-up only" filter hides them too (they're the standing-list items).
+  if (!keepStandingList && !topUpOnly) {
     for (const item of currentPlan.recurringBuyItems) {
       add(item.name, item.category, "week", "Recurring buy");
     }
   }
 
+  for (const item of manualItems) {
+    add(item.name, item.category || "Other", "soon", "Manual");
+  }
+
   // One item, one place: keep the most urgent tier if it shows up twice.
   const byName = new Map();
   for (const item of collected) {
-    const key = normaliseItemName(item.name);
-    const existing = byName.get(key);
-    if (
-      !existing ||
-      TIER_ORDER.indexOf(item.tier) < TIER_ORDER.indexOf(existing.tier)
-    ) {
-      byName.set(key, { ...item, id: key });
+    const id = normaliseItemName(item.name);
+    const existing = byName.get(id);
+    if (!existing || TIER_RANK[item.tier] < TIER_RANK[existing.tier]) {
+      byName.set(id, { ...item, id, checked: Boolean(checkedMap[id]) });
     }
   }
 
-  return TIER_ORDER.map((tierKey) => {
-    const items = [...byName.values()].filter((item) => item.tier === tierKey);
+  // Meal ingredients skipped because they're already covered by stock/recurring,
+  // surfaced so the user can override. Deduped across both weeks.
+  const skipped = [];
+  const skippedSeen = new Set();
+  for (const item of [...currentPlan.skippedItems, ...nextPlan.skippedItems]) {
+    const id = normaliseItemName(item.name);
+    if (skippedSeen.has(id)) continue;
+    skippedSeen.add(id);
+    skipped.push(item);
+  }
 
-    const groupsMap = new Map();
-    for (const item of items) {
-      if (!groupsMap.has(item.category)) groupsMap.set(item.category, []);
-      groupsMap.get(item.category).push(item);
-    }
+  return { items: [...byName.values()], skipped };
+}
 
-    const groups = [...groupsMap.entries()]
-      .sort((a, b) => categoryRank(a[0]) - categoryRank(b[0]))
-      .map(([category, list]) => ({
-        category,
-        items: list.sort((a, b) => a.name.localeCompare(b.name)),
-      }));
-
-    return { key: tierKey, ...TIER_META[tierKey], count: items.length, groups };
+// Group items into the urgency tiers, aisle-sorted within each. Empty tiers
+// are dropped.
+export function groupByTier(items) {
+  return PRIORITY_TIERS.map((tier) => {
+    const tierItems = items.filter((item) => item.tier === tier.key);
+    return { ...tier, count: tierItems.length, groups: groupByAisle(tierItems) };
   }).filter((tier) => tier.count > 0);
+}
+
+// Group items into one flat aisle list (for a single big shop).
+export function groupByAisle(items) {
+  const map = new Map();
+  for (const item of items) {
+    if (!map.has(item.category)) map.set(item.category, []);
+    map.get(item.category).push(item);
+  }
+  return [...map.entries()]
+    .sort((a, b) => categoryRank(a[0]) - categoryRank(b[0]))
+    .map(([category, list]) => ({
+      category,
+      items: list.sort((a, b) => a.name.localeCompare(b.name)),
+    }));
 }

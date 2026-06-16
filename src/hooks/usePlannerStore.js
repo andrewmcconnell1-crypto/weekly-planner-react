@@ -211,6 +211,8 @@ export function usePlannerStore(user, guest = false) {
       setShoppingListMetaByWeek: makeSetter("shoppingListMetaByWeek"),
       setRemovalAcksByWeek: makeSetter("removalAcksByWeek"),
       setRecurringCheckedByWeek: makeSetter("recurringCheckedByWeek"),
+      setShoppingChecked: makeSetter("shoppingChecked"),
+      setManualShoppingItems: makeSetter("manualShoppingItems"),
       setStaples: makeSetter("staples"),
       setInventory: makeSetter("inventory"),
       setRecipes: makeSetter("recipes"),

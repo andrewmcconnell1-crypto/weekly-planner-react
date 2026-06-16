@@ -33,12 +33,7 @@ import {
 } from "./utils/dateUtils";
 import { normaliseItemName, createCollectionId } from "./utils/itemUtils";
 import { createMealHelpers } from "./utils/mealPlanning";
-import {
-  buildShoppingPlan,
-  generatedShoppingSources,
-  getGeneratedShoppingSignature,
-} from "./utils/shoppingPlan";
-import { buildPriorityShoppingList } from "./utils/priorityShoppingList";
+import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
 import {
   createStarterInventoryItems,
   normaliseInventoryItems,
@@ -121,14 +116,12 @@ function App() {
   const {
     mealsByWeek,
     setMealsByWeek,
-    shoppingItemsByWeek,
     setShoppingItemsByWeek,
-    shoppingListMetaByWeek,
     setShoppingListMetaByWeek,
-    removalAcksByWeek,
-    setRemovalAcksByWeek,
-    recurringCheckedByWeek,
-    setRecurringCheckedByWeek,
+    shoppingChecked,
+    setShoppingChecked,
+    manualShoppingItems,
+    setManualShoppingItems,
     staples,
     setStaples,
     inventory,
@@ -146,7 +139,8 @@ function App() {
   const [newStaple, setNewStaple] = useState("");
   const [newInventoryItem, setNewInventoryItem] = useState("");
   const [newRecipeName, setNewRecipeName] = useState("");
-  const [shopListView, setShopListView] = useState("topup");
+  const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
+  const [shopTopUpOnly, setShopTopUpOnly] = useState(false);
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
 
   const keepStandingList = settings?.keepStandingList !== false;
@@ -154,8 +148,8 @@ function App() {
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
   const { getMealSummary } = mealHelpers;
 
-  // Whether the user has completed the full workflow (plan -> generate -> check).
-  // Derived rather than stored, so we never call setState inside an effect.
+  // Whether the user has completed the full workflow (plan a meal -> tick
+  // something off the list). Derived, so we never setState inside an effect.
   const welcomeWorkflowComplete =
     Object.values(mealsByWeek).some((weekMeals) =>
       days.some((d) => {
@@ -164,11 +158,7 @@ function App() {
           m && (m.name || m.recipeId || (m.mealType && m.mealType !== "cook"))
         );
       })
-    ) &&
-    Object.keys(shoppingListMetaByWeek).length > 0 &&
-    Object.values(shoppingItemsByWeek).some(
-      (items) => Array.isArray(items) && items.some((i) => i.checked)
-    );
+    ) && Object.values(shoppingChecked).some(Boolean);
 
   // Identifies the current session so the welcome's dismissed/done state is
   // per-account: a new sign-in, sign-out, or guest gets a different key and
@@ -215,16 +205,7 @@ function App() {
       : mealWeekKey === nextWeekKey
         ? "next"
         : "custom";
-  const shoppingWeekMode =
-    shoppingWeekKey === currentWeekKey
-      ? "current"
-      : shoppingWeekKey === nextWeekKey
-        ? "next"
-        : "custom";
   const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
-  const shoppingWeekMeals =
-    mealsByWeek[shoppingWeekKey] || createEmptyMeals();
-  const shoppingItems = shoppingItemsByWeek[shoppingWeekKey] || [];
 
   // "Tonight" on Home: today's meal, drawn from the current week's plan.
   const today = new Date();
@@ -334,98 +315,26 @@ function App() {
   const activeInventoryCount = inventory.filter(
     (item) => item.active !== false
   ).length;
-  const visibleShoppingItems = shoppingItems.filter(
-    (item) => item.source !== "Recurring buy"
+  // One shopping list spanning this week + next, ordered by urgency. Ticks and
+  // manual adds are persisted (shoppingChecked / manualShoppingItems).
+  const { items: unifiedItems, skipped: skippedShoppingItems } =
+    buildUnifiedShoppingList({
+      staples,
+      inventory,
+      mealsByWeek,
+      currentWeekKey,
+      nextWeekKey,
+      todayDayName,
+      getMealSummary,
+      keepStandingList,
+      topUpOnly: shopTopUpOnly,
+      manualItems: manualShoppingItems,
+      checkedMap: shoppingChecked,
+    });
+  const unifiedPending = unifiedItems.filter((item) => !item.checked).length;
+  const unifiedHasRecurring = unifiedItems.some(
+    (item) => item.source === "Recurring buy"
   );
-  const shoppingItemsCount = visibleShoppingItems.length;
-  const pendingShoppingItemsCount = visibleShoppingItems.filter(
-    (item) => !item.checked
-  ).length;
-  const checkedShoppingItemsCount = shoppingItemsCount - pendingShoppingItemsCount;
-  const shoppingListPlan = buildShoppingPlan({
-    staples,
-    inventory,
-    shoppingItems,
-    weekMeals: shoppingWeekMeals,
-    weekKey: shoppingWeekKey,
-    getMealSummary,
-  });
-  // Prototype: a single urgency-ordered list spanning this week + next, built
-  // from existing data (read-only — see PriorityShoppingList).
-  const priorityTiers = buildPriorityShoppingList({
-    staples,
-    inventory,
-    mealsByWeek,
-    shoppingItemsByWeek,
-    currentWeekKey,
-    nextWeekKey,
-    todayDayName,
-    getMealSummary,
-    keepStandingList,
-  });
-  const shoppingListMeta = shoppingListMetaByWeek[shoppingWeekKey] || null;
-  const currentGeneratedShoppingSignature = getGeneratedShoppingSignature(
-    shoppingItems.filter((item) => generatedShoppingSources.includes(item.source))
-  );
-  const hasGeneratedShoppingRows = shoppingItems.some((item) =>
-    generatedShoppingSources.includes(item.source)
-  );
-  const hasGeneratedShopPlan =
-    hasGeneratedShoppingRows || Boolean(shoppingListMeta);
-  const shoppingListIsCurrent =
-    hasGeneratedShopPlan &&
-    shoppingListMeta?.signature === shoppingListPlan.signature &&
-    currentGeneratedShoppingSignature === shoppingListPlan.itemsSignature;
-  const shoppingListNeedsUpdate =
-    hasGeneratedShopPlan && !shoppingListIsCurrent;
-  const shoppingActionLabel =
-    !hasGeneratedShopPlan
-      ? "Generate list"
-      : shoppingListNeedsUpdate
-        ? "Update list"
-        : "Refresh list";
-  const shoppingStatusLabel =
-    !hasGeneratedShopPlan
-      ? "Not generated"
-      : shoppingListNeedsUpdate
-        ? "Needs update"
-        : "Current";
-  const recurringRemovalItems = shoppingListPlan.removeFromRecurring;
-  const skippedShoppingItems = shoppingListPlan.skippedItems;
-  // Recurring buys shown (and ticked off) in the "full list" view, with their
-  // checked state tracked per week separately from the generated rows.
-  const recurringBuyItems = shoppingListPlan.recurringBuyItems;
-  const recurringBuyIds = new Set(recurringBuyItems.map((item) => item.id));
-  const recurringCheckedIds = (
-    recurringCheckedByWeek[shoppingWeekKey] || []
-  ).filter((id) => recurringBuyIds.has(id));
-  // Items the current plan would add that aren't already on the list — i.e. what
-  // a meal change since you shopped means you still need to grab.
-  const currentShoppingNames = new Set(
-    shoppingItems.map((item) => normaliseItemName(item.name))
-  );
-  const topUpItemCount = shoppingListPlan.newItems.filter(
-    (item) => !currentShoppingNames.has(normaliseItemName(item.name))
-  ).length;
-  // Which removals the user has ticked off (handled in their Woolworths list),
-  // limited to removals still present this week.
-  const currentRemovalIds = new Set(
-    recurringRemovalItems.map((item) => item.id)
-  );
-  const removalAckIds = (removalAcksByWeek[shoppingWeekKey] || []).filter((id) =>
-    currentRemovalIds.has(id)
-  );
-  const pendingRemovalCount = recurringRemovalItems.filter(
-    (item) => !removalAckIds.includes(item.id)
-  ).length;
-  const shoppingLastUpdatedText = shoppingListMeta?.generatedAt
-    ? new Date(shoppingListMeta.generatedAt).toLocaleString("en-AU", {
-      day: "numeric",
-      month: "short",
-      hour: "numeric",
-      minute: "2-digit",
-    })
-    : "";
 
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
@@ -494,26 +403,6 @@ function App() {
   function dismissWelcome() {
     setWelcomePreview(false);
     setWelcomeDismissedFor(welcomeSessionKey);
-  }
-
-  function goToPreviousShoppingWeek() {
-    const previousWeek = new Date(shoppingWeekStart);
-    previousWeek.setDate(shoppingWeekStart.getDate() - 7);
-    setActiveWeekStart(previousWeek);
-  }
-
-  function goToNextShoppingWeek() {
-    const nextWeek = new Date(shoppingWeekStart);
-    nextWeek.setDate(shoppingWeekStart.getDate() + 7);
-    setActiveWeekStart(nextWeek);
-  }
-
-  function goToThisShoppingWeek() {
-    setActiveWeekStart(getSunday());
-  }
-
-  function goToNextShoppingWeekDefault() {
-    setActiveWeekStart(getNextSunday());
   }
 
   // Cook once, eat for `nights` nights: keep the meal on startDay and mark the
@@ -627,105 +516,50 @@ function App() {
     setActiveTab(settingsReturnTab);
   }
 
-  function addShoppingItem() {
-    const cleanedItem = newItem.trim();
-    if (cleanedItem === "") return;
-
-    const updatedItems = [
-      ...shoppingItems,
-      {
-        id: createCollectionId("shopping", shoppingItems, cleanedItem),
-        name: cleanedItem,
-        category: "Other",
-        source: "Manual",
-        checked: false,
-      },
-    ];
-
-    setShoppingItemsByWeek({
-      ...shoppingItemsByWeek,
-      [shoppingWeekKey]: updatedItems,
-    });
-
-    setNewItem("");
-  }
-
-  // Override the "already have" smarts: put a skipped ingredient back on the
-  // list as a manual item (which the generator then preserves).
-  function addSkippedShoppingItem(name) {
+  // Add a one-off item to the shopping list. Manual items live in their own
+  // persisted slice and always show (in "Get soon"), independent of the plan.
+  function addManualShoppingItem(name) {
     const cleanedItem = name.trim();
-    if (cleanedItem === "") return;
+    if (cleanedItem === "") return false;
 
-    const alreadyOnList = shoppingItems.some(
+    const alreadyManual = manualShoppingItems.some(
       (item) => normaliseItemName(item.name) === normaliseItemName(cleanedItem)
     );
-    if (alreadyOnList) return;
+    if (alreadyManual) return false;
 
-    setShoppingItemsByWeek({
-      ...shoppingItemsByWeek,
-      [shoppingWeekKey]: [
-        ...shoppingItems,
-        {
-          id: createCollectionId("shopping", shoppingItems, cleanedItem),
-          name: cleanedItem,
-          category: "Meal ingredients",
-          source: "Manual",
-          checked: false,
-        },
-      ],
-    });
+    setManualShoppingItems([
+      ...manualShoppingItems,
+      {
+        id: createCollectionId("manual", manualShoppingItems, cleanedItem),
+        name: cleanedItem,
+        category: "Other",
+      },
+    ]);
+    return true;
   }
 
-  function toggleShoppingItem(id) {
-    const updatedItems = shoppingItems.map((item) =>
-      item.id === id ? { ...item, checked: !item.checked } : item
-    );
+  function addShoppingItem() {
+    if (addManualShoppingItem(newItem)) setNewItem("");
+  }
 
-    setShoppingItemsByWeek({
-      ...shoppingItemsByWeek,
-      [shoppingWeekKey]: updatedItems,
-    });
+  // Override the "already have" smarts: add a skipped ingredient as a manual
+  // item so it appears on the list anyway.
+  function addSkippedShoppingItem(name) {
+    addManualShoppingItem(name);
   }
 
   function deleteShoppingItem(id) {
-    const updatedItems = shoppingItems.filter((item) => item.id !== id);
-
-    setShoppingItemsByWeek({
-      ...shoppingItemsByWeek,
-      [shoppingWeekKey]: updatedItems,
-    });
+    setManualShoppingItems(
+      manualShoppingItems.filter((item) => item.id !== id)
+    );
   }
 
-  // Tick a "remove from Woolworths list" item off once it's been handled. We
-  // prune acks down to removals still present, so the stored set can't grow
-  // stale or silently dismiss a removal that later returns.
-  function toggleRemovalAck(id) {
-    const current = (removalAcksByWeek[shoppingWeekKey] || []).filter((ackId) =>
-      currentRemovalIds.has(ackId)
-    );
-    const next = current.includes(id)
-      ? current.filter((ackId) => ackId !== id)
-      : [...current, id];
-
-    setRemovalAcksByWeek({
-      ...removalAcksByWeek,
-      [shoppingWeekKey]: next,
-    });
-  }
-
-  // Tick a recurring buy off the full shopping list. Stored per week and pruned
-  // to recurring buys still due, mirroring how removal acks are kept tidy.
-  function toggleRecurringChecked(id) {
-    const current = (recurringCheckedByWeek[shoppingWeekKey] || []).filter(
-      (checkedId) => recurringBuyIds.has(checkedId)
-    );
-    const next = current.includes(id)
-      ? current.filter((checkedId) => checkedId !== id)
-      : [...current, id];
-
-    setRecurringCheckedByWeek({
-      ...recurringCheckedByWeek,
-      [shoppingWeekKey]: next,
+  // Tick an item off. Keyed by item identity so the state survives the list
+  // being recomputed when the plan changes.
+  function toggleShoppingChecked(id) {
+    setShoppingChecked({
+      ...shoppingChecked,
+      [id]: !shoppingChecked[id],
     });
   }
 
@@ -790,24 +624,7 @@ function App() {
     );
   }
 
-  function buildShoppingList() {
-    setShoppingItemsByWeek({
-      ...shoppingItemsByWeek,
-      [shoppingWeekKey]: [
-        ...shoppingListPlan.retainedShoppingItems,
-        ...shoppingListPlan.newItems,
-      ],
-    });
-
-    setShoppingListMetaByWeek({
-      ...shoppingListMetaByWeek,
-      [shoppingWeekKey]: {
-        generatedAt: new Date().toISOString(),
-        signature: shoppingListPlan.signature,
-        summary: shoppingListPlan.summary,
-      },
-    });
-
+  function openShoppingList() {
     setActiveTab("shop");
   }
 
@@ -969,19 +786,21 @@ function App() {
 
 
   function applyImportedData(backup) {
-    if (Object.prototype.hasOwnProperty.call(backup, "mealsByWeek")) {
-      setMealsByWeek(backup.mealsByWeek);
-    }
-    if (Object.prototype.hasOwnProperty.call(backup, "shoppingItemsByWeek")) {
+    const has = (key) => Object.prototype.hasOwnProperty.call(backup, key);
+
+    if (has("mealsByWeek")) setMealsByWeek(backup.mealsByWeek);
+    if (has("shoppingItemsByWeek")) {
       setShoppingItemsByWeek(backup.shoppingItemsByWeek);
     }
-    if (Object.prototype.hasOwnProperty.call(backup, "shoppingListMetaByWeek")) {
+    if (has("shoppingListMetaByWeek")) {
       setShoppingListMetaByWeek(backup.shoppingListMetaByWeek);
     }
-    if (Object.prototype.hasOwnProperty.call(backup, "removalAcksByWeek")) {
-      setRemovalAcksByWeek(backup.removalAcksByWeek);
+    if (has("shoppingChecked")) setShoppingChecked(backup.shoppingChecked);
+    if (has("manualShoppingItems")) {
+      setManualShoppingItems(backup.manualShoppingItems);
     }
-    if (Object.prototype.hasOwnProperty.call(backup, "staples")) {
+    if (has("settings")) setSettings(backup.settings);
+    if (has("staples")) {
       setStaples(backup.staples);
     }
     // Run imported inventory / recipes through the same migration helpers the
@@ -994,38 +813,29 @@ function App() {
     }
   }
 
-  // "This week" shopping status: nag only when a plan change actually created a
-  // top-up need; otherwise stay quiet (you've usually already shopped).
+  // Home shopping status, from the live unified list (this week + next).
   let homeShopStatus;
-  if (!hasGeneratedShopPlan) {
+  if (unifiedItems.length === 0) {
     homeShopStatus = {
-      tone: "",
-      title: "No shopping list yet",
-      sub: "Make one from this week's meals",
-      actionLabel: "Generate list",
-      onAction: buildShoppingList,
+      tone: "done",
+      title: "Nothing to buy",
+      sub: "Plan some meals or mark stock as out",
+      actionLabel: null,
+      onAction: null,
     };
-  } else if (topUpItemCount > 0) {
+  } else if (unifiedPending > 0) {
     homeShopStatus = {
       tone: "needs",
-      title: "Plan changed since you shopped",
-      sub: `${topUpItemCount} new item${topUpItemCount === 1 ? "" : "s"} to top up`,
-      actionLabel: "Update list",
-      onAction: buildShoppingList,
-    };
-  } else if (pendingShoppingItemsCount > 0) {
-    homeShopStatus = {
-      tone: "",
       title: "Shopping list ready",
-      sub: `${pendingShoppingItemsCount} left to buy`,
+      sub: `${unifiedPending} item${unifiedPending === 1 ? "" : "s"} to buy`,
       actionLabel: "Open list",
-      onAction: () => setActiveTab("shop"),
+      onAction: openShoppingList,
     };
   } else {
     homeShopStatus = {
       tone: "done",
       title: "Shopping sorted",
-      sub: "Your list matches this week's plan",
+      sub: "Everything's ticked off",
       actionLabel: null,
       onAction: null,
     };
@@ -1253,49 +1063,18 @@ function App() {
                 <span className="home-step-chevron">›</span>
               </button>
 
-              <div className="home-step-action">
-                <div className="home-step-head">
-                  <span className="home-step-num">3</span>
-
-                  <span className="home-step-body">
-                    <strong>Generate shopping list</strong>
-                    <span>
-                      {shoppingLastUpdatedText
-                        ? `Last updated ${shoppingLastUpdatedText}`
-                        : "From meals, recurring buys & stock"}
-                    </span>
-                  </span>
-
-                  <span
-                    className={`list-status-pill ${
-                      shoppingListNeedsUpdate ? "needs-update" : ""
-                    }`}
-                  >
-                    {shoppingStatusLabel}
-                  </span>
-                </div>
-
-                <button
-                  className="primary-button"
-                  type="button"
-                  onClick={buildShoppingList}
-                >
-                  {shoppingActionLabel}
-                </button>
-              </div>
-
               <button
                 className="home-step"
                 type="button"
                 onClick={() => setActiveTab("shop")}
               >
-                <span className="home-step-num">4</span>
+                <span className="home-step-num">3</span>
 
                 <span className="home-step-body">
                   <strong>Shop</strong>
                   <span>
-                    {pendingShoppingItemsCount} to buy ·{" "}
-                    {checkedShoppingItemsCount} done
+                    {unifiedPending} to buy · {unifiedItems.length - unifiedPending}{" "}
+                    done
                   </span>
                 </span>
 
@@ -1391,34 +1170,18 @@ function App() {
           newItem={newItem}
           setNewItem={setNewItem}
           addShoppingItem={addShoppingItem}
-          shoppingItems={visibleShoppingItems}
-          toggleShoppingItem={toggleShoppingItem}
-          deleteShoppingItem={deleteShoppingItem}
-          buildShoppingList={buildShoppingList}
-          shoppingActionLabel={shoppingActionLabel}
-          shoppingListNeedsUpdate={shoppingListNeedsUpdate}
-          hasGeneratedShopPlan={hasGeneratedShopPlan}
-          shoppingLastUpdatedText={shoppingLastUpdatedText}
-          recurringRemovalItems={recurringRemovalItems}
-          removalAckIds={removalAckIds}
-          pendingRemovalCount={pendingRemovalCount}
-          onToggleRemoval={toggleRemovalAck}
+          unifiedItems={unifiedItems}
+          unifiedPending={unifiedPending}
+          onToggleChecked={toggleShoppingChecked}
+          onDeleteManual={deleteShoppingItem}
           skippedItems={skippedShoppingItems}
           onAddSkipped={addSkippedShoppingItem}
-          shoppingWeekStart={shoppingWeekStart}
-          shoppingWeekEnd={shoppingWeekEnd}
-          shoppingWeekMode={shoppingWeekMode}
-          goToPreviousShoppingWeek={goToPreviousShoppingWeek}
-          goToThisShoppingWeek={goToThisShoppingWeek}
-          goToNextShoppingWeekDefault={goToNextShoppingWeekDefault}
-          goToNextShoppingWeek={goToNextShoppingWeek}
           keepStandingList={keepStandingList}
-          shopListView={shopListView}
-          setShopListView={setShopListView}
-          recurringBuyItems={recurringBuyItems}
-          recurringCheckedIds={recurringCheckedIds}
-          onToggleRecurring={toggleRecurringChecked}
-          priorityTiers={priorityTiers}
+          hasRecurring={unifiedHasRecurring}
+          shopLayout={shopLayout}
+          setShopLayout={setShopLayout}
+          topUpOnly={shopTopUpOnly}
+          setTopUpOnly={setShopTopUpOnly}
           onOpenHelp={() => setShoppingHelpOpen(true)}
         />
       )}

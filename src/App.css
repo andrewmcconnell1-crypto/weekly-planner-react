@@ -2696,6 +2696,22 @@ input::placeholder {
   margin: 0;
 }
 
+.shop-topup-filter {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.shop-topup-filter input {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
 /* ---- Priority list (prototype): urgency tiers, aisle groups within ---- */
 
 .priority-tier {
