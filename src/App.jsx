@@ -102,8 +102,11 @@ function App() {
 
   const [currentWeekStart] = useState(getSunday);
   const [nextWeekStart] = useState(getNextSunday);
-  const [mealWeekStart, setMealWeekStart] = useState(getNextSunday);
-  const [shoppingWeekStart, setShoppingWeekStart] = useState(getNextSunday);
+  const [activeWeekStart, setActiveWeekStart] = useState(getNextSunday);
+  // Meals and Shop share one active week, so these are the same value — kept as
+  // named aliases so the meal/shop-specific reads below stay readable.
+  const mealWeekStart = activeWeekStart;
+  const shoppingWeekStart = activeWeekStart;
 
   const {
     user,
@@ -217,11 +220,6 @@ function App() {
       : shoppingWeekKey === nextWeekKey
         ? "next"
         : "custom";
-  // The planning week (Meals tab) and shopping week (Shop tab) move
-  // independently; flag when they've drifted apart so each screen can offer to
-  // realign them.
-  const weeksDiverged = mealWeekKey !== shoppingWeekKey;
-
   const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
   const shoppingWeekMeals =
     mealsByWeek[shoppingWeekKey] || createEmptyMeals();
@@ -418,40 +416,36 @@ function App() {
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
     previousWeek.setDate(mealWeekStart.getDate() - 7);
-    setMealWeekStart(previousWeek);
+    setActiveWeekStart(previousWeek);
   }
 
   function goToNextMealWeek() {
     const nextWeek = new Date(mealWeekStart);
     nextWeek.setDate(mealWeekStart.getDate() + 7);
-    setMealWeekStart(nextWeek);
+    setActiveWeekStart(nextWeek);
   }
 
   function goToThisMealWeek() {
-    setMealWeekStart(getSunday());
+    setActiveWeekStart(getSunday());
   }
 
   function goToNextMealWeekDefault() {
-    setMealWeekStart(getNextSunday());
+    setActiveWeekStart(getNextSunday());
   }
 
   function showHomeWeek(weekStart) {
-    const nextMealWeekStart = new Date(weekStart);
-    const nextShoppingWeekStart = new Date(weekStart);
-
-    setMealWeekStart(nextMealWeekStart);
-    setShoppingWeekStart(nextShoppingWeekStart);
+    setActiveWeekStart(new Date(weekStart));
     setExpandedMealDay(null);
   }
 
   function openTonightInPlan() {
-    setMealWeekStart(new Date(currentWeekStart));
+    setActiveWeekStart(new Date(currentWeekStart));
     setExpandedMealDay(todayDayName);
     setActiveTab("plan");
   }
 
   function openHomeDayInPlan(day) {
-    setMealWeekStart(new Date(currentWeekStart));
+    setActiveWeekStart(new Date(currentWeekStart));
     setExpandedMealDay(day);
     setActiveTab("plan");
   }
@@ -491,27 +485,21 @@ function App() {
   function goToPreviousShoppingWeek() {
     const previousWeek = new Date(shoppingWeekStart);
     previousWeek.setDate(shoppingWeekStart.getDate() - 7);
-    setShoppingWeekStart(previousWeek);
+    setActiveWeekStart(previousWeek);
   }
 
   function goToNextShoppingWeek() {
     const nextWeek = new Date(shoppingWeekStart);
     nextWeek.setDate(shoppingWeekStart.getDate() + 7);
-    setShoppingWeekStart(nextWeek);
+    setActiveWeekStart(nextWeek);
   }
 
   function goToThisShoppingWeek() {
-    setShoppingWeekStart(getSunday());
+    setActiveWeekStart(getSunday());
   }
 
   function goToNextShoppingWeekDefault() {
-    setShoppingWeekStart(getNextSunday());
-  }
-
-  // Pull the shopping week onto the planning week, so the list reflects the
-  // meals you've just been editing.
-  function alignShoppingToPlan() {
-    setShoppingWeekStart(new Date(mealWeekStart));
+    setActiveWeekStart(getNextSunday());
   }
 
   // Cook once, eat for `nights` nights: keep the meal on startDay and mark the
@@ -1352,24 +1340,6 @@ function App() {
             onNextWeek={goToNextMealWeek}
           />
 
-          {weeksDiverged && (
-            <div className="week-mismatch" role="status">
-              <span>
-                You're planning {formatDate(mealWeekStart)} –{" "}
-                {formatDate(mealWeekEnd)}, but your shopping list is set to{" "}
-                {formatDate(shoppingWeekStart)} – {formatDate(shoppingWeekEnd)}.
-              </span>
-
-              <button
-                type="button"
-                className="secondary"
-                onClick={alignShoppingToPlan}
-              >
-                Shop this week
-              </button>
-            </div>
-          )}
-
           <div className="meal-grid">
             {renderMealGroups(days, setExpandedMealDay)}
           </div>
@@ -1421,11 +1391,6 @@ function App() {
           onToggleRemoval={toggleRemovalAck}
           skippedItems={skippedShoppingItems}
           onAddSkipped={addSkippedShoppingItem}
-          weeksDiverged={weeksDiverged}
-          plannedWeekLabel={`${formatDate(mealWeekStart)} – ${formatDate(
-            mealWeekEnd
-          )}`}
-          onShopPlannedWeek={alignShoppingToPlan}
           shoppingWeekStart={shoppingWeekStart}
           shoppingWeekEnd={shoppingWeekEnd}
           shoppingWeekMode={shoppingWeekMode}

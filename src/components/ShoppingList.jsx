@@ -32,9 +32,6 @@ function ShoppingList({
   onToggleRemoval,
   skippedItems = [],
   onAddSkipped,
-  weeksDiverged,
-  plannedWeekLabel,
-  onShopPlannedWeek,
   shoppingWeekStart,
   shoppingWeekEnd,
   shoppingWeekMode,
@@ -280,19 +277,6 @@ function ShoppingList({
         onPreviousWeek={goToPreviousShoppingWeek}
         onNextWeek={goToNextShoppingWeek}
       />
-
-      {weeksDiverged && (
-        <div className="week-mismatch" role="status">
-          <span>
-            Shopping for {formattedShoppingRange}, but your meal plan is on{" "}
-            {plannedWeekLabel}.
-          </span>
-
-          <button type="button" className="secondary" onClick={onShopPlannedWeek}>
-            Shop the planned week
-          </button>
-        </div>
-      )}
 
       {!fullList && recurringRemovalItems.length > 0 && (
         <section className="woolworths-removal-section">

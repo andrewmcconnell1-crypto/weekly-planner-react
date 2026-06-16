@@ -2204,26 +2204,6 @@ input::placeholder {
   gap: 8px;
 }
 
-/* Shown on Meals + Shop when the planning week and shopping week differ. */
-.week-mismatch {
-  display: grid;
-  gap: 10px;
-  border: 1px solid #e1c38f;
-  border-radius: 12px;
-  background: #fffaf0;
-  padding: 12px;
-}
-
-.week-mismatch > span {
-  color: var(--ink);
-  font-size: 0.85rem;
-  font-weight: 720;
-}
-
-.week-mismatch button {
-  justify-self: start;
-}
-
 /* Meal editor bottom sheet */
 .sheet-backdrop {
   position: fixed;
@@ -2928,15 +2908,6 @@ input::placeholder {
   .primary-action-card {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-  }
-
-  .week-mismatch {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
-  .week-mismatch button {
-    justify-self: end;
   }
 
   .day-choice-grid {
