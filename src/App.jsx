@@ -1076,7 +1076,13 @@ function App() {
             your own plan from scratch and sync across devices.
           </span>
 
-          <button type="button" onClick={() => setGuest(false)}>
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("home");
+              setGuest(false);
+            }}
+          >
             Sign in
           </button>
         </div>
@@ -1574,7 +1580,12 @@ function App() {
             onImport={applyImportedData}
             user={user}
             cloud={cloud}
-            onSignOut={signOut}
+            onSignOut={() => {
+              // Sign out happens from the Settings screen; reset the tab so the
+              // next sign-in lands on Home, not back on Settings.
+              setActiveTab("home");
+              signOut();
+            }}
             keepStandingList={keepStandingList}
             onSetKeepStandingList={setKeepStandingList}
             onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
