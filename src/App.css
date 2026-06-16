@@ -2570,6 +2570,10 @@ input::placeholder {
   gap: 14px;
 }
 
+.settings-advanced > .settings-group {
+  margin-top: 14px;
+}
+
 .settings-advanced > summary {
   cursor: pointer;
   list-style: none;
@@ -2585,10 +2589,6 @@ input::placeholder {
 
 .settings-advanced > summary::after {
   content: " +";
-}
-
-.settings-advanced[open] > summary {
-  margin-bottom: 10px;
 }
 
 .settings-advanced[open] > summary::after {
