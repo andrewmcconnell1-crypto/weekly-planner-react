@@ -30,7 +30,8 @@ export function recipeSourceLabel(recipe) {
 export function recipeSourceKind(recipe) {
   const source = (recipe.source || "").trim().toLowerCase();
   if (source.includes("recipetin")) return "rte";
-  if (source.includes("ai")) return "ai";
+  // "Original recipes" (formerly "AI originals") share the same badge styling.
+  if (source.includes("original") || source.includes("ai")) return "ai";
   return "custom";
 }
 

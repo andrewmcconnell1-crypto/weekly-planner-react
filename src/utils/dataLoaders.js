@@ -86,11 +86,24 @@ function normaliseRecipe(recipe, index) {
 // Merge saved recipes with the bundled starter set, normalising old ids and
 // appending any starter recipes the saved data is missing.
 export function mergeSavedRecipes(parsedRecipes) {
+  const bundledById = new Map(
+    initialRecipes.map((recipe) => [recipe.id, recipe])
+  );
   const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
   const savedRecipeIds = new Set(normalisedRecipes.map((recipe) => recipe.id));
+
+  // Built-in recipes (any id that ships with the app) are app-managed, so
+  // refresh them from the current bundle — that way improvements to the recipe
+  // content reach existing accounts, not just new ones. Recipes you created
+  // (ids that aren't in the bundle) are kept exactly as saved.
+  const refreshedRecipes = normalisedRecipes.map((recipe) => {
+    const bundled = bundledById.get(recipe.id);
+    return bundled ? { ...bundled, serves: bundled.serves ?? 4 } : recipe;
+  });
+
   const missingStarterRecipes = initialRecipes
     .filter((recipe) => !savedRecipeIds.has(recipe.id))
     .map((recipe) => ({ ...recipe, serves: recipe.serves ?? 4 }));
 
-  return [...normalisedRecipes, ...missingStarterRecipes];
+  return [...refreshedRecipes, ...missingStarterRecipes];
 }

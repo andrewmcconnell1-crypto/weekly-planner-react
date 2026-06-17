@@ -818,7 +818,7 @@ const baseRecipes = [
     ],
   }),
 
-  // AI "good-consensus" recipes — own full method, no source link. See aiRecipes.js.
+  // Original recipes — own full method, no source link. See aiRecipes.js.
   ...aiRecipes,
 ];
 
@@ -877,7 +877,7 @@ const SERVES_BY_ID = {
   "pad-see-ew": 4,
   "hokkien-noodles": 4,
   "thai-chicken-peanut-noodles": 4,
-  // AI recipes
+  // Original recipes
   "honey-soy-salmon": 4,
   "crispy-skin-salmon": 4,
   "garlic-prawn-linguine": 4,

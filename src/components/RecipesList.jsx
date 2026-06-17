@@ -4,7 +4,7 @@ import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils"
 import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
 
-const SOURCE_ORDER = ["RecipeTin Eats", "AI originals", "Custom"];
+const SOURCE_ORDER = ["RecipeTin Eats", "Original recipes", "Custom"];
 
 function RecipesList({
   recipes,
