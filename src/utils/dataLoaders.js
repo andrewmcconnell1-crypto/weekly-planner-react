@@ -56,20 +56,11 @@ export function normaliseInventoryItems(inventoryItems) {
     });
 }
 
+// Normalise a single saved recipe's shape (apply id aliases, ensure fields).
+// Does not pull in bundled content — that's mergeSavedRecipes' job, so edits to
+// built-in recipes are preserved.
 function normaliseRecipe(recipe, index) {
   const recipeId = recipeIdAliases[recipe.id] || recipe.id;
-  const starterRecipe = initialRecipes.find(
-    (initialRecipe) => initialRecipe.id === recipeId
-  );
-
-  if (starterRecipe) {
-    // Bundled recipes don't ship with serving sizes, so default to a sensible
-    // family-dinner yield. The user's own "serves" edit always wins.
-    const userServes =
-      recipe.serves != null && recipe.serves !== "" ? recipe.serves : null;
-
-    return { ...starterRecipe, serves: userServes ?? starterRecipe.serves ?? 4 };
-  }
 
   return {
     id: recipeId || `recipe-${index}-${recipe.name || "untitled"}`,
@@ -79,31 +70,44 @@ function normaliseRecipe(recipe, index) {
     sourceUrl: recipe.sourceUrl || "",
     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
     method: recipe.method || "",
-    serves: recipe.serves ?? null,
+    serves:
+      recipe.serves != null && recipe.serves !== "" ? recipe.serves : null,
   };
 }
 
 // Merge saved recipes with the bundled starter set, normalising old ids and
 // appending any starter recipes the saved data is missing.
-export function mergeSavedRecipes(parsedRecipes) {
+// Bumped whenever the bundled recipe content changes. normaliseData compares
+// this against the account's stored recipesVersion and asks for a one-time
+// refresh, so content updates reach existing accounts without permanently
+// clobbering edits to built-in recipes thereafter.
+export const RECIPES_VERSION = 1;
+
+export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
     initialRecipes.map((recipe) => [recipe.id, recipe])
   );
   const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
   const savedRecipeIds = new Set(normalisedRecipes.map((recipe) => recipe.id));
 
-  // Built-in recipes (any id that ships with the app) are app-managed, so
-  // refresh them from the current bundle — that way improvements to the recipe
-  // content reach existing accounts, not just new ones. Recipes you created
-  // (ids that aren't in the bundle) are kept exactly as saved.
-  const refreshedRecipes = normalisedRecipes.map((recipe) => {
+  const merged = normalisedRecipes.map((recipe) => {
     const bundled = bundledById.get(recipe.id);
-    return bundled ? { ...bundled, serves: bundled.serves ?? 4 } : recipe;
+
+    // A recipe you created — keep it exactly, just ensure a serves default.
+    if (!bundled) return { ...recipe, serves: recipe.serves ?? 4 };
+
+    // A built-in recipe. On the one-time refresh, take the current bundle
+    // content (keeping any serves edit); otherwise keep the saved copy so your
+    // edits to built-ins persist.
+    if (refreshBuiltIns) {
+      return { ...bundled, serves: recipe.serves ?? bundled.serves ?? 4 };
+    }
+    return { ...recipe, serves: recipe.serves ?? bundled.serves ?? 4 };
   });
 
   const missingStarterRecipes = initialRecipes
     .filter((recipe) => !savedRecipeIds.has(recipe.id))
     .map((recipe) => ({ ...recipe, serves: recipe.serves ?? 4 }));
 
-  return [...refreshedRecipes, ...missingStarterRecipes];
+  return [...merged, ...missingStarterRecipes];
 }

@@ -1,6 +1,10 @@
 import { supabase } from "./supabase";
 import { initialRecipes } from "../data/initialRecipes";
-import { normaliseInventoryItems, mergeSavedRecipes } from "../utils/dataLoaders";
+import {
+  normaliseInventoryItems,
+  mergeSavedRecipes,
+  RECIPES_VERSION,
+} from "../utils/dataLoaders";
 
 // The slices of app state that get persisted (locally or to the cloud).
 export const DATA_KEYS = [
@@ -14,6 +18,7 @@ export const DATA_KEYS = [
   "staples",
   "inventory",
   "recipes",
+  "recipesVersion",
   "settings",
 ];
 
@@ -53,6 +58,7 @@ export function defaultData() {
     staples: [],
     inventory: [],
     recipes: initialRecipes,
+    recipesVersion: RECIPES_VERSION,
     settings: { ...defaultSettings },
   };
 }
@@ -82,9 +88,14 @@ export function normaliseData(raw) {
     inventory: normaliseInventoryItems(
       Array.isArray(data.inventory) ? data.inventory : []
     ),
+    // Refresh built-in recipes from the bundle only when the account hasn't yet
+    // seen this recipe version — a one-time migration that then leaves edits be.
     recipes: mergeSavedRecipes(
-      Array.isArray(data.recipes) ? data.recipes : base.recipes
+      Array.isArray(data.recipes) ? data.recipes : base.recipes,
+      (typeof data.recipesVersion === "number" ? data.recipesVersion : 0) <
+        RECIPES_VERSION
     ),
+    recipesVersion: RECIPES_VERSION,
     settings: normaliseSettings(data.settings),
   };
 }
