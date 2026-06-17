@@ -164,13 +164,16 @@ function SettingsPanel({
             />
             <span>
               <span className="settings-toggle-title">
-                I keep a standing grocery list
+                I use a saved grocery list
               </span>
               <span className="small-text">
-                e.g. a saved Woolworths list your recurring buys live on. The
-                Shop page shows a top-up of meal ingredients and restocks, with
-                a Full list toggle when you need everything. Turn this off to
-                make every shop one complete list instead.
+                e.g. a saved Woolworths or Coles list your recurring buys live
+                on. The Shop page then shows a per-trip “Using your saved list?”
+                switch — on for an online order (your recurring buys stay off the
+                list and you get a “take off your saved list” section), off when
+                shopping fresh (recurring buys are added to the list). Turn this
+                off if you don't keep a saved list — recurring buys are then
+                always part of the one list.
               </span>
             </span>
           </label>
