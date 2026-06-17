@@ -43,6 +43,7 @@ import { initialStaples } from "./data/initialStaples";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { useAuth } from "./hooks/useAuth";
 import { usePlannerStore } from "./hooks/usePlannerStore";
+import { categories } from "./data/categories";
 
 function LoadingScreen({ message }) {
   return (
@@ -319,6 +320,23 @@ function App() {
   const activeInventoryCount = inventory.filter(
     (item) => item.active !== false
   ).length;
+
+  // Categories offered when adding/editing stock & recurring buys: the built-in
+  // aisles plus any custom ones already on items (so user-created categories
+  // stick around and are shared across both lists). "Other" stays last.
+  const customCategories = [
+    ...new Set(
+      [...staples, ...inventory]
+        .map((item) => item.category)
+        .filter((category) => category && !categories.includes(category))
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+  const availableCategories = [
+    ...categories.filter((category) => category !== "Other"),
+    ...customCategories,
+    "Other",
+  ];
+
   // One shopping list spanning this week + next, ordered by urgency. Ticks and
   // manual adds are persisted (shoppingChecked / manualShoppingItems).
   const {
@@ -597,7 +615,7 @@ function App() {
     setRemovalAcksByWeek({ ...removalAcksByWeek, [currentWeekKey]: next });
   }
 
-  function addStaple() {
+  function addStaple(category = "Other") {
     const cleanedStaple = newStaple.trim();
     if (cleanedStaple === "") return;
 
@@ -606,7 +624,7 @@ function App() {
       {
         id: createCollectionId("staple", staples, cleanedStaple),
         name: cleanedStaple,
-        category: "Other",
+        category: (category || "Other").trim() || "Other",
         quantity: null,
         unit: "",
         frequency: "weekly",
@@ -658,7 +676,7 @@ function App() {
     setActiveTab("shop");
   }
 
-  function addInventoryItem() {
+  function addInventoryItem(category = "Pantry") {
     const cleanedItem = newInventoryItem.trim();
 
     if (cleanedItem === "") return;
@@ -668,7 +686,7 @@ function App() {
       {
         id: createCollectionId("inventory", inventory, cleanedItem),
         name: cleanedItem,
-        category: "Pantry",
+        category: (category || "Pantry").trim() || "Pantry",
         quantity: null,
         unit: "",
         active: true,
@@ -1303,6 +1321,7 @@ function App() {
               {moreSection === "household" && (
                 <HouseholdBasics
                   activeSection={householdSection}
+                  availableCategories={availableCategories}
                   staples={staples}
                   inventory={inventory}
                   newStaple={newStaple}

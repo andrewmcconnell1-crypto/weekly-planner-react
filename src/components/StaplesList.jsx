@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
+import AddItemRow from "./AddItemRow";
 
 const frequencyLabels = {
   weekly: "Weekly",
@@ -38,6 +39,7 @@ function groupByCategory(items) {
 // category, delete) behind the per-row chevron.
 function StaplesList({
   staples,
+  availableCategories = [],
   newStaple,
   setNewStaple,
   addStaple,
@@ -218,7 +220,7 @@ function StaplesList({
                                   )
                                 }
                               >
-                                {categories.map((category) => (
+                                {availableCategories.map((category) => (
                                   <option key={category} value={category}>
                                     {category}
                                   </option>
@@ -248,21 +250,14 @@ function StaplesList({
         })
       )}
 
-      <div className="add-item-row basics-add-row">
-        <input
-          type="text"
-          placeholder="Add recurring buy..."
-          value={newStaple}
-          onChange={(event) => setNewStaple(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              addStaple();
-            }
-          }}
-        />
-
-        <button onClick={addStaple}>Add</button>
-      </div>
+      <AddItemRow
+        value={newStaple}
+        setValue={setNewStaple}
+        onAdd={addStaple}
+        placeholder="Add recurring buy..."
+        availableCategories={availableCategories}
+        defaultCategory="Other"
+      />
 
       {staples.length === 0 && (
         <div className="stock-maintenance">

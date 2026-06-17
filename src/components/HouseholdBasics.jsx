@@ -6,6 +6,7 @@ import StaplesList from "./StaplesList";
 // switcher or combined summary.
 function HouseholdBasics({
   activeSection,
+  availableCategories,
   staples,
   inventory,
   newStaple,
@@ -67,6 +68,7 @@ function HouseholdBasics({
       {activeSection === "recurring" ? (
         <StaplesList
           staples={staples}
+          availableCategories={availableCategories}
           newStaple={newStaple}
           setNewStaple={setNewStaple}
           addStaple={addStaple}
@@ -80,6 +82,7 @@ function HouseholdBasics({
       ) : (
         <InventoryList
           inventory={inventory}
+          availableCategories={availableCategories}
           newInventoryItem={newInventoryItem}
           setNewInventoryItem={setNewInventoryItem}
           addInventoryItem={addInventoryItem}

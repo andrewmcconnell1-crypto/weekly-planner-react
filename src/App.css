@@ -1995,10 +1995,30 @@ input::placeholder {
 }
 
 /* Adding items is rare, so the add box sits below the list, behind a divider. */
-.basics-add-row {
+.basics-add {
+  display: grid;
+  gap: 8px;
   margin-top: 4px;
   padding-top: 14px;
   border-top: 1px solid var(--line);
+}
+
+.basics-add-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.basics-add-controls select,
+.basics-add-controls input {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.basics-add-controls button {
+  flex: 0 0 auto;
+  padding-left: 22px;
+  padding-right: 22px;
 }
 
 .stock-maintenance {

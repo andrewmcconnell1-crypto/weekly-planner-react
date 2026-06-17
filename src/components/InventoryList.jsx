@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
+import AddItemRow from "./AddItemRow";
 
 // Stock items, grouped into collapsible category sections. Each row is a
 // compact tick + name; the category dropdown and Delete live behind the
 // chevron so the list stays scannable.
 function InventoryList({
   inventory,
+  availableCategories = [],
   newInventoryItem,
   setNewInventoryItem,
   addInventoryItem,
@@ -143,7 +144,7 @@ function InventoryList({
                                 )
                               }
                             >
-                              {categories.map((category) => (
+                              {availableCategories.map((category) => (
                                 <option key={category} value={category}>
                                   {category}
                                 </option>
@@ -169,21 +170,14 @@ function InventoryList({
         })
       )}
 
-      <div className="add-item-row basics-add-row">
-        <input
-          type="text"
-          placeholder="Add stock item..."
-          value={newInventoryItem}
-          onChange={(event) => setNewInventoryItem(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") addInventoryItem();
-          }}
-        />
-
-        <button type="button" onClick={addInventoryItem}>
-          Add
-        </button>
-      </div>
+      <AddItemRow
+        value={newInventoryItem}
+        setValue={setNewInventoryItem}
+        onAdd={addInventoryItem}
+        placeholder="Add stock item..."
+        availableCategories={availableCategories}
+        defaultCategory="Pantry"
+      />
 
       {inventory.length === 0 && (
         <div className="stock-maintenance">
