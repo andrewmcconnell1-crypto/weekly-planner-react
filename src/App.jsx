@@ -895,13 +895,11 @@ function App() {
     <main className={`app-shell tab-${activeTab}`}>
       <header className="app-header">
         <div>
-          {/* Home is the branded front page, so the title is the household name
-              and the duplicate eyebrow is dropped. */}
-          {activeTab !== "home" && <p className="eyebrow">Family meals</p>}
+          <p className="eyebrow">Family meals</p>
 
           <h1>
             {activeTab === "home"
-              ? "Family meals"
+              ? "Home"
               : activeTab === "shop"
               ? "Shopping list"
               : activeTab === "more"
