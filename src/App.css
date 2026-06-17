@@ -1994,31 +1994,58 @@ input::placeholder {
   line-height: 1;
 }
 
-/* Adding items is rare, so the add box sits below the list, behind a divider. */
-.basics-add {
+/* Adding items is rare, so the add box sits below the list as a tidy card. */
+.add-panel {
   display: grid;
-  gap: 8px;
-  margin-top: 4px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
+  gap: 10px;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 14px;
 }
 
-.basics-add-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.add-panel .section-kicker {
+  margin: 0;
+  color: var(--accent-strong);
 }
 
-.basics-add-controls select,
-.basics-add-controls input {
-  flex: 1 1 140px;
-  min-width: 0;
+.add-field {
+  display: grid;
+  gap: 6px;
 }
 
-.basics-add-controls button {
-  flex: 0 0 auto;
-  padding-left: 22px;
-  padding-right: 22px;
+.add-field-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 840;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* A consistent dropdown look: hide the native arrow and draw our own chevron. */
+.select-wrap {
+  position: relative;
+}
+
+.select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 40px;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.add-panel-submit {
+  width: 100%;
 }
 
 .stock-maintenance {

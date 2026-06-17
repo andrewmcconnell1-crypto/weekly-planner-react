@@ -254,7 +254,8 @@ function StaplesList({
         value={newStaple}
         setValue={setNewStaple}
         onAdd={addStaple}
-        placeholder="Add recurring buy..."
+        label="Add a recurring buy"
+        placeholder="e.g. Milk"
         availableCategories={availableCategories}
         defaultCategory="Other"
       />

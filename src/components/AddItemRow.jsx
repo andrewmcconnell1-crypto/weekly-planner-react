@@ -1,14 +1,16 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 const NEW_CATEGORY = "__new__";
 
-// Add row for stock / recurring items: name + a category picker. The picker
-// lists the available categories plus a "+ New category…" option that reveals a
-// text field, so a category can be created inline if none fits.
+// Add row for stock / recurring items: a small card with the name, a category
+// picker, and an inline "+ New category…" option that reveals a text field so a
+// category can be created on the spot.
 function AddItemRow({
   value,
   setValue,
   onAdd,
+  label,
   placeholder,
   availableCategories = [],
   defaultCategory,
@@ -36,9 +38,12 @@ function AddItemRow({
   }
 
   return (
-    <div className="basics-add">
+    <div className="add-panel">
+      {label && <p className="section-kicker">{label}</p>}
+
       <input
         type="text"
+        className="add-panel-name"
         placeholder={placeholder}
         value={value}
         onChange={(event) => setValue(event.target.value)}
@@ -47,19 +52,29 @@ function AddItemRow({
         }}
       />
 
-      <div className="basics-add-controls">
-        <select
-          aria-label="Category"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-        >
-          {availableCategories.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-          <option value={NEW_CATEGORY}>+ New category…</option>
-        </select>
+      <div className="add-field">
+        <span className="add-field-label">Category</span>
+
+        <div className="select-wrap">
+          <select
+            aria-label="Category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          >
+            {availableCategories.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+            <option value={NEW_CATEGORY}>+ New category…</option>
+          </select>
+
+          <ChevronDown
+            size={18}
+            className="select-chevron"
+            aria-hidden="true"
+          />
+        </div>
 
         {creating && (
           <input
@@ -73,11 +88,11 @@ function AddItemRow({
             }}
           />
         )}
-
-        <button type="button" onClick={handleAdd}>
-          Add
-        </button>
       </div>
+
+      <button type="button" className="add-panel-submit" onClick={handleAdd}>
+        Add
+      </button>
     </div>
   );
 }

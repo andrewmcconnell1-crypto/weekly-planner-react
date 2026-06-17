@@ -174,7 +174,8 @@ function InventoryList({
         value={newInventoryItem}
         setValue={setNewInventoryItem}
         onAdd={addInventoryItem}
-        placeholder="Add stock item..."
+        label="Add a stock item"
+        placeholder="e.g. Olive oil"
         availableCategories={availableCategories}
         defaultCategory="Pantry"
       />
