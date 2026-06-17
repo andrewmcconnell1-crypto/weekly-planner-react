@@ -978,9 +978,9 @@ function App() {
               </button>
             </div>
 
-            <p className="section-kicker">Shopping week</p>
+            <p className="section-kicker">Planning week</p>
             <h2>
-              {formatDate(shoppingWeekStart)} to {formatDate(shoppingWeekEnd)}
+              {formatDate(mealWeekStart)} to {formatDate(mealWeekEnd)}
             </h2>
           </div>
 
@@ -1010,10 +1010,10 @@ function App() {
                   already in stock.
                 </li>
                 <li>
-                  <span>Generate your list</span> — it adds your meal
-                  ingredients, skips anything already in stock, and (if you keep
-                  a standing list) keeps recurring buys separate. Tap “How
-                  shopping works” on the Shop page for the full picture.
+                  <span>Your shopping list builds itself</span> — the Shop page
+                  lists your meal ingredients automatically, skips anything in
+                  stock, and orders it by when you'll need it. Tap “How shopping
+                  works” there for the full picture.
                 </li>
                 <li>
                   <span>Shop</span> — check items off as you go. The Today screen
