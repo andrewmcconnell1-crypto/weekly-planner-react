@@ -550,33 +550,51 @@ function App() {
   // Add a one-off item to the shopping list, with a chosen category and
   // priority tier. Manual items live in their own persisted slice and show
   // independent of the plan.
+  // Add (or re-prioritise) a shopping item. Manual items are explicit
+  // overrides, so adding one that's already on the list moves it to the chosen
+  // category/priority rather than failing. Returns "added", "updated", or false.
   function addManualShoppingItem(name, category = "Other", tier = "soon") {
     const cleanedItem = name.trim();
     if (cleanedItem === "") return false;
 
-    // Already on the list (as a manual add, a recurring buy that's showing, a
-    // restock or a meal ingredient)? Don't add a silent duplicate.
-    const alreadyOnList = unifiedItems.some(
-      (item) => normaliseItemName(item.name) === normaliseItemName(cleanedItem)
-    );
-    if (alreadyOnList) return false;
+    const normalised = normaliseItemName(cleanedItem);
+    const cleanedCategory = (category || "Other").trim() || "Other";
+    const cleanedTier = tier || "soon";
 
-    setManualShoppingItems([
-      ...manualShoppingItems,
-      {
-        id: createCollectionId("manual", manualShoppingItems, cleanedItem),
-        name: cleanedItem,
-        category: (category || "Other").trim() || "Other",
-        tier: tier || "soon",
-      },
-    ]);
-    return true;
+    const existingManual = manualShoppingItems.find(
+      (item) => normaliseItemName(item.name) === normalised
+    );
+    const onList = unifiedItems.some(
+      (item) => normaliseItemName(item.name) === normalised
+    );
+
+    if (existingManual) {
+      setManualShoppingItems(
+        manualShoppingItems.map((item) =>
+          item.id === existingManual.id
+            ? { ...item, category: cleanedCategory, tier: cleanedTier }
+            : item
+        )
+      );
+    } else {
+      setManualShoppingItems([
+        ...manualShoppingItems,
+        {
+          id: createCollectionId("manual", manualShoppingItems, cleanedItem),
+          name: cleanedItem,
+          category: cleanedCategory,
+          tier: cleanedTier,
+        },
+      ]);
+    }
+
+    return onList ? "updated" : "added";
   }
 
   function addShoppingItem(category, priority) {
-    const added = addManualShoppingItem(newItem, category, priority);
-    if (added) setNewItem("");
-    return added;
+    const result = addManualShoppingItem(newItem, category, priority);
+    if (result) setNewItem("");
+    return result;
   }
 
   // Override the "already have" smarts: add a skipped ingredient as a manual

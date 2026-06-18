@@ -108,14 +108,24 @@ export function buildUnifiedShoppingList({
     add(item.name, item.category || "Other", item.tier || "soon", "Manual");
   }
 
-  // One item, one place: keep the most urgent tier if it shows up twice.
+  // One item, one place. A manual add is an explicit choice, so its tier and
+  // category win over an auto-assigned one (e.g. bump a recurring buy into "Get
+  // soon"). Otherwise the most urgent tier wins.
   const byName = new Map();
   for (const item of collected) {
     const id = normaliseItemName(item.name);
     const existing = byName.get(id);
-    if (!existing || TIER_RANK[item.tier] < TIER_RANK[existing.tier]) {
-      byName.set(id, { ...item, id, checked: Boolean(checkedMap[id]) });
+
+    let take;
+    if (!existing) {
+      take = true;
+    } else if ((item.source === "Manual") !== (existing.source === "Manual")) {
+      take = item.source === "Manual";
+    } else {
+      take = TIER_RANK[item.tier] < TIER_RANK[existing.tier];
     }
+
+    if (take) byName.set(id, { ...item, id, checked: Boolean(checkedMap[id]) });
   }
 
   // Meal ingredients skipped because they're already covered by stock/recurring,

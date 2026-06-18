@@ -35,16 +35,19 @@ function AddItemRow({
     const resolved = creating ? customCategory.trim() : category;
     if (creating && resolved === "") return; // need a name for the new category
 
-    const added = onAdd(resolved, priorityOptions ? priority : undefined);
+    const result = onAdd(resolved, priorityOptions ? priority : undefined);
 
-    // onAdd returns false when the item is already on the list; surface that
-    // instead of failing silently. (undefined = no result = treat as added.)
-    if (added === false) {
-      setStatus(`"${value.trim()}" is already on your list.`);
-      return;
+    // onAdd may return "updated" when the item was already on the list and got
+    // re-prioritised — confirm that so it doesn't feel like nothing happened.
+    if (result === "updated" && priorityOptions) {
+      const label =
+        priorityOptions.find((option) => option.value === priority)?.label ||
+        "your list";
+      setStatus(`Moved “${value.trim()}” to ${label}.`);
+    } else {
+      setStatus(null);
     }
 
-    setStatus(null);
     if (creating) {
       // Keep the just-created category selected for the next add.
       setCategory(resolved);
