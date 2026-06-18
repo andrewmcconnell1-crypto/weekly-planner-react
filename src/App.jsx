@@ -547,9 +547,10 @@ function App() {
     setActiveTab(settingsReturnTab);
   }
 
-  // Add a one-off item to the shopping list. Manual items live in their own
-  // persisted slice and always show (in "Get soon"), independent of the plan.
-  function addManualShoppingItem(name) {
+  // Add a one-off item to the shopping list, with a chosen category and
+  // priority tier. Manual items live in their own persisted slice and show
+  // independent of the plan.
+  function addManualShoppingItem(name, category = "Other", tier = "soon") {
     const cleanedItem = name.trim();
     if (cleanedItem === "") return false;
 
@@ -563,14 +564,15 @@ function App() {
       {
         id: createCollectionId("manual", manualShoppingItems, cleanedItem),
         name: cleanedItem,
-        category: "Other",
+        category: (category || "Other").trim() || "Other",
+        tier: tier || "soon",
       },
     ]);
     return true;
   }
 
-  function addShoppingItem() {
-    if (addManualShoppingItem(newItem)) setNewItem("");
+  function addShoppingItem(category, priority) {
+    if (addManualShoppingItem(newItem, category, priority)) setNewItem("");
   }
 
   // Override the "already have" smarts: add a skipped ingredient as a manual
@@ -1218,6 +1220,7 @@ function App() {
           newItem={newItem}
           setNewItem={setNewItem}
           addShoppingItem={addShoppingItem}
+          availableCategories={availableCategories}
           unifiedItems={unifiedItems}
           unifiedPending={unifiedPending}
           onToggleChecked={toggleShoppingChecked}

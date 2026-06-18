@@ -1,7 +1,17 @@
 import { HelpCircle, X } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
-import { groupByTier, groupByAisle } from "../utils/priorityShoppingList";
+import {
+  groupByTier,
+  groupByAisle,
+  PRIORITY_TIERS,
+} from "../utils/priorityShoppingList";
+import AddItemRow from "./AddItemRow";
+
+const PRIORITY_OPTIONS = PRIORITY_TIERS.map((tier) => ({
+  value: tier.key,
+  label: tier.title,
+}));
 
 // One shopping list spanning this week + next. Two layouts: "priority" (urgency
 // tiers, aisle within each) and "aisle" (one flat by-aisle list for a big shop).
@@ -10,6 +20,7 @@ function ShoppingList({
   newItem,
   setNewItem,
   addShoppingItem,
+  availableCategories = [],
   unifiedItems = [],
   unifiedPending = 0,
   onToggleChecked,
@@ -287,25 +298,17 @@ function ShoppingList({
         </details>
       )}
 
-      <div className="manual-add-panel">
-        <p className="section-kicker">Add an item</p>
-
-        <div className="add-item-row">
-          <input
-            type="text"
-            placeholder="e.g. Coffee"
-            value={newItem}
-            onChange={(event) => setNewItem(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") addShoppingItem();
-            }}
-          />
-
-          <button type="button" onClick={addShoppingItem}>
-            Add
-          </button>
-        </div>
-      </div>
+      <AddItemRow
+        value={newItem}
+        setValue={setNewItem}
+        onAdd={addShoppingItem}
+        label="Add an item"
+        placeholder="e.g. Coffee"
+        availableCategories={availableCategories}
+        defaultCategory="Other"
+        priorityOptions={PRIORITY_OPTIONS}
+        defaultPriority="soon"
+      />
     </section>
   );
 }

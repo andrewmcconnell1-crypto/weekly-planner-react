@@ -105,7 +105,7 @@ export function buildUnifiedShoppingList({
   }
 
   for (const item of manualItems) {
-    add(item.name, item.category || "Other", "soon", "Manual");
+    add(item.name, item.category || "Other", item.tier || "soon", "Manual");
   }
 
   // One item, one place: keep the most urgent tier if it shows up twice.

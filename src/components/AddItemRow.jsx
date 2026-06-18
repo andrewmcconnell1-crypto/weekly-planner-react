@@ -3,9 +3,10 @@ import { ChevronDown } from "lucide-react";
 
 const NEW_CATEGORY = "__new__";
 
-// Add row for stock / recurring items: a small card with the name, a category
-// picker, and an inline "+ New category…" option that reveals a text field so a
-// category can be created on the spot.
+// Add row for stock / recurring / shopping items: a small card with the name, a
+// category picker (with an inline "+ New category…" option), and — when
+// priorityOptions are given — a priority picker. onAdd receives (category,
+// priority); priority is undefined when no priority picker is shown.
 function AddItemRow({
   value,
   setValue,
@@ -14,11 +15,16 @@ function AddItemRow({
   placeholder,
   availableCategories = [],
   defaultCategory,
+  priorityOptions = null,
+  defaultPriority,
 }) {
   const [category, setCategory] = useState(
     defaultCategory || availableCategories[0] || "Other"
   );
   const [customCategory, setCustomCategory] = useState("");
+  const [priority, setPriority] = useState(
+    defaultPriority || priorityOptions?.[0]?.value || ""
+  );
 
   const creating = category === NEW_CATEGORY;
 
@@ -28,7 +34,7 @@ function AddItemRow({
     const resolved = creating ? customCategory.trim() : category;
     if (creating && resolved === "") return; // need a name for the new category
 
-    onAdd(resolved);
+    onAdd(resolved, priorityOptions ? priority : undefined);
 
     if (creating) {
       // Keep the just-created category selected for the next add.
@@ -89,6 +95,32 @@ function AddItemRow({
           />
         )}
       </div>
+
+      {priorityOptions && (
+        <div className="add-field">
+          <span className="add-field-label">Priority</span>
+
+          <div className="select-wrap">
+            <select
+              aria-label="Priority"
+              value={priority}
+              onChange={(event) => setPriority(event.target.value)}
+            >
+              {priorityOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <ChevronDown
+              size={18}
+              className="select-chevron"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      )}
 
       <button type="button" className="add-panel-submit" onClick={handleAdd}>
         Add
