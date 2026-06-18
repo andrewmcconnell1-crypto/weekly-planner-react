@@ -25,6 +25,7 @@ function AddItemRow({
   const [priority, setPriority] = useState(
     defaultPriority || priorityOptions?.[0]?.value || ""
   );
+  const [status, setStatus] = useState(null);
 
   const creating = category === NEW_CATEGORY;
 
@@ -34,8 +35,16 @@ function AddItemRow({
     const resolved = creating ? customCategory.trim() : category;
     if (creating && resolved === "") return; // need a name for the new category
 
-    onAdd(resolved, priorityOptions ? priority : undefined);
+    const added = onAdd(resolved, priorityOptions ? priority : undefined);
 
+    // onAdd returns false when the item is already on the list; surface that
+    // instead of failing silently. (undefined = no result = treat as added.)
+    if (added === false) {
+      setStatus(`"${value.trim()}" is already on your list.`);
+      return;
+    }
+
+    setStatus(null);
     if (creating) {
       // Keep the just-created category selected for the next add.
       setCategory(resolved);
@@ -52,11 +61,16 @@ function AddItemRow({
         className="add-panel-name"
         placeholder={placeholder}
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={(event) => {
+          setValue(event.target.value);
+          if (status) setStatus(null);
+        }}
         onKeyDown={(event) => {
           if (event.key === "Enter") handleAdd();
         }}
       />
+
+      {status && <p className="add-panel-status small-text">{status}</p>}
 
       <div className="add-field">
         <span className="add-field-label">Category</span>

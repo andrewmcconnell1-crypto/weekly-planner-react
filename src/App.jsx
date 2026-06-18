@@ -554,10 +554,12 @@ function App() {
     const cleanedItem = name.trim();
     if (cleanedItem === "") return false;
 
-    const alreadyManual = manualShoppingItems.some(
+    // Already on the list (as a manual add, a recurring buy that's showing, a
+    // restock or a meal ingredient)? Don't add a silent duplicate.
+    const alreadyOnList = unifiedItems.some(
       (item) => normaliseItemName(item.name) === normaliseItemName(cleanedItem)
     );
-    if (alreadyManual) return false;
+    if (alreadyOnList) return false;
 
     setManualShoppingItems([
       ...manualShoppingItems,
@@ -572,7 +574,9 @@ function App() {
   }
 
   function addShoppingItem(category, priority) {
-    if (addManualShoppingItem(newItem, category, priority)) setNewItem("");
+    const added = addManualShoppingItem(newItem, category, priority);
+    if (added) setNewItem("");
+    return added;
   }
 
   // Override the "already have" smarts: add a skipped ingredient as a manual

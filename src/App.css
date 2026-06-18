@@ -2048,6 +2048,12 @@ input::placeholder {
   width: 100%;
 }
 
+.add-panel-status {
+  margin: -2px 0 0;
+  color: var(--accent-strong);
+  font-weight: 720;
+}
+
 .stock-maintenance {
   display: grid;
   gap: 4px;
