@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 
 import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
@@ -20,6 +21,8 @@ function RecipesList({
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeSource, setActiveSource] = useState("All");
   const [openRecipeId, setOpenRecipeId] = useState(null);
+  // Adding a recipe is a rare action, so it stays tucked behind a quiet toggle.
+  const [showAddRecipe, setShowAddRecipe] = useState(false);
 
   // Grouped only to get a sensible category order + name sort; we render flat.
   const recipeGroups = groupRecipesByCategory(recipes);
@@ -68,25 +71,40 @@ function RecipesList({
 
   return (
     <div className="recipes-panel">
-      <p className="small-text">
-        Saved meals you can reuse in your weekly plan.
-      </p>
+      <div className="recipes-intro">
+        <p className="small-text">
+          Saved meals you can reuse in your weekly plan.
+        </p>
 
-      <div className="add-item-row">
-        <input
-          type="text"
-          placeholder="Add recipe..."
-          value={newRecipeName}
-          onChange={(event) => setNewRecipeName(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") addRecipe();
-          }}
-        />
-
-        <button type="button" onClick={addRecipe}>
-          Add
+        <button
+          type="button"
+          className="add-recipe-toggle"
+          aria-expanded={showAddRecipe}
+          onClick={() => setShowAddRecipe((open) => !open)}
+        >
+          <Plus size={15} aria-hidden="true" />
+          New recipe
         </button>
       </div>
+
+      {showAddRecipe && (
+        <div className="add-item-row">
+          <input
+            type="text"
+            placeholder="Add recipe..."
+            value={newRecipeName}
+            autoFocus
+            onChange={(event) => setNewRecipeName(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") addRecipe();
+            }}
+          />
+
+          <button type="button" onClick={addRecipe}>
+            Add
+          </button>
+        </div>
+      )}
 
       {recipes.length === 0 ? (
         <p className="empty-state">No recipes yet.</p>
