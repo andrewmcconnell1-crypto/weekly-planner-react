@@ -2024,6 +2024,8 @@ input::placeholder {
    (wrapped) content, so the grid lives in an inner element and the button is a
    plain block that grows around it. */
 .recipe-row {
+  position: relative;
+  overflow: hidden;
   display: block;
   width: 100%;
   height: auto;
@@ -2041,6 +2043,52 @@ input::placeholder {
     border-color 0.13s ease;
 }
 
+/* Category-tone accent bar down the leading edge, tinting each card by its
+   recipe category (chicken, beef, pasta, …). */
+.recipe-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--recipe-tone, var(--line));
+}
+
+.recipe-row[data-tone="chicken"] {
+  --recipe-tone: #cf9a45;
+}
+.recipe-row[data-tone="beef"] {
+  --recipe-tone: #b0503c;
+}
+.recipe-row[data-tone="pasta"] {
+  --recipe-tone: #c79a2f;
+}
+.recipe-row[data-tone="rice"] {
+  --recipe-tone: #d2b15c;
+}
+.recipe-row[data-tone="slow"] {
+  --recipe-tone: #946c46;
+}
+.recipe-row[data-tone="mexican"] {
+  --recipe-tone: #c4582f;
+}
+.recipe-row[data-tone="noodles"] {
+  --recipe-tone: #b97a44;
+}
+.recipe-row[data-tone="vegetarian"] {
+  --recipe-tone: var(--olive);
+}
+.recipe-row[data-tone="kid"] {
+  --recipe-tone: #cf7a63;
+}
+.recipe-row[data-tone="family"] {
+  --recipe-tone: #9c5e72;
+}
+.recipe-row[data-tone="other"] {
+  --recipe-tone: #a89683;
+}
+
 .recipe-row-inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -2050,7 +2098,7 @@ input::placeholder {
 
 .recipe-row:hover {
   background: var(--soft);
-  border-color: var(--meal-tone);
+  border-color: var(--recipe-tone, var(--meal-tone));
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
 }
