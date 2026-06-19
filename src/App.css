@@ -401,75 +401,130 @@ textarea:focus-visible {
   font-weight: 780;
 }
 
-.tonight-recipe-block {
+/* Collapsible recipe disclosure shared by the Home hero (variant "hero", dark)
+   and the meal editor's Selected block (variant "sheet", light). Layout is
+   shared; only the colours differ per variant. */
+.recipe-detail {
   display: grid;
   gap: 8px;
   margin-top: 4px;
 }
 
-.tonight-recipe-toggle {
+.recipe-detail-toggle {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   justify-self: start;
   min-height: 40px;
-  border: 1px solid rgba(247, 241, 230, 0.28);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  color: #f7f1e6;
   padding: 8px 14px;
   font-size: 0.84rem;
   font-weight: 760;
 }
 
-.tonight-recipe-toggle:hover {
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.tonight-recipe {
+.recipe-detail-body {
   display: grid;
   gap: 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.07);
   padding: 13px;
 }
 
-.tonight-recipe-section {
+.recipe-detail-section {
   display: grid;
   gap: 6px;
 }
 
-.tonight-recipe-label {
+.recipe-detail-label {
   margin: 0;
-  color: #e9c79e;
   font-size: 0.72rem;
   font-weight: 840;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.tonight-recipe ul {
+.recipe-detail-body ul {
   display: grid;
   gap: 5px;
   margin: 0;
   padding-left: 18px;
-  color: rgba(247, 241, 230, 0.92);
   font-size: 0.88rem;
 }
 
-.tonight-method {
+.recipe-detail-method {
   margin: 0;
-  color: rgba(247, 241, 230, 0.86);
   font-size: 0.88rem;
   line-height: 1.5;
   white-space: pre-line;
 }
 
-.tonight-source {
-  color: #f1c79b;
+.recipe-detail-source {
+  justify-self: start;
   font-size: 0.84rem;
   font-weight: 780;
   overflow-wrap: anywhere;
+}
+
+/* Hero variant — dark card background. */
+.recipe-detail-hero .recipe-detail-toggle {
+  border: 1px solid rgba(247, 241, 230, 0.28);
+  background: rgba(255, 255, 255, 0.07);
+  color: #f7f1e6;
+}
+
+.recipe-detail-hero .recipe-detail-toggle:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.recipe-detail-hero .recipe-detail-body {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.recipe-detail-hero .recipe-detail-label {
+  color: #e9c79e;
+}
+
+.recipe-detail-hero .recipe-detail-body ul {
+  color: rgba(247, 241, 230, 0.92);
+}
+
+.recipe-detail-hero .recipe-detail-method {
+  color: rgba(247, 241, 230, 0.86);
+}
+
+.recipe-detail-hero .recipe-detail-source {
+  color: #f1c79b;
+}
+
+/* Sheet variant — light editor sheet. */
+.recipe-detail-sheet .recipe-detail-toggle {
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--primary-strong);
+}
+
+.recipe-detail-sheet .recipe-detail-toggle:hover {
+  background: var(--soft);
+}
+
+.recipe-detail-sheet .recipe-detail-body {
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+
+.recipe-detail-sheet .recipe-detail-label {
+  color: var(--primary-strong);
+}
+
+.recipe-detail-sheet .recipe-detail-body ul {
+  color: var(--ink);
+}
+
+.recipe-detail-sheet .recipe-detail-method {
+  color: var(--ink);
+}
+
+.recipe-detail-sheet .recipe-detail-source {
+  color: var(--primary-strong);
 }
 
 .tonight-action {
@@ -1187,43 +1242,6 @@ textarea:focus-visible {
 .meal-mode-panel {
   display: grid;
   gap: 10px;
-}
-
-.meal-details {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 0;
-}
-
-.meal-details summary {
-  cursor: pointer;
-  padding: 11px 12px;
-  color: var(--primary-strong);
-  font-size: 0.88rem;
-  font-weight: 820;
-}
-
-.meal-details[open] {
-  padding-bottom: 11px;
-}
-
-.meal-details[open] summary {
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 10px;
-}
-
-.meal-details .add-item-row,
-.meal-details .ingredient-list {
-  margin: 0 11px;
-}
-
-.meal-method {
-  margin: 0 11px;
-  color: var(--ink);
-  font-size: 0.88rem;
-  line-height: 1.5;
-  white-space: pre-line;
 }
 
 .recipe-picker-results {
