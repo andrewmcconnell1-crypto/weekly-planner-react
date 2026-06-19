@@ -1,13 +1,11 @@
-import { useState } from "react";
 import {
   CalendarPlus,
-  ChevronDown,
-  ChevronUp,
-  NotebookText,
   Repeat2,
   ShoppingBag,
   UtensilsCrossed,
 } from "lucide-react";
+
+import RecipeDetail from "./RecipeDetail";
 
 // The hero "what's for dinner tonight" card at the top of Home. Reads today's
 // meal from the current week's plan and adapts to its type: a cooked recipe
@@ -21,13 +19,10 @@ function TonightCard({
   leftoverDaysLabel,
   onOpenPlan,
 }) {
-  const [recipeOpen, setRecipeOpen] = useState(false);
-
   const mealType = summary.meal?.mealType || "cook";
   const linkedRecipe = summary.linkedRecipe;
   const ingredients = summary.ingredients || [];
   const method = linkedRecipe?.method || "";
-  const hasRecipeDetail = ingredients.length > 0 || Boolean(method);
   const recipeServes = linkedRecipe?.serves || null;
   const batches = Math.max(1, Math.round(Number(summary.meal?.batches) || 1));
 
@@ -81,58 +76,13 @@ function TonightCard({
 
       {note && <p className="tonight-note">{note}</p>}
 
-      {mealType === "cook" && summary.hasMeal && hasRecipeDetail && (
-        <div className="tonight-recipe-block">
-          <button
-            type="button"
-            className="tonight-recipe-toggle"
-            aria-expanded={recipeOpen}
-            onClick={() => setRecipeOpen((open) => !open)}
-          >
-            <NotebookText size={16} aria-hidden="true" />
-            <span>{recipeOpen ? "Hide recipe" : "View recipe"}</span>
-            {recipeOpen ? (
-              <ChevronUp size={16} aria-hidden="true" />
-            ) : (
-              <ChevronDown size={16} aria-hidden="true" />
-            )}
-          </button>
-
-          {recipeOpen && (
-            <div className="tonight-recipe">
-              {ingredients.length > 0 && (
-                <div className="tonight-recipe-section">
-                  <p className="tonight-recipe-label">
-                    Ingredients ({ingredients.length})
-                  </p>
-                  <ul>
-                    {ingredients.map((ingredient, index) => (
-                      <li key={index}>{ingredient}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {method && (
-                <div className="tonight-recipe-section">
-                  <p className="tonight-recipe-label">Method</p>
-                  <p className="tonight-method">{method}</p>
-                </div>
-              )}
-
-              {linkedRecipe?.sourceUrl && (
-                <a
-                  className="tonight-source"
-                  href={linkedRecipe.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open source recipe
-                </a>
-              )}
-            </div>
-          )}
-        </div>
+      {mealType === "cook" && summary.hasMeal && (
+        <RecipeDetail
+          variant="hero"
+          ingredients={ingredients}
+          method={method}
+          sourceUrl={linkedRecipe?.sourceUrl || ""}
+        />
       )}
 
       <button type="button" className="tonight-action" onClick={onOpenPlan}>

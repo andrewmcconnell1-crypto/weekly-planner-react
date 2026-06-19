@@ -9,6 +9,7 @@ import {
 
 import { groupRecipesByCategory } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
+import RecipeDetail from "./RecipeDetail";
 
 // Full-height bottom-sheet editor for a single day's meal. Mounted (keyed by
 // day) only while a day is open, so its internal state resets per day.
@@ -48,10 +49,6 @@ function MealEditorSheet({
     (Boolean(selectedRecipeId) || (meal.name || "").trim() !== "");
   const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
   const recipeServes = linkedRecipe?.serves || null;
-  // Show the method inline when the recipe carries its own (AI / custom recipes
-  // with no source link); recipes with a source link point there instead.
-  const recipeMethod =
-    linkedRecipe?.method && !linkedRecipe?.sourceUrl ? linkedRecipe.method : "";
 
   // Secondary panels open from the "Or…" row, and start open when the day is
   // already that kind of meal.
@@ -343,28 +340,11 @@ function MealEditorSheet({
                 </div>
               </div>
 
-              {linkedRecipeIngredients.length > 0 && (
-                <details className="meal-details">
-                  <summary>
-                    Recipe ingredients ({linkedRecipeIngredients.length})
-                  </summary>
-
-                  <ul className="ingredient-list recipe-ingredient-list">
-                    {linkedRecipeIngredients.map((ingredient, index) => (
-                      <li className="ingredient-row read-only-row" key={index}>
-                        <span>{ingredient}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </details>
-              )}
-
-              {recipeMethod && (
-                <details className="meal-details">
-                  <summary>Method</summary>
-                  <p className="meal-method">{recipeMethod}</p>
-                </details>
-              )}
+              <RecipeDetail
+                variant="sheet"
+                ingredients={linkedRecipeIngredients}
+                method={linkedRecipe?.method || ""}
+              />
             </div>
           )}
 
