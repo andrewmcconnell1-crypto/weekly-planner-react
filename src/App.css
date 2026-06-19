@@ -1050,13 +1050,31 @@ textarea:focus-visible {
 
 /* Meal editor: current pick, nights stepper, recipe picker, "Or…" options */
 .meal-current {
+  position: relative;
+  overflow: hidden;
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
   box-shadow: var(--shadow);
-  padding: 12px;
+  padding: 12px 12px 12px 14px;
+}
+
+/* Accent rail + tinted kicker, driven by the meal's recipe category tone
+   (falls back to the accent for takeaway / custom meals with no tone). */
+.meal-current::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--recipe-tone, var(--accent));
+}
+
+.meal-current .section-kicker {
+  color: color-mix(in srgb, var(--recipe-tone, var(--accent)) 70%, #2a2420);
 }
 
 .meal-current-header {
