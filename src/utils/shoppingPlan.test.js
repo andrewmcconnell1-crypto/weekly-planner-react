@@ -37,10 +37,10 @@ function paprikaRows(result) {
 }
 
 const paprikaOutOfStock = [
-  { id: "i1", name: "Paprika", active: false, category: "Herbs & Spices" },
+  { id: "i1", name: "Paprika", active: false, category: "Pantry" },
 ];
 const paprikaInStock = [
-  { id: "i1", name: "Paprika", active: true, category: "Herbs & Spices" },
+  { id: "i1", name: "Paprika", active: true, category: "Pantry" },
 ];
 
 describe("buildShoppingPlan — already-have suppression", () => {
@@ -64,7 +64,7 @@ describe("buildShoppingPlan — already-have suppression", () => {
           active: true,
           frequency: "weekly",
           startDate: "2026-06-01",
-          category: "Herbs & Spices",
+          category: "Pantry",
         },
       ],
     });

@@ -84,33 +84,29 @@ const CATEGORY_KEYWORDS = [
     "Frozen",
     ["frozen", "icecream", "gelato"],
   ],
-  [
-    "Herbs & Spices",
-    [
-      "salt", "pepper", "paprika", "cumin", "turmeric", "cinnamon", "oregano",
-      "nutmeg", "cardamom", "clove", "curry", "spice", "bay", "allspice",
-      "cayenne", "masala", "saffron", "fenugreek", "mustard", "seed", "powder",
-      "flake", "stick",
-    ],
-  ],
-  [
-    "Condiments",
-    [
-      "oil", "vinegar", "sauce", "soy", "mayonnaise", "honey", "ketchup",
-      "paste", "worcestershire", "sriracha", "tahini", "pesto", "dressing",
-      "syrup", "miso", "mirin", "hoisin", "oyster", "harissa", "chutney",
-      "relish", "jam", "marmalade",
-    ],
-  ],
+  // Everything shelf-stable lives in one Pantry aisle now — dry/canned goods,
+  // the spice rack, and oils/sauces/condiments together. Checked after the
+  // fresh aisles so the fresh form of an ambiguous word (e.g. coriander) wins.
   [
     "Pantry",
     [
+      // Dry & canned goods
       "rice", "pasta", "noodle", "flour", "sugar", "oat", "lentil", "chickpea",
       "coconut", "stock", "breadcrumb", "cornflour", "cornstarch", "couscous",
       "quinoa", "polenta", "gelatine", "yeast", "raisin", "sultana", "almond",
       "walnut", "cashew", "peanut", "sesame", "nut", "can", "tin", "bean",
       "passata", "puree", "broth", "vanilla", "cocoa", "chocolate", "baking",
-      "wine", "stock",
+      "wine",
+      // Herbs & spices
+      "salt", "pepper", "paprika", "cumin", "turmeric", "cinnamon", "oregano",
+      "nutmeg", "cardamom", "clove", "curry", "spice", "bay", "allspice",
+      "cayenne", "masala", "saffron", "fenugreek", "mustard", "seed", "powder",
+      "flake", "stick",
+      // Oils, sauces & condiments
+      "oil", "vinegar", "sauce", "soy", "mayonnaise", "honey", "ketchup",
+      "paste", "worcestershire", "sriracha", "tahini", "pesto", "dressing",
+      "syrup", "miso", "mirin", "hoisin", "oyster", "harissa", "chutney",
+      "relish", "jam", "marmalade",
     ],
   ],
 ];

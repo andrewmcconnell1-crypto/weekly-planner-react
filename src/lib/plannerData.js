@@ -5,6 +5,18 @@ import {
   mergeSavedRecipes,
   RECIPES_VERSION,
 } from "../utils/dataLoaders";
+import { normaliseCategory } from "../data/categories";
+
+// Remap any retired categories (e.g. Herbs & Spices / Condiments → Pantry) on
+// the saved items that carry one, leaving every other field untouched.
+function migrateItemCategories(items) {
+  if (!Array.isArray(items)) return [];
+  return items.map((item) =>
+    item && item.category
+      ? { ...item, category: normaliseCategory(item.category) }
+      : item
+  );
+}
 
 // The slices of app state that get persisted (locally or to the cloud).
 export const DATA_KEYS = [
@@ -81,10 +93,12 @@ export function normaliseData(raw) {
       data.shoppingChecked && typeof data.shoppingChecked === "object"
         ? data.shoppingChecked
         : base.shoppingChecked,
-    manualShoppingItems: Array.isArray(data.manualShoppingItems)
-      ? data.manualShoppingItems
-      : base.manualShoppingItems,
-    staples: Array.isArray(data.staples) ? data.staples : base.staples,
+    manualShoppingItems: migrateItemCategories(
+      Array.isArray(data.manualShoppingItems) ? data.manualShoppingItems : []
+    ),
+    staples: migrateItemCategories(
+      Array.isArray(data.staples) ? data.staples : base.staples
+    ),
     inventory: normaliseInventoryItems(
       Array.isArray(data.inventory) ? data.inventory : []
     ),
