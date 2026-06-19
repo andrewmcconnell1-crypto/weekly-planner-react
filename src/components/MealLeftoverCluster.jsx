@@ -9,7 +9,10 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
   const batches = Math.max(1, Math.round(Number(leadSummary.meal?.batches) || 1));
 
   return (
-    <article className="card meal-card meal-card-cook meal-cluster">
+    <article
+      className="card meal-card meal-card-cook meal-cluster"
+      data-tone={leadSummary.tone}
+    >
       <button
         className="meal-row-button meal-row-button-nobadge"
         type="button"

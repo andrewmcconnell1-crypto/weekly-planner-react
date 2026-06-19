@@ -918,11 +918,12 @@ textarea:focus-visible {
   background: var(--surface);
 }
 
-/* Cooking days are emphasised with an accent rail (scoped above
-   `.plan-screen .meal-card` so its border-color doesn't override the accent). */
+/* Cooking days are emphasised with an accent rail, tinted by the recipe's
+   category tone (scoped above `.plan-screen .meal-card` so its border-color
+   doesn't override the accent). Custom cooked meals fall back to the accent. */
 .plan-screen .meal-card-cook,
 .home-screen .meal-card-cook {
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--recipe-tone, var(--accent));
 }
 
 .group-count,
@@ -2102,37 +2103,39 @@ input::placeholder {
   background: var(--recipe-tone, var(--line));
 }
 
-.recipe-row[data-tone="chicken"] {
+/* Shared category-tone palette: any element tagged with the recipe category's
+   tone (recipe rows, meal cards, …) exposes --recipe-tone for accents. */
+[data-tone="chicken"] {
   --recipe-tone: #cf9a45;
 }
-.recipe-row[data-tone="beef"] {
+[data-tone="beef"] {
   --recipe-tone: #b0503c;
 }
-.recipe-row[data-tone="pasta"] {
+[data-tone="pasta"] {
   --recipe-tone: #c79a2f;
 }
-.recipe-row[data-tone="rice"] {
+[data-tone="rice"] {
   --recipe-tone: #d2b15c;
 }
-.recipe-row[data-tone="slow"] {
+[data-tone="slow"] {
   --recipe-tone: #946c46;
 }
-.recipe-row[data-tone="mexican"] {
+[data-tone="mexican"] {
   --recipe-tone: #c4582f;
 }
-.recipe-row[data-tone="noodles"] {
+[data-tone="noodles"] {
   --recipe-tone: #b97a44;
 }
-.recipe-row[data-tone="vegetarian"] {
+[data-tone="vegetarian"] {
   --recipe-tone: var(--olive);
 }
-.recipe-row[data-tone="kid"] {
+[data-tone="kid"] {
   --recipe-tone: #cf7a63;
 }
-.recipe-row[data-tone="family"] {
+[data-tone="family"] {
   --recipe-tone: #9c5e72;
 }
-.recipe-row[data-tone="other"] {
+[data-tone="other"] {
   --recipe-tone: #a89683;
 }
 
