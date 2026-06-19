@@ -4,6 +4,7 @@ import { Plus, Search } from "lucide-react";
 import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
+import RecipeFilter from "./RecipeFilter";
 
 const SOURCE_ORDER = ["RecipeTin Eats", "Original recipes", "Custom"];
 
@@ -127,44 +128,19 @@ function RecipesList({
             />
           </div>
 
-          {categories.length > 2 && (
-            <div className="recipe-filter-group">
-              <p className="recipe-filter-label">Category</p>
-              <div
-                className="recipe-filter-chips"
-                aria-label="Filter by category"
-              >
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    type="button"
-                    className={activeCategory === category ? "active" : ""}
-                    onClick={() => setActiveCategory(category)}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <RecipeFilter
+            label="Category"
+            options={categories}
+            active={activeCategory}
+            onSelect={setActiveCategory}
+          />
 
-          {sources.length > 2 && (
-            <div className="recipe-filter-group">
-              <p className="recipe-filter-label">Source</p>
-              <div className="recipe-filter-chips" aria-label="Filter by source">
-                {sources.map((source) => (
-                  <button
-                    key={source}
-                    type="button"
-                    className={activeSource === source ? "active" : ""}
-                    onClick={() => setActiveSource(source)}
-                  >
-                    {source}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <RecipeFilter
+            label="Source"
+            options={sources}
+            active={activeSource}
+            onSelect={setActiveSource}
+          />
 
           {visibleRecipes.length === 0 ? (
             <p className="empty-state">No matching recipes.</p>
