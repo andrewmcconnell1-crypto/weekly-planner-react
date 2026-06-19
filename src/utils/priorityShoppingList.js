@@ -2,7 +2,7 @@ import { buildShoppingPlan } from "./shoppingPlan";
 import { categoriseIngredient } from "./categoriseIngredient";
 import { normaliseItemName } from "./itemUtils";
 import { days } from "./mealUtils";
-import { categories } from "../data/categories";
+import { categories, normaliseCategory } from "../data/categories";
 
 // One shopping list spanning this week + next, ordered by urgency rather than
 // split into weekly lists. Returns a flat, de-duplicated item list tagged with
@@ -160,8 +160,11 @@ export function groupByTier(items) {
 export function groupByAisle(items) {
   const map = new Map();
   for (const item of items) {
-    if (!map.has(item.category)) map.set(item.category, []);
-    map.get(item.category).push(item);
+    // Fold any retired category (e.g. Condiments) into its current aisle so a
+    // persisted list never shows a dead label.
+    const category = normaliseCategory(item.category);
+    if (!map.has(category)) map.set(category, []);
+    map.get(category).push(item);
   }
   return [...map.entries()]
     .sort((a, b) => categoryRank(a[0]) - categoryRank(b[0]))

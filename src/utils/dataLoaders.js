@@ -1,6 +1,7 @@
 import { normaliseItemName, slugifyIdPart } from "./itemUtils";
 import { initialRecipes } from "../data/initialRecipes";
 import { commonInventoryItems } from "../data/commonInventory";
+import { normaliseCategory } from "../data/categories";
 
 const recipeIdAliases = {
   "spaghetti-bolognese": "bolognese",
@@ -50,7 +51,9 @@ export function normaliseInventoryItems(inventoryItems) {
 
       return {
         ...item,
-        category: item.category || starterItem?.category || "Other",
+        category: normaliseCategory(
+          item.category || starterItem?.category || "Other"
+        ),
         active: item.active ?? true,
       };
     });

@@ -25,15 +25,13 @@ describe("categoriseIngredient", () => {
     expect(categoriseIngredient("1 cup grated cheddar cheese")).toBe("Dairy");
   });
 
-  it("files dry and canned goods under Pantry", () => {
+  it("files dry goods, spices, oils and sauces under Pantry", () => {
     expect(categoriseIngredient("2 cups basmati rice")).toBe("Pantry");
     expect(categoriseIngredient("400g can coconut milk")).toBe("Pantry");
     expect(categoriseIngredient("500g dried pasta")).toBe("Pantry");
-  });
-
-  it("files oils and sauces under Condiments", () => {
-    expect(categoriseIngredient("2 tbsp olive oil")).toBe("Condiments");
-    expect(categoriseIngredient("3 tbsp soy sauce")).toBe("Condiments");
+    expect(categoriseIngredient("1 tsp ground cumin")).toBe("Pantry");
+    expect(categoriseIngredient("2 tbsp olive oil")).toBe("Pantry");
+    expect(categoriseIngredient("3 tbsp soy sauce")).toBe("Pantry");
   });
 
   it("files bread products under Bakery", () => {
