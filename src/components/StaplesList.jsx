@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
+import { groupBySubcategory } from "../utils/pantrySubcategory";
 import AddItemRow from "./AddItemRow";
 
 const frequencyLabels = {
@@ -109,7 +110,16 @@ function StaplesList({
 
               {isOpen && (
                 <ul className="clean-list">
-                  {items.map((staple) => {
+                  {groupBySubcategory(category, items).flatMap((group) => [
+                    group.label && (
+                      <li
+                        className="subcategory-header"
+                        key={`sub-${group.key}`}
+                      >
+                        {group.label}
+                      </li>
+                    ),
+                    ...group.items.map((staple) => {
                     const isExpanded = expandedStapleId === staple.id;
                     const isOff = staple.active === false;
                     const showFrequency =
@@ -242,7 +252,8 @@ function StaplesList({
                         )}
                       </li>
                     );
-                  })}
+                    }),
+                  ])}
                 </ul>
               )}
             </div>

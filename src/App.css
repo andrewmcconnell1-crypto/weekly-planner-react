@@ -901,6 +901,21 @@ textarea:focus-visible {
   list-style: none;
 }
 
+/* Sub-header within a category section (e.g. Pantry → Spices & seasoning). */
+.subcategory-header {
+  margin: 4px 0 -2px;
+  padding: 0 2px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 840;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.subcategory-header:first-child {
+  margin-top: 0;
+}
+
 .card {
   padding: 13px;
 }
