@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+
 import {
   getRecipeTone,
   recipeSourceKind,
@@ -27,7 +29,11 @@ function RecipeCard({ recipe, active = false, onClick }) {
           {recipeSourceLabel(recipe)}
         </span>
 
-        <span className="recipe-row-chevron">›</span>
+        <ChevronRight
+          className="recipe-row-chevron"
+          size={18}
+          aria-hidden="true"
+        />
       </span>
     </button>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
@@ -71,10 +71,13 @@ function RecipesList({
 
   return (
     <div className="recipes-panel">
-      <div className="recipes-intro">
-        <p className="small-text">
-          Saved meals you can reuse in your weekly plan.
-        </p>
+      <div className="recipes-toolbar">
+        <div className="recipes-toolbar-text">
+          <strong>
+            {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
+          </strong>
+          <span>Reuse your saved meals across the week.</span>
+        </div>
 
         <button
           type="button"
@@ -110,28 +113,40 @@ function RecipesList({
         <p className="empty-state">No recipes yet.</p>
       ) : (
         <>
-          <input
-            type="search"
-            placeholder="Search recipes..."
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-          />
-
-          <div className="recipe-filter-group">
-            <p className="recipe-filter-label">Category</p>
-            <div className="recipe-filter-chips" aria-label="Filter by category">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  className={activeCategory === category ? "active" : ""}
-                  onClick={() => setActiveCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+          <div className="recipe-search">
+            <Search
+              className="recipe-search-icon"
+              size={16}
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              placeholder="Search recipes..."
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+            />
           </div>
+
+          {categories.length > 2 && (
+            <div className="recipe-filter-group">
+              <p className="recipe-filter-label">Category</p>
+              <div
+                className="recipe-filter-chips"
+                aria-label="Filter by category"
+              >
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    className={activeCategory === category ? "active" : ""}
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {sources.length > 2 && (
             <div className="recipe-filter-group">
