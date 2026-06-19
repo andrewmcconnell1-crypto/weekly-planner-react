@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   PencilLine,
   Repeat2,
+  Search,
   ShoppingBag,
   UtensilsCrossed,
   X,
@@ -425,12 +426,19 @@ function MealEditorSheet({
               {hasMeal ? "Change meal" : "Pick a recipe"}
             </p>
 
-            <input
-              type="text"
-              placeholder="Search recipes..."
-              value={recipeSearchText}
-              onChange={(event) => setRecipeSearchText(event.target.value)}
-            />
+            <div className="recipe-search">
+              <Search
+                className="recipe-search-icon"
+                size={16}
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                placeholder="Search recipes..."
+                value={recipeSearchText}
+                onChange={(event) => setRecipeSearchText(event.target.value)}
+              />
+            </div>
 
             <div className="recipe-picker-results recipe-picker-flat">
               {filteredRecipes.length === 0 ? (
