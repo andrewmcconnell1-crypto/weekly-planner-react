@@ -1049,28 +1049,19 @@ textarea:focus-visible {
 }
 
 /* Meal editor: current pick, nights stepper, recipe picker, "Or…" options */
+/* Accent rail tinted by the meal's recipe category tone, plus a tinted
+   "Selected" kicker. Falls back to the accent for takeaway / custom meals with
+   no category tone. Uses a plain border-left rail (not an absolutely-positioned
+   bar) so the card needs no overflow:hidden — which was clipping long names. */
 .meal-current {
-  position: relative;
-  overflow: hidden;
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
+  border-left: 4px solid var(--recipe-tone, var(--accent));
   border-radius: 12px;
   background: var(--surface);
   box-shadow: var(--shadow);
-  padding: 12px 12px 12px 14px;
-}
-
-/* Accent rail + tinted kicker, driven by the meal's recipe category tone
-   (falls back to the accent for takeaway / custom meals with no tone). */
-.meal-current::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--recipe-tone, var(--accent));
+  padding: 12px;
 }
 
 .meal-current .section-kicker {
@@ -1091,10 +1082,12 @@ textarea:focus-visible {
 }
 
 .meal-current-header strong {
+  min-width: 0;
   font-family: var(--font-display);
   font-size: 1.12rem;
   font-weight: 600;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .meal-current-label {
