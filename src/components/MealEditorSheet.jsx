@@ -11,6 +11,7 @@ import {
 import { groupRecipesByCategory } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
+import RecipeFilter from "./RecipeFilter";
 
 // Full-height bottom-sheet editor for a single day's meal. Mounted (keyed by
 // day) only while a day is open, so its internal state resets per day.
@@ -36,6 +37,7 @@ function MealEditorSheet({
 }) {
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
+  const [activeRecipeCategory, setActiveRecipeCategory] = useState("All");
   const nameInputRef = useRef(null);
 
   const manualIngredients = Array.isArray(meal.ingredients)
@@ -71,10 +73,15 @@ function MealEditorSheet({
 
   // Flat recipe list, kept in the familiar category order.
   const cleanedRecipeSearch = recipeSearchText.trim().toLowerCase();
-  const sortedRecipes = groupRecipesByCategory(recipes).flatMap(
-    (group) => group.recipes
-  );
+  const recipeGroups = groupRecipesByCategory(recipes);
+  const recipeCategories = ["All", ...recipeGroups.map((group) => group.category)];
+  const sortedRecipes = recipeGroups.flatMap((group) => group.recipes);
   const filteredRecipes = sortedRecipes.filter((recipe) => {
+    const inCategory =
+      activeRecipeCategory === "All" ||
+      (recipe.category || "Other") === activeRecipeCategory;
+
+    if (!inCategory) return false;
     if (!cleanedRecipeSearch) return true;
 
     return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
@@ -439,6 +446,13 @@ function MealEditorSheet({
                 onChange={(event) => setRecipeSearchText(event.target.value)}
               />
             </div>
+
+            <RecipeFilter
+              label="Category"
+              options={recipeCategories}
+              active={activeRecipeCategory}
+              onSelect={setActiveRecipeCategory}
+            />
 
             <div className="recipe-picker-results recipe-picker-flat">
               {filteredRecipes.length === 0 ? (
