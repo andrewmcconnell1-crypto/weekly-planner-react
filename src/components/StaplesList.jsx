@@ -53,6 +53,7 @@ function StaplesList({
 }) {
   const [searchText, setSearchText] = useState("");
   const [openCategories, setOpenCategories] = useState({});
+  const [openSubcategories, setOpenSubcategories] = useState({});
   const [expandedStapleId, setExpandedStapleId] = useState(null);
 
   const filteredStaples = staples.filter((staple) =>
@@ -65,6 +66,132 @@ function StaplesList({
       ...openCategories,
       [category]: !openCategories[category],
     });
+  }
+
+  function toggleSubcategory(key) {
+    setOpenSubcategories((open) => ({ ...open, [key]: !open[key] }));
+  }
+
+  function renderRow(staple) {
+    const isExpanded = expandedStapleId === staple.id;
+    const isOff = staple.active === false;
+    const showFrequency = staple.frequency && staple.frequency !== "weekly";
+
+    return (
+      <li className="card basics-card" key={staple.id}>
+        <div className="basics-row">
+          <input
+            type="checkbox"
+            checked={staple.active}
+            aria-label={`${staple.name} on Woolworths list`}
+            onChange={() => toggleStapleActive(staple.id)}
+          />
+
+          <div className="basics-row-main">
+            <strong className={isOff ? "basics-name-off" : ""}>
+              {staple.name}
+            </strong>
+
+            {showFrequency && (
+              <span>{frequencyLabels[staple.frequency]}</span>
+            )}
+
+            {isOff && (
+              <span className="staple-off-note">
+                Off — flagged on the Shop page to remove from your Woolworths
+                list
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="basics-edit-toggle"
+            aria-expanded={isExpanded}
+            aria-label={`Edit ${staple.name}`}
+            onClick={() => setExpandedStapleId(isExpanded ? null : staple.id)}
+          >
+            {isExpanded ? (
+              <ChevronUp size={17} aria-hidden="true" />
+            ) : (
+              <ChevronDown size={17} aria-hidden="true" />
+            )}
+          </button>
+        </div>
+
+        {isExpanded && (
+          <div className="basics-editor">
+            <div className="staple-quantity-row">
+              <input
+                type="number"
+                min="0"
+                step="any"
+                inputMode="decimal"
+                placeholder="Qty"
+                aria-label={`${staple.name} quantity`}
+                value={staple.quantity ?? ""}
+                onChange={(event) =>
+                  updateStapleDetails(staple.id, {
+                    quantity:
+                      event.target.value === ""
+                        ? null
+                        : Number(event.target.value),
+                  })
+                }
+              />
+
+              <input
+                type="text"
+                placeholder="unit (e.g. pack)"
+                aria-label={`${staple.name} unit`}
+                value={staple.unit || ""}
+                onChange={(event) =>
+                  updateStapleDetails(staple.id, {
+                    unit: event.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="staple-controls">
+              <select
+                value={staple.frequency}
+                onChange={(event) =>
+                  updateStapleFrequency(staple.id, event.target.value)
+                }
+              >
+                <option value="weekly">Weekly</option>
+                <option value="fortnightly">Fortnightly</option>
+                <option value="four-weekly">4-weekly</option>
+                <option value="ad-hoc">Ad hoc</option>
+              </select>
+
+              <select
+                value={staple.category || "Other"}
+                onChange={(event) =>
+                  updateStapleCategory(staple.id, event.target.value)
+                }
+              >
+                {availableCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <p className="small-text">Starts: {staple.startDate}</p>
+
+            <button
+              className="delete-button"
+              onClick={() => deleteStaple(staple.id)}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      </li>
+    );
   }
 
   return (
@@ -109,152 +236,50 @@ function StaplesList({
               </button>
 
               {isOpen && (
-                <ul className="clean-list">
-                  {groupBySubcategory(category, items).flatMap((group) => [
-                    group.label && (
-                      <li
-                        className="subcategory-header"
-                        key={`sub-${group.key}`}
-                      >
-                        {group.label}
-                      </li>
-                    ),
-                    ...group.items.map((staple) => {
-                    const isExpanded = expandedStapleId === staple.id;
-                    const isOff = staple.active === false;
-                    const showFrequency =
-                      staple.frequency && staple.frequency !== "weekly";
+                <div className="subcategory-list">
+                  {groupBySubcategory(category, items).map((group) => {
+                    if (!group.label) {
+                      return (
+                        <ul className="clean-list" key={group.key}>
+                          {group.items.map(renderRow)}
+                        </ul>
+                      );
+                    }
+
+                    const subKey = `${category}:${group.key}`;
+                    const subOpen = searchText
+                      ? true
+                      : openSubcategories[subKey] ?? false;
 
                     return (
-                      <li className="card basics-card" key={staple.id}>
-                        <div className="basics-row">
-                          <input
-                            type="checkbox"
-                            checked={staple.active}
-                            aria-label={`${staple.name} on Woolworths list`}
-                            onChange={() => toggleStapleActive(staple.id)}
-                          />
-
-                          <div className="basics-row-main">
-                            <strong className={isOff ? "basics-name-off" : ""}>
-                              {staple.name}
-                            </strong>
-
-                            {showFrequency && (
-                              <span>{frequencyLabels[staple.frequency]}</span>
-                            )}
-
-                            {isOff && (
-                              <span className="staple-off-note">
-                                Off — flagged on the Shop page to remove from
-                                your Woolworths list
-                              </span>
-                            )}
-                          </div>
-
-                          <button
-                            type="button"
-                            className="basics-edit-toggle"
-                            aria-expanded={isExpanded}
-                            aria-label={`Edit ${staple.name}`}
-                            onClick={() =>
-                              setExpandedStapleId(
-                                isExpanded ? null : staple.id
-                              )
-                            }
-                          >
-                            {isExpanded ? (
-                              <ChevronUp size={17} aria-hidden="true" />
+                      <div className="subcategory-group" key={group.key}>
+                        <button
+                          type="button"
+                          className="subcategory-toggle"
+                          aria-expanded={subOpen}
+                          onClick={() => toggleSubcategory(subKey)}
+                        >
+                          <span>{group.label}</span>
+                          <span className="category-toggle-meta">
+                            {group.items.length} item
+                            {group.items.length === 1 ? "" : "s"}
+                            {subOpen ? (
+                              <ChevronUp size={15} aria-hidden="true" />
                             ) : (
-                              <ChevronDown size={17} aria-hidden="true" />
+                              <ChevronDown size={15} aria-hidden="true" />
                             )}
-                          </button>
-                        </div>
+                          </span>
+                        </button>
 
-                        {isExpanded && (
-                          <div className="basics-editor">
-                            <div className="staple-quantity-row">
-                              <input
-                                type="number"
-                                min="0"
-                                step="any"
-                                inputMode="decimal"
-                                placeholder="Qty"
-                                aria-label={`${staple.name} quantity`}
-                                value={staple.quantity ?? ""}
-                                onChange={(event) =>
-                                  updateStapleDetails(staple.id, {
-                                    quantity:
-                                      event.target.value === ""
-                                        ? null
-                                        : Number(event.target.value),
-                                  })
-                                }
-                              />
-
-                              <input
-                                type="text"
-                                placeholder="unit (e.g. pack)"
-                                aria-label={`${staple.name} unit`}
-                                value={staple.unit || ""}
-                                onChange={(event) =>
-                                  updateStapleDetails(staple.id, {
-                                    unit: event.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-
-                            <div className="staple-controls">
-                              <select
-                                value={staple.frequency}
-                                onChange={(event) =>
-                                  updateStapleFrequency(
-                                    staple.id,
-                                    event.target.value
-                                  )
-                                }
-                              >
-                                <option value="weekly">Weekly</option>
-                                <option value="fortnightly">Fortnightly</option>
-                                <option value="four-weekly">4-weekly</option>
-                                <option value="ad-hoc">Ad hoc</option>
-                              </select>
-
-                              <select
-                                value={staple.category || "Other"}
-                                onChange={(event) =>
-                                  updateStapleCategory(
-                                    staple.id,
-                                    event.target.value
-                                  )
-                                }
-                              >
-                                {availableCategories.map((category) => (
-                                  <option key={category} value={category}>
-                                    {category}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            <p className="small-text">
-                              Starts: {staple.startDate}
-                            </p>
-
-                            <button
-                              className="delete-button"
-                              onClick={() => deleteStaple(staple.id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
+                        {subOpen && (
+                          <ul className="clean-list">
+                            {group.items.map(renderRow)}
+                          </ul>
                         )}
-                      </li>
+                      </div>
                     );
-                    }),
-                  ])}
-                </ul>
+                  })}
+                </div>
               )}
             </div>
           );

@@ -901,19 +901,35 @@ textarea:focus-visible {
   list-style: none;
 }
 
-/* Sub-header within a category section (e.g. Pantry → Spices & seasoning). */
-.subcategory-header {
-  margin: 4px 0 -2px;
-  padding: 0 2px;
-  color: var(--muted);
-  font-size: 0.7rem;
-  font-weight: 840;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+/* Nested accordions within a category section (e.g. Pantry → Spices &
+   seasoning). A quieter variant of .category-toggle so the hierarchy reads. */
+.subcategory-list,
+.subcategory-group {
+  display: grid;
+  gap: 8px;
 }
 
-.subcategory-header:first-child {
-  margin-top: 0;
+.subcategory-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--ink);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.subcategory-toggle[aria-expanded="true"],
+.subcategory-toggle:hover,
+.subcategory-toggle:focus {
+  border-color: var(--accent-soft);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .card {

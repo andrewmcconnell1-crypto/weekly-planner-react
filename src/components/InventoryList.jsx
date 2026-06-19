@@ -21,6 +21,7 @@ function InventoryList({
 }) {
   const [searchText, setSearchText] = useState("");
   const [openCategories, setOpenCategories] = useState({});
+  const [openSubcategories, setOpenSubcategories] = useState({});
   const [expandedItemId, setExpandedItemId] = useState(null);
 
   const filteredInventory = inventory.filter((item) =>
@@ -44,6 +45,80 @@ function InventoryList({
       ...openCategories,
       [category]: !openCategories[category],
     });
+  }
+
+  function toggleSubcategory(key) {
+    setOpenSubcategories((open) => ({ ...open, [key]: !open[key] }));
+  }
+
+  function renderRow(item) {
+    const isExpanded = expandedItemId === item.id;
+    const isOut = item.active === false;
+
+    return (
+      <li className="card basics-card" key={item.id}>
+        <div className="basics-row">
+          <input
+            type="checkbox"
+            checked={item.active !== false}
+            aria-label={`${item.name} in stock`}
+            onChange={() => toggleInventoryActive(item.id)}
+          />
+
+          <div className="basics-row-main">
+            <strong className={isOut ? "basics-name-off" : ""}>
+              {item.name}
+            </strong>
+
+            {isOut && (
+              <span className="staple-off-note">
+                Out — will be added to your shopping list
+              </span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="basics-edit-toggle"
+            aria-expanded={isExpanded}
+            aria-label={`Edit ${item.name}`}
+            onClick={() => setExpandedItemId(isExpanded ? null : item.id)}
+          >
+            {isExpanded ? (
+              <ChevronUp size={17} aria-hidden="true" />
+            ) : (
+              <ChevronDown size={17} aria-hidden="true" />
+            )}
+          </button>
+        </div>
+
+        {isExpanded && (
+          <div className="basics-editor">
+            <select
+              value={item.category || "Other"}
+              aria-label={`${item.name} category`}
+              onChange={(event) =>
+                updateInventoryCategory(item.id, event.target.value)
+              }
+            >
+              {availableCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              className="delete-button"
+              onClick={() => deleteInventoryItem(item.id)}
+            >
+              Delete
+            </button>
+          </div>
+        )}
+      </li>
+    );
   }
 
   return (
@@ -89,92 +164,50 @@ function InventoryList({
               </button>
 
               {isOpen && (
-                <ul className="clean-list">
-                  {groupBySubcategory(category, items).flatMap((group) => [
-                    group.label && (
-                      <li
-                        className="subcategory-header"
-                        key={`sub-${group.key}`}
-                      >
-                        {group.label}
-                      </li>
-                    ),
-                    ...group.items.map((item) => {
-                    const isExpanded = expandedItemId === item.id;
-                    const isOut = item.active === false;
+                <div className="subcategory-list">
+                  {groupBySubcategory(category, items).map((group) => {
+                    if (!group.label) {
+                      return (
+                        <ul className="clean-list" key={group.key}>
+                          {group.items.map(renderRow)}
+                        </ul>
+                      );
+                    }
+
+                    const subKey = `${category}:${group.key}`;
+                    const subOpen = searchText
+                      ? true
+                      : openSubcategories[subKey] ?? false;
 
                     return (
-                      <li className="card basics-card" key={item.id}>
-                        <div className="basics-row">
-                          <input
-                            type="checkbox"
-                            checked={item.active !== false}
-                            aria-label={`${item.name} in stock`}
-                            onChange={() => toggleInventoryActive(item.id)}
-                          />
-
-                          <div className="basics-row-main">
-                            <strong className={isOut ? "basics-name-off" : ""}>
-                              {item.name}
-                            </strong>
-
-                            {isOut && (
-                              <span className="staple-off-note">
-                                Out — will be added to your shopping list
-                              </span>
-                            )}
-                          </div>
-
-                          <button
-                            type="button"
-                            className="basics-edit-toggle"
-                            aria-expanded={isExpanded}
-                            aria-label={`Edit ${item.name}`}
-                            onClick={() =>
-                              setExpandedItemId(isExpanded ? null : item.id)
-                            }
-                          >
-                            {isExpanded ? (
-                              <ChevronUp size={17} aria-hidden="true" />
+                      <div className="subcategory-group" key={group.key}>
+                        <button
+                          type="button"
+                          className="subcategory-toggle"
+                          aria-expanded={subOpen}
+                          onClick={() => toggleSubcategory(subKey)}
+                        >
+                          <span>{group.label}</span>
+                          <span className="category-toggle-meta">
+                            {group.items.length} item
+                            {group.items.length === 1 ? "" : "s"}
+                            {subOpen ? (
+                              <ChevronUp size={15} aria-hidden="true" />
                             ) : (
-                              <ChevronDown size={17} aria-hidden="true" />
+                              <ChevronDown size={15} aria-hidden="true" />
                             )}
-                          </button>
-                        </div>
+                          </span>
+                        </button>
 
-                        {isExpanded && (
-                          <div className="basics-editor">
-                            <select
-                              value={item.category || "Other"}
-                              aria-label={`${item.name} category`}
-                              onChange={(event) =>
-                                updateInventoryCategory(
-                                  item.id,
-                                  event.target.value
-                                )
-                              }
-                            >
-                              {availableCategories.map((category) => (
-                                <option key={category} value={category}>
-                                  {category}
-                                </option>
-                              ))}
-                            </select>
-
-                            <button
-                              type="button"
-                              className="delete-button"
-                              onClick={() => deleteInventoryItem(item.id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
+                        {subOpen && (
+                          <ul className="clean-list">
+                            {group.items.map(renderRow)}
+                          </ul>
                         )}
-                      </li>
+                      </div>
                     );
-                    }),
-                  ])}
-                </ul>
+                  })}
+                </div>
               )}
             </div>
           );
