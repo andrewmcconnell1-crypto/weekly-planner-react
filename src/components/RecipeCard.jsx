@@ -19,9 +19,13 @@ function RecipeCard({ recipe, active = false, onClick }) {
       <span className="recipe-row-inner">
         <span className="recipe-row-main">
           <strong>{recipe.name}</strong>
-          <span>
-            {recipe.category || "Uncategorised"}
-            {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
+          <span className="recipe-row-meta">
+            <span className="recipe-row-tag">
+              {recipe.category || "Uncategorised"}
+            </span>
+            {recipe.serves ? (
+              <span className="recipe-row-serves">Serves {recipe.serves}</span>
+            ) : null}
           </span>
         </span>
 
