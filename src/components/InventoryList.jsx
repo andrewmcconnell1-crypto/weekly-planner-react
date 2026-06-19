@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
+import { groupBySubcategory } from "../utils/pantrySubcategory";
 import AddItemRow from "./AddItemRow";
 
 // Stock items, grouped into collapsible category sections. Each row is a
@@ -89,7 +90,16 @@ function InventoryList({
 
               {isOpen && (
                 <ul className="clean-list">
-                  {items.map((item) => {
+                  {groupBySubcategory(category, items).flatMap((group) => [
+                    group.label && (
+                      <li
+                        className="subcategory-header"
+                        key={`sub-${group.key}`}
+                      >
+                        {group.label}
+                      </li>
+                    ),
+                    ...group.items.map((item) => {
                     const isExpanded = expandedItemId === item.id;
                     const isOut = item.active === false;
 
@@ -162,7 +172,8 @@ function InventoryList({
                         )}
                       </li>
                     );
-                  })}
+                    }),
+                  ])}
                 </ul>
               )}
             </div>

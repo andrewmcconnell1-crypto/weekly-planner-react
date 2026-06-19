@@ -11,7 +11,7 @@ function singularise(word) {
   return word;
 }
 
-function tokenise(name) {
+export function tokenise(name) {
   let text = String(name || "").toLowerCase();
   text = text.replace(/\([^)]*\)/g, " "); // drop parentheticals
   text = text.split(",")[0]; // drop prep notes after the first comma
