@@ -1969,6 +1969,53 @@ input::placeholder {
   color: var(--primary-strong);
 }
 
+/* Designed empty states (no recipes yet / no matches). */
+.recipes-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  padding: 28px 22px;
+  text-align: center;
+}
+
+.recipes-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.recipes-empty strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 640;
+  color: var(--ink);
+}
+
+.recipes-empty p {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.recipes-empty button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
 /* Search field with a leading icon, so it reads as a deliberate control. */
 .recipe-search {
   position: relative;
@@ -2123,7 +2170,25 @@ input::placeholder {
   overflow-wrap: anywhere;
 }
 
-.recipe-row-main span {
+.recipe-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+/* Category tag, tinted from the card's own category tone. */
+.recipe-row-tag {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  font-weight: 820;
+  color: color-mix(in srgb, var(--recipe-tone, var(--muted)) 72%, #2a2420);
+  background: color-mix(in srgb, var(--recipe-tone, var(--muted)) 15%, #fff);
+}
+
+.recipe-row-serves {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

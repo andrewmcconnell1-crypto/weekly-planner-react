@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { BookOpen, Plus, Search, SearchX } from "lucide-react";
 
 import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
@@ -70,6 +70,12 @@ function RecipesList({
     ? recipes.find((recipe) => recipe.id === openRecipeId)
     : null;
 
+  function clearFilters() {
+    setSearchText("");
+    setActiveCategory("All");
+    setActiveSource("All");
+  }
+
   return (
     <div className="recipes-panel">
       <div className="recipes-toolbar">
@@ -111,7 +117,20 @@ function RecipesList({
       )}
 
       {recipes.length === 0 ? (
-        <p className="empty-state">No recipes yet.</p>
+        <div className="recipes-empty">
+          <span className="recipes-empty-icon" aria-hidden="true">
+            <BookOpen size={26} strokeWidth={1.75} />
+          </span>
+          <strong>No recipes yet</strong>
+          <p>
+            Save the meals you cook often so you can drop them straight into
+            your week.
+          </p>
+          <button type="button" onClick={() => setShowAddRecipe(true)}>
+            <Plus size={16} aria-hidden="true" />
+            Add your first recipe
+          </button>
+        </div>
       ) : (
         <>
           <div className="recipe-search">
@@ -143,7 +162,16 @@ function RecipesList({
           />
 
           {visibleRecipes.length === 0 ? (
-            <p className="empty-state">No matching recipes.</p>
+            <div className="recipes-empty">
+              <span className="recipes-empty-icon" aria-hidden="true">
+                <SearchX size={26} strokeWidth={1.75} />
+              </span>
+              <strong>No recipes match</strong>
+              <p>Try a different search or category.</p>
+              <button type="button" className="secondary" onClick={clearFilters}>
+                Clear filters
+              </button>
+            </div>
           ) : (
             <div className="recipe-list">
               {visibleRecipes.map((recipe) => (
