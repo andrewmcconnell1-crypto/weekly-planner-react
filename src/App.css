@@ -1915,6 +1915,39 @@ input::placeholder {
   gap: 14px;
 }
 
+/* Intro line + quiet "New recipe" toggle (adding is a rare action). */
+.recipes-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recipes-intro .small-text {
+  margin: 0;
+}
+
+.add-recipe-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 760;
+}
+
+.add-recipe-toggle:hover {
+  color: var(--primary-strong);
+}
+
+.add-recipe-toggle[aria-expanded="true"] {
+  color: var(--primary-strong);
+}
+
 /* Recipe browser: category filter chips + flat list */
 .recipe-filter-chips {
   display: flex;
