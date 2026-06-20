@@ -163,52 +163,58 @@ function InventoryList({
                 </span>
               </button>
 
-              {isOpen && (
-                <div className="subcategory-list">
-                  {groupBySubcategory(category, items).map((group) => {
-                    if (!group.label) {
-                      return (
-                        <ul className="clean-list" key={group.key}>
-                          {group.items.map(renderRow)}
-                        </ul>
-                      );
-                    }
-
-                    const subKey = `${category}:${group.key}`;
-                    const subOpen = searchText
-                      ? true
-                      : openSubcategories[subKey] ?? false;
-
-                    return (
-                      <div className="subcategory-group" key={group.key}>
-                        <button
-                          type="button"
-                          className="subcategory-toggle"
-                          aria-expanded={subOpen}
-                          onClick={() => toggleSubcategory(subKey)}
-                        >
-                          <span>{group.label}</span>
-                          <span className="category-toggle-meta">
-                            {group.items.length} item
-                            {group.items.length === 1 ? "" : "s"}
-                            {subOpen ? (
-                              <ChevronUp size={15} aria-hidden="true" />
-                            ) : (
-                              <ChevronDown size={15} aria-hidden="true" />
-                            )}
-                          </span>
-                        </button>
-
-                        {subOpen && (
-                          <ul className="clean-list">
+              <div className={`collapsible ${isOpen ? "open" : ""}`}>
+                <div className="collapsible-inner">
+                  <div className="subcategory-list">
+                    {groupBySubcategory(category, items).map((group) => {
+                      if (!group.label) {
+                        return (
+                          <ul className="clean-list" key={group.key}>
                             {group.items.map(renderRow)}
                           </ul>
-                        )}
-                      </div>
-                    );
-                  })}
+                        );
+                      }
+
+                      const subKey = `${category}:${group.key}`;
+                      const subOpen = searchText
+                        ? true
+                        : openSubcategories[subKey] ?? false;
+
+                      return (
+                        <div className="subcategory-group" key={group.key}>
+                          <button
+                            type="button"
+                            className="subcategory-toggle"
+                            aria-expanded={subOpen}
+                            onClick={() => toggleSubcategory(subKey)}
+                          >
+                            <span>{group.label}</span>
+                            <span className="category-toggle-meta">
+                              {group.items.length} item
+                              {group.items.length === 1 ? "" : "s"}
+                              {subOpen ? (
+                                <ChevronUp size={15} aria-hidden="true" />
+                              ) : (
+                                <ChevronDown size={15} aria-hidden="true" />
+                              )}
+                            </span>
+                          </button>
+
+                          <div
+                            className={`collapsible ${subOpen ? "open" : ""}`}
+                          >
+                            <div className="collapsible-inner">
+                              <ul className="clean-list">
+                                {group.items.map(renderRow)}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           );
         })
