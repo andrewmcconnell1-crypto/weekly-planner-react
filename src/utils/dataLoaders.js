@@ -75,6 +75,8 @@ function normaliseRecipe(recipe, index) {
     method: recipe.method || "",
     serves:
       recipe.serves != null && recipe.serves !== "" ? recipe.serves : null,
+    tags: Array.isArray(recipe.tags) ? recipe.tags : [],
+    timeMins: typeof recipe.timeMins === "number" ? recipe.timeMins : null,
   };
 }
 
@@ -84,7 +86,8 @@ function normaliseRecipe(recipe, index) {
 // this against the account's stored recipesVersion and asks for a one-time
 // refresh, so content updates reach existing accounts without permanently
 // clobbering edits to built-in recipes thereafter.
-export const RECIPES_VERSION = 1;
+// v2: bundled recipes gained tags + timeMins metadata.
+export const RECIPES_VERSION = 2;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(

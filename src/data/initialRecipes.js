@@ -1,4 +1,5 @@
 import { aiRecipes } from "./aiRecipes";
+import { deriveRecipeTags } from "../utils/recipeUtils";
 
 const RECIPETIN_SOURCE = "RecipeTin Eats";
 const METHOD_NOTE = "Open source link for full method.";
@@ -12,6 +13,8 @@ function recipe({ id, name, category, sourceUrl, ingredients }) {
     sourceUrl,
     ingredients,
     method: METHOD_NOTE,
+    tags: deriveRecipeTags({ name, category, ingredients }),
+    timeMins: null,
   };
 }
 

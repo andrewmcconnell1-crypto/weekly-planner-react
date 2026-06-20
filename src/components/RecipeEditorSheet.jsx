@@ -5,6 +5,7 @@ import {
   recipeCategories,
   recipeSourceKind,
   recipeSourceLabel,
+  recipeTags,
 } from "../utils/recipeUtils";
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
@@ -114,7 +115,18 @@ function RecipeEditorSheet({
                 <span className="recipe-view-meta">
                   {recipe.category || "Uncategorised"}
                   {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
+                  {recipe.timeMins ? ` · ${recipe.timeMins} min` : ""}
                 </span>
+
+                {recipe.tags?.length > 0 && (
+                  <span className="recipe-view-tags">
+                    {recipe.tags.map((tag) => (
+                      <span className="recipe-tag" key={tag}>
+                        {tag}
+                      </span>
+                    ))}
+                  </span>
+                )}
 
                 {recipe.sourceUrl && (
                   <a
@@ -204,6 +216,26 @@ function RecipeEditorSheet({
                 </label>
 
                 <label>
+                  <span>Time (mins)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="5"
+                    inputMode="numeric"
+                    placeholder="e.g. 30"
+                    value={recipe.timeMins ?? ""}
+                    onChange={(event) =>
+                      updateRecipe(recipe.id, {
+                        timeMins:
+                          event.target.value === ""
+                            ? null
+                            : Number(event.target.value),
+                      })
+                    }
+                  />
+                </label>
+
+                <label>
                   <span>Source</span>
                   <input
                     type="text"
@@ -226,6 +258,32 @@ function RecipeEditorSheet({
                     }
                   />
                 </label>
+              </div>
+
+              <div className="recipe-tags-field">
+                <p className="section-kicker">Tags</p>
+                <div className="recipe-tag-options">
+                  {recipeTags.map((tag) => {
+                    const active = (recipe.tags || []).includes(tag);
+                    return (
+                      <button
+                        type="button"
+                        key={tag}
+                        className={`recipe-tag-toggle ${active ? "active" : ""}`}
+                        aria-pressed={active}
+                        onClick={() =>
+                          updateRecipe(recipe.id, {
+                            tags: active
+                              ? recipe.tags.filter((value) => value !== tag)
+                              : [...(recipe.tags || []), tag],
+                          })
+                        }
+                      >
+                        {tag}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="meal-extra-ingredients">
