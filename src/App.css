@@ -2884,10 +2884,10 @@ input::placeholder {
   cursor: grabbing;
 }
 
+/* The next card sits full-size directly behind the top one, so a departing
+   card simply reveals it (no grow-in when it becomes the top card). */
 .discover-card-behind {
-  transform: scale(0.94) translateY(10px);
   pointer-events: none;
-  opacity: 0.6;
 }
 
 .discover-card-body {
@@ -3065,12 +3065,12 @@ input::placeholder {
 }
 
 .discover-add {
-  background: var(--olive);
+  background: #3f9b5b;
   color: #fff;
 }
 
 .discover-add:hover {
-  background: #4f5a30;
+  background: #357f4b;
 }
 
 .meal-picker-discover {
