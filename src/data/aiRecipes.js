@@ -7,10 +7,22 @@
 // and there is no sourceUrl. Every ingredient referenced in a method is listed
 // with a quantity (including the oil and seasoning), so nothing is left to guess.
 
+import { deriveRecipeTags } from "../utils/recipeUtils";
+
 const SOURCE = "Original recipes";
 
 function aiRecipe({ id, name, category, ingredients, method }) {
-  return { id, name, category, source: SOURCE, sourceUrl: "", ingredients, method };
+  return {
+    id,
+    name,
+    category,
+    source: SOURCE,
+    sourceUrl: "",
+    ingredients,
+    method,
+    tags: deriveRecipeTags({ name, category, ingredients }),
+    timeMins: null,
+  };
 }
 
 export const aiRecipes = [

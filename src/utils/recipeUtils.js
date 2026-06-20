@@ -17,6 +17,81 @@ const categoryOrder = [
 // The known recipe categories, used to populate category pickers.
 export const recipeCategories = categoryOrder;
 
+// Orthogonal recipe attributes (a recipe can have several), used for filtering
+// and the meal-planning discovery flow. Unlike `category` (one per recipe),
+// these stack — a dish can be Quick AND Kid-friendly AND Vegetarian.
+export const recipeTags = [
+  "Quick",
+  "Kid-friendly",
+  "Vegetarian",
+  "Leftover-friendly",
+  "One-pot",
+  "Spicy",
+];
+
+// A recipe at or under this many total minutes counts as "Quick" even without
+// the explicit tag.
+export const QUICK_MAX_MINS = 30;
+
+const MEAT_HINTS = [
+  "chicken", "beef", "mince", "pork", "lamb", "bacon", "ham", "sausage",
+  "chorizo", "prawn", "shrimp", "fish", "salmon", "tuna", "anchovy", "turkey",
+  "prosciutto", "pancetta", "steak", "kofta", "veal", "duck",
+];
+const KID_HINTS = [
+  "nugget", "sausage", "meatball", "mac and cheese", "macaroni", "pizza",
+  "pasta bake", "taco", "burger", "fish finger", "nacho", "spaghetti",
+  "parmigiana", "fajita", "bangers", "mash",
+];
+const QUICK_HINTS = [
+  "stir fry", "stir-fry", "stirfry", "noodle", "taco", "omelette", "omelet",
+  "salad", "wrap", "quesadilla", "fried rice", "carbonara", "fajita",
+  "toastie", "shakshuka", "15 minute", "20 minute", "quick",
+];
+const LEFTOVER_HINTS = [
+  "curry", "stew", "soup", "bolognese", "ragu", "lasagne", "lasagna",
+  "casserole", "chilli", "chili", "dal", "dahl", "braise", "pulled", "pie",
+  "risotto", "minestrone", "shepherd", "cottage",
+];
+const ONEPOT_HINTS = [
+  "one pot", "one-pot", "one pan", "one-pan", "soup", "stew", "risotto",
+  "traybake", "tray bake", "baked", "casserole", "skillet", "sheet pan",
+  "sheet-pan", "minestrone", "shakshuka", "dahl", "dal",
+];
+const SPICY_HINTS = [
+  "chilli", "chili", "curry", "jalapeno", "sriracha", "harissa", "gochujang",
+  "sambal", "cajun", "spicy", "laksa", "vindaloo", "madras", "kofta",
+];
+
+// Best-effort starter tags for a recipe from its name + category (and meat
+// detection from ingredients). Deliberately conservative — it seeds the
+// bundled library; users refine from there in the recipe editor.
+export function deriveRecipeTags({ name = "", category = "", ingredients = [] }) {
+  const nameText = String(name).toLowerCase();
+  const ingredientText = ingredients.join(" ").toLowerCase();
+  const inName = (hints) => hints.some((hint) => nameText.includes(hint));
+  const hasMeat = MEAT_HINTS.some(
+    (meat) => nameText.includes(meat) || ingredientText.includes(meat)
+  );
+
+  const tags = new Set();
+  if (category === "Vegetarian" || !hasMeat) tags.add("Vegetarian");
+  if (category === "Kid-friendly" || inName(KID_HINTS)) tags.add("Kid-friendly");
+  if (category === "Noodles" || inName(QUICK_HINTS)) tags.add("Quick");
+  if (["Slow cooker", "Soup"].includes(category) || inName(LEFTOVER_HINTS)) {
+    tags.add("Leftover-friendly");
+  }
+  if (category === "Slow cooker" || inName(ONEPOT_HINTS)) tags.add("One-pot");
+  if (inName(SPICY_HINTS)) tags.add("Spicy");
+
+  return recipeTags.filter((tag) => tags.has(tag));
+}
+
+export function isQuickRecipe(recipe) {
+  if ((recipe.tags || []).includes("Quick")) return true;
+  return recipe.timeMins != null && recipe.timeMins <= QUICK_MAX_MINS;
+}
+
 export function getRecipeCategory(recipe) {
   return recipe.category || "Other";
 }

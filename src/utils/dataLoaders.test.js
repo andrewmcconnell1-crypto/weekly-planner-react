@@ -42,11 +42,20 @@ describe("mergeSavedRecipes", () => {
     expect(merged.some((r) => r.id === "bolognese")).toBe(true);
   });
 
-  it("defaults serves for a user-created recipe", () => {
+  it("defaults serves, tags and timeMins for a user-created recipe", () => {
     const merged = mergeSavedRecipes([
       { id: "mine-1", name: "My Dinner", ingredients: [] },
     ]);
-    expect(merged.find((r) => r.id === "mine-1").serves).toBe(4);
+    const recipe = merged.find((r) => r.id === "mine-1");
+    expect(recipe.serves).toBe(4);
+    expect(recipe.tags).toEqual([]);
+    expect(recipe.timeMins).toBeNull();
+  });
+
+  it("seeds the bundled recipes with metadata tags", () => {
+    const merged = mergeSavedRecipes([]);
+    expect(merged.every((r) => Array.isArray(r.tags))).toBe(true);
+    expect(merged.some((r) => r.tags.length > 0)).toBe(true);
   });
 
   it("keeps edits to built-ins, but refreshes them on request", () => {
