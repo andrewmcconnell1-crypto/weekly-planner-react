@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, X } from "lucide-react";
 
 import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
@@ -22,7 +22,7 @@ function RecipeDiscoverySheet({
   const [usedInitial, setUsedInitial] = useState(false);
   const [lastAdded, setLastAdded] = useState(null);
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
-  const [leaving, setLeaving] = useState(null);
+  const [exiting, setExiting] = useState(null); // { recipe, direction, fromX }
   const [closing, setClosing] = useState(false);
   const start = useRef({ x: 0, y: 0 });
   const closeTimer = useRef(null);
@@ -74,24 +74,25 @@ function RecipeDiscoverySheet({
     }
   }
 
-  // Animate the top card off-screen, then advance the deck.
+  // Advance the deck immediately (so the next card sits stationary at centre),
+  // and fly the chosen card off as a separate layer on top from where it was
+  // released — no slide-in, no node reuse.
   function commit(direction) {
-    if (leaving || !top) return;
+    if (exiting || !top) return;
     if (direction === "right" && weekFull) {
       setDrag({ x: 0, y: 0, active: false }); // nothing to fill — snap back
       return;
     }
     const recipe = top;
-    setLeaving(direction);
-    commitTimer.current = window.setTimeout(() => {
-      setLeaving(null);
-      setDrag({ x: 0, y: 0, active: false });
-      apply(direction, recipe);
-    }, 200);
+    const fromX = drag.x;
+    apply(direction, recipe);
+    setDrag({ x: 0, y: 0, active: false });
+    setExiting({ recipe, direction, fromX });
+    commitTimer.current = window.setTimeout(() => setExiting(null), 320);
   }
 
   function onPointerDown(event) {
-    if (leaving) return;
+    if (exiting) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     start.current = { x: event.clientX, y: event.clientY };
     setDrag({ x: 0, y: 0, active: true });
@@ -114,21 +115,24 @@ function RecipeDiscoverySheet({
     else setDrag({ x: 0, y: 0, active: false });
   }
 
-  const cardStyle = leaving
-    ? {
-        transform: `translateX(${leaving === "right" ? 120 : -120}%) rotate(${
-          leaving === "right" ? 12 : -12
-        }deg)`,
-        opacity: 0,
-      }
-    : {
-        transform: `translate(${drag.x}px, ${drag.y * 0.2}px) rotate(${
-          drag.x / 18
-        }deg)`,
-      };
+  // Clear pending timers if the sheet unmounts mid-animation.
+  useEffect(
+    () => () => {
+      window.clearTimeout(commitTimer.current);
+      window.clearTimeout(closeTimer.current);
+    },
+    []
+  );
 
-  const hint =
-    drag.x > 40 ? "add" : drag.x < -40 ? "skip" : null;
+  const cardStyle = {
+    transform: `translate(${drag.x}px, ${drag.y * 0.2}px) rotate(${
+      drag.x / 18
+    }deg)`,
+  };
+
+  const hint = drag.x > 24 ? "add" : drag.x < -24 ? "skip" : null;
+  const hintOpacity = Math.min(1, (Math.abs(drag.x) - 24) / 80);
+  const showMessage = !exiting && (weekFull || !top);
 
   return (
     <div
@@ -185,50 +189,71 @@ function RecipeDiscoverySheet({
           </div>
 
           <div className="discover-stage">
-            {weekFull ? (
+            {showMessage ? (
               <div className="discover-message">
-                <Check size={26} aria-hidden="true" />
-                <strong>Your week's full!</strong>
-                <p>Every night has a meal. Close to see your plan.</p>
-              </div>
-            ) : !top ? (
-              <div className="discover-message">
-                <RotateCcw size={26} aria-hidden="true" />
-                <strong>No more matches</strong>
-                <p>
-                  {selectedTags.size > 0
-                    ? "Try removing a filter to see more recipes."
-                    : "You've been through every recipe."}
-                </p>
+                {weekFull ? (
+                  <>
+                    <Check size={26} aria-hidden="true" />
+                    <strong>Your week's full!</strong>
+                    <p>Every night has a meal. Close to see your plan.</p>
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw size={26} aria-hidden="true" />
+                    <strong>No more matches</strong>
+                    <p>
+                      {selectedTags.size > 0
+                        ? "Try removing a filter to see more recipes."
+                        : "You've been through every recipe."}
+                    </p>
+                  </>
+                )}
               </div>
             ) : (
               <div className="discover-deck">
-                {deck[1] && (
-                  <article className="discover-card discover-card-behind">
+                {!weekFull && deck[1] && (
+                  <article
+                    key={deck[1].id}
+                    className="discover-card discover-card-behind"
+                  >
                     <DeckCardBody recipe={deck[1]} />
                   </article>
                 )}
 
-                <article
-                  className={`discover-card ${
-                    drag.active ? "dragging" : ""
-                  }`}
-                  style={cardStyle}
-                  onPointerDown={onPointerDown}
-                  onPointerMove={onPointerMove}
-                  onPointerUp={onPointerUp}
-                  onPointerCancel={onPointerUp}
-                >
-                  {hint && (
-                    <span
-                      className={`discover-stamp discover-stamp-${hint}`}
-                      aria-hidden="true"
-                    >
-                      {hint === "add" ? "ADD" : "SKIP"}
-                    </span>
-                  )}
-                  <DeckCardBody recipe={top} />
-                </article>
+                {!weekFull && top && (
+                  <article
+                    key={top.id}
+                    className={`discover-card ${drag.active ? "dragging" : ""} ${
+                      hint ? `discover-card-${hint}` : ""
+                    }`}
+                    style={cardStyle}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={onPointerUp}
+                    onPointerCancel={onPointerUp}
+                  >
+                    {hint && (
+                      <span
+                        className={`discover-stamp discover-stamp-${hint}`}
+                        style={{ opacity: hintOpacity }}
+                        aria-hidden="true"
+                      >
+                        {hint === "add" ? "ADD" : "SKIP"}
+                      </span>
+                    )}
+                    <DeckCardBody recipe={top} />
+                  </article>
+                )}
+
+                {exiting && (
+                  <article
+                    key={`exit-${exiting.recipe.id}`}
+                    className={`discover-card discover-card-exit discover-card-exit-${exiting.direction}`}
+                    style={{ "--from-x": `${exiting.fromX}px` }}
+                  >
+                    <DeckCardBody recipe={exiting.recipe} />
+                  </article>
+                )}
               </div>
             )}
           </div>
