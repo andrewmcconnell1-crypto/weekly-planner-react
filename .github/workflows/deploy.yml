@@ -27,6 +27,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # Gates: a failing lint or test blocks the build artifact, so a broken
+      # commit never reaches Pages.
+      - run: npm run lint
+      - run: npm test
+
       - run: npm run build
         env:
           # Set these in repo Settings -> Secrets and variables -> Actions ->
