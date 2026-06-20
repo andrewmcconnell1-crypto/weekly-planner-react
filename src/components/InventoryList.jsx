@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
 import AddItemRow from "./AddItemRow";
+import SwipeRow from "./SwipeRow";
 
 // Stock items, grouped into collapsible category sections. Each row is a
 // compact tick + name; the category dropdown and Delete live behind the
@@ -56,8 +57,13 @@ function InventoryList({
     const isOut = item.active === false;
 
     return (
-      <li className="card basics-card" key={item.id}>
-        <div className="basics-row">
+      <li key={item.id}>
+        <SwipeRow
+          onDelete={() => deleteInventoryItem(item.id)}
+          itemName={item.name}
+        >
+          <div className="card basics-card">
+            <div className="basics-row">
           <input
             type="checkbox"
             checked={item.active !== false}
@@ -117,6 +123,8 @@ function InventoryList({
             </button>
           </div>
         )}
+          </div>
+        </SwipeRow>
       </li>
     );
   }
