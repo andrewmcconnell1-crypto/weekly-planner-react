@@ -8,6 +8,20 @@ export default defineConfig({
   // (GitHub Pages: /weekly-planner-react/).
   base: './',
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split big, rarely-changing dependencies into their own chunks so
+        // they cache across deploys and download in parallel with app code.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('@supabase')) return 'supabase'
+          if (id.includes('lucide-react')) return 'icons'
+          if (id.includes('/react') || id.includes('/scheduler')) return 'react'
+        },
+      },
+    },
+  },
   // globals: true lets React Testing Library auto-register its afterEach
   // cleanup, so component test DOM doesn't leak between cases.
   test: {
