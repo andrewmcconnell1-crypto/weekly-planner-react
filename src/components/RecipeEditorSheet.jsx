@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 
 import {
   recipeCategories,
@@ -94,7 +94,7 @@ function RecipeEditorSheet({
             aria-label="Close"
             onClick={requestClose}
           >
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 

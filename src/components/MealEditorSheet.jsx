@@ -325,7 +325,7 @@ function MealEditorSheet({
             aria-label="Close"
             onClick={requestClose}
           >
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 

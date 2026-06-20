@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 
 // The tappable summary row for one day. Tapping it opens the meal editor sheet.
 function MealCard({
@@ -65,7 +65,7 @@ function MealCard({
 
         {rowBadge && <span className="meal-row-count">{rowBadge}</span>}
 
-        <span className="meal-row-chevron">›</span>
+        <ChevronRight className="meal-row-chevron" size={18} aria-hidden="true" />
       </button>
     </article>
   );
