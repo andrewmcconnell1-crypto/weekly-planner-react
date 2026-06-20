@@ -164,7 +164,10 @@ function InventoryList({
               </button>
 
               <div className={`collapsible ${isOpen ? "open" : ""}`}>
-                <div className="collapsible-inner">
+                <div
+                  className="collapsible-inner"
+                  inert={!isOpen ? true : undefined}
+                >
                   <div className="subcategory-list">
                     {groupBySubcategory(category, items).map((group) => {
                       if (!group.label) {
@@ -203,7 +206,10 @@ function InventoryList({
                           <div
                             className={`collapsible ${subOpen ? "open" : ""}`}
                           >
-                            <div className="collapsible-inner">
+                            <div
+                              className="collapsible-inner"
+                              inert={!subOpen ? true : undefined}
+                            >
                               <ul className="clean-list">
                                 {group.items.map(renderRow)}
                               </ul>
