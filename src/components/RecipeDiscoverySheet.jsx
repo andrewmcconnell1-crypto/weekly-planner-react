@@ -1,12 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, X } from "lucide-react";
 
-import {
-  getRecipeTone,
-  recipeSourceKind,
-  recipeSourceLabel,
-  recipeTags,
-} from "../utils/recipeUtils";
+import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
 
 // Swipe-to-plan: a filtered deck of recipe cards. Swipe right (or "Add") drops
 // the recipe onto the next empty night; swipe left (or "Skip") passes. Filters
@@ -17,12 +12,14 @@ const SWIPE_AT = 90;
 function RecipeDiscoverySheet({
   recipes,
   unplannedDays = [],
+  initialDay = null,
   plannedRecipeIds = [],
   onAssign,
   onClose,
 }) {
   const [selectedTags, setSelectedTags] = useState(() => new Set());
   const [handled, setHandled] = useState(() => new Set());
+  const [usedInitial, setUsedInitial] = useState(false);
   const [lastAdded, setLastAdded] = useState(null);
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const [leaving, setLeaving] = useState(null);
@@ -45,7 +42,10 @@ function RecipeDiscoverySheet({
   }, [recipes, selectedTags, handled, plannedSet]);
 
   const top = deck[0];
-  const nextDay = unplannedDays[0] || null;
+  // When opened from a specific day, fill that day first; then fall back to the
+  // week's remaining empty nights in order.
+  const nextDay =
+    !usedInitial && initialDay ? initialDay : unplannedDays[0] || null;
   const weekFull = !nextDay;
 
   function requestClose() {
@@ -67,6 +67,7 @@ function RecipeDiscoverySheet({
     if (direction === "right" && nextDay && recipe) {
       onAssign(nextDay, recipe);
       setLastAdded({ name: recipe.name, day: nextDay });
+      if (nextDay === initialDay) setUsedInitial(true);
     }
     if (recipe) {
       setHandled((prev) => new Set(prev).add(recipe.id));
@@ -148,9 +149,11 @@ function RecipeDiscoverySheet({
             <span>
               {weekFull
                 ? "Every night is planned"
-                : `${unplannedDays.length} night${
-                    unplannedDays.length === 1 ? "" : "s"
-                  } to fill`}
+                : !usedInitial && initialDay
+                  ? `Pick a meal for ${initialDay}`
+                  : `${unplannedDays.length} night${
+                      unplannedDays.length === 1 ? "" : "s"
+                    } to fill`}
             </span>
           </div>
 
@@ -210,7 +213,6 @@ function RecipeDiscoverySheet({
                   className={`discover-card ${
                     drag.active ? "dragging" : ""
                   }`}
-                  data-tone={getRecipeTone(top.category)}
                   style={cardStyle}
                   onPointerDown={onPointerDown}
                   onPointerMove={onPointerMove}
@@ -264,22 +266,24 @@ function RecipeDiscoverySheet({
 }
 
 function DeckCardBody({ recipe }) {
+  const meta = [
+    recipe.category || "Uncategorised",
+    recipe.serves ? `Serves ${recipe.serves}` : null,
+    recipe.timeMins ? `${recipe.timeMins} min` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <div className="discover-card-body">
-      <span className="recipe-source" data-source={recipeSourceKind(recipe)}>
-        {recipeSourceLabel(recipe)}
-      </span>
+      <p className="discover-card-kicker">{recipeSourceLabel(recipe)}</p>
 
       <strong className="discover-card-name">{recipe.name}</strong>
 
-      <span className="discover-card-meta">
-        {recipe.category || "Uncategorised"}
-        {recipe.serves ? ` · Serves ${recipe.serves}` : ""}
-        {recipe.timeMins ? ` · ${recipe.timeMins} min` : ""}
-      </span>
+      <p className="discover-card-sub">{meta}</p>
 
       {recipe.tags?.length > 0 && (
-        <span className="recipe-view-tags">
+        <span className="recipe-view-tags discover-card-tags">
           {recipe.tags.map((tag) => (
             <span className="recipe-tag" key={tag}>
               {tag}
@@ -288,9 +292,9 @@ function DeckCardBody({ recipe }) {
         </span>
       )}
 
-      <span className="discover-card-count">
+      <p className="discover-card-count">
         {recipe.ingredients?.length || 0} ingredients
-      </span>
+      </p>
     </div>
   );
 }

@@ -99,6 +99,7 @@ function App() {
   const [householdSection, setHouseholdSection] = useState("stock");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
   const [discoverOpen, setDiscoverOpen] = useState(false);
+  const [discoverDay, setDiscoverDay] = useState(null);
   const updateReady = useUpdatePrompt();
   // The session the welcome was dismissed for (a user id, "guest", or "local"),
   // so dismissal is per-account and auto-resets when the account changes.
@@ -1224,7 +1225,10 @@ function App() {
               <button
                 type="button"
                 className="page-hero-action page-hero-action-ghost"
-                onClick={() => setDiscoverOpen(true)}
+                onClick={() => {
+                  setDiscoverDay(null);
+                  setDiscoverOpen(true);
+                }}
               >
                 Find meals by swiping
               </button>
@@ -1262,6 +1266,12 @@ function App() {
               onClearDay={() => clearMealDay(expandedMealDay)}
               updateMeal={updateMeal}
               onClose={() => setExpandedMealDay(null)}
+              onFindMeals={() => {
+                const day = expandedMealDay;
+                setExpandedMealDay(null);
+                setDiscoverDay(day);
+                setDiscoverOpen(true);
+              }}
               onNextDay={
                 expandedNextDay
                   ? () => setExpandedMealDay(expandedNextDay)
@@ -1470,9 +1480,13 @@ function App() {
           <RecipeDiscoverySheet
             recipes={recipes}
             unplannedDays={unplannedDays}
+            initialDay={discoverDay}
             plannedRecipeIds={plannedRecipeIds}
             onAssign={assignRecipeToDay}
-            onClose={() => setDiscoverOpen(false)}
+            onClose={() => {
+              setDiscoverOpen(false);
+              setDiscoverDay(null);
+            }}
           />
         </Suspense>
       )}

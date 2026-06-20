@@ -4,6 +4,7 @@ import {
   Repeat2,
   Search,
   ShoppingBag,
+  Sparkles,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -33,6 +34,7 @@ function MealEditorSheet({
   onClearDay,
   updateMeal,
   onClose,
+  onFindMeals,
   onNextDay,
 }) {
   const [newIngredient, setNewIngredient] = useState("");
@@ -450,6 +452,17 @@ function MealEditorSheet({
             <p className="section-kicker">
               {hasMeal ? "Change meal" : "Pick a recipe"}
             </p>
+
+            {onFindMeals && (
+              <button
+                type="button"
+                className="meal-picker-discover"
+                onClick={onFindMeals}
+              >
+                <Sparkles size={16} aria-hidden="true" />
+                Find meals by swiping
+              </button>
+            )}
 
             <div className="recipe-search">
               <Search

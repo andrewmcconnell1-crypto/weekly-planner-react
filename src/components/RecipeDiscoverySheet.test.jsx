@@ -66,4 +66,19 @@ describe("RecipeDiscoverySheet", () => {
       screen.queryByRole("button", { name: /Add to/i })
     ).not.toBeInTheDocument();
   });
+
+  it("targets a specific day when opened from one", async () => {
+    const user = userEvent.setup();
+    const { onAssign } = setup({ initialDay: "Wednesday" });
+
+    expect(screen.getByText("Pick a meal for Wednesday")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Add to Wednesday/i }));
+
+    await waitFor(() =>
+      expect(onAssign).toHaveBeenCalledWith(
+        "Wednesday",
+        expect.objectContaining({ id: "r1" })
+      )
+    );
+  });
 });
