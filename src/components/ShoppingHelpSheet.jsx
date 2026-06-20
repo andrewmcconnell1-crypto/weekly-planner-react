@@ -1,16 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 
 // Explains the (non-obvious) shopping model: stock vs recurring buys vs meals,
 // how the generated list is a "top-up" of a standing grocery list, and the
 // options for people who shop differently.
 function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
+  const [closing, setClosing] = useState(false);
+  const closeTimerRef = useRef(null);
+
+  // Play the sheet's exit animation, then unmount.
+  function requestClose() {
+    if (closeTimerRef.current) return;
+    setClosing(true);
+    closeTimerRef.current = window.setTimeout(onClose, 220);
+  }
+
   // Lock background scroll and close on Escape while the sheet is open.
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     function handleKey(event) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") requestClose();
     }
 
     window.addEventListener("keydown", handleKey);
@@ -19,12 +30,20 @@ function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKey);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
 
+  // Clear any pending close timer if the sheet unmounts first.
+  useEffect(() => () => window.clearTimeout(closeTimerRef.current), []);
+
   return (
-    <div className="sheet-backdrop" role="presentation" onClick={onClose}>
+    <div
+      className={`sheet-backdrop ${closing ? "closing" : ""}`}
+      role="presentation"
+      onClick={requestClose}
+    >
       <div
-        className="sheet"
+        className={`sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label="How shopping works"
@@ -40,9 +59,9 @@ function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
             type="button"
             className="sheet-close"
             aria-label="Close"
-            onClick={onClose}
+            onClick={requestClose}
           >
-            ✕
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 

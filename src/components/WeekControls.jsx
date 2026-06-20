@@ -1,3 +1,5 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 function WeekControls({
   activePreset,
   onThisWeek,
@@ -13,7 +15,7 @@ function WeekControls({
         aria-label="Previous week"
         onClick={onPreviousWeek}
       >
-        ‹
+        <ChevronLeft size={20} aria-hidden="true" />
       </button>
 
       <div className="week-preset-tabs" aria-label="Week shortcuts">
@@ -40,7 +42,7 @@ function WeekControls({
         aria-label="Next week"
         onClick={onNextWeek}
       >
-        ›
+        <ChevronRight size={20} aria-hidden="true" />
       </button>
     </div>
   );
