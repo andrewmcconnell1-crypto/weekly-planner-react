@@ -5,6 +5,7 @@ import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
 import AddItemRow from "./AddItemRow";
+import SwipeRow from "./SwipeRow";
 
 const frequencyLabels = {
   weekly: "Weekly",
@@ -78,8 +79,13 @@ function StaplesList({
     const showFrequency = staple.frequency && staple.frequency !== "weekly";
 
     return (
-      <li className="card basics-card" key={staple.id}>
-        <div className="basics-row">
+      <li key={staple.id}>
+        <SwipeRow
+          onDelete={() => deleteStaple(staple.id)}
+          itemName={staple.name}
+        >
+          <div className="card basics-card">
+            <div className="basics-row">
           <input
             type="checkbox"
             checked={staple.active}
@@ -190,6 +196,8 @@ function StaplesList({
             </button>
           </div>
         )}
+          </div>
+        </SwipeRow>
       </li>
     );
   }
