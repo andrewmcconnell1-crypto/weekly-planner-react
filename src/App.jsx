@@ -22,6 +22,9 @@ import SignInScreen from "./components/SignInScreen";
 // Lazily loaded: bottom-sheet editors (opened on demand) and the secondary
 // Kitchen/Settings screens (behind navigation) — kept out of the initial bundle.
 const MealEditorSheet = lazy(() => import("./components/MealEditorSheet"));
+const RecipeDiscoverySheet = lazy(
+  () => import("./components/RecipeDiscoverySheet")
+);
 const ShoppingHelpSheet = lazy(() => import("./components/ShoppingHelpSheet"));
 const HouseholdBasics = lazy(() => import("./components/HouseholdBasics"));
 const RecipesList = lazy(() => import("./components/RecipesList"));
@@ -93,6 +96,7 @@ function App() {
   const [moreSection, setMoreSection] = useState("overview");
   const [householdSection, setHouseholdSection] = useState("stock");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
+  const [discoverOpen, setDiscoverOpen] = useState(false);
   // The session the welcome was dismissed for (a user id, "guest", or "local"),
   // so dismissal is per-account and auto-resets when the account changes.
   const [welcomeDismissedFor, setWelcomeDismissedFor] = useState(null);
@@ -272,6 +276,10 @@ function App() {
     .filter((daySummary) => !daySummary.hasMeal)
     .map((daySummary) => daySummary.day);
   const firstUnplannedDay = unplannedDays[0] || null;
+  // Recipes already on the week, so the discovery deck doesn't re-offer them.
+  const plannedRecipeIds = planningDaySummaries
+    .map((daySummary) => daySummary.linkedRecipe?.id)
+    .filter(Boolean);
   const planGapsLabel =
     unplannedDays.length === 0
       ? "Every night is planned."
@@ -497,6 +505,16 @@ function App() {
     setMealsByWeek({
       ...mealsByWeek,
       [mealWeekKey]: updatedMeals,
+    });
+  }
+
+  // Drop a recipe onto a day as a cooked meal (used by the discovery deck).
+  function assignRecipeToDay(day, recipe) {
+    updateMeal(day, {
+      ...createEmptyMeal(),
+      mealType: "cook",
+      name: recipe.name,
+      recipeId: recipe.id,
     });
   }
 
@@ -1190,13 +1208,23 @@ function App() {
             <p className="page-hero-sub">{planGapsLabel}</p>
 
             {firstUnplannedDay && (
-              <button
-                type="button"
-                className="page-hero-action"
-                onClick={() => setExpandedMealDay(firstUnplannedDay)}
-              >
-                Plan {firstUnplannedDay}
-              </button>
+              <div className="page-hero-actions">
+                <button
+                  type="button"
+                  className="page-hero-action"
+                  onClick={() => setExpandedMealDay(firstUnplannedDay)}
+                >
+                  Plan {firstUnplannedDay}
+                </button>
+
+                <button
+                  type="button"
+                  className="page-hero-action page-hero-action-ghost"
+                  onClick={() => setDiscoverOpen(true)}
+                >
+                  Find meals by swiping
+                </button>
+              </div>
             )}
           </div>
 
@@ -1428,6 +1456,18 @@ function App() {
           />
           </Suspense>
         </section>
+      )}
+
+      {discoverOpen && (
+        <Suspense fallback={null}>
+          <RecipeDiscoverySheet
+            recipes={recipes}
+            unplannedDays={unplannedDays}
+            plannedRecipeIds={plannedRecipeIds}
+            onAssign={assignRecipeToDay}
+            onClose={() => setDiscoverOpen(false)}
+          />
+        </Suspense>
       )}
 
       {shoppingHelpOpen && (

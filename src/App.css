@@ -2799,6 +2799,207 @@ input::placeholder {
   color: var(--olive);
 }
 
+/* Meal-plan hero actions */
+.page-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.page-hero-action-ghost {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.page-hero-action-ghost:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Recipe discovery (swipe-to-plan) */
+.discover-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  min-height: 62vh;
+}
+
+.discover-filters {
+  display: flex;
+  gap: var(--space-6);
+  overflow-x: auto;
+  padding-bottom: var(--space-4);
+}
+
+.discover-filters .recipe-tag-toggle {
+  flex: 0 0 auto;
+}
+
+.discover-stage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.discover-deck {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+}
+
+.discover-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  border-left: 4px solid var(--recipe-tone, var(--accent));
+  background: var(--panel);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-16);
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+  transition:
+    transform var(--dur-med) var(--ease-out),
+    opacity var(--dur-med) var(--ease-standard);
+  will-change: transform;
+}
+
+.discover-card.dragging {
+  transition: none;
+  cursor: grabbing;
+}
+
+.discover-card-behind {
+  transform: scale(0.94) translateY(10px);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.discover-card-body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-8);
+  width: 100%;
+}
+
+.discover-card-name {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 640;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.discover-card-meta {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.discover-card-count {
+  margin-top: auto;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.discover-stamp {
+  position: absolute;
+  top: var(--space-16);
+  padding: var(--space-2) var(--space-10);
+  border: 3px solid currentColor;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.08em;
+}
+
+.discover-stamp-add {
+  right: var(--space-16);
+  color: var(--olive);
+  transform: rotate(-12deg);
+}
+
+.discover-stamp-skip {
+  left: var(--space-16);
+  color: var(--danger);
+  transform: rotate(12deg);
+}
+
+.discover-message {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-6);
+  text-align: center;
+  color: var(--muted);
+}
+
+.discover-message strong {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--ink);
+}
+
+.discover-message p {
+  margin: 0;
+  max-width: 28ch;
+  font-size: var(--text-md);
+}
+
+.discover-toast {
+  margin: 0;
+  text-align: center;
+  color: var(--olive);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.discover-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10);
+}
+
+.discover-skip,
+.discover-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 52px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+}
+
+.discover-skip {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--danger);
+}
+
+.discover-skip:hover {
+  background: #fdeded;
+  border-color: var(--danger);
+}
+
+.discover-add {
+  background: var(--olive);
+  color: #fff;
+}
+
+.discover-add:hover {
+  background: #4f5a30;
+}
+
 .staple-off-note {
   color: var(--accent-strong);
   font-weight: var(--weight-semibold);
