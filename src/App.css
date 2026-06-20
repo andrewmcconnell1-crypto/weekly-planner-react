@@ -257,7 +257,8 @@
 
   .basics-row > input[type="checkbox"]:checked,
   .shop-screen .shopping-row input[type="checkbox"]:checked,
-  .collapsible.open .clean-list > li {
+  .collapsible.open .clean-list > li,
+  .update-banner {
     animation: none;
   }
 
@@ -2998,6 +2999,58 @@ input::placeholder {
 
 .discover-add:hover {
   background: #4f5a30;
+}
+
+/* "New version available" prompt — floats above the bottom nav. */
+.update-banner {
+  position: fixed;
+  left: 50%;
+  bottom: calc(82px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  max-width: calc(100% - var(--space-16) * 2);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: #fff;
+  padding: var(--space-6) var(--space-6) var(--space-6) var(--space-16);
+  box-shadow: var(--shadow-lg);
+  animation: update-in var(--dur-med) var(--ease-out);
+}
+
+@keyframes update-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.update-banner-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.update-banner-button {
+  flex-shrink: 0;
+  min-height: 36px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--ink);
+  padding: var(--space-4) var(--space-14);
+  font-weight: var(--weight-bold);
+}
+
+.update-banner-button:hover {
+  background: var(--soft);
 }
 
 .staple-off-note {

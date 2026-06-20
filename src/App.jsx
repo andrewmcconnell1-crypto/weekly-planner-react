@@ -18,6 +18,7 @@ import TonightCard from "./components/TonightCard";
 import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
 import SignInScreen from "./components/SignInScreen";
+import UpdateBanner from "./components/UpdateBanner";
 
 // Lazily loaded: bottom-sheet editors (opened on demand) and the secondary
 // Kitchen/Settings screens (behind navigation) — kept out of the initial bundle.
@@ -49,6 +50,7 @@ import { initialStaples } from "./data/initialStaples";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { useAuth } from "./hooks/useAuth";
 import { usePlannerStore } from "./hooks/usePlannerStore";
+import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
 import { categories } from "./data/categories";
 
 function LoadingScreen({ message }) {
@@ -97,6 +99,7 @@ function App() {
   const [householdSection, setHouseholdSection] = useState("stock");
   const [expandedMealDay, setExpandedMealDay] = useState(null);
   const [discoverOpen, setDiscoverOpen] = useState(false);
+  const updateReady = useUpdatePrompt();
   // The session the welcome was dismissed for (a user id, "guest", or "local"),
   // so dismissal is per-account and auto-resets when the account changes.
   const [welcomeDismissedFor, setWelcomeDismissedFor] = useState(null);
@@ -1207,8 +1210,8 @@ function App() {
 
             <p className="page-hero-sub">{planGapsLabel}</p>
 
-            {firstUnplannedDay && (
-              <div className="page-hero-actions">
+            <div className="page-hero-actions">
+              {firstUnplannedDay && (
                 <button
                   type="button"
                   className="page-hero-action"
@@ -1216,16 +1219,16 @@ function App() {
                 >
                   Plan {firstUnplannedDay}
                 </button>
+              )}
 
-                <button
-                  type="button"
-                  className="page-hero-action page-hero-action-ghost"
-                  onClick={() => setDiscoverOpen(true)}
-                >
-                  Find meals by swiping
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                className="page-hero-action page-hero-action-ghost"
+                onClick={() => setDiscoverOpen(true)}
+              >
+                Find meals by swiping
+              </button>
+            </div>
           </div>
 
           <WeekControls
@@ -1456,6 +1459,10 @@ function App() {
           />
           </Suspense>
         </section>
+      )}
+
+      {updateReady && (
+        <UpdateBanner onReload={() => window.location.reload()} />
       )}
 
       {discoverOpen && (
