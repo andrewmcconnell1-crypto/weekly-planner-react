@@ -22,11 +22,13 @@
   --meal-soft: #f1eadd;
   --meal-ink: #8c8175;
 
-  /* Motion tokens (subtle, iOS-like). */
+  /* Motion tokens (a little more pronounced; --ease-spring adds a gentle
+     overshoot on entrances). */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur-fast: 140ms;
-  --dur-med: 220ms;
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --dur-fast: 170ms;
+  --dur-med: 300ms;
 
   /* Type weight scale (collapsed from a dozen ad-hoc weights). */
   --weight-medium: 600;
@@ -73,7 +75,7 @@
   min-height: 0;
 }
 
-/* Subtle press feedback on the main tappable surfaces. */
+/* Press feedback on the main tappable surfaces — springs back on release. */
 .recipe-row,
 .meal-row-button,
 .category-toggle,
@@ -83,7 +85,7 @@
 .tonight-action,
 .sheet-footer > button {
   transition:
-    transform var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-spring),
     background var(--dur-fast) var(--ease-standard),
     border-color var(--dur-fast) var(--ease-standard),
     color var(--dur-fast) var(--ease-standard),
@@ -98,7 +100,7 @@
 .add-recipe-toggle:active,
 .tonight-action:active,
 .sheet-footer > button:active {
-  transform: scale(0.985);
+  transform: scale(0.96);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2650,7 +2652,7 @@ input::placeholder {
   background: var(--bg);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: 0 -16px 44px rgba(18, 26, 22, 0.28);
-  animation: sheet-up var(--dur-med) var(--ease-out);
+  animation: sheet-up var(--dur-med) var(--ease-spring);
 }
 
 /* Exit animations, played while the editor sets a closing flag before unmount. */
