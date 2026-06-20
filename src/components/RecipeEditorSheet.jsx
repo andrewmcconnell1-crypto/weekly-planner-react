@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 
 import {
@@ -19,6 +19,15 @@ function RecipeEditorSheet({
 }) {
   const [newIngredient, setNewIngredient] = useState("");
   const [mode, setMode] = useState("view");
+  const [closing, setClosing] = useState(false);
+  const closeTimerRef = useRef(null);
+
+  // Play the sheet's exit animation, then unmount.
+  function requestClose() {
+    if (closeTimerRef.current) return;
+    setClosing(true);
+    closeTimerRef.current = window.setTimeout(onClose, 220);
+  }
 
   const categoryOptions =
     recipe.category && !recipeCategories.includes(recipe.category)
@@ -34,7 +43,7 @@ function RecipeEditorSheet({
     document.body.style.overflow = "hidden";
 
     function handleKey(event) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") requestClose();
     }
 
     window.addEventListener("keydown", handleKey);
@@ -43,7 +52,11 @@ function RecipeEditorSheet({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKey);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
+
+  // Clear any pending close timer if the sheet unmounts first.
+  useEffect(() => () => window.clearTimeout(closeTimerRef.current), []);
 
   function handleAddIngredient() {
     const cleaned = newIngredient.trim();
@@ -53,13 +66,17 @@ function RecipeEditorSheet({
   }
 
   function handleDelete() {
-    if (deleteRecipe(recipe.id)) onClose();
+    if (deleteRecipe(recipe.id)) requestClose();
   }
 
   return (
-    <div className="sheet-backdrop" role="presentation" onClick={onClose}>
+    <div
+      className={`sheet-backdrop ${closing ? "closing" : ""}`}
+      role="presentation"
+      onClick={requestClose}
+    >
       <div
-        className="sheet"
+        className={`sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={recipe.name}
@@ -75,7 +92,7 @@ function RecipeEditorSheet({
             type="button"
             className="sheet-close"
             aria-label="Close"
-            onClick={onClose}
+            onClick={requestClose}
           >
             ✕
           </button>
@@ -270,7 +287,7 @@ function RecipeEditorSheet({
         <div className="sheet-footer">
           {mode === "view" ? (
             <>
-              <button type="button" className="secondary" onClick={onClose}>
+              <button type="button" className="secondary" onClick={requestClose}>
                 Done
               </button>
 

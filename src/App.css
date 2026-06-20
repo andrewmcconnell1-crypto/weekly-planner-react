@@ -28,7 +28,13 @@
   --dur-fast: 140ms;
   --dur-med: 220ms;
 
-  /* Scale tokens — being introduced; applied in the motion POC areas first. */
+  /* Type weight scale (collapsed from a dozen ad-hoc weights). */
+  --weight-medium: 600;
+  --weight-semibold: 720;
+  --weight-bold: 780;
+  --weight-heavy: 840;
+
+  /* Radius + elevation scale. */
   --radius-sm: 10px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -132,11 +138,11 @@ textarea {
 button {
   min-height: 44px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--primary);
   color: #fff;
   padding: 10px 13px;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
   cursor: pointer;
 }
 
@@ -186,7 +192,7 @@ textarea:focus-visible {
 .summary-card,
 .more-summary-card {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   box-shadow: var(--shadow);
 }
@@ -207,7 +213,7 @@ textarea:focus-visible {
   width: 40px;
   height: 40px;
   margin-top: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--muted);
@@ -228,7 +234,7 @@ textarea:focus-visible {
   margin: 0 0 5px;
   color: var(--olive);
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -238,7 +244,7 @@ textarea:focus-visible {
   margin: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   line-height: 1.08;
   letter-spacing: -0.01em;
 }
@@ -256,7 +262,7 @@ textarea:focus-visible {
 .more-tabs {
   display: grid;
   gap: 6px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--soft);
   padding: 4px;
 }
@@ -323,12 +329,12 @@ textarea:focus-visible {
   justify-content: center;
   gap: 3px;
   min-height: 50px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 .bottom-nav button span {
   font-size: 0.68rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
   letter-spacing: 0.01em;
 }
 
@@ -360,7 +366,7 @@ textarea:focus-visible {
 .more-screen > .screen-header {
   border: 1px solid var(--tab-line);
   border-left: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   padding: 13px;
   box-shadow: var(--shadow);
@@ -378,12 +384,12 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--soft);
   padding: 10px 12px;
   color: var(--ink);
   font-size: 0.92rem;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .plan-screen .date-card {
@@ -409,7 +415,7 @@ textarea:focus-visible {
 .summary-card span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 780;
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
 }
 
@@ -435,7 +441,7 @@ textarea:focus-visible {
 .tonight-card {
   display: grid;
   gap: 8px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background:
     radial-gradient(
       120% 140% at 0% 0%,
@@ -456,7 +462,7 @@ textarea:focus-visible {
   margin: 0;
   color: #e9c79e;
   font-size: 0.74rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -464,7 +470,7 @@ textarea:focus-visible {
 .tonight-dish {
   font-family: var(--font-display);
   font-size: 1.55rem;
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   line-height: 1.08;
   letter-spacing: -0.01em;
   color: #fdfaf3;
@@ -475,14 +481,14 @@ textarea:focus-visible {
   margin: 0;
   color: rgba(247, 241, 230, 0.74);
   font-size: 0.86rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .tonight-note {
   margin: 2px 0 0;
   color: #f1c79b;
   font-size: 0.86rem;
-  font-weight: 780;
+  font-weight: var(--weight-bold);
 }
 
 /* Collapsible recipe disclosure shared by the Home hero (variant "hero", dark)
@@ -500,16 +506,16 @@ textarea:focus-visible {
   gap: 7px;
   justify-self: start;
   min-height: 40px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 8px 14px;
   font-size: 0.84rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .recipe-detail-body {
   display: grid;
   gap: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 13px;
 }
 
@@ -521,7 +527,7 @@ textarea:focus-visible {
 .recipe-detail-label {
   margin: 0;
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -544,7 +550,7 @@ textarea:focus-visible {
 .recipe-detail-source {
   justify-self: start;
   font-size: 0.84rem;
-  font-weight: 780;
+  font-weight: var(--weight-bold);
   overflow-wrap: anywhere;
 }
 
@@ -630,7 +636,7 @@ textarea:focus-visible {
   gap: 10px;
   border: 1px solid var(--line);
   border-left: 3px solid var(--accent);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow);
   padding: 16px 16px 16px 14px;
@@ -669,7 +675,7 @@ textarea:focus-visible {
 }
 
 .welcome-steps span {
-  font-weight: 760;
+  font-weight: var(--weight-bold);
   color: var(--accent);
 }
 
@@ -685,7 +691,7 @@ textarea:focus-visible {
 .home-step,
 .home-step-action {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   box-shadow: var(--shadow);
   padding: 14px;
@@ -722,11 +728,11 @@ textarea:focus-visible {
   place-items: center;
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--tab-soft);
   color: var(--tab-accent-strong);
   font-size: 0.9rem;
-  font-weight: 850;
+  font-weight: var(--weight-heavy);
 }
 
 .home-step-body {
@@ -742,13 +748,13 @@ textarea:focus-visible {
 .home-step-body > span {
   color: var(--muted);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 .home-step-chevron {
   color: var(--muted);
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
   line-height: 1;
 }
 
@@ -781,7 +787,7 @@ textarea:focus-visible {
   color: var(--primary-strong);
   padding: 0;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .home-link:hover {
@@ -793,7 +799,7 @@ textarea:focus-visible {
   display: grid;
   gap: 12px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   box-shadow: var(--shadow);
   padding: 14px;
@@ -826,7 +832,7 @@ textarea:focus-visible {
 .home-topup-body > span {
   color: var(--muted);
   font-size: 0.85rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .home-topup .primary-button,
@@ -846,7 +852,7 @@ textarea:focus-visible {
 
 .home-hero {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   box-shadow: var(--shadow);
 }
@@ -865,7 +871,7 @@ textarea:focus-visible {
 .home-hero h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   font-size: 1.5rem;
   line-height: 1.12;
 }
@@ -893,7 +899,7 @@ textarea:focus-visible {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
   width: min(100%, 320px);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--soft);
   padding: 4px;
   margin-bottom: 12px;
@@ -937,11 +943,11 @@ textarea:focus-visible {
   width: 42px;
   min-height: 44px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   color: var(--ink);
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
   line-height: 1;
 }
 
@@ -954,7 +960,7 @@ textarea:focus-visible {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 4px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--soft);
   padding: 4px;
 }
@@ -1000,12 +1006,12 @@ textarea:focus-visible {
   align-items: center;
   min-height: 40px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--soft);
   color: var(--ink);
   padding: 8px 12px;
   font-size: 0.85rem;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .subcategory-toggle[aria-expanded="true"],
@@ -1016,16 +1022,20 @@ textarea:focus-visible {
   color: var(--accent-strong);
 }
 
-/* Stock list uses height-animated bodies, so the toggle and its collapsible
-   body must sit flush (no parent gap leaving a phantom space when collapsed);
-   the open body adds its own top breathing room instead. */
+/* Stock + Recurring lists use height-animated bodies, so the toggle and its
+   collapsible body must sit flush (no parent gap leaving a phantom space when
+   collapsed); the open body adds its own top breathing room instead. */
 .inventory-panel .shopping-group,
-.inventory-panel .subcategory-group {
+.inventory-panel .subcategory-group,
+.staples-panel .shopping-group,
+.staples-panel .subcategory-group {
   gap: 0;
 }
 
 .inventory-panel .shopping-group > .collapsible.open > .collapsible-inner,
-.inventory-panel .subcategory-group > .collapsible.open > .collapsible-inner {
+.inventory-panel .subcategory-group > .collapsible.open > .collapsible-inner,
+.staples-panel .shopping-group > .collapsible.open > .collapsible-inner,
+.staples-panel .subcategory-group > .collapsible.open > .collapsible-inner {
   padding-top: 8px;
 }
 
@@ -1056,12 +1066,12 @@ textarea:focus-visible {
 
 .group-count,
 .meal-row-count {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--muted);
   padding: 3px 8px;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .meal-row-button {
@@ -1108,7 +1118,7 @@ textarea:focus-visible {
   width: 3.1rem;
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
@@ -1119,7 +1129,7 @@ textarea:focus-visible {
   min-width: 0;
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .meal-cluster-repeat-label svg {
@@ -1131,7 +1141,7 @@ textarea:focus-visible {
 .meal-row-chevron {
   color: var(--muted);
   font-size: 1.2rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
   line-height: 1;
 }
 
@@ -1147,7 +1157,7 @@ textarea:focus-visible {
   width: 3.1rem;
   color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 860;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
@@ -1168,12 +1178,12 @@ textarea:focus-visible {
 .meal-row-main span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .muted-title {
   color: var(--muted);
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 /* Meal editor: current pick, nights stepper, recipe picker, "Or…" options */
@@ -1186,7 +1196,7 @@ textarea:focus-visible {
   gap: 8px;
   border: 1px solid var(--line);
   border-left: 4px solid var(--recipe-tone, var(--accent));
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow);
   padding: 12px;
@@ -1213,7 +1223,7 @@ textarea:focus-visible {
   min-width: 0;
   font-family: var(--font-display);
   font-size: 1.12rem;
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -1221,13 +1231,13 @@ textarea:focus-visible {
 .meal-current-label {
   color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .meal-current-header a {
   color: var(--primary);
   font-size: 0.86rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   white-space: nowrap;
 }
 
@@ -1244,12 +1254,12 @@ textarea:focus-visible {
   gap: 4px;
   min-height: 34px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: #ffffff;
   color: var(--danger);
   padding: 6px 12px;
   font-size: 0.8rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .meal-current-clear:hover {
@@ -1261,7 +1271,7 @@ textarea:focus-visible {
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--olive-soft);
   padding: 12px;
 }
@@ -1270,7 +1280,7 @@ textarea:focus-visible {
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   padding: 12px;
 }
@@ -1285,11 +1295,11 @@ textarea:focus-visible {
   min-width: 0;
   min-height: 44px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #ffffff;
   color: var(--ink);
   padding: 9px 8px;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .nights-buttons button:hover {
@@ -1307,7 +1317,7 @@ textarea:focus-visible {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .meal-picker {
@@ -1337,7 +1347,7 @@ textarea:focus-visible {
   margin: 0;
   color: var(--olive);
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1361,12 +1371,12 @@ textarea:focus-visible {
   gap: 7px;
   min-height: 42px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--ink);
   padding: 9px 14px;
   font-size: 0.85rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .meal-or-options button:hover {
@@ -1398,7 +1408,7 @@ textarea:focus-visible {
 
 .recipe-picker-group {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #ffffff;
   overflow: hidden;
 }
@@ -1412,7 +1422,7 @@ textarea:focus-visible {
   padding: 11px 12px;
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
@@ -1422,12 +1432,12 @@ textarea:focus-visible {
 
 .recipe-picker-group summary span:last-child,
 .recipe-choice-count {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--primary-strong);
   padding: 3px 8px;
   font-size: 0.76rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
 }
 
 .recipe-choice-list {
@@ -1483,7 +1493,7 @@ textarea:focus-visible {
 .day-choice-grid span {
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .day-choice-grid {
@@ -1499,7 +1509,7 @@ textarea:focus-visible {
 .day-choice-grid strong {
   color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 860;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
@@ -1515,7 +1525,7 @@ textarea {
   width: 100%;
   min-height: 44px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #fff;
   color: #111827;
   padding: 10px 12px;
@@ -1547,7 +1557,7 @@ input::placeholder {
   display: grid;
   gap: 10px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   padding: 11px;
 }
@@ -1568,7 +1578,7 @@ input::placeholder {
 .linked-recipe-header span {
   color: var(--muted);
   font-size: 0.74rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
@@ -1579,7 +1589,7 @@ input::placeholder {
 .linked-recipe-header a {
   color: var(--primary);
   font-size: 0.86rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   white-space: nowrap;
 }
 
@@ -1627,7 +1637,7 @@ input::placeholder {
 .skipped-section,
 .manual-add-panel {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   box-shadow: var(--shadow);
 }
@@ -1637,7 +1647,7 @@ input::placeholder {
 .page-hero {
   display: grid;
   gap: 7px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 16px;
   box-shadow: var(--shadow);
   margin-bottom: 14px;
@@ -1661,7 +1671,7 @@ input::placeholder {
 .page-hero-kicker {
   margin: 0;
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -1677,7 +1687,7 @@ input::placeholder {
 .page-hero-count {
   font-family: var(--font-display);
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   line-height: 1.08;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -1687,7 +1697,7 @@ input::placeholder {
   margin: 0;
   color: var(--muted);
   font-size: 0.86rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .page-hero-action {
@@ -1715,7 +1725,7 @@ input::placeholder {
 
 .shop-hero-progress {
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(156, 70, 50, 0.16);
   overflow: hidden;
 }
@@ -1723,7 +1733,7 @@ input::placeholder {
 .shop-hero-progress > span {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent);
   transition: width 0.2s ease;
 }
@@ -1731,17 +1741,17 @@ input::placeholder {
 .shopping-section-header span {
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
 .list-status-pill {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--muted);
   padding: 4px 9px;
   font-size: 0.76rem;
-  font-weight: 850;
+  font-weight: var(--weight-heavy);
   white-space: nowrap;
 }
 
@@ -1788,12 +1798,12 @@ input::placeholder {
 .shopping-section-header > span,
 .done-section summary span:last-child,
 .skipped-section summary span:last-child {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--primary-strong);
   padding: 3px 8px;
   font-size: 0.78rem;
-  font-weight: 850;
+  font-weight: var(--weight-heavy);
 }
 
 .shop-screen .shopping-row {
@@ -1831,7 +1841,7 @@ input::placeholder {
 .shopping-source-detail {
   color: var(--muted);
   font-size: 0.75rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1856,7 +1866,7 @@ input::placeholder {
   width: 34px;
   min-height: 34px;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--muted);
   padding: 0;
@@ -1916,7 +1926,7 @@ input::placeholder {
   margin: 0;
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1969,7 +1979,7 @@ input::placeholder {
   cursor: pointer;
   padding: 11px 12px;
   color: var(--primary-strong);
-  font-weight: 850;
+  font-weight: var(--weight-heavy);
   list-style: none;
 }
 
@@ -2007,7 +2017,7 @@ input::placeholder {
 .skipped-main span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .skipped-row .secondary {
@@ -2021,7 +2031,7 @@ input::placeholder {
   flex-shrink: 0;
   color: var(--olive);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .manual-add-panel summary::after {
@@ -2073,7 +2083,7 @@ input::placeholder {
 .recipes-toolbar-text strong {
   font-family: var(--font-display);
   font-size: 1.08rem;
-  font-weight: 640;
+  font-weight: var(--weight-medium);
   color: var(--ink);
 }
 
@@ -2089,12 +2099,12 @@ input::placeholder {
   gap: 5px;
   min-height: 34px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--panel);
   padding: 6px 13px;
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .add-recipe-toggle:hover {
@@ -2116,7 +2126,7 @@ input::placeholder {
   gap: 8px;
   margin-top: 6px;
   border: 1px dashed var(--line);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--panel);
   padding: 28px 22px;
   text-align: center;
@@ -2136,7 +2146,7 @@ input::placeholder {
 .recipes-empty strong {
   font-family: var(--font-display);
   font-size: 1.05rem;
-  font-weight: 640;
+  font-weight: var(--weight-medium);
   color: var(--ink);
 }
 
@@ -2189,11 +2199,11 @@ input::placeholder {
   min-height: 36px;
   padding: 6px 14px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--panel);
   color: var(--muted);
   font-size: 0.86rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .recipe-filter-chips button.active {
@@ -2217,7 +2227,7 @@ input::placeholder {
   width: 100%;
   height: auto;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   color: var(--ink);
   padding: 13px 14px;
@@ -2322,10 +2332,10 @@ input::placeholder {
 /* Category tag, tinted from the card's own category tone. */
 .recipe-row-tag {
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px 9px;
   font-size: 0.72rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   color: color-mix(in srgb, var(--recipe-tone, var(--muted)) 72%, #2a2420);
   background: color-mix(in srgb, var(--recipe-tone, var(--muted)) 15%, #fff);
 }
@@ -2336,7 +2346,7 @@ input::placeholder {
   white-space: nowrap;
   color: var(--muted);
   font-size: 0.8rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .recipe-row-chevron {
@@ -2350,7 +2360,7 @@ input::placeholder {
   gap: 10px;
   margin-top: 6px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--panel);
   box-shadow: var(--shadow);
   padding: 14px;
@@ -2369,7 +2379,7 @@ input::placeholder {
 .add-field-label {
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -2401,7 +2411,7 @@ input::placeholder {
 .add-panel-status {
   margin: -2px 0 0;
   color: var(--accent-strong);
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .stock-maintenance {
@@ -2422,7 +2432,7 @@ input::placeholder {
   background: transparent;
   color: var(--muted);
   font-size: 0.84rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -2471,7 +2481,7 @@ input::placeholder {
 .basics-row-main > span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .basics-name-off {
@@ -2486,7 +2496,7 @@ input::placeholder {
   width: 34px;
   min-height: 34px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: #ffffff;
   color: var(--muted);
   padding: 0;
@@ -2513,22 +2523,22 @@ input::placeholder {
 }
 
 .recipe-count {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--muted);
   padding: 3px 8px;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
   white-space: nowrap;
 }
 
 .recipe-source {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--muted);
   padding: 3px 9px;
   font-size: 0.72rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   white-space: nowrap;
 }
 
@@ -2551,7 +2561,7 @@ input::placeholder {
   margin: 0;
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -2564,7 +2574,7 @@ input::placeholder {
 .recipe-method-field span {
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
@@ -2585,20 +2595,20 @@ input::placeholder {
 .recipe-detail-fields label span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   text-transform: uppercase;
 }
 
 .recipe-source-link {
   color: var(--primary);
   font-size: 0.82rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
   overflow-wrap: anywhere;
 }
 
 .staple-off-note {
   color: var(--accent-strong);
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .staple-quantity-row {
@@ -2626,7 +2636,7 @@ input::placeholder {
   max-height: 92vh;
   max-height: 92dvh;
   background: var(--bg);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: 0 -16px 44px rgba(18, 26, 22, 0.28);
   animation: sheet-up var(--dur-med) var(--ease-out);
 }
@@ -2686,14 +2696,14 @@ input::placeholder {
 .sheet-title span {
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 .sheet-close {
   flex: 0 0 auto;
   width: 38px;
   height: 38px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--ink);
@@ -2748,14 +2758,14 @@ input::placeholder {
 .recipe-view-name {
   font-family: var(--font-display);
   font-size: 1.4rem;
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   line-height: 1.15;
 }
 
 .recipe-view-meta {
   color: var(--muted);
   font-size: 0.86rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .recipe-view-section {
@@ -2784,7 +2794,7 @@ input::placeholder {
   gap: 12px;
   width: min(100%, 420px);
   padding: 28px 22px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--panel);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
@@ -2816,7 +2826,7 @@ input::placeholder {
   border: 1px solid var(--line);
   background: #fff;
   color: var(--ink);
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .auth-google:hover {
@@ -2834,7 +2844,7 @@ input::placeholder {
   margin: 4px 0;
   color: var(--muted);
   font-size: 0.74rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -2851,7 +2861,7 @@ input::placeholder {
   grid-template-columns: 1fr 1fr;
   gap: 4px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--soft);
   padding: 4px;
 }
@@ -2859,11 +2869,11 @@ input::placeholder {
 .auth-methods button {
   min-height: 40px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--muted);
   font-size: 0.9rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .auth-methods button.active {
@@ -2886,7 +2896,7 @@ input::placeholder {
 .auth-field > span {
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -2903,7 +2913,7 @@ input::placeholder {
   color: var(--primary-strong);
   padding: 4px;
   font-size: 0.86rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .auth-link:hover {
@@ -2925,7 +2935,7 @@ input::placeholder {
 .auth-status {
   margin: 0;
   padding: 9px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--olive-soft);
   color: var(--olive);
   text-align: center;
@@ -2944,7 +2954,7 @@ input::placeholder {
   color: var(--muted);
   padding: 6px;
   font-size: 0.88rem;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
 }
 
 .auth-guest:hover {
@@ -2960,12 +2970,12 @@ input::placeholder {
   gap: 12px;
   margin: 0 0 12px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid #d6dcbe;
   background: var(--olive-soft);
   color: var(--ink);
   font-size: 0.84rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 .guest-banner button {
@@ -2981,12 +2991,12 @@ input::placeholder {
 .sync-banner {
   margin: 0 0 12px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #fbeceb;
   color: var(--danger);
   border: 1px solid #f0cfca;
   font-size: 0.86rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 .settings-panel {
@@ -3004,7 +3014,7 @@ input::placeholder {
   padding: 4px 0;
   color: var(--muted);
   font-size: 0.84rem;
-  font-weight: 820;
+  font-weight: var(--weight-heavy);
 }
 
 .settings-advanced > summary::-webkit-details-marker {
@@ -3023,7 +3033,7 @@ input::placeholder {
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #ffffff;
   padding: 12px;
 }
@@ -3062,7 +3072,7 @@ input::placeholder {
 }
 
 .settings-toggle-title {
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
   color: var(--ink);
 }
 
@@ -3080,7 +3090,7 @@ input::placeholder {
   display: inline-flex;
   gap: 4px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--soft);
   padding: 4px;
 }
@@ -3089,11 +3099,11 @@ input::placeholder {
   min-height: 36px;
   padding: 6px 16px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--muted);
   font-size: 0.86rem;
-  font-weight: 760;
+  font-weight: var(--weight-bold);
 }
 
 .shop-list-toggle button.active {
@@ -3112,7 +3122,7 @@ input::placeholder {
   background: transparent;
   color: var(--accent-strong);
   font-size: 0.82rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
   padding: 4px;
 }
 
@@ -3134,7 +3144,7 @@ input::placeholder {
 }
 
 .shop-switch-text {
-  font-weight: 760;
+  font-weight: var(--weight-bold);
   color: var(--ink);
 }
 
@@ -3144,7 +3154,7 @@ input::placeholder {
   flex: 0 0 auto;
   width: 46px;
   height: 26px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--line);
   position: relative;
   cursor: pointer;
@@ -3176,7 +3186,7 @@ input::placeholder {
   display: grid;
   gap: 8px;
   border: 1px solid var(--accent-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--accent-soft);
   padding: 12px;
 }
@@ -3213,7 +3223,7 @@ input::placeholder {
 
 .priority-tier-head span {
   color: var(--accent-strong);
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   font-size: 0.9rem;
 }
 
@@ -3224,7 +3234,7 @@ input::placeholder {
 .priority-aisle {
   color: var(--olive);
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin: 4px 0 2px;
@@ -3261,13 +3271,13 @@ input::placeholder {
 .help-current {
   margin: 4px 0 0;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--soft);
 }
 
 .settings-status {
   margin: 0;
-  font-weight: 740;
+  font-weight: var(--weight-semibold);
   color: var(--primary-strong);
 }
 
@@ -3289,7 +3299,7 @@ input::placeholder {
   margin: 0 4px 4px;
   color: var(--muted);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 .household-basics {
@@ -3307,7 +3317,7 @@ input::placeholder {
   display: grid;
   gap: 5px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--panel);
   padding: 12px;
   box-shadow: var(--shadow);
@@ -3316,7 +3326,7 @@ input::placeholder {
 .section-summary span {
   color: var(--olive);
   font-size: 0.72rem;
-  font-weight: 840;
+  font-weight: var(--weight-heavy);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -3324,14 +3334,14 @@ input::placeholder {
 .section-summary strong {
   font-family: var(--font-display);
   font-size: 1.6rem;
-  font-weight: 600;
+  font-weight: var(--weight-medium);
   line-height: 1;
 }
 
 .section-summary small {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .manager-row {
@@ -3359,7 +3369,7 @@ input::placeholder {
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 11px;
+  border-radius: var(--radius-sm);
   background: var(--manager-soft);
   color: var(--manager-accent);
 }
@@ -3384,7 +3394,7 @@ input::placeholder {
 .manager-main span {
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 720;
+  font-weight: var(--weight-semibold);
 }
 
 .more-summary-card {
@@ -3407,11 +3417,11 @@ input::placeholder {
   justify-self: start;
   padding-left: 10px;
   padding-right: 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border-color: var(--accent-soft);
   background: var(--accent-soft);
   color: var(--accent-strong);
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 .back-button svg {
@@ -3482,7 +3492,7 @@ input::placeholder {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 800;
+  font-weight: var(--weight-bold);
 }
 
 /* Open / pressed: the warm red the resting tint hints at, with white text so it
@@ -3534,7 +3544,7 @@ input::placeholder {
 
 .meal-row-add {
   color: var(--muted);
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
 }
 
 .meal-row-addicon {
@@ -3542,7 +3552,7 @@ input::placeholder {
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent-soft);
   color: var(--accent);
 }
