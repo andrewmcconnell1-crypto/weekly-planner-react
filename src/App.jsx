@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   House,
   CalendarDays,
@@ -12,17 +12,20 @@ import {
 } from "lucide-react";
 import "./App.css";
 
-import HouseholdBasics from "./components/HouseholdBasics";
 import MealCard from "./components/MealCard";
-import MealEditorSheet from "./components/MealEditorSheet";
 import MealLeftoverCluster from "./components/MealLeftoverCluster";
 import TonightCard from "./components/TonightCard";
 import ShoppingList from "./components/ShoppingList";
-import ShoppingHelpSheet from "./components/ShoppingHelpSheet";
 import WeekControls from "./components/WeekControls";
-import RecipesList from "./components/RecipesList";
-import SettingsPanel from "./components/SettingsPanel";
 import SignInScreen from "./components/SignInScreen";
+
+// Lazily loaded: bottom-sheet editors (opened on demand) and the secondary
+// Kitchen/Settings screens (behind navigation) — kept out of the initial bundle.
+const MealEditorSheet = lazy(() => import("./components/MealEditorSheet"));
+const ShoppingHelpSheet = lazy(() => import("./components/ShoppingHelpSheet"));
+const HouseholdBasics = lazy(() => import("./components/HouseholdBasics"));
+const RecipesList = lazy(() => import("./components/RecipesList"));
+const SettingsPanel = lazy(() => import("./components/SettingsPanel"));
 
 import { createEmptyMeal, createEmptyMeals, days } from "./utils/mealUtils";
 import {
@@ -1210,7 +1213,8 @@ function App() {
           </div>
 
           {expandedMealDay && (
-            <MealEditorSheet
+            <Suspense fallback={null}>
+              <MealEditorSheet
               key={expandedMealDay}
               day={expandedMealDay}
               dateLabel={expandedDayLabel}
@@ -1232,7 +1236,8 @@ function App() {
                   ? () => setExpandedMealDay(expandedNextDay)
                   : undefined
               }
-            />
+              />
+            </Suspense>
           )}
         </section>
       )}
@@ -1344,6 +1349,7 @@ function App() {
               </button>
 
               {moreSection === "household" && (
+                <Suspense fallback={null}>
                 <HouseholdBasics
                   activeSection={householdSection}
                   availableCategories={availableCategories}
@@ -1366,9 +1372,11 @@ function App() {
                   toggleInventoryActive={toggleInventoryActive}
                   loadStarterInventory={loadStarterInventory}
                 />
+                </Suspense>
               )}
 
               {moreSection === "recipes" && (
+                <Suspense fallback={null}>
                 <RecipesList
                   recipes={recipes}
                   newRecipeName={newRecipeName}
@@ -1379,6 +1387,7 @@ function App() {
                   deleteIngredientFromRecipe={deleteIngredientFromRecipe}
                   updateRecipe={updateRecipe}
                 />
+                </Suspense>
               )}
             </>
           )}
@@ -1396,6 +1405,7 @@ function App() {
             Back
           </button>
 
+          <Suspense fallback={null}>
           <SettingsPanel
             onImport={applyImportedData}
             user={user}
@@ -1416,14 +1426,17 @@ function App() {
               setActiveTab("home");
             }}
           />
+          </Suspense>
         </section>
       )}
 
       {shoppingHelpOpen && (
-        <ShoppingHelpSheet
-          keepStandingList={keepStandingList}
-          onClose={() => setShoppingHelpOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <ShoppingHelpSheet
+            keepStandingList={keepStandingList}
+            onClose={() => setShoppingHelpOpen(false)}
+          />
+        </Suspense>
       )}
 
       <nav className="bottom-nav" aria-label="Primary">
