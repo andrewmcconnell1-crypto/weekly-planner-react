@@ -38,7 +38,17 @@ function MealEditorSheet({
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
   const [activeRecipeCategory, setActiveRecipeCategory] = useState("All");
+  const [closing, setClosing] = useState(false);
   const nameInputRef = useRef(null);
+  const closeTimerRef = useRef(null);
+
+  // Play the sheet's exit animation, then actually unmount. Guarded by the
+  // timer ref so repeated triggers (backdrop + Escape) can't double-close.
+  function requestClose() {
+    if (closeTimerRef.current) return;
+    setClosing(true);
+    closeTimerRef.current = window.setTimeout(onClose, 220);
+  }
 
   const manualIngredients = Array.isArray(meal.ingredients)
     ? meal.ingredients
@@ -108,7 +118,7 @@ function MealEditorSheet({
     document.body.style.overflow = "hidden";
 
     function handleKey(event) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") requestClose();
     }
 
     window.addEventListener("keydown", handleKey);
@@ -117,7 +127,11 @@ function MealEditorSheet({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKey);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
+
+  // Clear any pending close timer if the sheet unmounts first.
+  useEffect(() => () => window.clearTimeout(closeTimerRef.current), []);
 
   // Put the cursor straight in the name field when the custom panel opens.
   useEffect(() => {
@@ -240,7 +254,7 @@ function MealEditorSheet({
     if (onNextDay) {
       onNextDay();
     } else {
-      onClose();
+      requestClose();
     }
   }
 
@@ -287,9 +301,13 @@ function MealEditorSheet({
   }
 
   return (
-    <div className="sheet-backdrop" role="presentation" onClick={onClose}>
+    <div
+      className={`sheet-backdrop ${closing ? "closing" : ""}`}
+      role="presentation"
+      onClick={requestClose}
+    >
       <div
-        className="sheet"
+        className={`sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={`${day} meal`}
@@ -305,7 +323,7 @@ function MealEditorSheet({
             type="button"
             className="sheet-close"
             aria-label="Close"
-            onClick={onClose}
+            onClick={requestClose}
           >
             ✕
           </button>
@@ -576,7 +594,7 @@ function MealEditorSheet({
         </div>
 
         <div className="sheet-footer">
-          <button type="button" className="secondary" onClick={onClose}>
+          <button type="button" className="secondary" onClick={requestClose}>
             Done
           </button>
 

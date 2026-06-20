@@ -21,6 +21,90 @@
   --meal-tone: #e3d8c6;
   --meal-soft: #f1eadd;
   --meal-ink: #8c8175;
+
+  /* Motion tokens (subtle, iOS-like). */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur-med: 220ms;
+
+  /* Scale tokens — being introduced; applied in the motion POC areas first. */
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --elev-1: 0 1px 2px rgba(74, 48, 26, 0.06);
+  --elev-2: var(--shadow);
+  --elev-3: var(--shadow-lg);
+}
+
+/* Height-animated disclosure used by collapsible lists (Stock accordions). The
+   0fr→1fr grid-rows trick animates auto-height content smoothly. */
+.collapsible {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-med) var(--ease-standard);
+}
+
+.collapsible.open {
+  grid-template-rows: 1fr;
+}
+
+.collapsible > .collapsible-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Subtle press feedback on the main tappable surfaces. */
+.recipe-row,
+.meal-row-button,
+.category-toggle,
+.subcategory-toggle,
+.basics-edit-toggle,
+.add-recipe-toggle,
+.tonight-action,
+.sheet-footer > button {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+.recipe-row:active,
+.meal-row-button:active,
+.category-toggle:active,
+.subcategory-toggle:active,
+.basics-edit-toggle:active,
+.add-recipe-toggle:active,
+.tonight-action:active,
+.sheet-footer > button:active {
+  transform: scale(0.985);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsible {
+    transition: none;
+  }
+
+  .sheet,
+  .sheet-backdrop,
+  .sheet.closing,
+  .sheet-backdrop.closing {
+    animation: none;
+  }
+
+  .recipe-row:active,
+  .meal-row-button:active,
+  .category-toggle:active,
+  .subcategory-toggle:active,
+  .basics-edit-toggle:active,
+  .add-recipe-toggle:active,
+  .tonight-action:active,
+  .sheet-footer > button:active {
+    transform: none;
+  }
 }
 
 
@@ -930,6 +1014,19 @@ textarea:focus-visible {
   border-color: var(--accent-soft);
   background: var(--accent-soft);
   color: var(--accent-strong);
+}
+
+/* Stock list uses height-animated bodies, so the toggle and its collapsible
+   body must sit flush (no parent gap leaving a phantom space when collapsed);
+   the open body adds its own top breathing room instead. */
+.inventory-panel .shopping-group,
+.inventory-panel .subcategory-group {
+  gap: 0;
+}
+
+.inventory-panel .shopping-group > .collapsible.open > .collapsible-inner,
+.inventory-panel .subcategory-group > .collapsible.open > .collapsible-inner {
+  padding-top: 8px;
 }
 
 .card {
@@ -2519,7 +2616,7 @@ input::placeholder {
   align-items: flex-end;
   justify-content: center;
   background: rgba(18, 26, 22, 0.45);
-  animation: sheet-fade 0.18s ease;
+  animation: sheet-fade var(--dur-med) var(--ease-standard);
 }
 
 .sheet {
@@ -2531,7 +2628,16 @@ input::placeholder {
   background: var(--bg);
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -16px 44px rgba(18, 26, 22, 0.28);
-  animation: sheet-up 0.24s ease;
+  animation: sheet-up var(--dur-med) var(--ease-out);
+}
+
+/* Exit animations, played while the editor sets a closing flag before unmount. */
+.sheet-backdrop.closing {
+  animation: sheet-fade-out var(--dur-med) var(--ease-standard) both;
+}
+
+.sheet.closing {
+  animation: sheet-down var(--dur-med) var(--ease-out) both;
 }
 
 @keyframes sheet-fade {
@@ -2542,6 +2648,18 @@ input::placeholder {
 
 @keyframes sheet-up {
   from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-down {
+  to {
     transform: translateY(100%);
   }
 }
