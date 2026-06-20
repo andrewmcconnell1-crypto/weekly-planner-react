@@ -8,4 +8,9 @@ export default defineConfig({
   // (GitHub Pages: /weekly-planner-react/).
   base: './',
   plugins: [react()],
+  // globals: true lets React Testing Library auto-register its afterEach
+  // cleanup, so component test DOM doesn't leak between cases.
+  test: {
+    globals: true,
+  },
 })
