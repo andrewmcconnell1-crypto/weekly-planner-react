@@ -1486,61 +1486,107 @@ textarea:focus-visible {
   padding: var(--space-2);
 }
 
-.meal-or-row {
+/* Step 1: the meal-type chooser shown for an empty day. One decision at a
+   time — each tile leads to a focused detail view. */
+.meal-type-chooser {
+  display: grid;
+  gap: var(--space-16);
+}
+
+.meal-type-prompt {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.meal-type-list {
   display: grid;
   gap: var(--space-10);
-  margin-top: var(--space-4);
 }
 
-/* Editorial "— or instead —" rule between the recipe list and the
-   secondary choices. */
-.meal-or-divider {
-  display: flex;
+.meal-type-tile {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-12);
-  margin: 0;
-  color: var(--olive);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-heavy);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  width: 100%;
+  min-height: 64px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--ink);
+  padding: var(--space-12) var(--space-14);
+  text-align: left;
+  box-shadow: var(--shadow);
 }
 
-.meal-or-divider::before,
-.meal-or-divider::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid var(--line);
+.meal-type-tile:hover {
+  border-color: var(--olive);
+  background: var(--panel);
 }
 
-.meal-or-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-}
-
-.meal-or-options button {
+.meal-type-icon {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-8);
-  min-height: 42px;
-  border: 1px solid transparent;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-pill);
-  background: var(--soft);
-  color: var(--ink);
-  padding: var(--space-10) var(--space-14);
+  background: var(--olive-soft);
+  color: var(--olive);
+}
+
+.meal-type-text {
+  display: grid;
+  gap: 2px;
+}
+
+.meal-type-text strong {
   font-size: var(--text-md);
   font-weight: var(--weight-bold);
 }
 
-.meal-or-options button:hover {
-  background: #e9dfca;
+.meal-type-text span {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
 }
 
-.meal-or-options button.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
+.meal-type-chevron {
+  color: var(--muted);
+}
+
+/* "Change type" link back to the chooser from any detail view. */
+.meal-type-back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 0;
+  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-8) var(--space-4) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.meal-type-back:hover {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+/* Takeaway / eating-out detail: nothing to configure, just a reassurance. */
+.meal-away-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .meal-mode-panel {
