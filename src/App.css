@@ -1417,23 +1417,29 @@ textarea:focus-visible {
   gap: var(--space-12);
 }
 
-.meal-current-clear {
+/* Destructive "remove this day's meal" action, sitting on its own at the foot
+   of the card (away from the Source link) with a trash icon and a fill-red
+   hover so its intent is unmistakable. */
+.meal-current-remove {
+  justify-self: start;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-4);
-  min-height: 34px;
-  border: 1px solid var(--line);
+  gap: var(--space-6);
+  min-height: 40px;
+  margin-top: var(--space-2);
+  border: 1px solid var(--danger);
   border-radius: var(--radius-pill);
   background: #ffffff;
   color: var(--danger);
-  padding: var(--space-6) var(--space-12);
+  padding: var(--space-8) var(--space-16);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
 }
 
-.meal-current-clear:hover {
+.meal-current-remove:hover {
   border-color: var(--danger);
-  background: #fdeded;
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .nights-panel {

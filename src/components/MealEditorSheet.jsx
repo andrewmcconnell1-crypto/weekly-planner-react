@@ -9,6 +9,7 @@ import {
   Search,
   ShoppingBag,
   Sparkles,
+  Trash2,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -374,8 +375,8 @@ function MealEditorSheet({
             </span>
           </div>
 
-          <div className="meal-current-actions">
-            {linkedRecipe?.sourceUrl && (
+          {linkedRecipe?.sourceUrl && (
+            <div className="meal-current-actions">
               <a
                 className="meal-current-source"
                 href={linkedRecipe.sourceUrl}
@@ -385,19 +386,8 @@ function MealEditorSheet({
                 <ExternalLink size={14} aria-hidden="true" />
                 Source
               </a>
-            )}
-
-            {onClearDay && (
-              <button
-                type="button"
-                className="meal-current-clear"
-                onClick={clearDay}
-              >
-                <X size={14} aria-hidden="true" />
-                Clear
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {view === "recipe" && (
@@ -406,6 +396,17 @@ function MealEditorSheet({
             ingredients={linkedRecipeIngredients}
             method={linkedRecipe?.method || ""}
           />
+        )}
+
+        {onClearDay && (
+          <button
+            type="button"
+            className="meal-current-remove"
+            onClick={clearDay}
+          >
+            <Trash2 size={15} aria-hidden="true" />
+            Remove meal
+          </button>
         )}
       </div>
     );
