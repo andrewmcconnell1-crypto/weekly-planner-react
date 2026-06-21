@@ -1483,6 +1483,7 @@ function App() {
             initialDay={discoverDay}
             plannedRecipeIds={plannedRecipeIds}
             onAssign={assignRecipeToDay}
+            onSetNights={setLeftoverNights}
             onClose={() => {
               setDiscoverOpen(false);
               setDiscoverDay(null);

@@ -3272,11 +3272,52 @@ input::placeholder {
 }
 
 .discover-toast {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.discover-toast-text {
   margin: 0;
   text-align: center;
   color: var(--olive);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+}
+
+/* Optional "cook for N nights" leftovers control on the just-added toast. */
+.discover-toast-nights {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.discover-toast-nights button {
+  min-height: 32px;
+  min-width: 32px;
+  padding: 0 var(--space-8);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.discover-toast-nights button:hover {
+  border-color: var(--olive);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.discover-toast-nights button.active {
+  border-color: var(--olive);
+  background: var(--olive-soft);
+  color: var(--olive);
 }
 
 .discover-actions {
