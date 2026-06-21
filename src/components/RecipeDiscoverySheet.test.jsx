@@ -27,11 +27,18 @@ function setup(props = {}) {
   return { onAssign, onClose };
 }
 
+// The deck is now reached through a short guided question flow; skip past it to
+// get to the swipe cards.
+function skipWizard(user) {
+  return user.click(screen.getByRole("button", { name: /skip to swiping/i }));
+}
+
 describe("RecipeDiscoverySheet", () => {
   it("assigns the top recipe to the next empty day on Add", async () => {
     const user = userEvent.setup();
     const { onAssign } = setup();
 
+    await skipWizard(user);
     expect(screen.getByText("Beef Tacos")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Add to Sunday/i }));
 
@@ -48,13 +55,30 @@ describe("RecipeDiscoverySheet", () => {
     const user = userEvent.setup();
     setup();
 
+    await skipWizard(user);
     await user.click(screen.getByRole("button", { name: "Vegetarian" }));
     expect(screen.getByText("Lentil Dahl")).toBeInTheDocument();
     expect(screen.queryByText("Beef Tacos")).not.toBeInTheDocument();
   });
 
-  it("excludes recipes already planned this week", () => {
+  it("pre-filters the deck from the guided questions", async () => {
+    const user = userEvent.setup();
+    setup();
+
+    // Q1 (Quick) — no preference, Q2 (Vegetarian) — yes, then jump to the deck.
+    await user.click(screen.getByRole("button", { name: "No preference" }));
+    await user.click(screen.getByRole("button", { name: "Vegetarian" }));
+    await skipWizard(user);
+
+    expect(screen.getByText("Lentil Dahl")).toBeInTheDocument();
+    expect(screen.queryByText("Beef Tacos")).not.toBeInTheDocument();
+  });
+
+  it("excludes recipes already planned this week", async () => {
+    const user = userEvent.setup();
     setup({ plannedRecipeIds: ["r1"] });
+
+    await skipWizard(user);
     expect(screen.queryByText("Beef Tacos")).not.toBeInTheDocument();
     expect(screen.getByText("Lentil Dahl")).toBeInTheDocument();
   });
@@ -71,6 +95,7 @@ describe("RecipeDiscoverySheet", () => {
     const user = userEvent.setup();
     const { onAssign } = setup({ initialDay: "Wednesday" });
 
+    await skipWizard(user);
     expect(screen.getByText("Pick a meal for Wednesday")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Add to Wednesday/i }));
 

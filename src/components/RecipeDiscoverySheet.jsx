@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, RotateCcw, X } from "lucide-react";
+import {
+  Baby,
+  Boxes,
+  Check,
+  ChevronLeft,
+  CookingPot,
+  Flame,
+  Leaf,
+  RotateCcw,
+  Timer,
+  X,
+} from "lucide-react";
 
 import RecipeDetail from "./RecipeDetail";
 import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
@@ -10,6 +21,19 @@ import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
 // is an enhancement, so both route through the same commit().
 const SWIPE_AT = 90;
 
+// A short guided flow shown before the deck. Each yes/no question maps to one of
+// the recipe tags; "yes" answers pre-filter the deck so swiping starts from a
+// shortlist. The tag names double as the "yes" label so the deck's filter chips
+// line up with what was chosen. Skippable at any point.
+const WIZARD_STEPS = [
+  { tag: "Quick", question: "Short on time tonight?", icon: Timer },
+  { tag: "Vegetarian", question: "Keep it meat-free?", icon: Leaf },
+  { tag: "Kid-friendly", question: "Cooking for kids?", icon: Baby },
+  { tag: "Leftover-friendly", question: "Want leftovers for later?", icon: Boxes },
+  { tag: "One-pot", question: "Minimal washing up?", icon: CookingPot },
+  { tag: "Spicy", question: "In the mood for spice?", icon: Flame },
+];
+
 function RecipeDiscoverySheet({
   recipes,
   unplannedDays = [],
@@ -18,6 +42,8 @@ function RecipeDiscoverySheet({
   onAssign,
   onClose,
 }) {
+  const [stage, setStage] = useState("wizard"); // "wizard" | "deck"
+  const [stepIndex, setStepIndex] = useState(0);
   const [selectedTags, setSelectedTags] = useState(() => new Set());
   const [handled, setHandled] = useState(() => new Set());
   const [usedInitial, setUsedInitial] = useState(false);
@@ -64,6 +90,29 @@ function RecipeDiscoverySheet({
       else next.add(tag);
       return next;
     });
+  }
+
+  // Record the answer (add or remove this step's tag so going back and changing
+  // an answer stays correct), then advance — finishing the last step lands on
+  // the deck.
+  function answerStep(wantsTag) {
+    const { tag } = WIZARD_STEPS[stepIndex];
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+      if (wantsTag) next.add(tag);
+      else next.delete(tag);
+      return next;
+    });
+    if (stepIndex + 1 >= WIZARD_STEPS.length) setStage("deck");
+    else setStepIndex((index) => index + 1);
+  }
+
+  function backStep() {
+    setStepIndex((index) => Math.max(0, index - 1));
+  }
+
+  function skipWizard() {
+    setStage("deck");
   }
 
   function apply(direction, recipe) {
@@ -152,6 +201,11 @@ function RecipeDiscoverySheet({
   const hint = drag.x > 24 ? "add" : drag.x < -24 ? "skip" : null;
   const hintOpacity = Math.min(1, (Math.abs(drag.x) - 24) / 80);
   const showMessage = !exiting && (weekFull || !top);
+  // Skip the questions when there's nothing to plan — the week-full state shows
+  // straight away instead.
+  const inWizard = stage === "wizard" && !weekFull;
+  const step = WIZARD_STEPS[stepIndex];
+  const StepIcon = step.icon;
 
   return (
     <div
@@ -172,11 +226,13 @@ function RecipeDiscoverySheet({
             <span>
               {weekFull
                 ? "Every night is planned"
-                : !usedInitial && initialDay
-                  ? `Pick a meal for ${initialDay}`
-                  : `${unplannedDays.length} night${
-                      unplannedDays.length === 1 ? "" : "s"
-                    } to fill`}
+                : inWizard
+                  ? "A few quick questions"
+                  : !usedInitial && initialDay
+                    ? `Pick a meal for ${initialDay}`
+                    : `${unplannedDays.length} night${
+                        unplannedDays.length === 1 ? "" : "s"
+                      } to fill`}
             </span>
           </div>
 
@@ -191,23 +247,89 @@ function RecipeDiscoverySheet({
         </div>
 
         <div className="sheet-body discover-body">
-          <div className="discover-filters" aria-label="Filter by tag">
-            {recipeTags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                className={`recipe-tag-toggle ${
-                  selectedTags.has(tag) ? "active" : ""
-                }`}
-                aria-pressed={selectedTags.has(tag)}
-                onClick={() => toggleTag(tag)}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
+          {inWizard ? (
+            <div className="discover-wizard">
+              <div className="discover-wizard-top">
+                {stepIndex > 0 ? (
+                  <button
+                    type="button"
+                    className="discover-wizard-back"
+                    onClick={backStep}
+                  >
+                    <ChevronLeft size={16} aria-hidden="true" />
+                    Back
+                  </button>
+                ) : (
+                  <span />
+                )}
+                <span className="discover-wizard-count">
+                  {stepIndex + 1} of {WIZARD_STEPS.length}
+                </span>
+              </div>
 
-          <div className="discover-stage">
+              <div className="discover-wizard-dots" aria-hidden="true">
+                {WIZARD_STEPS.map((wizardStep, index) => (
+                  <span
+                    key={wizardStep.tag}
+                    className={`discover-wizard-dot ${
+                      index <= stepIndex ? "active" : ""
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div key={step.tag} className="discover-wizard-card">
+                <span className="discover-wizard-icon">
+                  <StepIcon size={30} aria-hidden="true" />
+                </span>
+                <strong className="discover-wizard-question">
+                  {step.question}
+                </strong>
+                <div className="discover-wizard-options">
+                  <button
+                    type="button"
+                    className="discover-wizard-yes"
+                    onClick={() => answerStep(true)}
+                  >
+                    {step.tag}
+                  </button>
+                  <button
+                    type="button"
+                    className="discover-wizard-no"
+                    onClick={() => answerStep(false)}
+                  >
+                    No preference
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="discover-wizard-skip"
+                onClick={skipWizard}
+              >
+                Skip to swiping
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="discover-filters" aria-label="Filter by tag">
+                {recipeTags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className={`recipe-tag-toggle ${
+                      selectedTags.has(tag) ? "active" : ""
+                    }`}
+                    aria-pressed={selectedTags.has(tag)}
+                    onClick={() => toggleTag(tag)}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+
+              <div className="discover-stage">
             {showMessage ? (
               <div className="discover-message">
                 {weekFull ? (
@@ -274,25 +396,27 @@ function RecipeDiscoverySheet({
             </p>
           )}
 
-          {!weekFull && top && (
-            <div className="discover-actions">
-              <button
-                type="button"
-                className="discover-skip"
-                onClick={() => commit("left")}
-              >
-                <X size={18} aria-hidden="true" />
-                Skip
-              </button>
-              <button
-                type="button"
-                className="discover-add"
-                onClick={() => commit("right")}
-              >
-                <Check size={18} aria-hidden="true" />
-                Add to {nextDay}
-              </button>
-            </div>
+              {!weekFull && top && (
+                <div className="discover-actions">
+                  <button
+                    type="button"
+                    className="discover-skip"
+                    onClick={() => commit("left")}
+                  >
+                    <X size={18} aria-hidden="true" />
+                    Skip
+                  </button>
+                  <button
+                    type="button"
+                    className="discover-add"
+                    onClick={() => commit("right")}
+                  >
+                    <Check size={18} aria-hidden="true" />
+                    Add to {nextDay}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
