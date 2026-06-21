@@ -14,6 +14,7 @@ import {
 
 import RecipeDetail from "./RecipeDetail";
 import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
+import { days } from "../utils/mealUtils";
 
 // Swipe-to-plan: a filtered deck of recipe cards. Swipe right (or "Add") drops
 // the recipe onto the next empty night; swipe left (or "Skip") passes. Filters
@@ -40,6 +41,7 @@ function RecipeDiscoverySheet({
   initialDay = null,
   plannedRecipeIds = [],
   onAssign,
+  onSetNights,
   onClose,
 }) {
   const [stage, setStage] = useState("wizard"); // "wizard" | "deck"
@@ -115,15 +117,46 @@ function RecipeDiscoverySheet({
     setStage("deck");
   }
 
+  // How many nights this meal could cover from `startDay`: itself plus the run
+  // of empty days immediately after it (leftovers fill consecutive days only,
+  // and can't overwrite a planned day or spill past the end of the week).
+  function maxLeftoverNights(startDay) {
+    const emptyDays = new Set(unplannedDays);
+    const startIndex = days.indexOf(startDay);
+
+    if (startIndex === -1) return 1;
+
+    let nights = 1;
+    for (let index = startIndex + 1; index < days.length; index += 1) {
+      if (!emptyDays.has(days[index])) break;
+      nights += 1;
+    }
+
+    return nights;
+  }
+
   function apply(direction, recipe) {
     if (direction === "right" && nextDay && recipe) {
       onAssign(nextDay, recipe);
-      setLastAdded({ name: recipe.name, day: nextDay });
+      setLastAdded({
+        name: recipe.name,
+        day: nextDay,
+        nights: 1,
+        maxNights: onSetNights ? maxLeftoverNights(nextDay) : 1,
+      });
       if (nextDay === initialDay) setUsedInitial(true);
     }
     if (recipe) {
       setHandled((prev) => new Set(prev).add(recipe.id));
     }
+  }
+
+  // Bump the just-added meal to cover N nights (cook once, leftovers fill the
+  // following days). Only offered on the toast for the most recent add.
+  function chooseNights(nights) {
+    if (!lastAdded || !onSetNights) return;
+    onSetNights(lastAdded.day, nights);
+    setLastAdded((prev) => (prev ? { ...prev, nights } : prev));
   }
 
   // Advance the deck immediately (so the next card sits stationary at centre),
@@ -392,9 +425,38 @@ function RecipeDiscoverySheet({
           </div>
 
           {lastAdded && (
-            <p className="discover-toast" role="status">
-              Added <strong>{lastAdded.name}</strong> to {lastAdded.day}
-            </p>
+            <div className="discover-toast" role="status">
+              <p className="discover-toast-text">
+                Added <strong>{lastAdded.name}</strong> to {lastAdded.day}
+              </p>
+
+              {onSetNights && lastAdded.maxNights > 1 && (
+                <div
+                  className="discover-toast-nights"
+                  role="group"
+                  aria-label={`How many nights for ${lastAdded.name}`}
+                >
+                  <span>Cook for</span>
+
+                  {Array.from(
+                    { length: lastAdded.maxNights },
+                    (_, index) => index + 1
+                  ).map((nights) => (
+                    <button
+                      key={nights}
+                      type="button"
+                      className={lastAdded.nights === nights ? "active" : ""}
+                      aria-pressed={lastAdded.nights === nights}
+                      onClick={() => chooseNights(nights)}
+                    >
+                      {nights}
+                    </button>
+                  ))}
+
+                  <span>{lastAdded.nights === 1 ? "night" : "nights"}</span>
+                </div>
+              )}
+            </div>
           )}
 
               {!weekFull && top && (

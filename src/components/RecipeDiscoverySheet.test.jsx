@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
@@ -14,17 +14,19 @@ const recipes = [
 function setup(props = {}) {
   const onAssign = vi.fn();
   const onClose = vi.fn();
+  const onSetNights = vi.fn();
   render(
     <RecipeDiscoverySheet
       recipes={recipes}
       unplannedDays={["Sunday", "Monday"]}
       plannedRecipeIds={[]}
       onAssign={onAssign}
+      onSetNights={onSetNights}
       onClose={onClose}
       {...props}
     />
   );
-  return { onAssign, onClose };
+  return { onAssign, onClose, onSetNights };
 }
 
 // The deck is now reached through a short guided question flow; skip past it to
@@ -49,6 +51,22 @@ describe("RecipeDiscoverySheet", () => {
       )
     );
     expect(await screen.findByText(/Added/)).toHaveTextContent("Sunday");
+  });
+
+  it("offers a leftovers nights control on the toast after adding", async () => {
+    const user = userEvent.setup();
+    const { onSetNights } = setup();
+
+    await skipWizard(user);
+    await user.click(screen.getByRole("button", { name: /Add to Sunday/i }));
+
+    // Sunday + the following empty Monday → up to 2 nights.
+    const group = await screen.findByRole("group", {
+      name: /how many nights/i,
+    });
+    await user.click(within(group).getByRole("button", { name: "2" }));
+
+    expect(onSetNights).toHaveBeenCalledWith("Sunday", 2);
   });
 
   it("narrows the deck by tag filter", async () => {
