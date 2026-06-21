@@ -325,8 +325,10 @@ function App() {
       }
     }
   }
+  // A cooked meal can stretch to at most 3 nights of leftovers, never past the
+  // end of the week.
   const expandedMaxNights =
-    expandedDayIndex >= 0 ? Math.min(7, days.length - expandedDayIndex) : 1;
+    expandedDayIndex >= 0 ? Math.min(3, days.length - expandedDayIndex) : 1;
 
   const activeStaplesCount = staples.filter(
     (staple) => staple.active !== false
