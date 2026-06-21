@@ -2796,10 +2796,20 @@ input::placeholder {
   font-weight: var(--weight-semibold);
 }
 
-.recipe-tag-toggle.active {
+.recipe-tag-toggle.active,
+.recipe-tag-toggle.active:hover {
   border-color: var(--olive);
   background: var(--olive-soft);
   color: var(--olive);
+}
+
+/* Unselected chips must override the global `button:hover` (which paints the
+   rust --primary-strong), otherwise deselecting a chip leaves it red while
+   the cursor is still over it. */
+.recipe-tag-toggle:hover {
+  border-color: var(--olive);
+  background: var(--panel);
+  color: var(--ink);
 }
 
 /* Keep the focus ring on the brand olive so toggling a chip off never
