@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  ArrowLeft,
+  ChefHat,
+  ChevronRight,
   PencilLine,
   Repeat2,
   Search,
@@ -14,12 +17,49 @@ import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import RecipeFilter from "./RecipeFilter";
 
+// The meal-type choices presented on the chooser step. Each maps to one
+// focused detail view, so the user makes a single decision at a time instead
+// of facing the whole picker + "or instead" pile at once.
+const MEAL_TYPES = [
+  {
+    id: "recipe",
+    icon: ChefHat,
+    title: "Cook a recipe",
+    blurb: "Pick from your recipes or swipe to find one",
+  },
+  {
+    id: "custom",
+    icon: PencilLine,
+    title: "Custom meal",
+    blurb: "Type a one-off meal and any ingredients",
+  },
+  {
+    id: "takeaway",
+    icon: ShoppingBag,
+    title: "Takeaway",
+    blurb: "No cooking, no shopping",
+  },
+  {
+    id: "eating-out",
+    icon: UtensilsCrossed,
+    title: "Eating out",
+    blurb: "Off the plan for the night",
+  },
+  {
+    id: "repeat",
+    icon: Repeat2,
+    title: "Same as another day",
+    blurb: "Reuse a cooked meal as leftovers",
+  },
+];
+
 // Full-height bottom-sheet editor for a single day's meal. Mounted (keyed by
 // day) only while a day is open, so its internal state resets per day.
 //
-// Content-first layout: the current pick sits at the top, the recipe list is
-// immediately tappable below a search box, and the non-recipe choices
-// (custom / takeaway / eating out / repeat) live in a secondary "Or…" row.
+// Wizard-style flow: an empty day opens on a type chooser (Step 1); choosing a
+// type — or opening an already-planned day — lands on a focused detail view
+// (Step 2) that shows only the controls that type needs, with a "Change type"
+// link back to the chooser.
 function MealEditorSheet({
   day,
   dateLabel,
@@ -37,6 +77,34 @@ function MealEditorSheet({
   onFindMeals,
   onNextDay,
 }) {
+  const manualIngredients = Array.isArray(meal.ingredients)
+    ? meal.ingredients
+    : [];
+  const linkedRecipeIngredients = linkedRecipe?.ingredients || [];
+  const mealType = meal.mealType || "cook";
+  const selectedRecipeId = meal.recipeId || linkedRecipe?.id || "";
+  const isCustomMeal = mealType === "cook" && !selectedRecipeId;
+  const isCookedMeal =
+    mealType === "cook" &&
+    (Boolean(selectedRecipeId) || (meal.name || "").trim() !== "");
+  const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
+  const recipeServes = linkedRecipe?.serves || null;
+
+  const daySummary = weekDaySummaries.find((summary) => summary.day === day);
+  const hasMeal = daySummary?.hasMeal ?? false;
+
+  // Map the current meal onto a chooser type, so re-opening a planned day lands
+  // on the matching detail view instead of the chooser.
+  function viewForMeal() {
+    if (!hasMeal) return "chooser";
+    if (mealType === "takeaway") return "takeaway";
+    if (mealType === "eating-out") return "eating-out";
+    if (mealType === "repeat") return "repeat";
+    if (isCustomMeal) return "custom";
+    return "recipe";
+  }
+
+  const [view, setView] = useState(viewForMeal);
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
   const [activeRecipeCategory, setActiveRecipeCategory] = useState("All");
@@ -51,29 +119,6 @@ function MealEditorSheet({
     setClosing(true);
     closeTimerRef.current = window.setTimeout(onClose, 220);
   }
-
-  const manualIngredients = Array.isArray(meal.ingredients)
-    ? meal.ingredients
-    : [];
-  const linkedRecipeIngredients = linkedRecipe?.ingredients || [];
-  const mealType = meal.mealType || "cook";
-  const selectedRecipeId = meal.recipeId || linkedRecipe?.id || "";
-  const isCustomMeal = mealType === "cook" && !selectedRecipeId;
-  const isCookedMeal =
-    mealType === "cook" &&
-    (Boolean(selectedRecipeId) || (meal.name || "").trim() !== "");
-  const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
-  const recipeServes = linkedRecipe?.serves || null;
-
-  // Secondary panels open from the "Or…" row, and start open when the day is
-  // already that kind of meal.
-  const [showCustomInput, setShowCustomInput] = useState(
-    isCustomMeal && (meal.name || "").trim() !== ""
-  );
-  const [showDayPicker, setShowDayPicker] = useState(mealType === "repeat");
-
-  const daySummary = weekDaySummaries.find((summary) => summary.day === day);
-  const hasMeal = daySummary?.hasMeal ?? false;
 
   // Only cooked meals (recipe or custom) can be repeated as leftovers — not
   // takeaway / eating out / other repeats / unplanned days.
@@ -114,6 +159,17 @@ function MealEditorSheet({
           leftoverDays.length - 1
         ]?.slice(0, 3)}`;
 
+  // Whether the "Selected" summary card belongs in the current detail view —
+  // i.e. the saved meal actually matches the type being shown. Stops a stale
+  // "Takeaway" card lingering while the recipe picker is open, for example.
+  const currentMatchesView =
+    hasMeal &&
+    ((view === "recipe" && mealType === "cook" && Boolean(selectedRecipeId)) ||
+      (view === "custom" && isCustomMeal && (meal.name || "").trim() !== "") ||
+      (view === "takeaway" && mealType === "takeaway") ||
+      (view === "eating-out" && mealType === "eating-out") ||
+      (view === "repeat" && mealType === "repeat" && meal.repeatFromDay));
+
   // Lock background scroll and close on Escape while the sheet is open.
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -135,12 +191,12 @@ function MealEditorSheet({
   // Clear any pending close timer if the sheet unmounts first.
   useEffect(() => () => window.clearTimeout(closeTimerRef.current), []);
 
-  // Put the cursor straight in the name field when the custom panel opens.
+  // Put the cursor straight in the name field when the custom view opens.
   useEffect(() => {
-    if (showCustomInput) {
+    if (view === "custom") {
       nameInputRef.current?.focus();
     }
-  }, [showCustomInput]);
+  }, [view]);
 
   function changeMealType(nextMealType) {
     if (nextMealType === "cook") {
@@ -164,41 +220,31 @@ function MealEditorSheet({
     });
   }
 
-  function chooseCustom() {
-    setShowDayPicker(false);
-    setShowCustomInput(true);
-
-    if (mealType !== "cook" || selectedRecipeId) {
-      updateMeal(day, {
-        ...meal,
-        mealType: "cook",
-        recipeId: "",
-        repeatFromDay: "",
-        name: "",
-      });
+  // Route a chooser tile to its detail view, applying any meal change the
+  // choice implies up front (takeaway / eating out are decided on the spot;
+  // recipe / repeat wait for a further pick).
+  function chooseType(typeId) {
+    if (typeId === "custom") {
+      if (mealType !== "cook" || selectedRecipeId) {
+        updateMeal(day, {
+          ...meal,
+          mealType: "cook",
+          recipeId: "",
+          repeatFromDay: "",
+          name: "",
+        });
+      }
+    } else if (typeId === "takeaway" || typeId === "eating-out") {
+      changeMealType(typeId);
     }
-  }
 
-  function chooseAway(nextMealType) {
-    setShowCustomInput(false);
-    setShowDayPicker(false);
-    changeMealType(nextMealType);
-  }
-
-  // Open the day picker without touching the meal — the day stays as it is
-  // until a source day is actually chosen.
-  function chooseRepeat() {
-    setShowCustomInput(false);
-    setShowDayPicker(true);
+    setView(typeId);
   }
 
   function selectRecipe(recipeId) {
     const selectedRecipe = recipes.find((recipe) => recipe.id === recipeId);
 
     if (!selectedRecipe) return;
-
-    setShowCustomInput(false);
-    setShowDayPicker(false);
 
     updateMeal(day, {
       ...meal,
@@ -212,10 +258,9 @@ function MealEditorSheet({
   }
 
   function clearDay() {
-    setShowCustomInput(false);
-    setShowDayPicker(false);
     setRecipeSearchText("");
     onClearDay();
+    setView("chooser");
   }
 
   function selectRepeatFromDay(repeatFromDay) {
@@ -302,6 +347,318 @@ function MealEditorSheet({
     );
   }
 
+  function renderCurrentCard() {
+    if (!currentMatchesView || !daySummary) return null;
+
+    return (
+      <div className="meal-current" data-tone={daySummary.tone}>
+        <div className="meal-current-header">
+          <div>
+            <span className="section-kicker">Selected</span>
+            <strong>{daySummary.name}</strong>
+            <span className="meal-current-label">
+              {daySummary.label}
+              {recipeServes ? ` · Serves ${recipeServes}` : ""}
+            </span>
+          </div>
+
+          <div className="meal-current-actions">
+            {linkedRecipe?.sourceUrl && (
+              <a href={linkedRecipe.sourceUrl} target="_blank" rel="noreferrer">
+                Source
+              </a>
+            )}
+
+            {onClearDay && (
+              <button
+                type="button"
+                className="meal-current-clear"
+                onClick={clearDay}
+              >
+                <X size={14} aria-hidden="true" />
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {view === "recipe" && (
+          <RecipeDetail
+            variant="sheet"
+            ingredients={linkedRecipeIngredients}
+            method={linkedRecipe?.method || ""}
+          />
+        )}
+      </div>
+    );
+  }
+
+  function renderNightsAndBatch() {
+    return (
+      <>
+        {showNights && (
+          <div className="nights-panel">
+            <p className="section-kicker">How many nights?</p>
+
+            <div
+              className="nights-buttons"
+              role="radiogroup"
+              aria-label={`How many nights for ${day}'s meal`}
+            >
+              {Array.from({ length: maxNights }, (_, index) => index + 1).map(
+                (nights) => (
+                  <button
+                    key={nights}
+                    type="button"
+                    role="radio"
+                    aria-checked={leftoverNights === nights}
+                    className={leftoverNights === nights ? "active" : ""}
+                    onClick={() => onSetNights(nights)}
+                  >
+                    {nights}
+                  </button>
+                )
+              )}
+            </div>
+
+            <p className="nights-hint">
+              {leftoverNights > 1
+                ? `Cook once — leftovers cover ${leftoverDaysLabel}, no extra shopping.`
+                : "Pick more nights to fill the next days with leftovers."}
+            </p>
+          </div>
+        )}
+
+        {isCookedMeal && (
+          <div className="batch-panel">
+            <p className="section-kicker">Batch size</p>
+
+            <div
+              className="nights-buttons"
+              role="radiogroup"
+              aria-label="Batch size"
+            >
+              {[1, 2, 3].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  role="radio"
+                  aria-checked={batches === size}
+                  className={batches === size ? "active" : ""}
+                  onClick={() => updateMeal(day, { ...meal, batches: size })}
+                >
+                  ×{size}
+                </button>
+              ))}
+            </div>
+
+            <p className="nights-hint">
+              {batches > 1
+                ? `${
+                    batches === 2 ? "Double" : batches === 3 ? "Triple" : `×${batches}`
+                  } batch${
+                    recipeServes
+                      ? ` — serves ${recipeServes} → ${recipeServes * batches}`
+                      : ""
+                  }. Shopping amounts scaled ×${batches}.`
+                : recipeServes
+                  ? `Single batch — serves ${recipeServes}.`
+                  : "Cooking a single batch."}
+            </p>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  function renderChooser() {
+    return (
+      <div className="meal-type-chooser">
+        <p className="meal-type-prompt">How are you eating {day}?</p>
+
+        <div className="meal-type-list">
+          {MEAL_TYPES.map((type) => {
+            const Icon = type.icon;
+
+            return (
+              <button
+                key={type.id}
+                type="button"
+                className="meal-type-tile"
+                onClick={() => chooseType(type.id)}
+              >
+                <span className="meal-type-icon">
+                  <Icon size={20} aria-hidden="true" />
+                </span>
+
+                <span className="meal-type-text">
+                  <strong>{type.title}</strong>
+                  <span>{type.blurb}</span>
+                </span>
+
+                <ChevronRight
+                  className="meal-type-chevron"
+                  size={18}
+                  aria-hidden="true"
+                />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  function renderRecipeView() {
+    return (
+      <>
+        {renderCurrentCard()}
+        {renderNightsAndBatch()}
+
+        <div className="meal-picker">
+          {onFindMeals && (
+            <button
+              type="button"
+              className="meal-picker-discover"
+              onClick={onFindMeals}
+            >
+              <Sparkles size={16} aria-hidden="true" />
+              Find meals by swiping
+            </button>
+          )}
+
+          <div className="recipe-search">
+            <Search className="recipe-search-icon" size={16} aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search recipes..."
+              value={recipeSearchText}
+              onChange={(event) => setRecipeSearchText(event.target.value)}
+            />
+          </div>
+
+          <RecipeFilter
+            label="Category"
+            options={recipeCategories}
+            active={activeRecipeCategory}
+            onSelect={setActiveRecipeCategory}
+          />
+
+          <div className="recipe-picker-results recipe-picker-flat">
+            {filteredRecipes.length === 0 ? (
+              <p className="empty-state">No matching recipes.</p>
+            ) : (
+              filteredRecipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  active={selectedRecipeId === recipe.id}
+                  onClick={() => selectRecipe(recipe.id)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+
+        {selectedRecipeId &&
+          renderExtraIngredients("Add extra ingredient...")}
+      </>
+    );
+  }
+
+  function renderCustomView() {
+    return (
+      <>
+        {renderCurrentCard()}
+        {renderNightsAndBatch()}
+
+        <div className="meal-mode-panel">
+          <input
+            ref={nameInputRef}
+            type="text"
+            placeholder="Meal name..."
+            value={meal.name}
+            onChange={(event) =>
+              updateMeal(day, {
+                ...meal,
+                mealType: "cook",
+                recipeId: "",
+                repeatFromDay: "",
+                name: event.target.value,
+              })
+            }
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                finishDay();
+              }
+            }}
+          />
+        </div>
+
+        {renderExtraIngredients("Add ingredient...")}
+      </>
+    );
+  }
+
+  function renderAwayView(label) {
+    return (
+      <>
+        {renderCurrentCard()}
+
+        {!currentMatchesView && (
+          <p className="empty-state">Setting {label} for {day}…</p>
+        )}
+
+        <p className="meal-away-hint">
+          {label} needs nothing else — you&apos;re all set. Tap Done, or change
+          the type above.
+        </p>
+      </>
+    );
+  }
+
+  function renderRepeatView() {
+    return (
+      <>
+        {renderCurrentCard()}
+
+        <div className="day-choice-grid">
+          {repeatDaySummaries.length === 0 ? (
+            <p className="empty-state">
+              Nothing to repeat yet — plan a cooked meal on another day first.
+            </p>
+          ) : (
+            repeatDaySummaries.map((summary) => (
+              <button
+                type="button"
+                className={
+                  mealType === "repeat" && meal.repeatFromDay === summary.day
+                    ? "active"
+                    : ""
+                }
+                key={summary.day}
+                onClick={() => selectRepeatFromDay(summary.day)}
+              >
+                <strong>{summary.day.slice(0, 3)}</strong>
+                <span>{summary.name}</span>
+              </button>
+            ))
+          )}
+        </div>
+      </>
+    );
+  }
+
+  function renderDetail() {
+    if (view === "recipe") return renderRecipeView();
+    if (view === "custom") return renderCustomView();
+    if (view === "takeaway") return renderAwayView("Takeaway");
+    if (view === "eating-out") return renderAwayView("Eating out");
+    if (view === "repeat") return renderRepeatView();
+    return null;
+  }
+
   return (
     <div
       className={`sheet-backdrop ${closing ? "closing" : ""}`}
@@ -332,278 +689,18 @@ function MealEditorSheet({
         </div>
 
         <div className="sheet-body">
-          {hasMeal && daySummary && (
-            <div className="meal-current" data-tone={daySummary.tone}>
-              <div className="meal-current-header">
-                <div>
-                  <span className="section-kicker">Selected</span>
-                  <strong>{daySummary.name}</strong>
-                  <span className="meal-current-label">
-                    {daySummary.label}
-                    {recipeServes ? ` · Serves ${recipeServes}` : ""}
-                  </span>
-                </div>
-
-                <div className="meal-current-actions">
-                  {linkedRecipe?.sourceUrl && (
-                    <a
-                      href={linkedRecipe.sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Source
-                    </a>
-                  )}
-
-                  {onClearDay && (
-                    <button
-                      type="button"
-                      className="meal-current-clear"
-                      onClick={clearDay}
-                    >
-                      <X size={14} aria-hidden="true" />
-                      Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <RecipeDetail
-                variant="sheet"
-                ingredients={linkedRecipeIngredients}
-                method={linkedRecipe?.method || ""}
-              />
-            </div>
+          {view !== "chooser" && (
+            <button
+              type="button"
+              className="meal-type-back"
+              onClick={() => setView("chooser")}
+            >
+              <ArrowLeft size={16} aria-hidden="true" />
+              Change type
+            </button>
           )}
 
-          {showNights && (
-            <div className="nights-panel">
-              <p className="section-kicker">How many nights?</p>
-
-              <div
-                className="nights-buttons"
-                role="radiogroup"
-                aria-label={`How many nights for ${day}'s meal`}
-              >
-                {Array.from({ length: maxNights }, (_, index) => index + 1).map(
-                  (nights) => (
-                    <button
-                      key={nights}
-                      type="button"
-                      role="radio"
-                      aria-checked={leftoverNights === nights}
-                      className={leftoverNights === nights ? "active" : ""}
-                      onClick={() => onSetNights(nights)}
-                    >
-                      {nights}
-                    </button>
-                  )
-                )}
-              </div>
-
-              <p className="nights-hint">
-                {leftoverNights > 1
-                  ? `Cook once — leftovers cover ${leftoverDaysLabel}, no extra shopping.`
-                  : "Pick more nights to fill the next days with leftovers."}
-              </p>
-            </div>
-          )}
-
-          {isCookedMeal && (
-            <div className="batch-panel">
-              <p className="section-kicker">Batch size</p>
-
-              <div
-                className="nights-buttons"
-                role="radiogroup"
-                aria-label="Batch size"
-              >
-                {[1, 2, 3].map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    role="radio"
-                    aria-checked={batches === size}
-                    className={batches === size ? "active" : ""}
-                    onClick={() => updateMeal(day, { ...meal, batches: size })}
-                  >
-                    ×{size}
-                  </button>
-                ))}
-              </div>
-
-              <p className="nights-hint">
-                {batches > 1
-                  ? `${
-                      batches === 2 ? "Double" : batches === 3 ? "Triple" : `×${batches}`
-                    } batch${
-                      recipeServes
-                        ? ` — serves ${recipeServes} → ${recipeServes * batches}`
-                        : ""
-                    }. Shopping amounts scaled ×${batches}.`
-                  : recipeServes
-                    ? `Single batch — serves ${recipeServes}.`
-                    : "Cooking a single batch."}
-              </p>
-            </div>
-          )}
-
-          <div className="meal-picker">
-            <p className="section-kicker">
-              {hasMeal ? "Change meal" : "Pick a recipe"}
-            </p>
-
-            {onFindMeals && (
-              <button
-                type="button"
-                className="meal-picker-discover"
-                onClick={onFindMeals}
-              >
-                <Sparkles size={16} aria-hidden="true" />
-                Find meals by swiping
-              </button>
-            )}
-
-            <div className="recipe-search">
-              <Search
-                className="recipe-search-icon"
-                size={16}
-                aria-hidden="true"
-              />
-              <input
-                type="search"
-                placeholder="Search recipes..."
-                value={recipeSearchText}
-                onChange={(event) => setRecipeSearchText(event.target.value)}
-              />
-            </div>
-
-            <RecipeFilter
-              label="Category"
-              options={recipeCategories}
-              active={activeRecipeCategory}
-              onSelect={setActiveRecipeCategory}
-            />
-
-            <div className="recipe-picker-results recipe-picker-flat">
-              {filteredRecipes.length === 0 ? (
-                <p className="empty-state">No matching recipes.</p>
-              ) : (
-                filteredRecipes.map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    active={selectedRecipeId === recipe.id}
-                    onClick={() => selectRecipe(recipe.id)}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="meal-or-row">
-            <p className="meal-or-divider">
-              <span>Or instead</span>
-            </p>
-
-            <div className="meal-or-options">
-              <button
-                type="button"
-                className={showCustomInput && isCustomMeal ? "active" : ""}
-                onClick={chooseCustom}
-              >
-                <PencilLine size={16} aria-hidden="true" />
-                Custom meal
-              </button>
-
-              <button
-                type="button"
-                className={mealType === "takeaway" ? "active" : ""}
-                onClick={() => chooseAway("takeaway")}
-              >
-                <ShoppingBag size={16} aria-hidden="true" />
-                Takeaway
-              </button>
-
-              <button
-                type="button"
-                className={mealType === "eating-out" ? "active" : ""}
-                onClick={() => chooseAway("eating-out")}
-              >
-                <UtensilsCrossed size={16} aria-hidden="true" />
-                Eating out
-              </button>
-
-              <button
-                type="button"
-                className={mealType === "repeat" ? "active" : ""}
-                onClick={chooseRepeat}
-              >
-                <Repeat2 size={16} aria-hidden="true" />
-                Same as another day
-              </button>
-            </div>
-          </div>
-
-          {showCustomInput && isCustomMeal && (
-            <div className="meal-mode-panel">
-              <input
-                ref={nameInputRef}
-                type="text"
-                placeholder="Meal name..."
-                value={meal.name}
-                onChange={(event) =>
-                  updateMeal(day, {
-                    ...meal,
-                    mealType: "cook",
-                    recipeId: "",
-                    repeatFromDay: "",
-                    name: event.target.value,
-                  })
-                }
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    finishDay();
-                  }
-                }}
-              />
-            </div>
-          )}
-
-          {showDayPicker && (
-            <div className="day-choice-grid">
-              {repeatDaySummaries.length === 0 ? (
-                <p className="empty-state">
-                  Nothing to repeat yet — plan a cooked meal on another day
-                  first.
-                </p>
-              ) : (
-                repeatDaySummaries.map((summary) => (
-                  <button
-                    type="button"
-                    className={
-                      mealType === "repeat" &&
-                      meal.repeatFromDay === summary.day
-                        ? "active"
-                        : ""
-                    }
-                    key={summary.day}
-                    onClick={() => selectRepeatFromDay(summary.day)}
-                  >
-                    <strong>{summary.day.slice(0, 3)}</strong>
-                    <span>{summary.name}</span>
-                  </button>
-                ))
-              )}
-            </div>
-          )}
-
-          {mealType === "cook" &&
-            (isCookedMeal || showCustomInput) &&
-            renderExtraIngredients(
-              linkedRecipe ? "Add extra ingredient..." : "Add ingredient..."
-            )}
+          {view === "chooser" ? renderChooser() : renderDetail()}
         </div>
 
         <div className="sheet-footer">
