@@ -41,7 +41,6 @@ function RecipeDiscoverySheet({
   initialDay = null,
   plannedRecipeIds = [],
   onAssign,
-  onSetNights,
   onClose,
 }) {
   const [stage, setStage] = useState("wizard"); // "wizard" | "deck"
@@ -145,11 +144,10 @@ function RecipeDiscoverySheet({
     commitTimer.current = window.setTimeout(() => setExiting(null), 320);
   }
 
-  // Commit an add: assign the recipe, set leftovers if more than one night, and
-  // animate the card away.
+  // Commit an add: assign the recipe (with leftovers for nights > 1, applied in
+  // a single update) and animate the card away.
   function finalizeAdd(recipe, day, nights, fromX) {
-    onAssign(day, recipe);
-    if (nights > 1 && onSetNights) onSetNights(day, nights);
+    onAssign(day, recipe, nights);
     setLastAdded({ name: recipe.name, day, nights });
     if (day === initialDay) setUsedInitial(true);
     flyOff(recipe, "right", fromX);
@@ -183,7 +181,7 @@ function RecipeDiscoverySheet({
       }
 
       const recipe = top;
-      const maxNights = onSetNights ? maxLeftoverNights(nextDay) : 1;
+      const maxNights = maxLeftoverNights(nextDay);
 
       if (maxNights > 1) {
         setDrag({ x: 0, y: 0, active: false }); // hold the card centred

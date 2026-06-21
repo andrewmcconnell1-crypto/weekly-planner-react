@@ -512,13 +512,50 @@ function App() {
     });
   }
 
-  // Drop a recipe onto a day as a cooked meal (used by the discovery deck).
-  function assignRecipeToDay(day, recipe) {
-    updateMeal(day, {
-      ...createEmptyMeal(),
-      mealType: "cook",
-      name: recipe.name,
-      recipeId: recipe.id,
+  // Drop a recipe onto a day as a cooked meal (used by the discovery deck),
+  // optionally cooking once for `nights` and filling the following days with
+  // leftovers. Done in a single update so the assignment and the leftovers
+  // compose, rather than two setState calls clobbering each other.
+  function assignRecipeToDay(day, recipe, nights = 1) {
+    const startIndex = days.indexOf(day);
+
+    setMealsByWeek((prevByWeek) => {
+      const current = prevByWeek[mealWeekKey] || {};
+      const nextMeals = {
+        ...current,
+        [day]: {
+          ...createEmptyMeal(),
+          mealType: "cook",
+          name: recipe.name,
+          recipeId: recipe.id,
+        },
+      };
+
+      if (startIndex !== -1) {
+        for (let index = startIndex + 1; index < days.length; index += 1) {
+          const followingDay = days[index];
+          const existingMeal = nextMeals[followingDay];
+          const repeatsStartDay =
+            existingMeal?.mealType === "repeat" &&
+            existingMeal.repeatFromDay === day;
+
+          if (index - startIndex < nights) {
+            nextMeals[followingDay] = {
+              name: "",
+              recipeId: "",
+              mealType: "repeat",
+              repeatFromDay: day,
+              ingredients: [],
+            };
+          } else if (repeatsStartDay) {
+            nextMeals[followingDay] = createEmptyMeal();
+          } else {
+            break;
+          }
+        }
+      }
+
+      return { ...prevByWeek, [mealWeekKey]: nextMeals };
     });
   }
 
@@ -1483,7 +1520,6 @@ function App() {
             initialDay={discoverDay}
             plannedRecipeIds={plannedRecipeIds}
             onAssign={assignRecipeToDay}
-            onSetNights={setLeftoverNights}
             onClose={() => {
               setDiscoverOpen(false);
               setDiscoverDay(null);
