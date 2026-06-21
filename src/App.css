@@ -1351,7 +1351,7 @@ textarea:focus-visible {
   border: 1px solid var(--line);
   border-left: 4px solid var(--recipe-tone, var(--accent));
   border-radius: var(--radius-md);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--recipe-tone, var(--accent)) 12%, var(--surface));
   box-shadow: var(--shadow);
   padding: var(--space-12);
 }
@@ -1388,17 +1388,27 @@ textarea:focus-visible {
   font-weight: var(--weight-semibold);
 }
 
-/* Source link styled as a pill so it's a proper tap target and clearly
-   distinct from the Clear button beside it. */
+/* Source + Remove stack vertically on the right of the card header, keeping the
+   card compact instead of trailing a full-width action row. */
+.meal-current-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-8);
+}
+
+/* Source: an olive pill — coloured and clearly the "open recipe" action,
+   distinct in hue, icon and label from the red Remove beneath it. */
 .meal-current-source {
   display: inline-flex;
   align-items: center;
   gap: var(--space-4);
   min-height: 34px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--olive);
   border-radius: var(--radius-pill);
-  background: #ffffff;
-  color: var(--primary);
+  background: var(--olive-soft);
+  color: var(--olive);
   padding: var(--space-6) var(--space-12);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
@@ -1406,34 +1416,26 @@ textarea:focus-visible {
 }
 
 .meal-current-source:hover {
-  border-color: var(--primary);
-  background: var(--accent-soft);
-}
-
-.meal-current-actions {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: var(--space-12);
+  border-color: var(--olive);
+  background: #e3e7cf;
 }
 
 /* Destructive "remove this day's meal" action, sitting on its own at the foot
    of the card (away from the Source link) with a trash icon and a fill-red
    hover so its intent is unmistakable. */
 .meal-current-remove {
-  justify-self: start;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-6);
-  min-height: 40px;
-  margin-top: var(--space-2);
+  gap: var(--space-4);
+  min-height: 34px;
   border: 1px solid var(--danger);
   border-radius: var(--radius-pill);
   background: #ffffff;
   color: var(--danger);
-  padding: var(--space-8) var(--space-16);
+  padding: var(--space-6) var(--space-12);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
+  white-space: nowrap;
 }
 
 .meal-current-remove:hover {
