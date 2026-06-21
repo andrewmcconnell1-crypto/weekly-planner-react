@@ -2853,8 +2853,9 @@ input::placeholder {
   min-height: 300px;
 }
 
-/* Deck cards mirror the Home "Tonight" hero: dark gradient, cream text,
-   a big display dish name. */
+/* Deck cards echo the Home "Tonight" hero shape, but in a neutral charcoal so
+   the green "Add" button reads as a clearly distinct action rather than blending
+   into an olive card. A faint terracotta glow keeps it warm. */
 .discover-card {
   position: absolute;
   inset: 0;
@@ -2863,14 +2864,16 @@ input::placeholder {
   background:
     radial-gradient(
       120% 140% at 0% 0%,
-      rgba(191, 88, 64, 0.32) 0%,
-      rgba(191, 88, 64, 0) 55%
+      rgba(191, 88, 64, 0.22) 0%,
+      rgba(191, 88, 64, 0) 58%
     ),
-    linear-gradient(155deg, #46502c 0%, #2c2620 78%);
+    linear-gradient(158deg, #40404a 0%, #24222a 84%);
   color: #f7f1e6;
   box-shadow: var(--shadow-lg);
   padding: var(--space-16);
-  touch-action: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   user-select: none;
   cursor: grab;
   transition:
@@ -2884,10 +2887,29 @@ input::placeholder {
   cursor: grabbing;
 }
 
-/* The next card sits full-size directly behind the top one, so a departing
-   card simply reveals it (no grow-in when it becomes the top card). */
-.discover-card-behind {
-  pointer-events: none;
+/* Each new top card drifts up into place after a short beat, so the deck
+   advances with a soft float rather than an abrupt snap. `backwards` holds the
+   start frame during the delay; no forwards fill, so the inline drag transform
+   takes over cleanly once the entrance finishes. */
+.discover-card-top {
+  animation: card-float-in var(--dur-med) var(--ease-out) 90ms backwards;
+}
+
+@keyframes card-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .discover-card-top {
+    animation: none;
+  }
 }
 
 .discover-card-body {
