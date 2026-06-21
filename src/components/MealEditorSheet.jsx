@@ -532,7 +532,6 @@ function MealEditorSheet({
         <>
           {renderCurrentCard()}
           {renderNightsAndBatch()}
-          {renderExtraIngredients("Add extra ingredient...")}
 
           <button
             type="button"
@@ -595,9 +594,6 @@ function MealEditorSheet({
             )}
           </div>
         </div>
-
-        {selectedRecipeId &&
-          renderExtraIngredients("Add extra ingredient...")}
       </>
     );
   }
