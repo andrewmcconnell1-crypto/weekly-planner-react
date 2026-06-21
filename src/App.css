@@ -3,7 +3,7 @@
   --surface: #fffdf7;
   --panel: #fffdf7;
   --ink: #2a2420;
-  --muted: #8c8175;
+  --muted: #6d6456;
   --line: #e8e0d2;
   --soft: #f1eadd;
   --accent: #bf5840;
@@ -3047,15 +3047,19 @@ input::placeholder {
 
 .discover-wizard-skip {
   align-self: center;
-  padding: var(--space-8) var(--space-12);
-  color: var(--muted);
+  min-height: 40px;
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--panel);
+  color: var(--ink);
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  font-weight: var(--weight-bold);
 }
 
 .discover-wizard-skip:hover {
+  border-color: var(--olive);
+  background: var(--panel);
   color: var(--ink);
 }
 
