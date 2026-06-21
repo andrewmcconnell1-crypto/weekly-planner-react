@@ -14,19 +14,17 @@ const recipes = [
 function setup(props = {}) {
   const onAssign = vi.fn();
   const onClose = vi.fn();
-  const onSetNights = vi.fn();
   render(
     <RecipeDiscoverySheet
       recipes={recipes}
       unplannedDays={["Sunday", "Monday"]}
       plannedRecipeIds={[]}
       onAssign={onAssign}
-      onSetNights={onSetNights}
       onClose={onClose}
       {...props}
     />
   );
-  return { onAssign, onClose, onSetNights };
+  return { onAssign, onClose };
 }
 
 // The deck is now reached through a short guided question flow; skip past it to
@@ -55,15 +53,16 @@ describe("RecipeDiscoverySheet", () => {
     await waitFor(() =>
       expect(onAssign).toHaveBeenCalledWith(
         "Sunday",
-        expect.objectContaining({ id: "r1" })
+        expect.objectContaining({ id: "r1" }),
+        1
       )
     );
     expect(await screen.findByText(/Added/)).toHaveTextContent("Sunday");
   });
 
-  it("sets leftovers when more than one night is chosen", async () => {
+  it("assigns with leftovers when more than one night is chosen", async () => {
     const user = userEvent.setup();
-    const { onSetNights } = setup();
+    const { onAssign } = setup();
 
     await skipWizard(user);
     await user.click(screen.getByRole("button", { name: /Add to Sunday/i }));
@@ -74,7 +73,13 @@ describe("RecipeDiscoverySheet", () => {
     });
     await user.click(within(group).getByRole("button", { name: "2 nights" }));
 
-    expect(onSetNights).toHaveBeenCalledWith("Sunday", 2);
+    await waitFor(() =>
+      expect(onAssign).toHaveBeenCalledWith(
+        "Sunday",
+        expect.objectContaining({ id: "r1" }),
+        2
+      )
+    );
   });
 
   it("commits directly with no nights prompt when leftovers can't fit", async () => {
@@ -94,7 +99,8 @@ describe("RecipeDiscoverySheet", () => {
     await waitFor(() =>
       expect(onAssign).toHaveBeenCalledWith(
         "Wednesday",
-        expect.objectContaining({ id: "r1" })
+        expect.objectContaining({ id: "r1" }),
+        1
       )
     );
   });
@@ -150,7 +156,8 @@ describe("RecipeDiscoverySheet", () => {
     await waitFor(() =>
       expect(onAssign).toHaveBeenCalledWith(
         "Wednesday",
-        expect.objectContaining({ id: "r1" })
+        expect.objectContaining({ id: "r1" }),
+        1
       )
     );
   });
