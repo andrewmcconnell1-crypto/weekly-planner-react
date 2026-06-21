@@ -6,6 +6,7 @@ import {
   ExternalLink,
   PencilLine,
   Repeat2,
+  Replace,
   Search,
   ShoppingBag,
   Sparkles,
@@ -113,6 +114,9 @@ function MealEditorSheet({
   }
 
   const [view, setView] = useState(viewForMeal);
+  // In the recipe view, a planned day opens in edit mode (no list); flipping
+  // this reveals the picker to swap to a different recipe.
+  const [changingRecipe, setChangingRecipe] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
   const [recipeSearchText, setRecipeSearchText] = useState("");
   const [activeRecipeCategory, setActiveRecipeCategory] = useState("All");
@@ -268,6 +272,7 @@ function MealEditorSheet({
     });
 
     setRecipeSearchText("");
+    setChangingRecipe(false);
   }
 
   function clearDay() {
@@ -375,30 +380,17 @@ function MealEditorSheet({
             </span>
           </div>
 
-          {(linkedRecipe?.sourceUrl || onClearDay) && (
+          {linkedRecipe?.sourceUrl && (
             <div className="meal-current-actions">
-              {linkedRecipe?.sourceUrl && (
-                <a
-                  className="meal-current-source"
-                  href={linkedRecipe.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <ExternalLink size={14} aria-hidden="true" />
-                  Source
-                </a>
-              )}
-
-              {onClearDay && (
-                <button
-                  type="button"
-                  className="meal-current-remove"
-                  onClick={clearDay}
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                  Remove plan
-                </button>
-              )}
+              <a
+                className="meal-current-source"
+                href={linkedRecipe.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink size={14} aria-hidden="true" />
+                Source
+              </a>
             </div>
           )}
         </div>
@@ -533,6 +525,27 @@ function MealEditorSheet({
   }
 
   function renderRecipeView() {
+    // A planned recipe opens in edit mode — just the details and a way to swap
+    // — rather than dropping back into the full picker.
+    if (selectedRecipeId && !changingRecipe) {
+      return (
+        <>
+          {renderCurrentCard()}
+          {renderNightsAndBatch()}
+          {renderExtraIngredients("Add extra ingredient...")}
+
+          <button
+            type="button"
+            className="meal-change-recipe-link"
+            onClick={() => setChangingRecipe(true)}
+          >
+            <Replace size={14} aria-hidden="true" />
+            Choose a different recipe
+          </button>
+        </>
+      );
+    }
+
     return (
       <>
         {renderCurrentCard()}
@@ -724,6 +737,19 @@ function MealEditorSheet({
           )}
 
           {view === "chooser" ? renderChooser() : renderDetail()}
+
+          {view !== "chooser" && hasMeal && onClearDay && (
+            <div className="meal-remove-row">
+              <button
+                type="button"
+                className="meal-current-remove"
+                onClick={clearDay}
+              >
+                <Trash2 size={14} aria-hidden="true" />
+                Remove plan
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="sheet-footer">

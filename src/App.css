@@ -3430,9 +3430,10 @@ input::placeholder {
   background: #357f4b;
 }
 
-/* Secondary "or swipe instead" link inside the browse view — swiping has its
-   own first-class tile on the chooser, so this is intentionally low-key. */
-.meal-picker-swipe-link {
+/* Low-key text links inside the meal views: "or swipe instead" in the browse
+   picker, and "choose a different recipe" in the planned-recipe edit view. */
+.meal-picker-swipe-link,
+.meal-change-recipe-link {
   display: inline-flex;
   align-items: center;
   justify-self: start;
@@ -3448,9 +3449,17 @@ input::placeholder {
   text-underline-offset: 3px;
 }
 
-.meal-picker-swipe-link:hover {
+.meal-picker-swipe-link:hover,
+.meal-change-recipe-link:hover {
   background: transparent;
   color: var(--ink);
+}
+
+/* Destructive action parked at the bottom-right of the editor body. */
+.meal-remove-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-4);
 }
 
 /* "New version available" prompt — floats above the bottom nav. */
