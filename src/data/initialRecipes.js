@@ -902,6 +902,17 @@ const SERVES_BY_ID = {
   "falafel-wraps": 4,
   "halloumi-traybake": 4,
   minestrone: 6,
+  "tofu-vegetable-stir-fry": 4,
+  "fish-tacos-slaw": 4,
+  "sausage-bean-traybake": 4,
+  "mushroom-risotto": 4,
+  "beef-broccoli-stir-fry": 4,
+  "chicken-noodle-soup": 5,
+  "pesto-gnocchi": 4,
+  "vegetable-chickpea-curry": 5,
+  "teriyaki-salmon-bowls": 4,
+  "margherita-pizza": 4,
+  "black-bean-quesadillas": 4,
 };
 
 export const initialRecipes = baseRecipes.map((recipeItem) => ({
