@@ -119,7 +119,8 @@ function RecipeDiscoverySheet({
 
   // How many nights this meal could cover from `startDay`: itself plus the run
   // of empty days immediately after it (leftovers fill consecutive days only,
-  // and can't overwrite a planned day or spill past the end of the week).
+  // and can't overwrite a planned day, spill past the end of the week, or
+  // stretch beyond 3 nights).
   function maxLeftoverNights(startDay) {
     const emptyDays = new Set(unplannedDays);
     const startIndex = days.indexOf(startDay);
@@ -128,7 +129,7 @@ function RecipeDiscoverySheet({
 
     let nights = 1;
     for (let index = startIndex + 1; index < days.length; index += 1) {
-      if (!emptyDays.has(days[index])) break;
+      if (!emptyDays.has(days[index]) || nights >= 3) break;
       nights += 1;
     }
 
