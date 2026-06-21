@@ -1388,18 +1388,33 @@ textarea:focus-visible {
   font-weight: var(--weight-semibold);
 }
 
-.meal-current-header a {
+/* Source link styled as a pill so it's a proper tap target and clearly
+   distinct from the Clear button beside it. */
+.meal-current-source {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: #ffffff;
   color: var(--primary);
-  font-size: var(--text-md);
-  font-weight: var(--weight-heavy);
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   white-space: nowrap;
+}
+
+.meal-current-source:hover {
+  border-color: var(--primary);
+  background: var(--accent-soft);
 }
 
 .meal-current-actions {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: var(--space-10);
+  gap: var(--space-12);
 }
 
 .meal-current-clear {
