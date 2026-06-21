@@ -291,7 +291,8 @@ function RecipeDiscoverySheet({
                     className="discover-wizard-yes"
                     onClick={() => answerStep(true)}
                   >
-                    {step.tag}
+                    <Check size={16} aria-hidden="true" />
+                    Yes
                   </button>
                   <button
                     type="button"

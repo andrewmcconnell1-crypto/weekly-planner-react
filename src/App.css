@@ -2929,7 +2929,7 @@ input::placeholder {
   width: 64px;
   height: 64px;
   border-radius: var(--radius-pill);
-  background: var(--olive-tint, rgba(70, 80, 44, 0.12));
+  background: var(--olive-soft);
   color: var(--olive);
 }
 
@@ -2943,38 +2943,44 @@ input::placeholder {
 }
 
 .discover-wizard-options {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-8);
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
 }
 
 .discover-wizard-yes,
 .discover-wizard-no {
-  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 46px;
   border-radius: var(--radius-pill);
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
   font-weight: var(--weight-bold);
 }
 
 .discover-wizard-yes {
-  background: var(--olive);
-  color: #fff;
+  border: 1px solid var(--olive);
+  background: var(--olive-soft);
+  color: var(--olive);
 }
 
 .discover-wizard-yes:hover {
-  background: var(--olive-dark, #3a4226);
+  background: #e3e7cf;
 }
 
 .discover-wizard-no {
   border: 1px solid var(--line);
   background: var(--panel);
-  color: var(--ink);
+  color: var(--muted);
 }
 
 .discover-wizard-no:hover {
   border-color: var(--olive);
+  color: var(--ink);
 }
 
 .discover-wizard-skip {
