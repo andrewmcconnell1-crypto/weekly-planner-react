@@ -375,17 +375,30 @@ function MealEditorSheet({
             </span>
           </div>
 
-          {linkedRecipe?.sourceUrl && (
+          {(linkedRecipe?.sourceUrl || onClearDay) && (
             <div className="meal-current-actions">
-              <a
-                className="meal-current-source"
-                href={linkedRecipe.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink size={14} aria-hidden="true" />
-                Source
-              </a>
+              {linkedRecipe?.sourceUrl && (
+                <a
+                  className="meal-current-source"
+                  href={linkedRecipe.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={14} aria-hidden="true" />
+                  Source
+                </a>
+              )}
+
+              {onClearDay && (
+                <button
+                  type="button"
+                  className="meal-current-remove"
+                  onClick={clearDay}
+                >
+                  <Trash2 size={14} aria-hidden="true" />
+                  Remove meal
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -396,17 +409,6 @@ function MealEditorSheet({
             ingredients={linkedRecipeIngredients}
             method={linkedRecipe?.method || ""}
           />
-        )}
-
-        {onClearDay && (
-          <button
-            type="button"
-            className="meal-current-remove"
-            onClick={clearDay}
-          >
-            <Trash2 size={15} aria-hidden="true" />
-            Remove meal
-          </button>
         )}
       </div>
     );
