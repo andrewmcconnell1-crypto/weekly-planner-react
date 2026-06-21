@@ -1,4 +1,5 @@
 import { aiRecipes } from "./aiRecipes";
+import { webRecipes } from "./webRecipes";
 import { deriveRecipeTags } from "../utils/recipeUtils";
 
 const RECIPETIN_SOURCE = "RecipeTin Eats";
@@ -823,6 +824,10 @@ const baseRecipes = [
 
   // Original recipes — own full method, no source link. See aiRecipes.js.
   ...aiRecipes,
+
+  // Recipes from other websites — curated ingredients, method via source link.
+  // See webRecipes.js.
+  ...webRecipes,
 ];
 
 // Servings per recipe. The RecipeTin entries are taken from each recipe's
@@ -913,6 +918,16 @@ const SERVES_BY_ID = {
   "teriyaki-salmon-bowls": 4,
   "margherita-pizza": 4,
   "black-bean-quesadillas": 4,
+  // Recipes from other websites
+  "bb-coconut-curry-lentils": 4,
+  "ck-vegetarian-chili": 6,
+  "wol-kung-pao-chicken": 4,
+  "mb-coconut-red-curry-chickpeas": 4,
+  "ll-lentil-soup": 6,
+  "wol-mongolian-beef": 4,
+  "ll-pasta-primavera": 4,
+  "wol-shrimp-broccoli": 4,
+  "bb-sausage-peppers-pasta": 5,
 };
 
 export const initialRecipes = baseRecipes.map((recipeItem) => ({
