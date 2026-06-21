@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ChefHat,
   ChevronRight,
+  ExternalLink,
   PencilLine,
   Repeat2,
   Search,
@@ -375,7 +376,13 @@ function MealEditorSheet({
 
           <div className="meal-current-actions">
             {linkedRecipe?.sourceUrl && (
-              <a href={linkedRecipe.sourceUrl} target="_blank" rel="noreferrer">
+              <a
+                className="meal-current-source"
+                href={linkedRecipe.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink size={14} aria-hidden="true" />
                 Source
               </a>
             )}
