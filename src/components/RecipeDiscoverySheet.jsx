@@ -50,6 +50,7 @@ function RecipeDiscoverySheet({
   const [handled, setHandled] = useState(() => new Set());
   const [usedInitial, setUsedInitial] = useState(false);
   const [lastAdded, setLastAdded] = useState(null);
+  const [pendingAdd, setPendingAdd] = useState(null); // { recipe, day, maxNights }
   const [drag, setDrag] = useState({ x: 0, y: 0, active: false });
   const [exiting, setExiting] = useState(null); // { recipe, direction, fromX }
   const [closing, setClosing] = useState(false);
@@ -135,45 +136,66 @@ function RecipeDiscoverySheet({
     return nights;
   }
 
-  function apply(direction, recipe) {
-    if (direction === "right" && nextDay && recipe) {
-      onAssign(nextDay, recipe);
-      setLastAdded({
-        name: recipe.name,
-        day: nextDay,
-        nights: 1,
-        maxNights: onSetNights ? maxLeftoverNights(nextDay) : 1,
-      });
-      if (nextDay === initialDay) setUsedInitial(true);
-    }
-    if (recipe) {
-      setHandled((prev) => new Set(prev).add(recipe.id));
-    }
-  }
-
-  // Bump the just-added meal to cover N nights (cook once, leftovers fill the
-  // following days). Only offered on the toast for the most recent add.
-  function chooseNights(nights) {
-    if (!lastAdded || !onSetNights) return;
-    onSetNights(lastAdded.day, nights);
-    setLastAdded((prev) => (prev ? { ...prev, nights } : prev));
-  }
-
-  // Advance the deck immediately (so the next card sits stationary at centre),
-  // and fly the chosen card off as a separate layer on top from where it was
-  // released — no slide-in, no node reuse.
-  function commit(direction) {
-    if (exiting || !top) return;
-    if (direction === "right" && weekFull) {
-      setDrag({ x: 0, y: 0, active: false }); // nothing to fill — snap back
-      return;
-    }
-    const recipe = top;
-    const fromX = drag.x;
-    apply(direction, recipe);
+  // Fly the chosen card off as a separate layer on top from where it was
+  // released, and drop it into the handled set so the deck advances underneath.
+  function flyOff(recipe, direction, fromX) {
+    setHandled((prev) => new Set(prev).add(recipe.id));
     setDrag({ x: 0, y: 0, active: false });
     setExiting({ recipe, direction, fromX });
     commitTimer.current = window.setTimeout(() => setExiting(null), 320);
+  }
+
+  // Commit an add: assign the recipe, set leftovers if more than one night, and
+  // animate the card away.
+  function finalizeAdd(recipe, day, nights, fromX) {
+    onAssign(day, recipe);
+    if (nights > 1 && onSetNights) onSetNights(day, nights);
+    setLastAdded({ name: recipe.name, day, nights });
+    if (day === initialDay) setUsedInitial(true);
+    flyOff(recipe, "right", fromX);
+  }
+
+  // Confirm the mandatory nights pick for the held card, then commit.
+  function confirmNights(nights) {
+    if (!pendingAdd) return;
+    const { recipe, day } = pendingAdd;
+    setPendingAdd(null);
+    finalizeAdd(recipe, day, nights, 0);
+  }
+
+  // Back out of a held add (e.g. swiped right by mistake) — the card snaps back
+  // and nothing is assigned.
+  function cancelPendingAdd() {
+    setPendingAdd(null);
+    setDrag({ x: 0, y: 0, active: false });
+  }
+
+  // Advance the deck immediately (so the next card sits stationary at centre).
+  // A right commit first holds the card for a mandatory "how many nights?" pick
+  // whenever leftovers are possible; a single-night day commits straight away.
+  function commit(direction) {
+    if (exiting || !top || pendingAdd) return;
+
+    if (direction === "right") {
+      if (weekFull) {
+        setDrag({ x: 0, y: 0, active: false }); // nothing to fill — snap back
+        return;
+      }
+
+      const recipe = top;
+      const maxNights = onSetNights ? maxLeftoverNights(nextDay) : 1;
+
+      if (maxNights > 1) {
+        setDrag({ x: 0, y: 0, active: false }); // hold the card centred
+        setPendingAdd({ recipe, day: nextDay, maxNights });
+        return;
+      }
+
+      finalizeAdd(recipe, nextDay, 1, drag.x);
+      return;
+    }
+
+    flyOff(top, "left", drag.x);
   }
 
   // Axis-lock: don't capture the pointer or start dragging until the gesture
@@ -181,7 +203,7 @@ function RecipeDiscoverySheet({
   // expanded recipe) and plain taps (the "View recipe" toggle) to behave
   // normally.
   function onPointerDown(event) {
-    if (exiting) return;
+    if (exiting || pendingAdd) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     start.current = { x: event.clientX, y: event.clientY };
     axis.current = null;
@@ -424,60 +446,78 @@ function RecipeDiscoverySheet({
             )}
           </div>
 
-          {lastAdded && (
-            <div className="discover-toast" role="status">
-              <p className="discover-toast-text">
-                Added <strong>{lastAdded.name}</strong> to {lastAdded.day}
-              </p>
-
-              {onSetNights && lastAdded.maxNights > 1 && (
-                <div
-                  className="discover-toast-nights"
-                  role="group"
-                  aria-label={`How many nights for ${lastAdded.name}`}
-                >
-                  <span>Cook for</span>
-
-                  {Array.from(
-                    { length: lastAdded.maxNights },
-                    (_, index) => index + 1
-                  ).map((nights) => (
-                    <button
-                      key={nights}
-                      type="button"
-                      className={lastAdded.nights === nights ? "active" : ""}
-                      aria-pressed={lastAdded.nights === nights}
-                      onClick={() => chooseNights(nights)}
-                    >
-                      {nights}
-                    </button>
-                  ))}
-
-                  <span>{lastAdded.nights === 1 ? "night" : "nights"}</span>
-                </div>
-              )}
-            </div>
+          {lastAdded && !pendingAdd && (
+            <p className="discover-toast" role="status">
+              Added <strong>{lastAdded.name}</strong> to {lastAdded.day}
+              {lastAdded.nights > 1
+                ? ` for ${lastAdded.nights} nights`
+                : ""}
+            </p>
           )}
 
-              {!weekFull && top && (
-                <div className="discover-actions">
+              {pendingAdd ? (
+                <div
+                  className="discover-nights"
+                  role="group"
+                  aria-label={`How many nights for ${pendingAdd.recipe.name}`}
+                >
+                  <p className="discover-nights-title">
+                    How many nights will this cover?
+                  </p>
+                  <p className="discover-nights-sub">
+                    Cook once on {pendingAdd.day}, eat the leftovers after.
+                  </p>
+
+                  <div className="discover-nights-options">
+                    {Array.from(
+                      { length: pendingAdd.maxNights },
+                      (_, index) => index + 1
+                    ).map((nights) => (
+                      <button
+                        key={nights}
+                        type="button"
+                        className="discover-nights-option"
+                        aria-label={`${nights} ${
+                          nights === 1 ? "night" : "nights"
+                        }`}
+                        onClick={() => confirmNights(nights)}
+                      >
+                        <strong>{nights}</strong>
+                        <span>{nights === 1 ? "night" : "nights"}</span>
+                      </button>
+                    ))}
+                  </div>
+
                   <button
                     type="button"
-                    className="discover-skip"
-                    onClick={() => commit("left")}
+                    className="discover-nights-cancel"
+                    onClick={cancelPendingAdd}
                   >
-                    <X size={18} aria-hidden="true" />
-                    Skip
-                  </button>
-                  <button
-                    type="button"
-                    className="discover-add"
-                    onClick={() => commit("right")}
-                  >
-                    <Check size={18} aria-hidden="true" />
-                    Add to {nextDay}
+                    Cancel
                   </button>
                 </div>
+              ) : (
+                !weekFull &&
+                top && (
+                  <div className="discover-actions">
+                    <button
+                      type="button"
+                      className="discover-skip"
+                      onClick={() => commit("left")}
+                    >
+                      <X size={18} aria-hidden="true" />
+                      Skip
+                    </button>
+                    <button
+                      type="button"
+                      className="discover-add"
+                      onClick={() => commit("right")}
+                    >
+                      <Check size={18} aria-hidden="true" />
+                      Add to {nextDay}
+                    </button>
+                  </div>
+                )
               )}
             </>
           )}

@@ -36,13 +36,21 @@ function skipWizard(user) {
 }
 
 describe("RecipeDiscoverySheet", () => {
-  it("assigns the top recipe to the next empty day on Add", async () => {
+  it("assigns the top recipe after the mandatory nights pick", async () => {
     const user = userEvent.setup();
     const { onAssign } = setup();
 
     await skipWizard(user);
     expect(screen.getByText("Beef Tacos")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Add to Sunday/i }));
+
+    // Nothing is assigned until a night count is chosen.
+    expect(onAssign).not.toHaveBeenCalled();
+
+    const group = await screen.findByRole("group", {
+      name: /how many nights/i,
+    });
+    await user.click(within(group).getByRole("button", { name: "1 night" }));
 
     await waitFor(() =>
       expect(onAssign).toHaveBeenCalledWith(
@@ -53,7 +61,7 @@ describe("RecipeDiscoverySheet", () => {
     expect(await screen.findByText(/Added/)).toHaveTextContent("Sunday");
   });
 
-  it("offers a leftovers nights control on the toast after adding", async () => {
+  it("sets leftovers when more than one night is chosen", async () => {
     const user = userEvent.setup();
     const { onSetNights } = setup();
 
@@ -64,9 +72,31 @@ describe("RecipeDiscoverySheet", () => {
     const group = await screen.findByRole("group", {
       name: /how many nights/i,
     });
-    await user.click(within(group).getByRole("button", { name: "2" }));
+    await user.click(within(group).getByRole("button", { name: "2 nights" }));
 
     expect(onSetNights).toHaveBeenCalledWith("Sunday", 2);
+  });
+
+  it("commits directly with no nights prompt when leftovers can't fit", async () => {
+    const user = userEvent.setup();
+    // Wednesday has no following empty day, so there's no nights choice.
+    const { onAssign } = setup({
+      initialDay: "Wednesday",
+      unplannedDays: ["Wednesday"],
+    });
+
+    await skipWizard(user);
+    await user.click(screen.getByRole("button", { name: /Add to Wednesday/i }));
+
+    expect(
+      screen.queryByRole("group", { name: /how many nights/i })
+    ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(onAssign).toHaveBeenCalledWith(
+        "Wednesday",
+        expect.objectContaining({ id: "r1" })
+      )
+    );
   });
 
   it("narrows the deck by tag filter", async () => {
