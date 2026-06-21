@@ -22,10 +22,16 @@ import RecipeFilter from "./RecipeFilter";
 // of facing the whole picker + "or instead" pile at once.
 const MEAL_TYPES = [
   {
+    id: "swipe",
+    icon: Sparkles,
+    title: "Swipe to find a meal",
+    blurb: "Flip through ideas, add with a swipe",
+  },
+  {
     id: "recipe",
     icon: ChefHat,
-    title: "Cook a recipe",
-    blurb: "Pick from your recipes or swipe to find one",
+    title: "Browse your recipes",
+    blurb: "Search and pick from the list",
   },
   {
     id: "custom",
@@ -224,6 +230,11 @@ function MealEditorSheet({
   // choice implies up front (takeaway / eating out are decided on the spot;
   // recipe / repeat wait for a further pick).
   function chooseType(typeId) {
+    if (typeId === "swipe") {
+      onFindMeals?.();
+      return;
+    }
+
     if (typeId === "custom") {
       if (mealType !== "cook" || selectedRecipeId) {
         updateMeal(day, {
@@ -477,7 +488,9 @@ function MealEditorSheet({
         <p className="meal-type-prompt">How are you eating {day}?</p>
 
         <div className="meal-type-list">
-          {MEAL_TYPES.map((type) => {
+          {MEAL_TYPES.filter(
+            (type) => type.id !== "swipe" || onFindMeals
+          ).map((type) => {
             const Icon = type.icon;
 
             return (
@@ -519,11 +532,11 @@ function MealEditorSheet({
           {onFindMeals && (
             <button
               type="button"
-              className="meal-picker-discover"
+              className="meal-picker-swipe-link"
               onClick={onFindMeals}
             >
-              <Sparkles size={16} aria-hidden="true" />
-              Find meals by swiping
+              <Sparkles size={14} aria-hidden="true" />
+              Or swipe through ideas instead
             </button>
           )}
 
