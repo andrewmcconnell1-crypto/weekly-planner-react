@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, X } from "lucide-react";
 
+import RecipeDetail from "./RecipeDetail";
 import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
 
 // Swipe-to-plan: a filtered deck of recipe cards. Swipe right (or "Add") drops
@@ -25,6 +26,8 @@ function RecipeDiscoverySheet({
   const [exiting, setExiting] = useState(null); // { recipe, direction, fromX }
   const [closing, setClosing] = useState(false);
   const start = useRef({ x: 0, y: 0 });
+  const axis = useRef(null); // null until the gesture locks to "x" or "y"
+  const activePointer = useRef(null);
   const closeTimer = useRef(null);
   const commitTimer = useRef(null);
 
@@ -91,25 +94,41 @@ function RecipeDiscoverySheet({
     commitTimer.current = window.setTimeout(() => setExiting(null), 320);
   }
 
+  // Axis-lock: don't capture the pointer or start dragging until the gesture
+  // proves itself horizontal. That leaves vertical drags (scrolling the
+  // expanded recipe) and plain taps (the "View recipe" toggle) to behave
+  // normally.
   function onPointerDown(event) {
     if (exiting) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     start.current = { x: event.clientX, y: event.clientY };
-    setDrag({ x: 0, y: 0, active: true });
-    event.currentTarget.setPointerCapture(event.pointerId);
+    axis.current = null;
+    activePointer.current = event.pointerId;
   }
 
   function onPointerMove(event) {
-    if (!drag.active) return;
-    setDrag({
-      x: event.clientX - start.current.x,
-      y: event.clientY - start.current.y,
-      active: true,
-    });
+    if (activePointer.current !== event.pointerId) return;
+    const x = event.clientX - start.current.x;
+    const y = event.clientY - start.current.y;
+
+    if (!axis.current) {
+      if (Math.abs(x) < 8 && Math.abs(y) < 8) return;
+      axis.current = Math.abs(x) > Math.abs(y) ? "x" : "y";
+      if (axis.current === "x") {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+    }
+
+    if (axis.current !== "x") return;
+    setDrag({ x, y, active: true });
   }
 
-  function onPointerUp() {
-    if (!drag.active) return;
+  function onPointerUp(event) {
+    if (activePointer.current !== event.pointerId) return;
+    activePointer.current = null;
+    const wasHorizontal = axis.current === "x";
+    axis.current = null;
+    if (!wasHorizontal) return;
     if (drag.x > SWIPE_AT) commit("right");
     else if (drag.x < -SWIPE_AT) commit("left");
     else setDrag({ x: 0, y: 0, active: false });
@@ -211,21 +230,12 @@ function RecipeDiscoverySheet({
               </div>
             ) : (
               <div className="discover-deck">
-                {!weekFull && deck[1] && (
-                  <article
-                    key={deck[1].id}
-                    className="discover-card discover-card-behind"
-                  >
-                    <DeckCardBody recipe={deck[1]} />
-                  </article>
-                )}
-
                 {!weekFull && top && (
                   <article
                     key={top.id}
-                    className={`discover-card ${drag.active ? "dragging" : ""} ${
-                      hint ? `discover-card-${hint}` : ""
-                    }`}
+                    className={`discover-card discover-card-top ${
+                      drag.active ? "dragging" : ""
+                    } ${hint ? `discover-card-${hint}` : ""}`}
                     style={cardStyle}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
@@ -320,6 +330,13 @@ function DeckCardBody({ recipe }) {
       <p className="discover-card-count">
         {recipe.ingredients?.length || 0} ingredients
       </p>
+
+      <RecipeDetail
+        variant="hero"
+        ingredients={recipe.ingredients || []}
+        method={recipe.method || ""}
+        sourceUrl={recipe.sourceUrl || ""}
+      />
     </div>
   );
 }
