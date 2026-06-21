@@ -396,7 +396,7 @@ function MealEditorSheet({
                   onClick={clearDay}
                 >
                   <Trash2 size={14} aria-hidden="true" />
-                  Remove meal
+                  Remove plan
                 </button>
               )}
             </div>
