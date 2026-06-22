@@ -51,6 +51,7 @@ import { isSupabaseConfigured } from "./lib/supabase";
 import { useAuth } from "./hooks/useAuth";
 import { usePlannerStore } from "./hooks/usePlannerStore";
 import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
+import useBackToClose from "./hooks/useBackToClose";
 import { categories } from "./data/categories";
 
 function LoadingScreen({ message }) {
@@ -155,6 +156,22 @@ function App() {
   const [newRecipeName, setNewRecipeName] = useState("");
   const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
+
+  // Let the device / browser Back button close whichever overlay sheet is open
+  // instead of leaving the app. One coordinator (not one per sheet) keeps a
+  // single history entry across hand-offs like editor -> discovery.
+  const closeOpenOverlay = expandedMealDay
+    ? () => setExpandedMealDay(null)
+    : discoverOpen
+      ? () => {
+          setDiscoverOpen(false);
+          setDiscoverDay(null);
+        }
+      : shoppingHelpOpen
+        ? () => setShoppingHelpOpen(false)
+        : null;
+
+  useBackToClose(Boolean(closeOpenOverlay), () => closeOpenOverlay?.());
 
   const keepStandingList = settings?.keepStandingList !== false;
   // Per-trip: are we using the saved list (online order) or shopping fresh?
