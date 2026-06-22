@@ -803,7 +803,7 @@ textarea:focus-visible {
   padding: var(--space-16) var(--space-16) var(--space-16) var(--space-14);
 }
 
-.welcome-card strong {
+.welcome-card > strong {
   font-size: var(--text-xl);
 }
 
@@ -826,18 +826,39 @@ textarea:focus-visible {
 }
 
 .welcome-steps {
-  margin: var(--space-2) 0 0;
-  padding-left: 1.3rem;
   display: grid;
-  gap: var(--space-6);
-  color: var(--ink);
-  font-size: var(--text-md);
-  line-height: 1.4;
+  gap: var(--space-12);
+  margin: var(--space-4) 0 var(--space-2);
 }
 
-.welcome-steps span {
+.welcome-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: start;
+}
+
+.welcome-step-num {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--olive-soft);
+  color: var(--olive);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-heavy);
+}
+
+.welcome-step p {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-md);
+  line-height: 1.45;
+}
+
+.welcome-step strong {
   font-weight: var(--weight-bold);
-  color: var(--accent);
 }
 
 .welcome-cta {
