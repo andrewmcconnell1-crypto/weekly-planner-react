@@ -1086,28 +1086,32 @@ function App() {
               <p className="section-kicker">Getting started</p>
               <strong>Here's how it works</strong>
 
-              <ol className="welcome-steps">
-                <li>
-                  <span>Plan your week</span> — on Meals, pick a recipe for each
-                  night. Cook once and reuse leftovers across several nights, or
-                  mark a takeaway / night out.
-                </li>
-                <li>
-                  <span>Set up household basics</span> — in Kitchen, list your
-                  recurring buys (things you get most weeks) and tick what's
-                  already in stock.
-                </li>
-                <li>
-                  <span>Your shopping list builds itself</span> — the Shop page
-                  lists your meal ingredients automatically, skips anything in
-                  stock, and orders it by when you'll need it. Tap “How shopping
-                  works” there for the full picture.
-                </li>
-                <li>
-                  <span>Shop</span> — check items off as you go. The Today screen
-                  always shows what's for dinner tonight.
-                </li>
-              </ol>
+              <div className="welcome-steps">
+                <div className="welcome-step">
+                  <span className="welcome-step-num">1</span>
+                  <p>
+                    <strong>Plan your week</strong> — pick recipes for each night
+                    on Meals; cook once and reuse leftovers.
+                  </p>
+                </div>
+
+                <div className="welcome-step">
+                  <span className="welcome-step-num">2</span>
+                  <p>
+                    <strong>Stock the basics</strong> — add recurring buys in
+                    Kitchen and tick what's already in stock.
+                  </p>
+                </div>
+
+                <div className="welcome-step">
+                  <span className="welcome-step-num">3</span>
+                  <p>
+                    <strong>Shop the auto-list</strong> — Shop builds your list
+                    from your meals, skips what's in stock, and orders it by when
+                    you'll need it.
+                  </p>
+                </div>
+              </div>
 
               <button
                 type="button"
