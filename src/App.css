@@ -4441,11 +4441,13 @@ input::placeholder {
   flex-shrink: 0;
 }
 
-/* Unplanned day = a clearly empty, fillable slot (single "needs action" cue) */
+/* Unplanned day = a clearly empty, fillable slot. Dashed border keeps it
+   distinct from planned cards, but a solid surface background (not transparent)
+   stops it blending into the page. */
 .plan-screen .meal-card.meal-card-empty,
 .home-screen .meal-card.meal-card-empty {
   border-style: dashed;
-  background: transparent;
+  background: var(--surface);
   box-shadow: none;
 }
 
@@ -4464,6 +4466,6 @@ input::placeholder {
   width: 30px;
   height: 30px;
   border-radius: var(--radius-pill);
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
 }
