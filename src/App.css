@@ -2879,12 +2879,6 @@ input::placeholder {
   color: var(--ink);
 }
 
-/* Keep the focus ring on the brand olive so toggling a chip off never
-   flashes the rust-coloured global focus outline (reads as an error). */
-.recipe-tag-toggle:focus-visible {
-  outline-color: rgba(95, 106, 58, 0.4);
-}
-
 /* Meal-plan hero actions */
 .page-hero-actions {
   display: flex;
