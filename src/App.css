@@ -3209,22 +3209,25 @@ input::placeholder {
   position: absolute;
   top: var(--space-16);
   padding: var(--space-4) var(--space-12);
-  border: 3px solid currentColor;
+  border: 3px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-sm);
+  color: #ffffff;
   font-size: var(--text-xl);
   font-weight: var(--weight-heavy);
   letter-spacing: 0.08em;
 }
 
+/* Solid fills (not transparent outlines) so the stamp is unmissable over the
+   card; the ADD/SKIP label keeps it readable without relying on the colour. */
 .discover-stamp-add {
   left: var(--space-16);
-  color: #b9dd8f;
+  background: #3f9b5b;
   transform: rotate(-12deg);
 }
 
 .discover-stamp-skip {
   right: var(--space-16);
-  color: #f0a79c;
+  background: #c0473a;
   transform: rotate(12deg);
 }
 
