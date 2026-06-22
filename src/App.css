@@ -19,8 +19,6 @@
   --radius: 14px;
   --font-display: "Fraunces", Georgia, serif;
   --meal-tone: #e3d8c6;
-  --meal-soft: #f1eadd;
-  --meal-ink: #8c8175;
 
   /* Motion tokens (a little more pronounced; --ease-spring adds a gentle
      overshoot on entrances). */
