@@ -2863,11 +2863,14 @@ input::placeholder {
   font-weight: var(--weight-semibold);
 }
 
+/* Solid fill when active so selection reads from fill + lightness, not an
+   olive hue alone (matches the category filter chips, and keeps the state
+   legible with colour vision deficiency). */
 .recipe-tag-toggle.active,
 .recipe-tag-toggle.active:hover {
   border-color: var(--olive);
-  background: var(--olive-soft);
-  color: var(--olive);
+  background: var(--olive);
+  color: #ffffff;
 }
 
 /* Unselected chips must override the global `button:hover` (which paints the
