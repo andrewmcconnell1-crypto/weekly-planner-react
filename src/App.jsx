@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   House,
   CalendarDays,
@@ -19,6 +19,7 @@ import ShoppingList from "./components/ShoppingList";
 import WeekControls from "./components/WeekControls";
 import SignInScreen from "./components/SignInScreen";
 import UpdateBanner from "./components/UpdateBanner";
+import UndoSnackbar from "./components/UndoSnackbar";
 
 // Lazily loaded: bottom-sheet editors (opened on demand) and the secondary
 // Kitchen/Settings screens (behind navigation) — kept out of the initial bundle.
@@ -172,6 +173,25 @@ function App() {
         : null;
 
   useBackToClose(Boolean(closeOpenOverlay), () => closeOpenOverlay?.());
+
+  // Transient "Undo" snackbar for destructive actions. Each action snapshots the
+  // affected state, mutates, then registers an undo that restores the snapshot.
+  const [undoState, setUndoState] = useState(null); // { message, onUndo }
+  const undoTimerRef = useRef(null);
+
+  function requestUndo(message, onUndo) {
+    window.clearTimeout(undoTimerRef.current);
+    setUndoState({ message, onUndo });
+    undoTimerRef.current = window.setTimeout(() => setUndoState(null), 6000);
+  }
+
+  function runUndo() {
+    window.clearTimeout(undoTimerRef.current);
+    undoState?.onUndo?.();
+    setUndoState(null);
+  }
+
+  useEffect(() => () => window.clearTimeout(undoTimerRef.current), []);
 
   const keepStandingList = settings?.keepStandingList !== false;
   // Per-trip: are we using the saved list (online order) or shopping fresh?
@@ -512,6 +532,7 @@ function App() {
   // Reset a day to unplanned, along with any repeat days that pointed at it
   // (otherwise they'd dangle as "Same as <day>" with no source meal).
   function clearMealDay(day) {
+    const snapshot = meals;
     const updatedMeals = { ...meals, [day]: createEmptyMeal() };
 
     for (const otherDay of days) {
@@ -529,6 +550,10 @@ function App() {
       ...mealsByWeek,
       [mealWeekKey]: updatedMeals,
     });
+
+    requestUndo(`Removed ${day}'s plan`, () =>
+      setMealsByWeek((prev) => ({ ...prev, [mealWeekKey]: snapshot }))
+    );
   }
 
   // Drop a recipe onto a day as a cooked meal (used by the discovery deck),
@@ -685,8 +710,14 @@ function App() {
   }
 
   function deleteShoppingItem(id) {
+    const snapshot = manualShoppingItems;
+    const removed = manualShoppingItems.find((item) => item.id === id);
     setManualShoppingItems(
       manualShoppingItems.filter((item) => item.id !== id)
+    );
+    requestUndo(
+      removed?.name ? `Removed “${removed.name}”` : "Removed item",
+      () => setManualShoppingItems(snapshot)
     );
   }
 
@@ -742,7 +773,13 @@ function App() {
   }
 
   function deleteStaple(id) {
+    const snapshot = staples;
+    const removed = staples.find((staple) => staple.id === id);
     setStaples(staples.filter((staple) => staple.id !== id));
+    requestUndo(
+      removed?.name ? `Removed “${removed.name}”` : "Removed item",
+      () => setStaples(snapshot)
+    );
   }
 
   function updateStapleFrequency(id, frequency) {
@@ -802,7 +839,13 @@ function App() {
   }
 
   function deleteInventoryItem(id) {
+    const snapshot = inventory;
+    const removed = inventory.find((item) => item.id === id);
     setInventory(inventory.filter((item) => item.id !== id));
+    requestUndo(
+      removed?.name ? `Removed “${removed.name}”` : "Removed item",
+      () => setInventory(snapshot)
+    );
   }
 
   function updateInventoryCategory(id, category) {
@@ -884,13 +927,12 @@ function App() {
 
   function deleteRecipe(id) {
     const recipe = recipes.find((item) => item.id === id);
-    const shouldDelete = window.confirm(
-      `Delete "${recipe?.name || "this recipe"}"? Its ingredients and method will be removed. This can't be undone.`
-    );
-
-    if (!shouldDelete) return false;
-
+    const snapshot = recipes;
     setRecipes(recipes.filter((item) => item.id !== id));
+    requestUndo(
+      recipe?.name ? `Deleted “${recipe.name}”` : "Deleted recipe",
+      () => setRecipes(snapshot)
+    );
     return true;
   }
 
@@ -1533,6 +1575,10 @@ function App() {
 
       {updateReady && (
         <UpdateBanner onReload={() => window.location.reload()} />
+      )}
+
+      {undoState && (
+        <UndoSnackbar message={undoState.message} onUndo={runUndo} />
       )}
 
       {discoverOpen && (

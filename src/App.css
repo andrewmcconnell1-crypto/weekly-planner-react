@@ -3487,6 +3487,68 @@ input::placeholder {
 }
 
 /* "New version available" prompt — floats above the bottom nav. */
+/* Undo snackbar — a dark transient toast floating above the nav (and sheets). */
+.undo-snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  width: min(92%, 440px);
+  border-radius: var(--radius-md);
+  background: var(--ink);
+  color: #f7f1e6;
+  padding: var(--space-10) var(--space-10) var(--space-10) var(--space-16);
+  box-shadow: var(--shadow-lg);
+  animation: undo-in var(--dur-med) var(--ease-out);
+}
+
+.undo-snackbar-msg {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.undo-snackbar-action {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 0;
+  border: 1px solid rgba(247, 241, 230, 0.32);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: #f7f1e6;
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.undo-snackbar-action:hover {
+  background: rgba(247, 241, 230, 0.14);
+}
+
+@keyframes undo-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .undo-snackbar {
+    animation: none;
+  }
+}
+
 .update-banner {
   position: fixed;
   left: 50%;
