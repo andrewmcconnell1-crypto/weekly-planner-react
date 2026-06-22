@@ -91,15 +91,9 @@
   min-height: 0;
 }
 
-/* Press feedback on the main tappable surfaces — springs back on release. */
-.recipe-row,
-.meal-row-button,
-.category-toggle,
-.subcategory-toggle,
-.basics-edit-toggle,
-.add-recipe-toggle,
-.tonight-action,
-.sheet-footer > button {
+/* One interaction model for every button: a quick state transition, a springy
+   press that springs back on release, and a clear disabled state. */
+button {
   transition:
     transform var(--dur-fast) var(--ease-spring),
     background var(--dur-fast) var(--ease-standard),
@@ -108,15 +102,13 @@
     box-shadow var(--dur-fast) var(--ease-standard);
 }
 
-.recipe-row:active,
-.meal-row-button:active,
-.category-toggle:active,
-.subcategory-toggle:active,
-.basics-edit-toggle:active,
-.add-recipe-toggle:active,
-.tonight-action:active,
-.sheet-footer > button:active {
-  transform: scale(0.96);
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Custom checkbox with a satisfying tick — the box pops and a white check
@@ -307,6 +299,7 @@ button {
   background: var(--primary);
   color: #fff;
   padding: var(--space-10) var(--space-14);
+  font-size: var(--text-md);
   font-weight: var(--weight-bold);
   cursor: pointer;
 }
