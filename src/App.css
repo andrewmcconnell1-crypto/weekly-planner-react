@@ -4,18 +4,25 @@
   --panel: #fffdf7;
   --ink: #2a2420;
   --muted: #6d6456;
-  --line: #e8e0d2;
+  --line: #ece6d9;
   --soft: #f1eadd;
-  --accent: #bf5840;
-  --accent-strong: #9c4632;
-  --accent-soft: #f6e7df;
+  /* Olive is the calm UI primary; rust is reserved as a rare warm accent
+     (the dark Tonight hero + its CTA), not the everything-colour it had become. */
+  --accent: var(--olive);
+  --accent-strong: #4c5530;
+  --accent-soft: var(--olive-soft);
   --olive: #5f6a3a;
   --olive-soft: #edefdf;
-  --primary: #bf5840;
-  --primary-strong: #9c4632;
+  --primary: var(--olive);
+  --primary-strong: #4c5530;
+  --rust: #bf5840;
+  --rust-strong: #9c4632;
+  --rust-soft: #f6e7df;
   --danger: #a23b2b;
-  --shadow: 0 6px 22px rgba(74, 48, 26, 0.08);
-  --shadow-lg: 0 16px 40px rgba(74, 48, 26, 0.12);
+  /* Layered, tighter shadows (a soft contact shadow + a wider ambient one)
+     read more refined than a single muddy brown blur. */
+  --shadow: 0 1px 2px rgba(43, 33, 24, 0.05), 0 8px 24px -10px rgba(43, 33, 24, 0.12);
+  --shadow-lg: 0 2px 6px rgba(43, 33, 24, 0.06), 0 24px 48px -16px rgba(43, 33, 24, 0.16);
   --radius: 14px;
   --font-display: "Fraunces", Georgia, serif;
   --meal-tone: #e3d8c6;
@@ -39,7 +46,7 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-pill: 999px;
-  --elev-1: 0 1px 2px rgba(74, 48, 26, 0.06);
+  --elev-1: 0 1px 2px rgba(43, 33, 24, 0.05);
   --elev-2: var(--shadow);
   --elev-3: var(--shadow-lg);
 
@@ -318,7 +325,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(191, 88, 64, 0.32);
+  outline: 3px solid rgba(95, 106, 58, 0.4);
   outline-offset: 2px;
 }
 
@@ -774,13 +781,13 @@ textarea:focus-visible {
 .tonight-action {
   justify-self: start;
   margin-top: var(--space-4);
-  background: var(--accent);
+  background: var(--rust);
   color: #fff;
   padding: var(--space-10) var(--space-16);
 }
 
 .tonight-action:hover {
-  background: #cf6249;
+  background: var(--rust-strong);
 }
 
 /* Home guided 3-step flow */
@@ -1881,8 +1888,8 @@ input::placeholder {
 }
 
 .shop-hero {
-  border: 1px solid #e0b6a1;
-  background: linear-gradient(152deg, #f0c0a8 0%, #f6dccd 100%);
+  border: 1px solid #c6cdb2;
+  background: linear-gradient(152deg, #d7ddc4 0%, #ecedde 100%);
 }
 
 .shop-hero.needs-update {
@@ -1942,13 +1949,13 @@ input::placeholder {
 }
 
 .shop-hero .page-hero-action:hover {
-  background: #cf6249;
+  background: #525c33;
 }
 
 .shop-hero-progress {
   height: 8px;
   border-radius: var(--radius-pill);
-  background: rgba(156, 70, 50, 0.16);
+  background: rgba(95, 106, 58, 0.16);
   overflow: hidden;
 }
 
