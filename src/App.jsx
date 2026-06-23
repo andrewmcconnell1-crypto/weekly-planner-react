@@ -9,6 +9,8 @@ import {
   Repeat2,
   Package,
   ChevronLeft,
+  ChevronRight,
+  X,
 } from "lucide-react";
 import "./App.css";
 
@@ -1139,7 +1141,7 @@ function App() {
                 aria-label="Dismiss"
                 onClick={dismissWelcome}
               >
-                ✕
+                <X size={16} aria-hidden="true" />
               </button>
 
               <p className="section-kicker">Getting started</p>
@@ -1193,7 +1195,8 @@ function App() {
                       className="home-link"
                       onClick={() => setActiveTab("plan")}
                     >
-                      Full plan ›
+                      Full plan
+                      <ChevronRight size={15} aria-hidden="true" />
                     </button>
                   </div>
 
@@ -1241,7 +1244,7 @@ function App() {
                   </span>
                 </span>
 
-                <span className="home-step-chevron">›</span>
+                <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
               </button>
 
               <button
@@ -1259,7 +1262,7 @@ function App() {
                   </span>
                 </span>
 
-                <span className="home-step-chevron">›</span>
+                <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
               </button>
 
               <button
@@ -1277,7 +1280,7 @@ function App() {
                   </span>
                 </span>
 
-                <span className="home-step-chevron">›</span>
+                <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
               </button>
             </div>
           )}
@@ -1434,7 +1437,7 @@ function App() {
                       {recipes.length === 1 ? "" : "s"}
                     </span>
                   </span>
-                  <span className="home-step-chevron">›</span>
+                  <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
                 </button>
 
                 <button
@@ -1449,7 +1452,7 @@ function App() {
                     <strong>Recurring buys</strong>
                     <span>{activeStaplesCount} on your list</span>
                   </span>
-                  <span className="home-step-chevron">›</span>
+                  <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
                 </button>
 
                 <button
@@ -1464,7 +1467,7 @@ function App() {
                     <strong>Stock</strong>
                     <span>{activeInventoryCount} in stock</span>
                   </span>
-                  <span className="home-step-chevron">›</span>
+                  <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
                 </button>
               </div>
             </>
