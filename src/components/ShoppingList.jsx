@@ -1,4 +1,4 @@
-import { HelpCircle, X } from "lucide-react";
+import { ChevronDown, HelpCircle, X } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
 import {
@@ -246,7 +246,16 @@ function ShoppingList({
             <details className="done-section">
               <summary>
                 <span>Done</span>
-                <span>{doneItems.length}</span>
+                <span className="section-collapse-end">
+                  <span className="section-collapse-count">
+                    {doneItems.length}
+                  </span>
+                  <ChevronDown
+                    className="section-collapse-chevron"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                </span>
               </summary>
               <ul className="clean-list">{doneItems.map(renderRow)}</ul>
             </details>
@@ -258,7 +267,16 @@ function ShoppingList({
         <details className="skipped-section">
           <summary>
             <span>Already have</span>
-            <span>{skippedItems.length}</span>
+            <span className="section-collapse-end">
+              <span className="section-collapse-count">
+                {skippedItems.length}
+              </span>
+              <ChevronDown
+                className="section-collapse-chevron"
+                size={16}
+                aria-hidden="true"
+              />
+            </span>
           </summary>
 
           <p className="small-text">

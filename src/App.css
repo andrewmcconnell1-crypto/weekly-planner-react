@@ -2084,9 +2084,7 @@ textarea::placeholder {
   color: var(--ink);
 }
 
-.shopping-section-header > span,
-.done-section summary span:last-child,
-.skipped-section summary span:last-child {
+.shopping-section-header > span {
   border-radius: var(--radius-pill);
   background: var(--soft);
   color: var(--primary-strong);
@@ -2278,11 +2276,65 @@ textarea::placeholder {
 }
 
 .skipped-section .small-text {
-  margin: 0 var(--space-12);
+  margin: 0;
 }
 
 .skipped-section .clean-list {
-  padding: 0 var(--space-12) var(--space-4);
+  padding: 0 0 var(--space-4);
+}
+
+/* Done / Already-have are secondary, so they read as collapsible section
+   headers in the list's own kicker language — not heavy bordered cards. */
+.done-section,
+.skipped-section {
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: var(--space-4) 0 0;
+  gap: var(--space-4);
+}
+
+.done-section summary,
+.skipped-section summary {
+  min-height: 40px;
+  padding: var(--space-8) 0;
+  color: var(--olive);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.section-collapse-end {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.section-collapse-count {
+  border-radius: var(--radius-pill);
+  background: var(--soft);
+  color: var(--olive);
+  padding: var(--space-2) var(--space-8);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0;
+}
+
+.section-collapse-chevron {
+  color: var(--muted);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.done-section[open] .section-collapse-chevron,
+.skipped-section[open] .section-collapse-chevron {
+  transform: rotate(180deg);
+}
+
+.done-section .clean-list {
+  padding: var(--space-4) 0 var(--space-8);
 }
 
 .skipped-row {
@@ -2331,13 +2383,8 @@ textarea::placeholder {
   content: "-";
 }
 
-.done-section[open] summary,
 .manual-add-panel[open] summary {
   border-bottom: 1px solid var(--line);
-}
-
-.done-section .clean-list {
-  padding: var(--space-12);
 }
 
 .small-text {
