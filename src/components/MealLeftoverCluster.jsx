@@ -1,4 +1,4 @@
-import { ChevronRight, CornerDownRight } from "lucide-react";
+import { ChevronRight, CookingPot, CornerDownRight } from "lucide-react";
 
 // A cook day plus the leftover (repeat) days that follow it, rendered as one
 // merged card: the cook day is emphasised on top, the leftover nights hang
@@ -14,17 +14,20 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
       data-tone={leadSummary.tone}
     >
       <button
-        className="meal-row-button meal-row-button-nobadge"
+        className="meal-row-button"
         type="button"
         onClick={() => onOpenDay(leadDay)}
       >
-        <span className="meal-row-day">{leadDay}</span>
+        <span className="meal-type-badge">
+          <CookingPot size={20} aria-hidden="true" />
+        </span>
 
         <span className="meal-row-main">
+          <span className="meal-row-day">{leadDay}</span>
           <strong>{leadName}</strong>
-          <span>
-            {leadSummary.label} · cook once, eat {coversNights} nights
-            {batches > 1 ? ` · ×${batches} batch` : ""}
+          <span className="meal-row-sub">
+            Cook once · eat {coversNights} nights
+            {batches > 1 ? ` · ×${batches}` : ""}
           </span>
         </span>
 
