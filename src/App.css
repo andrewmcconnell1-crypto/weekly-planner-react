@@ -1225,30 +1225,33 @@ textarea:focus-visible {
   padding: var(--space-14);
 }
 
-/* Editorial "menu" list: each day is a divider-separated row (no card), with
-   the day as a colour-coded kicker and the dish in the display serif. */
+/* Each day is a card, organised by meal TYPE: a coloured icon badge (cook =
+   olive, takeaway / eating out = rust, leftovers = soft) plus the dish, so the
+   kind of night reads at a glance. */
 .meal-grid {
-  gap: 0;
+  gap: var(--space-10);
 }
 
 .meal-card {
   display: grid;
-  gap: 0;
   padding: 0;
   overflow: hidden;
 }
 
 .plan-screen .meal-card,
 .home-screen .meal-card {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
-.plan-screen .meal-card + .meal-card,
-.home-screen .meal-card + .meal-card {
-  border-top: 1px solid var(--line);
+/* Empty day: an inviting outlined "add" tile, not a faded meal card. */
+.plan-screen .meal-card-empty,
+.home-screen .meal-card-empty {
+  background: transparent;
+  border-style: dashed;
+  box-shadow: none;
 }
 
 .group-count,
@@ -1263,57 +1266,94 @@ textarea:focus-visible {
 
 .meal-row-button {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: var(--space-10);
-  row-gap: var(--space-2);
+  gap: var(--space-12);
   width: 100%;
-  min-height: 66px;
+  min-height: 70px;
   border: 0;
   border-radius: 0;
   background: transparent;
   color: var(--ink);
-  padding: var(--space-14) var(--space-2);
+  padding: var(--space-12) var(--space-14);
   text-align: left;
 }
 
-.meal-row-day {
-  grid-column: 1;
-  grid-row: 1;
-  width: auto;
-  color: color-mix(in srgb, var(--recipe-tone, var(--olive)) 70%, var(--ink));
-  font-size: var(--text-xs);
-  font-weight: var(--weight-heavy);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.meal-row-button:hover {
+  background: var(--soft);
 }
 
-.meal-card-empty .meal-row-day {
-  color: var(--muted);
+/* Meal-type icon badge: colour says cook (olive) vs takeaway / eating out
+   (rust); the icon says which type. */
+.meal-type-badge {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--olive-soft);
+  color: var(--olive);
+}
+
+.meal-card-takeaway .meal-type-badge,
+.meal-card-eating-out .meal-type-badge {
+  background: var(--rust-soft);
+  color: var(--rust-strong);
+}
+
+.meal-card-leftovers .meal-type-badge {
+  background: var(--soft);
+  color: var(--olive);
+}
+
+.meal-card-empty .meal-type-badge {
+  background: transparent;
+  border: 1.5px dashed var(--olive);
+  color: var(--olive);
 }
 
 .meal-row-main {
-  grid-column: 1;
-  grid-row: 2;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
 }
 
-.meal-row-main strong {
-  font-family: var(--font-display);
-  font-weight: var(--weight-medium);
-  font-size: var(--text-2xl);
-  line-height: 1.18;
+.meal-row-day {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.meal-row-button > .meal-row-count {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
+.meal-row-main strong,
+.meal-row-add,
+.meal-row-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.meal-row-button > .meal-row-chevron {
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
+.meal-row-main strong,
+.meal-row-add {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.meal-row-add {
+  color: var(--olive);
+}
+
+.meal-row-sub {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.meal-row-chevron {
+  flex-shrink: 0;
+  color: var(--muted);
 }
 
 /* Merged leftovers: cook day on top, leftover nights recessed beneath it. */
@@ -1321,15 +1361,15 @@ textarea:focus-visible {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-10);
+  gap: var(--space-12);
   width: 100%;
-  min-height: 40px;
+  min-height: 48px;
   border: 0;
   border-top: 1px solid var(--line);
   border-radius: 0;
   background: var(--soft);
   color: var(--muted);
-  padding: var(--space-8) var(--space-12);
+  padding: var(--space-8) var(--space-14);
   text-align: left;
 }
 
@@ -1342,7 +1382,7 @@ textarea:focus-visible {
   color: var(--muted);
   font-size: var(--text-xs);
   font-weight: var(--weight-heavy);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -1358,41 +1398,8 @@ textarea:focus-visible {
 
 .meal-cluster-repeat-label svg {
   flex-shrink: 0;
-  color: var(--accent);
-  opacity: 0.75;
-}
-
-.meal-row-chevron {
-  flex-shrink: 0;
-  color: var(--muted);
-}
-
-.meal-row-button:hover {
-  background: var(--soft);
-}
-
-.plan-screen .meal-row-button:hover {
-  background: var(--soft);
-}
-
-.meal-row-main {
-  display: grid;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-.meal-row-main strong,
-.meal-row-main span {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.meal-row-main span {
-  color: var(--muted);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  color: var(--olive);
+  opacity: 0.8;
 }
 
 .muted-title {
@@ -4647,30 +4654,6 @@ textarea::placeholder {
   flex-shrink: 0;
 }
 
-/* Unplanned day: a quiet placeholder in the menu — muted day kicker and a
-   muted serif "Add a meal", with a small olive + as the call to action. */
-.meal-row-add {
-  font-family: var(--font-display);
-  font-weight: var(--weight-medium);
-  font-size: var(--text-2xl);
-  line-height: 1.18;
-  color: var(--muted);
-}
-
 .meal-card-empty .meal-row-button:hover .meal-row-add {
   color: var(--ink);
-}
-
-.meal-row-addicon {
-  grid-column: 2;
-  grid-row: 2;
-  justify-self: end;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  border: 1.5px solid var(--olive);
-  color: var(--olive);
 }
