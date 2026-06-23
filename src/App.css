@@ -532,17 +532,6 @@ textarea:focus-visible {
   gap: var(--space-10);
 }
 
-.plan-screen > .screen-header,
-.shop-screen > .screen-header,
-.more-screen > .screen-header {
-  border: 1px solid var(--tab-line);
-  border-left: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  padding: var(--space-14);
-  box-shadow: var(--shadow);
-}
-
 .plan-screen .section-kicker,
 .shop-screen .section-kicker,
 .more-screen .section-kicker {
