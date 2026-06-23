@@ -4028,6 +4028,10 @@ textarea::placeholder {
 
 .auth-guest {
   min-height: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
   margin-top: var(--space-2);
   border: 0;
   background: transparent;
