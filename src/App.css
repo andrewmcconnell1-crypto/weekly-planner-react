@@ -1774,10 +1774,37 @@ textarea {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: #fff;
-  color: #111827;
+  color: var(--ink);
   padding: var(--space-10) var(--space-12);
   font-size: 16px;
-  -webkit-text-fill-color: #111827;
+  -webkit-text-fill-color: var(--ink);
+  transition:
+    border-color var(--dur-fast) var(--ease-standard),
+    box-shadow var(--dur-fast) var(--ease-standard);
+}
+
+input[type="text"]:hover,
+input[type="search"]:hover,
+input[type="number"]:hover,
+input[type="url"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="tel"]:hover,
+select:hover,
+textarea:hover {
+  border-color: #ddd2bf;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--olive);
 }
 
 textarea {
@@ -1786,8 +1813,9 @@ textarea {
   line-height: 1.45;
 }
 
-input::placeholder {
-  color: #9ca3af;
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
   opacity: 1;
 }
 
@@ -2183,7 +2211,7 @@ input::placeholder {
 }
 
 .checked-item {
-  color: #9ca3af;
+  color: var(--muted);
   text-decoration: line-through;
 }
 
