@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowRight } from "lucide-react";
 
 function GoogleMark() {
   return (
@@ -224,7 +225,8 @@ function SignInScreen({
 
         {onGuest && (
           <button type="button" className="auth-guest" onClick={onGuest}>
-            Just looking? Explore without an account →
+            Just looking? Explore without an account
+            <ArrowRight size={15} aria-hidden="true" />
           </button>
         )}
 
