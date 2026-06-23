@@ -34,7 +34,7 @@ describe("MealCard", () => {
     );
 
     expect(screen.getByText("Beef Tacos")).toBeInTheDocument();
-    expect(screen.getByText("Mon")).toBeInTheDocument();
+    expect(screen.getByText("Monday")).toBeInTheDocument();
     await user.click(screen.getByRole("button"));
     expect(onOpen).toHaveBeenCalledTimes(1);
   });

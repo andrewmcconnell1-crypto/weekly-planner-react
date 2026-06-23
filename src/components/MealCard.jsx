@@ -32,7 +32,7 @@ function MealCard({
     return (
       <article className="card meal-card meal-card-empty" data-tone={mealTone}>
         <button className="meal-row-button" type="button" onClick={onOpen}>
-          <span className="meal-row-day">{day.slice(0, 3)}</span>
+          <span className="meal-row-day">{day}</span>
 
           <span className="meal-row-main">
             <strong className="meal-row-add">Add a meal</strong>
@@ -56,7 +56,7 @@ function MealCard({
         type="button"
         onClick={onOpen}
       >
-        <span className="meal-row-day">{day.slice(0, 3)}</span>
+        <span className="meal-row-day">{day}</span>
 
         <span className="meal-row-main">
           <strong>{mealName}</strong>
