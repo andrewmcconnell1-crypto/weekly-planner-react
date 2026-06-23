@@ -18,7 +18,7 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
         type="button"
         onClick={() => onOpenDay(leadDay)}
       >
-        <span className="meal-row-day">{leadDay.slice(0, 3)}</span>
+        <span className="meal-row-day">{leadDay}</span>
 
         <span className="meal-row-main">
           <strong>{leadName}</strong>
@@ -39,9 +39,7 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
             type="button"
             onClick={() => onOpenDay(repeatDay)}
           >
-            <span className="meal-cluster-repeat-day">
-              {repeatDay.slice(0, 3)}
-            </span>
+            <span className="meal-cluster-repeat-day">{repeatDay}</span>
 
             <span className="meal-cluster-repeat-label">
               <CornerDownRight size={14} aria-hidden="true" />
