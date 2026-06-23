@@ -271,6 +271,19 @@ button:disabled {
   box-sizing: border-box;
 }
 
+/* Respect users who ask for less motion: collapse every animation/transition
+   to near-instant app-wide (a single source of truth, rather than per-effect). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -931,10 +944,8 @@ textarea:focus-visible {
 }
 
 .home-step-chevron {
+  flex-shrink: 0;
   color: var(--muted);
-  font-size: var(--text-3xl);
-  font-weight: var(--weight-semibold);
-  line-height: 1;
 }
 
 .home-step-action .primary-button {
@@ -961,6 +972,9 @@ textarea:focus-visible {
 
 .home-link {
   min-height: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   border: 0;
   background: transparent;
   color: var(--primary-strong);
