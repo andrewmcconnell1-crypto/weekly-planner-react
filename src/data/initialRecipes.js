@@ -931,6 +931,18 @@ const SERVES_BY_ID = {
   "ll-pasta-primavera": 4,
   "wol-shrimp-broccoli": 4,
   "bb-sausage-peppers-pasta": 5,
+  "dd-slow-cooker-beef-stew": 6,
+  "st-baked-chicken-parmesan": 4,
+  "sl-honey-garlic-pork-chops": 4,
+  "md-lamb-meatballs": 4,
+  "dd-garlic-butter-shrimp-pasta": 4,
+  "sl-shrimp-mushroom-pasta": 4,
+  "wol-chicken-chow-mein": 4,
+  "ll-shakshuka": 4,
+  "ck-veggie-black-bean-enchiladas": 4,
+  "ck-black-bean-sweet-potato-enchiladas": 4,
+  "mb-red-curry-roasted-veg": 4,
+  "mb-massaman-curry": 4,
 };
 
 export const initialRecipes = baseRecipes.map((recipeItem) => ({
