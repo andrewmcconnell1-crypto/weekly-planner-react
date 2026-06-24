@@ -27,8 +27,8 @@ import { days } from "../utils/mealUtils";
 // path; the drag is an enhancement, so both route through the same commit().
 const SWIPE_AT = 90;
 
-// Cuisine / cooking-style tags. Unlike the lifestyle tags below, these are OR'd
-// (a dish is rarely two styles, so multi-selecting should widen, not empty out).
+// Cuisine / cooking-style tags — surfaced as their own wizard step, but filter
+// the same way as every other tag (AND): a recipe must carry all selected tags.
 const STYLE_TAGS = ["Pasta", "Noodles", "Soup", "Mexican", "Slow-cooked"];
 
 // A short guided flow shown before the deck, mirroring the recipe taxonomy: a
@@ -72,7 +72,6 @@ function RecipeDiscoverySheet({
   const [stage, setStage] = useState("wizard"); // "wizard" | "deck"
   const [stepIndex, setStepIndex] = useState(0);
   const [selectedCategories, setSelectedCategories] = useState(() => new Set());
-  const [selectedStyles, setSelectedStyles] = useState(() => new Set());
   const [selectedTags, setSelectedTags] = useState(() => new Set());
   const [handled, setHandled] = useState(() => new Set());
   const [usedInitial, setUsedInitial] = useState(false);
@@ -112,23 +111,21 @@ function RecipeDiscoverySheet({
     };
   }, [recipes]);
 
+  // Categories are OR'd (a dish belongs to one protein, so "Chicken or Beef"),
+  // tags are AND'd (a recipe must carry every selected tag — Kid-friendly AND
+  // Quick).
   const deck = useMemo(() => {
     const cats = [...selectedCategories];
-    const styles = [...selectedStyles];
     const tags = [...selectedTags];
     return recipes.filter((recipe) => {
       if (handled.has(recipe.id) || plannedSet.has(recipe.id)) return false;
       if (cats.length && !cats.includes(recipe.category)) return false;
       const recipeTagList = recipe.tags || [];
-      if (styles.length && !styles.some((style) => recipeTagList.includes(style))) {
-        return false;
-      }
       return tags.every((tag) => recipeTagList.includes(tag));
     });
-  }, [recipes, selectedCategories, selectedStyles, selectedTags, handled, plannedSet]);
+  }, [recipes, selectedCategories, selectedTags, handled, plannedSet]);
 
-  const anyFilter =
-    selectedCategories.size + selectedStyles.size + selectedTags.size > 0;
+  const anyFilter = selectedCategories.size + selectedTags.size > 0;
 
   const top = deck[0];
   // When opened from a specific day, fill that day first; then fall back to the
@@ -409,11 +406,11 @@ function RecipeDiscoverySheet({
                         const set =
                           step.set === "category"
                             ? selectedCategories
-                            : selectedStyles;
+                            : selectedTags;
                         const setter =
                           step.set === "category"
                             ? setSelectedCategories
-                            : setSelectedStyles;
+                            : setSelectedTags;
                         const active = set.has(option);
                         return (
                           <button
@@ -484,17 +481,14 @@ function RecipeDiscoverySheet({
                   );
                 })}
                 {filterChips.tagChips.map((tag) => {
-                  const isStyle = STYLE_TAGS.includes(tag);
-                  const set = isStyle ? selectedStyles : selectedTags;
-                  const setter = isStyle ? setSelectedStyles : setSelectedTags;
-                  const active = set.has(tag);
+                  const active = selectedTags.has(tag);
                   return (
                     <button
                       key={`tag-${tag}`}
                       type="button"
                       className={`recipe-tag-toggle ${active ? "active" : ""}`}
                       aria-pressed={active}
-                      onClick={() => toggleIn(setter, tag)}
+                      onClick={() => toggleIn(setSelectedTags, tag)}
                     >
                       {tag}
                     </button>
