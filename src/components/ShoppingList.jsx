@@ -53,7 +53,7 @@ function ShoppingList({
   function renderRow(item) {
     return (
       <li
-        className={`card shopping-row ${item.checked ? "checked-row" : ""}`}
+        className={`shopping-row ${item.checked ? "checked-row" : ""}`}
         key={item.id}
       >
         <label className={item.checked ? "checked-item" : ""}>
@@ -85,7 +85,7 @@ function ShoppingList({
     return (
       <div className="shopping-group" key={group.category}>
         <div className="priority-aisle">{group.category}</div>
-        <ul className="clean-list">{group.items.map(renderRow)}</ul>
+        <ul className="clean-list shopping-rows">{group.items.map(renderRow)}</ul>
       </div>
     );
   }
@@ -182,7 +182,7 @@ function ShoppingList({
             week, then tick them here.
           </p>
 
-          <ul className="clean-list">
+          <ul className="clean-list shopping-rows">
             {[...removals]
               .sort(
                 (a, b) =>
@@ -194,7 +194,7 @@ function ShoppingList({
 
                 return (
                   <li
-                    className={`card shopping-row removal-row ${
+                    className={`shopping-row removal-row ${
                       done ? "checked-row" : ""
                     }`}
                     key={item.id}
@@ -257,7 +257,7 @@ function ShoppingList({
                   />
                 </span>
               </summary>
-              <ul className="clean-list">{doneItems.map(renderRow)}</ul>
+              <ul className="clean-list shopping-rows">{doneItems.map(renderRow)}</ul>
             </details>
           )}
         </>

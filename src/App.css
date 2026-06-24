@@ -1977,6 +1977,29 @@ textarea::placeholder {
   gap: var(--space-10);
 }
 
+/* Rows grouped into one card with hairline dividers, rather than a stack of
+   individually-shadowed floating cards — reads as a tight checklist. */
+.shopping-rows {
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  box-shadow: var(--elev-1);
+  overflow: hidden;
+}
+
+.shopping-rows > .shopping-row {
+  padding: var(--space-12) var(--space-14);
+}
+
+.shopping-rows > .shopping-row + .shopping-row {
+  border-top: 1px solid var(--line);
+}
+
+.shopping-rows > .checked-row {
+  background: transparent;
+}
+
 .ingredient-row {
   border-top: 1px solid var(--line);
   padding-top: var(--space-10);
