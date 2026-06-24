@@ -2627,6 +2627,15 @@ textarea::placeholder {
 [data-tone="beef"] {
   --recipe-tone: #b0503c;
 }
+[data-tone="pork"] {
+  --recipe-tone: #c67e6e;
+}
+[data-tone="lamb"] {
+  --recipe-tone: #9c5e72;
+}
+[data-tone="seafood"] {
+  --recipe-tone: #5f8e88;
+}
 [data-tone="pasta"] {
   --recipe-tone: #c79a2f;
 }

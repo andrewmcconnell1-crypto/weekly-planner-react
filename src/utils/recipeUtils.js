@@ -3,23 +3,19 @@ import { normaliseItemName } from "./itemUtils";
 const categoryOrder = [
   "Chicken",
   "Beef",
-  "Pasta",
-  "Rice",
-  "Slow cooker",
-  "Mexican",
-  "Noodles",
+  "Pork",
+  "Lamb",
+  "Seafood",
   "Vegetarian",
-  "Kid-friendly",
-  "Family favourites",
   "Other",
 ];
 
-// The known recipe categories, used to populate category pickers.
+// The known recipe categories (one per recipe — the dish's main ingredient).
 export const recipeCategories = categoryOrder;
 
-// Orthogonal recipe attributes (a recipe can have several), used for filtering
-// and the meal-planning discovery flow. Unlike `category` (one per recipe),
-// these stack — a dish can be Quick AND Kid-friendly AND Vegetarian.
+// Orthogonal recipe attributes (a recipe can have several): cooking style,
+// cuisine and dietary notes. Unlike `category` (one per recipe, by main
+// ingredient), these stack — a dish can be Quick AND Pasta AND Vegetarian.
 export const recipeTags = [
   "Quick",
   "Kid-friendly",
@@ -27,6 +23,11 @@ export const recipeTags = [
   "Leftover-friendly",
   "One-pot",
   "Spicy",
+  "Pasta",
+  "Noodles",
+  "Soup",
+  "Mexican",
+  "Slow-cooked",
 ];
 
 // A recipe at or under this many total minutes counts as "Quick" even without
@@ -62,6 +63,63 @@ const SPICY_HINTS = [
   "chilli", "chili", "curry", "jalapeno", "sriracha", "harissa", "gochujang",
   "sambal", "cajun", "spicy", "laksa", "vindaloo", "madras", "kofta",
 ];
+const PASTA_HINTS = [
+  "pasta", "spaghetti", "lasagne", "lasagna", "penne", "carbonara", "gnocchi",
+  "macaroni", "fettuccine", "pappardelle", "ravioli", "rigatoni", "linguine",
+  "pesto", "bolognese", "ragu",
+];
+const NOODLE_HINTS = [
+  "noodle", "ramen", "pad thai", "lo mein", "chow mein", "udon", "soba",
+  "vermicelli", "laksa",
+];
+const SOUP_HINTS = ["soup", "broth", "chowder", "minestrone", "bisque"];
+const MEXICAN_HINTS = [
+  "taco", "fajita", "quesadilla", "burrito", "nacho", "enchilada", "mexican",
+];
+const SLOW_HINTS = ["slow cooker", "slow-cook", "slow cook"];
+
+// Main-ingredient detection, in priority order, for resolving a dish to its
+// protein category.
+const CHICKEN_HINTS = ["chicken", "turkey"];
+const BEEF_HINTS = [
+  "beef", "mince", "steak", "bolognese", "lasagne", "lasagna", "brisket",
+];
+const LAMB_HINTS = ["lamb"];
+const SEAFOOD_HINTS = [
+  "salmon", "fish", "prawn", "shrimp", "tuna", "cod", "seafood", "calamari",
+  "squid", "mussel", "scallop", "barramundi", "snapper", "crab",
+];
+const PORK_HINTS = [
+  "pork", "bacon", "ham", "sausage", "chorizo", "prosciutto", "pancetta",
+  "bratwurst",
+];
+
+const PROTEIN_CATEGORIES = ["Chicken", "Beef", "Pork", "Lamb", "Seafood"];
+
+// Resolve a recipe to its main-ingredient category. Protein categories pass
+// through; descriptive labels (Pasta, Mexican, Soup…) are resolved to the
+// dish's protein from its name + ingredients, falling back to Vegetarian when
+// no meat is detected, else Other.
+export function deriveMainCategory({ name = "", category = "", ingredients = [] }) {
+  if (PROTEIN_CATEGORIES.includes(category)) return category;
+  if (category === "Vegetarian") return "Vegetarian";
+
+  // Stocks and sauces flavour a dish but aren't its main ingredient — strip
+  // them so e.g. "chicken stock" in a sausage dish doesn't read as Chicken.
+  const hay = `${name} ${ingredients.join(" ")}`
+    .toLowerCase()
+    .replace(/(chicken|beef|fish|vegetable) (stock|broth|bouillon|powder)/g, "")
+    .replace(/(fish|oyster|worcestershire) sauce/g, "");
+  const has = (words) => words.some((word) => hay.includes(word));
+
+  if (has(CHICKEN_HINTS)) return "Chicken";
+  if (has(BEEF_HINTS)) return "Beef";
+  if (has(LAMB_HINTS)) return "Lamb";
+  if (has(SEAFOOD_HINTS)) return "Seafood";
+  if (has(PORK_HINTS)) return "Pork";
+  if (!has(MEAT_HINTS)) return "Vegetarian";
+  return "Other";
+}
 
 // Best-effort starter tags for a recipe from its name + category (and meat
 // detection from ingredients). Deliberately conservative — it seeds the
@@ -83,6 +141,13 @@ export function deriveRecipeTags({ name = "", category = "", ingredients = [] })
   }
   if (category === "Slow cooker" || inName(ONEPOT_HINTS)) tags.add("One-pot");
   if (inName(SPICY_HINTS)) tags.add("Spicy");
+
+  // Style / cuisine, preserved as tags now that category is by main ingredient.
+  if (category === "Pasta" || inName(PASTA_HINTS)) tags.add("Pasta");
+  if (category === "Noodles" || inName(NOODLE_HINTS)) tags.add("Noodles");
+  if (category === "Soup" || inName(SOUP_HINTS)) tags.add("Soup");
+  if (category === "Mexican" || inName(MEXICAN_HINTS)) tags.add("Mexican");
+  if (category === "Slow cooker" || inName(SLOW_HINTS)) tags.add("Slow-cooked");
 
   return recipeTags.filter((tag) => tags.has(tag));
 }
@@ -115,12 +180,18 @@ export function getRecipeTone(category) {
 
   if (normalisedCategory.includes("chicken")) return "chicken";
   if (normalisedCategory.includes("beef")) return "beef";
+  if (normalisedCategory.includes("pork")) return "pork";
+  if (normalisedCategory.includes("lamb")) return "lamb";
+  if (normalisedCategory.includes("seafood") || normalisedCategory.includes("fish")) {
+    return "seafood";
+  }
+  if (normalisedCategory.includes("vegetarian")) return "vegetarian";
+  // Retired categories kept mapping for any older saved recipes.
   if (normalisedCategory.includes("pasta")) return "pasta";
   if (normalisedCategory.includes("rice")) return "rice";
   if (normalisedCategory.includes("slow")) return "slow";
   if (normalisedCategory.includes("mexican")) return "mexican";
   if (normalisedCategory.includes("noodle")) return "noodles";
-  if (normalisedCategory.includes("vegetarian")) return "vegetarian";
   if (normalisedCategory.includes("kid")) return "kid";
   if (normalisedCategory.includes("family")) return "family";
 

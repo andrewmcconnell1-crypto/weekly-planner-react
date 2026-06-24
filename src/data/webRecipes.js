@@ -7,7 +7,7 @@
 // time of adding. To add a recipe, prefer one of the sites already here so the
 // source badge stays recognisable.
 
-import { deriveRecipeTags } from "../utils/recipeUtils";
+import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 
 const METHOD_NOTE = "Open source link for full method.";
 
@@ -15,7 +15,7 @@ function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
   return {
     id,
     name,
-    category,
+    category: deriveMainCategory({ name, category, ingredients }),
     source,
     sourceUrl,
     ingredients,

@@ -1,6 +1,6 @@
 import { aiRecipes } from "./aiRecipes";
 import { webRecipes } from "./webRecipes";
-import { deriveRecipeTags } from "../utils/recipeUtils";
+import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 
 const RECIPETIN_SOURCE = "RecipeTin Eats";
 const METHOD_NOTE = "Open source link for full method.";
@@ -9,7 +9,7 @@ function recipe({ id, name, category, sourceUrl, ingredients }) {
   return {
     id,
     name,
-    category,
+    category: deriveMainCategory({ name, category, ingredients }),
     source: RECIPETIN_SOURCE,
     sourceUrl,
     ingredients,
