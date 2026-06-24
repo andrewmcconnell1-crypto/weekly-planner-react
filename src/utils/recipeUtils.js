@@ -157,6 +157,21 @@ export function isQuickRecipe(recipe) {
   return recipe.timeMins != null && recipe.timeMins <= QUICK_MAX_MINS;
 }
 
+// Split a stored method into discrete steps for a scannable numbered list.
+// Handles both newline-separated steps and a single run of "1. … 2. …".
+export function parseMethodSteps(method) {
+  const text = String(method || "").trim();
+  if (!text) return [];
+  let parts = text.split(/\n+/).map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    parts = text
+      .split(/(?=\d+[.)]\s)/)
+      .map((part) => part.trim())
+      .filter(Boolean);
+  }
+  return parts.map((part) => part.replace(/^\d+[.)]\s*/, ""));
+}
+
 export function getRecipeCategory(recipe) {
   return recipe.category || "Other";
 }
