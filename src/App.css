@@ -1928,11 +1928,12 @@ textarea::placeholder {
 }
 
 .recipe-ingredient-list {
-  gap: var(--space-8);
+  gap: var(--space-2);
 }
 
 .recipe-ingredient-list .ingredient-row {
   border-top: 1px solid var(--line);
+  padding-top: var(--space-8);
 }
 
 .read-only-row {
@@ -2953,8 +2954,77 @@ textarea::placeholder {
   text-transform: uppercase;
 }
 
+/* Destructive, but restrained: outline by default, fills only on hover so a
+   single deliberate action doesn't shout like the old solid-red button. */
 .recipe-delete-button {
   width: 100%;
+  border: 1px solid var(--danger);
+  background: #ffffff;
+  color: var(--danger);
+  font-weight: var(--weight-bold);
+}
+
+.recipe-delete-button:hover {
+  background: var(--danger);
+  color: #ffffff;
+}
+
+/* Per-row ingredient removal in the editor — a quiet icon button (mirrors the
+   shopping list) instead of a column of loud red "Delete" buttons. */
+.ingredient-delete {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-height: 36px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+}
+
+.ingredient-delete:hover {
+  background: var(--soft);
+  color: var(--danger);
+}
+
+/* Method as scannable numbered steps rather than one block of text. */
+.recipe-steps {
+  display: grid;
+  gap: var(--space-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.recipe-steps li {
+  position: relative;
+  counter-increment: step;
+  padding-left: calc(28px + var(--space-12));
+  color: var(--ink);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+}
+
+.recipe-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  background: var(--olive-soft);
+  color: var(--olive);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .recipe-detail-fields {
@@ -2975,10 +3045,17 @@ textarea::placeholder {
 }
 
 .recipe-source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
   color: var(--primary);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   overflow-wrap: anywhere;
+}
+
+.recipe-source-link:hover {
+  text-decoration: underline;
 }
 
 /* Recipe tags — olive-toned to read as a separate dimension from the

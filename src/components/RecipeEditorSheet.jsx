@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Pencil, X } from "lucide-react";
+import { ExternalLink, Pencil, Trash2, X } from "lucide-react";
 
 import {
   recipeCategories,
@@ -7,6 +7,19 @@ import {
   recipeSourceLabel,
   recipeTags,
 } from "../utils/recipeUtils";
+
+// Split a stored method into discrete steps for a scannable numbered list.
+// Handles both newline-separated steps and a single run of "1. … 2. …".
+function toMethodSteps(method) {
+  const text = String(method || "").trim();
+  if (!text) return [];
+  let parts = text.split(/\n+/).map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    parts = text.split(/(?=\d+[.)]\s)/).map((part) => part.trim()).filter(Boolean);
+  }
+  return parts.map((part) => part.replace(/^\d+[.)]\s*/, ""));
+}
+
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
 // case); an "Edit recipe" button reveals the edit form.
@@ -37,6 +50,7 @@ function RecipeEditorSheet({
 
   // Show the method inline when the recipe carries its own (no source link).
   const showMethod = Boolean(recipe.method) && !recipe.sourceUrl;
+  const methodSteps = showMethod ? toMethodSteps(recipe.method) : [];
 
   // Lock background scroll and close on Escape while the sheet is open.
   useEffect(() => {
@@ -135,6 +149,7 @@ function RecipeEditorSheet({
                     target="_blank"
                     rel="noreferrer"
                   >
+                    <ExternalLink size={14} aria-hidden="true" />
                     Open source recipe
                   </a>
                 )}
@@ -161,7 +176,15 @@ function RecipeEditorSheet({
               {showMethod && (
                 <div className="recipe-view-section">
                   <p className="section-kicker">Method</p>
-                  <p className="recipe-view-method">{recipe.method}</p>
+                  {methodSteps.length > 1 ? (
+                    <ol className="recipe-steps">
+                      {methodSteps.map((step, index) => (
+                        <li key={index}>{step}</li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="recipe-view-method">{recipe.method}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -313,12 +336,13 @@ function RecipeEditorSheet({
 
                         <button
                           type="button"
-                          className="delete-button"
+                          className="ingredient-delete"
+                          aria-label={`Remove ${ingredient}`}
                           onClick={() =>
                             deleteIngredientFromRecipe(recipe.id, index)
                           }
                         >
-                          Delete
+                          <Trash2 size={16} aria-hidden="true" />
                         </button>
                       </li>
                     ))}
@@ -370,9 +394,10 @@ function RecipeEditorSheet({
 
               <button
                 type="button"
-                className="delete-button recipe-delete-button"
+                className="recipe-delete-button with-icon"
                 onClick={handleDelete}
               >
+                <Trash2 size={16} aria-hidden="true" />
                 Delete recipe
               </button>
             </>
