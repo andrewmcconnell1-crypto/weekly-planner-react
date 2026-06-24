@@ -119,9 +119,9 @@ describe("RecipeDiscoverySheet", () => {
     const user = userEvent.setup();
     setup();
 
-    // Q1 (Quick) — no preference, Q2 (Vegetarian) — yes, then jump to the deck.
-    await user.click(screen.getByRole("button", { name: "No preference" }));
-    await user.click(screen.getByRole("button", { name: "Yes" }));
+    // Q1 (protein) — pick Vegetarian then continue, then jump to the deck.
+    await user.click(screen.getByRole("button", { name: "Vegetarian" }));
+    await user.click(screen.getByRole("button", { name: /continue/i }));
     await skipWizard(user);
 
     expect(screen.getByText("Lentil Dahl")).toBeInTheDocument();

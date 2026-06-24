@@ -3186,6 +3186,21 @@ textarea::placeholder {
   max-width: 360px;
 }
 
+.discover-wizard-picks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-8);
+  width: 100%;
+  max-width: 360px;
+}
+
+.discover-wizard-continue {
+  width: 100%;
+  max-width: 360px;
+  min-height: 46px;
+}
+
 .discover-wizard-yes,
 .discover-wizard-no {
   display: inline-flex;
