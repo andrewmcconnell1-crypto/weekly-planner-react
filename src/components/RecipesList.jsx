@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { BookOpen, Plus, Search, SearchX } from "lucide-react";
 
-import { groupRecipesByCategory, recipeSourceLabel } from "../utils/recipeUtils";
+import { groupRecipesByCategory, recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
 import RecipeFilter from "./RecipeFilter";
@@ -21,6 +21,7 @@ function RecipesList({
   const [searchText, setSearchText] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeSource, setActiveSource] = useState("All");
+  const [activeTag, setActiveTag] = useState("All");
   const [openRecipeId, setOpenRecipeId] = useState(null);
   // Adding a recipe is a rare action, so it stays tucked behind a quiet toggle.
   const [showAddRecipe, setShowAddRecipe] = useState(false);
@@ -43,11 +44,20 @@ function RecipesList({
   });
   const sources = ["All", ...distinctSources];
 
+  // Style / cuisine / attribute tags actually present, in the master tag order.
+  // (Vegetarian is omitted — it's already a category.)
+  const presentTags = new Set(recipes.flatMap((recipe) => recipe.tags || []));
+  const distinctTags = recipeTags.filter(
+    (tag) => tag !== "Vegetarian" && presentTags.has(tag)
+  );
+  const tags = ["All", ...distinctTags];
+
   const cleanedSearch = searchText.trim().toLowerCase();
   const categoryIsAvailable =
     activeCategory === "All" || categories.includes(activeCategory);
   const sourceIsAvailable =
     activeSource === "All" || sources.includes(activeSource);
+  const tagIsAvailable = activeTag === "All" || tags.includes(activeTag);
   const visibleRecipes = allRecipes.filter((recipe) => {
     const inCategory =
       !categoryIsAvailable ||
@@ -57,8 +67,12 @@ function RecipesList({
       !sourceIsAvailable ||
       activeSource === "All" ||
       recipeSourceLabel(recipe) === activeSource;
+    const inTag =
+      !tagIsAvailable ||
+      activeTag === "All" ||
+      (recipe.tags || []).includes(activeTag);
 
-    if (!inCategory || !inSource) return false;
+    if (!inCategory || !inSource || !inTag) return false;
     if (!cleanedSearch) return true;
 
     return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
@@ -74,6 +88,7 @@ function RecipesList({
     setSearchText("");
     setActiveCategory("All");
     setActiveSource("All");
+    setActiveTag("All");
   }
 
   return (
@@ -152,6 +167,13 @@ function RecipesList({
             options={categories}
             active={activeCategory}
             onSelect={setActiveCategory}
+          />
+
+          <RecipeFilter
+            label="Tags"
+            options={tags}
+            active={activeTag}
+            onSelect={setActiveTag}
           />
 
           <RecipeFilter
