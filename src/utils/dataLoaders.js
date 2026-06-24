@@ -87,7 +87,10 @@ function normaliseRecipe(recipe, index) {
 // refresh, so content updates reach existing accounts without permanently
 // clobbering edits to built-in recipes thereafter.
 // v2: bundled recipes gained tags + timeMins metadata.
-export const RECIPES_VERSION = 2;
+// v3: recategorised by main ingredient (protein) — old style/cuisine categories
+// (Pasta, Mexican, Kid-friendly…) became tags, and every bundled recipe had its
+// tags re-derived. Refreshes built-ins so existing accounts pick up both.
+export const RECIPES_VERSION = 3;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(

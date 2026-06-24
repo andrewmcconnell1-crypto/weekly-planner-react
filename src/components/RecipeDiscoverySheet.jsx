@@ -4,35 +4,61 @@ import {
   Boxes,
   Check,
   ChevronLeft,
+  ChevronRight,
   CookingPot,
-  Flame,
-  Leaf,
+  Drumstick,
   RotateCcw,
   Timer,
+  Utensils,
   X,
 } from "lucide-react";
 
 import RecipeDetail from "./RecipeDetail";
-import { recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
+import {
+  recipeCategories,
+  recipeSourceLabel,
+  recipeTags,
+} from "../utils/recipeUtils";
 import { days } from "../utils/mealUtils";
 
 // Swipe-to-plan: a filtered deck of recipe cards. Swipe right (or "Add") drops
 // the recipe onto the next empty night; swipe left (or "Skip") passes. Filters
-// narrow the deck by tag. The Skip/Add buttons are the reliable path; the drag
-// is an enhancement, so both route through the same commit().
+// narrow the deck by category and tag. The Skip/Add buttons are the reliable
+// path; the drag is an enhancement, so both route through the same commit().
 const SWIPE_AT = 90;
 
-// A short guided flow shown before the deck. Each yes/no question maps to one of
-// the recipe tags; "yes" answers pre-filter the deck so swiping starts from a
-// shortlist. The tag names double as the "yes" label so the deck's filter chips
-// line up with what was chosen. Skippable at any point.
+// Cuisine / cooking-style tags. Unlike the lifestyle tags below, these are OR'd
+// (a dish is rarely two styles, so multi-selecting should widen, not empty out).
+const STYLE_TAGS = ["Pasta", "Noodles", "Soup", "Mexican", "Slow-cooked"];
+
+// A short guided flow shown before the deck, mirroring the recipe taxonomy: a
+// protein category pick, a cooking-style pick, then a few yes/no lifestyle tags.
+// "pick" steps multi-select (OR within the step); "toggle" steps map to one tag.
+// Choices pre-filter the deck so swiping starts from a shortlist. Skippable.
 const WIZARD_STEPS = [
-  { tag: "Quick", question: "Short on time tonight?", icon: Timer },
-  { tag: "Vegetarian", question: "Keep it meat-free?", icon: Leaf },
-  { tag: "Kid-friendly", question: "Cooking for kids?", icon: Baby },
-  { tag: "Leftover-friendly", question: "Want leftovers for later?", icon: Boxes },
-  { tag: "One-pot", question: "Minimal washing up?", icon: CookingPot },
-  { tag: "Spicy", question: "In the mood for spice?", icon: Flame },
+  {
+    kind: "pick",
+    set: "category",
+    question: "What are you in the mood for?",
+    icon: Drumstick,
+    options: ["Chicken", "Beef", "Pork", "Lamb", "Seafood", "Vegetarian"],
+  },
+  {
+    kind: "pick",
+    set: "style",
+    question: "Fancy a particular style?",
+    icon: Utensils,
+    options: STYLE_TAGS,
+  },
+  { kind: "toggle", tag: "Quick", question: "Short on time tonight?", icon: Timer },
+  { kind: "toggle", tag: "Kid-friendly", question: "Cooking for kids?", icon: Baby },
+  {
+    kind: "toggle",
+    tag: "Leftover-friendly",
+    question: "Want leftovers for later?",
+    icon: Boxes,
+  },
+  { kind: "toggle", tag: "One-pot", question: "Minimal washing up?", icon: CookingPot },
 ];
 
 function RecipeDiscoverySheet({
@@ -45,6 +71,8 @@ function RecipeDiscoverySheet({
 }) {
   const [stage, setStage] = useState("wizard"); // "wizard" | "deck"
   const [stepIndex, setStepIndex] = useState(0);
+  const [selectedCategories, setSelectedCategories] = useState(() => new Set());
+  const [selectedStyles, setSelectedStyles] = useState(() => new Set());
   const [selectedTags, setSelectedTags] = useState(() => new Set());
   const [handled, setHandled] = useState(() => new Set());
   const [usedInitial, setUsedInitial] = useState(false);
@@ -64,13 +92,43 @@ function RecipeDiscoverySheet({
     [plannedRecipeIds]
   );
 
+  // The category + tag chips to surface in the deck's refine bar — only those
+  // actually present, in the master order. (Vegetarian is a category, so it's
+  // dropped from the tag chips to avoid a duplicate.)
+  const filterChips = useMemo(() => {
+    const presentCategories = new Set();
+    const presentTags = new Set();
+    recipes.forEach((recipe) => {
+      if (recipe.category) presentCategories.add(recipe.category);
+      (recipe.tags || []).forEach((tag) => presentTags.add(tag));
+    });
+    return {
+      categoryChips: recipeCategories.filter((category) =>
+        presentCategories.has(category)
+      ),
+      tagChips: recipeTags.filter(
+        (tag) => tag !== "Vegetarian" && presentTags.has(tag)
+      ),
+    };
+  }, [recipes]);
+
   const deck = useMemo(() => {
+    const cats = [...selectedCategories];
+    const styles = [...selectedStyles];
     const tags = [...selectedTags];
     return recipes.filter((recipe) => {
       if (handled.has(recipe.id) || plannedSet.has(recipe.id)) return false;
-      return tags.every((tag) => (recipe.tags || []).includes(tag));
+      if (cats.length && !cats.includes(recipe.category)) return false;
+      const recipeTagList = recipe.tags || [];
+      if (styles.length && !styles.some((style) => recipeTagList.includes(style))) {
+        return false;
+      }
+      return tags.every((tag) => recipeTagList.includes(tag));
     });
-  }, [recipes, selectedTags, handled, plannedSet]);
+  }, [recipes, selectedCategories, selectedStyles, selectedTags, handled, plannedSet]);
+
+  const anyFilter =
+    selectedCategories.size + selectedStyles.size + selectedTags.size > 0;
 
   const top = deck[0];
   // When opened from a specific day, fill that day first; then fall back to the
@@ -85,18 +143,23 @@ function RecipeDiscoverySheet({
     closeTimer.current = window.setTimeout(onClose, 220);
   }
 
-  function toggleTag(tag) {
-    setSelectedTags((prev) => {
+  // Add or remove a value from a Set-valued filter (category / style / tag).
+  function toggleIn(setter, value) {
+    setter((prev) => {
       const next = new Set(prev);
-      if (next.has(tag)) next.delete(tag);
-      else next.add(tag);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
       return next;
     });
   }
 
-  // Record the answer (add or remove this step's tag so going back and changing
-  // an answer stays correct), then advance — finishing the last step lands on
-  // the deck.
+  function advance() {
+    if (stepIndex + 1 >= WIZARD_STEPS.length) setStage("deck");
+    else setStepIndex((index) => index + 1);
+  }
+
+  // Record a yes/no answer (add or remove this step's tag so going back and
+  // changing an answer stays correct), then advance.
   function answerStep(wantsTag) {
     const { tag } = WIZARD_STEPS[stepIndex];
     setSelectedTags((prev) => {
@@ -105,8 +168,7 @@ function RecipeDiscoverySheet({
       else next.delete(tag);
       return next;
     });
-    if (stepIndex + 1 >= WIZARD_STEPS.length) setStage("deck");
-    else setStepIndex((index) => index + 1);
+    advance();
   }
 
   function backStep() {
@@ -324,7 +386,7 @@ function RecipeDiscoverySheet({
               <div className="discover-wizard-dots" aria-hidden="true">
                 {WIZARD_STEPS.map((wizardStep, index) => (
                   <span
-                    key={wizardStep.tag}
+                    key={wizardStep.question}
                     className={`discover-wizard-dot ${
                       index <= stepIndex ? "active" : ""
                     }`}
@@ -332,30 +394,68 @@ function RecipeDiscoverySheet({
                 ))}
               </div>
 
-              <div key={step.tag} className="discover-wizard-card">
+              <div key={step.question} className="discover-wizard-card">
                 <span className="discover-wizard-icon">
                   <StepIcon size={30} aria-hidden="true" />
                 </span>
                 <strong className="discover-wizard-question">
                   {step.question}
                 </strong>
-                <div className="discover-wizard-options">
-                  <button
-                    type="button"
-                    className="discover-wizard-yes"
-                    onClick={() => answerStep(true)}
-                  >
-                    <Check size={16} aria-hidden="true" />
-                    Yes
-                  </button>
-                  <button
-                    type="button"
-                    className="discover-wizard-no"
-                    onClick={() => answerStep(false)}
-                  >
-                    No preference
-                  </button>
-                </div>
+
+                {step.kind === "pick" ? (
+                  <>
+                    <div className="discover-wizard-picks">
+                      {step.options.map((option) => {
+                        const set =
+                          step.set === "category"
+                            ? selectedCategories
+                            : selectedStyles;
+                        const setter =
+                          step.set === "category"
+                            ? setSelectedCategories
+                            : setSelectedStyles;
+                        const active = set.has(option);
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            className={`recipe-tag-toggle ${active ? "active" : ""}`}
+                            aria-pressed={active}
+                            onClick={() => toggleIn(setter, option)}
+                          >
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      className="discover-wizard-yes discover-wizard-continue"
+                      onClick={advance}
+                    >
+                      Continue
+                      <ChevronRight size={16} aria-hidden="true" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="discover-wizard-options">
+                    <button
+                      type="button"
+                      className="discover-wizard-yes"
+                      onClick={() => answerStep(true)}
+                    >
+                      <Check size={16} aria-hidden="true" />
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      className="discover-wizard-no"
+                      onClick={() => answerStep(false)}
+                    >
+                      No preference
+                    </button>
+                  </div>
+                )}
               </div>
 
               <button
@@ -368,20 +468,38 @@ function RecipeDiscoverySheet({
             </div>
           ) : (
             <>
-              <div className="discover-filters" aria-label="Filter by tag">
-                {recipeTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className={`recipe-tag-toggle ${
-                      selectedTags.has(tag) ? "active" : ""
-                    }`}
-                    aria-pressed={selectedTags.has(tag)}
-                    onClick={() => toggleTag(tag)}
-                  >
-                    {tag}
-                  </button>
-                ))}
+              <div className="discover-filters" aria-label="Filter recipes">
+                {filterChips.categoryChips.map((category) => {
+                  const active = selectedCategories.has(category);
+                  return (
+                    <button
+                      key={`cat-${category}`}
+                      type="button"
+                      className={`recipe-tag-toggle ${active ? "active" : ""}`}
+                      aria-pressed={active}
+                      onClick={() => toggleIn(setSelectedCategories, category)}
+                    >
+                      {category}
+                    </button>
+                  );
+                })}
+                {filterChips.tagChips.map((tag) => {
+                  const isStyle = STYLE_TAGS.includes(tag);
+                  const set = isStyle ? selectedStyles : selectedTags;
+                  const setter = isStyle ? setSelectedStyles : setSelectedTags;
+                  const active = set.has(tag);
+                  return (
+                    <button
+                      key={`tag-${tag}`}
+                      type="button"
+                      className={`recipe-tag-toggle ${active ? "active" : ""}`}
+                      aria-pressed={active}
+                      onClick={() => toggleIn(setter, tag)}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="discover-stage">
@@ -398,7 +516,7 @@ function RecipeDiscoverySheet({
                     <RotateCcw size={26} aria-hidden="true" />
                     <strong>No more matches</strong>
                     <p>
-                      {selectedTags.size > 0
+                      {anyFilter
                         ? "Try removing a filter to see more recipes."
                         : "You've been through every recipe."}
                     </p>
