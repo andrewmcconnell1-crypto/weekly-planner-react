@@ -2,23 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Pencil, Trash2, X } from "lucide-react";
 
 import {
+  parseMethodSteps,
   recipeCategories,
   recipeSourceKind,
   recipeSourceLabel,
   recipeTags,
 } from "../utils/recipeUtils";
-
-// Split a stored method into discrete steps for a scannable numbered list.
-// Handles both newline-separated steps and a single run of "1. … 2. …".
-function toMethodSteps(method) {
-  const text = String(method || "").trim();
-  if (!text) return [];
-  let parts = text.split(/\n+/).map((part) => part.trim()).filter(Boolean);
-  if (parts.length <= 1) {
-    parts = text.split(/(?=\d+[.)]\s)/).map((part) => part.trim()).filter(Boolean);
-  }
-  return parts.map((part) => part.replace(/^\d+[.)]\s*/, ""));
-}
 
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
@@ -50,7 +39,7 @@ function RecipeEditorSheet({
 
   // Show the method inline when the recipe carries its own (no source link).
   const showMethod = Boolean(recipe.method) && !recipe.sourceUrl;
-  const methodSteps = showMethod ? toMethodSteps(recipe.method) : [];
+  const methodSteps = showMethod ? parseMethodSteps(recipe.method) : [];
 
   // Lock background scroll and close on Escape while the sheet is open.
   useEffect(() => {

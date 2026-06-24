@@ -707,7 +707,44 @@ textarea:focus-visible {
   white-space: pre-line;
 }
 
+/* Method as scannable numbered steps (badge colours are set per variant). */
+.recipe-detail-steps {
+  display: grid;
+  gap: var(--space-10);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+
+.recipe-detail-steps li {
+  position: relative;
+  counter-increment: step;
+  padding-left: calc(24px + var(--space-10));
+}
+
+.recipe-detail-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
 .recipe-detail-source {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
   justify-self: start;
   font-size: var(--text-md);
   font-weight: var(--weight-bold);
@@ -741,6 +778,15 @@ textarea:focus-visible {
   color: rgba(247, 241, 230, 0.86);
 }
 
+.recipe-detail-hero .recipe-detail-steps {
+  color: rgba(247, 241, 230, 0.9);
+}
+
+.recipe-detail-hero .recipe-detail-steps li::before {
+  background: rgba(255, 255, 255, 0.16);
+  color: #f1c79b;
+}
+
 .recipe-detail-hero .recipe-detail-source {
   color: #f1c79b;
 }
@@ -771,6 +817,15 @@ textarea:focus-visible {
 
 .recipe-detail-sheet .recipe-detail-method {
   color: var(--ink);
+}
+
+.recipe-detail-sheet .recipe-detail-steps {
+  color: var(--ink);
+}
+
+.recipe-detail-sheet .recipe-detail-steps li::before {
+  background: var(--olive-soft);
+  color: var(--olive);
 }
 
 .recipe-detail-sheet .recipe-detail-source {

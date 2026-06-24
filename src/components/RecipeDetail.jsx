@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, NotebookText } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  NotebookText,
+} from "lucide-react";
+
+import { parseMethodSteps } from "../utils/recipeUtils";
 
 // Collapsible "View recipe" disclosure shared by the Home hero (TonightCard)
 // and the meal editor's "Selected" block, so both render a recipe's ingredients
@@ -16,6 +23,8 @@ function RecipeDetail({
 
   const hasDetail = ingredients.length > 0 || Boolean(method);
   if (!hasDetail) return null;
+
+  const methodSteps = parseMethodSteps(method);
 
   return (
     <div className={`recipe-detail recipe-detail-${variant}`}>
@@ -52,7 +61,15 @@ function RecipeDetail({
           {method && (
             <div className="recipe-detail-section">
               <p className="recipe-detail-label">Method</p>
-              <p className="recipe-detail-method">{method}</p>
+              {methodSteps.length > 1 ? (
+                <ol className="recipe-detail-steps">
+                  {methodSteps.map((step, index) => (
+                    <li key={index}>{step}</li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="recipe-detail-method">{method}</p>
+              )}
             </div>
           )}
 
@@ -63,6 +80,7 @@ function RecipeDetail({
               target="_blank"
               rel="noreferrer"
             >
+              <ExternalLink size={14} aria-hidden="true" />
               Open source recipe
             </a>
           )}
