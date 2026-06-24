@@ -7,11 +7,48 @@
 // time of adding. To add a recipe, prefer one of the sites already here so the
 // source badge stays recognisable.
 
-import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
+import {
+  deriveMainCategory,
+  deriveRecipeTags,
+  recipeTags,
+} from "../utils/recipeUtils";
 
 const METHOD_NOTE = "Open source link for full method.";
 
+// Best-guess tags layered on top of what deriveRecipeTags infers from the name
+// and ingredients. The auto-derivation is keyword-based and misses things it
+// can't see in the name (e.g. a stir fry being Quick, a sweet glaze being
+// Kid-friendly), so these fill the gaps. Unioned with the derived tags in
+// webRecipe(), then re-sorted into the master tag order. Vegetarian is left to
+// the deriver (it's tied to the absence of meat).
+const EXTRA_TAGS = {
+  "bb-coconut-curry-lentils": ["One-pot"],
+  "ck-vegetarian-chili": ["One-pot"],
+  "wol-kung-pao-chicken": ["Quick", "Spicy"],
+  "mb-coconut-red-curry-chickpeas": ["One-pot"],
+  "wol-mongolian-beef": ["Quick", "Kid-friendly"],
+  "ll-pasta-primavera": ["Quick"],
+  "wol-shrimp-broccoli": ["One-pot"],
+  "bb-sausage-peppers-pasta": ["Leftover-friendly"],
+  "dd-slow-cooker-beef-stew": ["Kid-friendly"],
+  "st-baked-chicken-parmesan": ["Kid-friendly"],
+  "sl-honey-garlic-pork-chops": ["Quick", "Kid-friendly"],
+  "md-lamb-meatballs": ["Leftover-friendly"],
+  "dd-garlic-butter-shrimp-pasta": ["Quick"],
+  "sl-shrimp-mushroom-pasta": ["Quick"],
+  "wol-chicken-chow-mein": ["Quick", "Kid-friendly"],
+  "ll-shakshuka": ["Spicy"],
+  "ck-veggie-black-bean-enchiladas": ["Kid-friendly", "Leftover-friendly"],
+  "ck-black-bean-sweet-potato-enchiladas": ["Leftover-friendly", "Spicy"],
+  "mb-massaman-curry": ["One-pot"],
+};
+
 function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
+  const merged = new Set([
+    ...deriveRecipeTags({ name, category, ingredients }),
+    ...(EXTRA_TAGS[id] || []),
+  ]);
+
   return {
     id,
     name,
@@ -20,7 +57,7 @@ function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
     sourceUrl,
     ingredients,
     method: METHOD_NOTE,
-    tags: deriveRecipeTags({ name, category, ingredients }),
+    tags: recipeTags.filter((tag) => merged.has(tag)),
     timeMins: null,
   };
 }
