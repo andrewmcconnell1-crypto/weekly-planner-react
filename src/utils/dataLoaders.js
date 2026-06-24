@@ -90,7 +90,10 @@ function normaliseRecipe(recipe, index) {
 // v3: recategorised by main ingredient (protein) — old style/cuisine categories
 // (Pasta, Mexican, Kid-friendly…) became tags, and every bundled recipe had its
 // tags re-derived. Refreshes built-ins so existing accounts pick up both.
-export const RECIPES_VERSION = 3;
+// v4: corrected ingredient lists across the RecipeTin and web recipes (verified
+// against sources), and added best-guess tags to the web recipes. Refreshes
+// built-ins so existing accounts pick up the fixes.
+export const RECIPES_VERSION = 4;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
