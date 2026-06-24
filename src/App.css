@@ -3084,22 +3084,26 @@ textarea::placeholder {
 .discover-wizard-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 28px;
+  justify-content: flex-end;
+  min-height: 20px;
 }
 
 .discover-wizard-back {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-4) var(--space-8) var(--space-4) var(--space-4);
+  min-height: 46px;
+  padding: var(--space-8) var(--space-16) var(--space-8) var(--space-12);
+  border: 1px solid var(--line);
   border-radius: var(--radius-pill);
-  color: var(--muted);
+  background: var(--panel);
+  color: var(--ink);
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
 }
 
 .discover-wizard-back:hover {
+  border-color: var(--olive);
   background: var(--panel);
   color: var(--ink);
 }
@@ -3178,6 +3182,12 @@ textarea::placeholder {
   max-width: 22ch;
 }
 
+.discover-wizard-hint {
+  margin-top: calc(var(--space-12) * -1);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
 .discover-wizard-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3199,6 +3209,18 @@ textarea::placeholder {
   width: 100%;
   max-width: 360px;
   min-height: 46px;
+}
+
+.discover-wizard-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.discover-wizard-nav .discover-wizard-continue {
+  flex: 1;
+  width: auto;
+  max-width: none;
 }
 
 .discover-wizard-yes,

@@ -306,6 +306,7 @@ function RecipeDiscoverySheet({
   const inWizard = stage === "wizard" && !weekFull;
   const step = WIZARD_STEPS[stepIndex];
   const StepIcon = step.icon;
+  const isLastStep = stepIndex + 1 >= WIZARD_STEPS.length;
 
   return (
     <div
@@ -350,18 +351,6 @@ function RecipeDiscoverySheet({
           {inWizard ? (
             <div className="discover-wizard">
               <div className="discover-wizard-top">
-                {stepIndex > 0 ? (
-                  <button
-                    type="button"
-                    className="discover-wizard-back"
-                    onClick={backStep}
-                  >
-                    <ChevronLeft size={16} aria-hidden="true" />
-                    Back
-                  </button>
-                ) : (
-                  <span />
-                )}
                 <span className="discover-wizard-count">
                   {stepIndex + 1} of {WIZARD_STEPS.length}
                 </span>
@@ -385,6 +374,9 @@ function RecipeDiscoverySheet({
                 <strong className="discover-wizard-question">
                   {step.question}
                 </strong>
+                <p className="discover-wizard-hint">
+                  Optional — tap any that fit, or none.
+                </p>
 
                 <div className="discover-wizard-picks">
                   {step.options.map((option) => {
@@ -410,24 +402,40 @@ function RecipeDiscoverySheet({
                     );
                   })}
                 </div>
+              </div>
 
+              <div className="discover-wizard-nav">
+                {stepIndex > 0 ? (
+                  <button
+                    type="button"
+                    className="discover-wizard-back"
+                    onClick={backStep}
+                  >
+                    <ChevronLeft size={16} aria-hidden="true" />
+                    Back
+                  </button>
+                ) : (
+                  <span />
+                )}
                 <button
                   type="button"
                   className="discover-wizard-yes discover-wizard-continue"
                   onClick={advance}
                 >
-                  {stepIndex + 1 >= WIZARD_STEPS.length ? "See matches" : "Continue"}
+                  {isLastStep ? "Start swiping" : "Continue"}
                   <ChevronRight size={16} aria-hidden="true" />
                 </button>
               </div>
 
-              <button
-                type="button"
-                className="discover-wizard-skip"
-                onClick={skipWizard}
-              >
-                Skip to swiping
-              </button>
+              {!isLastStep && (
+                <button
+                  type="button"
+                  className="discover-wizard-skip"
+                  onClick={skipWizard}
+                >
+                  Skip to swiping
+                </button>
+              )}
             </div>
           ) : (
             <>
