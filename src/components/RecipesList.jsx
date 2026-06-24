@@ -21,7 +21,8 @@ function RecipesList({
   const [searchText, setSearchText] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [activeSource, setActiveSource] = useState("All");
-  const [activeTag, setActiveTag] = useState("All");
+  // Tags are multi-select (AND): an empty Set means "All".
+  const [activeTags, setActiveTags] = useState(() => new Set());
   const [openRecipeId, setOpenRecipeId] = useState(null);
   // Adding a recipe is a rare action, so it stays tucked behind a quiet toggle.
   const [showAddRecipe, setShowAddRecipe] = useState(false);
@@ -57,7 +58,7 @@ function RecipesList({
     activeCategory === "All" || categories.includes(activeCategory);
   const sourceIsAvailable =
     activeSource === "All" || sources.includes(activeSource);
-  const tagIsAvailable = activeTag === "All" || tags.includes(activeTag);
+  const selectedTags = [...activeTags];
   const visibleRecipes = allRecipes.filter((recipe) => {
     const inCategory =
       !categoryIsAvailable ||
@@ -67,10 +68,8 @@ function RecipesList({
       !sourceIsAvailable ||
       activeSource === "All" ||
       recipeSourceLabel(recipe) === activeSource;
-    const inTag =
-      !tagIsAvailable ||
-      activeTag === "All" ||
-      (recipe.tags || []).includes(activeTag);
+    const recipeTagList = recipe.tags || [];
+    const inTag = selectedTags.every((tag) => recipeTagList.includes(tag));
 
     if (!inCategory || !inSource || !inTag) return false;
     if (!cleanedSearch) return true;
@@ -84,11 +83,25 @@ function RecipesList({
     ? recipes.find((recipe) => recipe.id === openRecipeId)
     : null;
 
+  // "All" clears the selection; any other chip toggles in/out of the Set.
+  function toggleTag(option) {
+    if (option === "All") {
+      setActiveTags(new Set());
+      return;
+    }
+    setActiveTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(option)) next.delete(option);
+      else next.add(option);
+      return next;
+    });
+  }
+
   function clearFilters() {
     setSearchText("");
     setActiveCategory("All");
     setActiveSource("All");
-    setActiveTag("All");
+    setActiveTags(new Set());
   }
 
   return (
@@ -172,8 +185,9 @@ function RecipesList({
           <RecipeFilter
             label="Tags"
             options={tags}
-            active={activeTag}
-            onSelect={setActiveTag}
+            active={activeTags}
+            onSelect={toggleTag}
+            multiple
           />
 
           <RecipeFilter
