@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Baby,
-  Boxes,
   Check,
   ChevronLeft,
   ChevronRight,
-  CookingPot,
   Drumstick,
   RotateCcw,
-  Timer,
+  Sparkles,
   Utensils,
   X,
 } from "lucide-react";
@@ -27,38 +24,41 @@ import { days } from "../utils/mealUtils";
 // path; the drag is an enhancement, so both route through the same commit().
 const SWIPE_AT = 90;
 
-// Cuisine / cooking-style tags — surfaced as their own wizard step, but filter
-// the same way as every other tag (AND): a recipe must carry all selected tags.
+// Tag groups, each surfaced as its own multi-select wizard step. All tags
+// filter the same way (AND): a recipe must carry every selected tag.
 const STYLE_TAGS = ["Pasta", "Noodles", "Soup", "Mexican", "Slow-cooked"];
+const LIFESTYLE_TAGS = [
+  "Quick",
+  "Kid-friendly",
+  "Leftover-friendly",
+  "One-pot",
+  "Spicy",
+];
 
-// A short guided flow shown before the deck, mirroring the recipe taxonomy: a
-// protein category pick, a cooking-style pick, then a few yes/no lifestyle tags.
-// "pick" steps multi-select (OR within the step); "toggle" steps map to one tag.
+// A short guided flow shown before the deck, mirroring the recipe taxonomy:
+// pick a protein, a cooking style, then any lifestyle tags. Every step is
+// multi-select, so e.g. Quick + Kid-friendly can be chosen together. `set`
+// routes the picks to the category filter (OR) or the tag filter (AND).
 // Choices pre-filter the deck so swiping starts from a shortlist. Skippable.
 const WIZARD_STEPS = [
   {
-    kind: "pick",
     set: "category",
     question: "What are you in the mood for?",
     icon: Drumstick,
     options: ["Chicken", "Beef", "Pork", "Lamb", "Seafood", "Vegetarian"],
   },
   {
-    kind: "pick",
-    set: "style",
+    set: "tag",
     question: "Fancy a particular style?",
     icon: Utensils,
     options: STYLE_TAGS,
   },
-  { kind: "toggle", tag: "Quick", question: "Short on time tonight?", icon: Timer },
-  { kind: "toggle", tag: "Kid-friendly", question: "Cooking for kids?", icon: Baby },
   {
-    kind: "toggle",
-    tag: "Leftover-friendly",
-    question: "Want leftovers for later?",
-    icon: Boxes,
+    set: "tag",
+    question: "Anything else matter tonight?",
+    icon: Sparkles,
+    options: LIFESTYLE_TAGS,
   },
-  { kind: "toggle", tag: "One-pot", question: "Minimal washing up?", icon: CookingPot },
 ];
 
 function RecipeDiscoverySheet({
@@ -153,19 +153,6 @@ function RecipeDiscoverySheet({
   function advance() {
     if (stepIndex + 1 >= WIZARD_STEPS.length) setStage("deck");
     else setStepIndex((index) => index + 1);
-  }
-
-  // Record a yes/no answer (add or remove this step's tag so going back and
-  // changing an answer stays correct), then advance.
-  function answerStep(wantsTag) {
-    const { tag } = WIZARD_STEPS[stepIndex];
-    setSelectedTags((prev) => {
-      const next = new Set(prev);
-      if (wantsTag) next.add(tag);
-      else next.delete(tag);
-      return next;
-    });
-    advance();
   }
 
   function backStep() {
@@ -399,60 +386,39 @@ function RecipeDiscoverySheet({
                   {step.question}
                 </strong>
 
-                {step.kind === "pick" ? (
-                  <>
-                    <div className="discover-wizard-picks">
-                      {step.options.map((option) => {
-                        const set =
-                          step.set === "category"
-                            ? selectedCategories
-                            : selectedTags;
-                        const setter =
-                          step.set === "category"
-                            ? setSelectedCategories
-                            : setSelectedTags;
-                        const active = set.has(option);
-                        return (
-                          <button
-                            key={option}
-                            type="button"
-                            className={`recipe-tag-toggle ${active ? "active" : ""}`}
-                            aria-pressed={active}
-                            onClick={() => toggleIn(setter, option)}
-                          >
-                            {option}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <button
-                      type="button"
-                      className="discover-wizard-yes discover-wizard-continue"
-                      onClick={advance}
-                    >
-                      Continue
-                      <ChevronRight size={16} aria-hidden="true" />
-                    </button>
-                  </>
-                ) : (
-                  <div className="discover-wizard-options">
-                    <button
-                      type="button"
-                      className="discover-wizard-yes"
-                      onClick={() => answerStep(true)}
-                    >
-                      <Check size={16} aria-hidden="true" />
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      className="discover-wizard-no"
-                      onClick={() => answerStep(false)}
-                    >
-                      No preference
-                    </button>
-                  </div>
-                )}
+                <div className="discover-wizard-picks">
+                  {step.options.map((option) => {
+                    const set =
+                      step.set === "category"
+                        ? selectedCategories
+                        : selectedTags;
+                    const setter =
+                      step.set === "category"
+                        ? setSelectedCategories
+                        : setSelectedTags;
+                    const active = set.has(option);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`recipe-tag-toggle ${active ? "active" : ""}`}
+                        aria-pressed={active}
+                        onClick={() => toggleIn(setter, option)}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  className="discover-wizard-yes discover-wizard-continue"
+                  onClick={advance}
+                >
+                  {stepIndex + 1 >= WIZARD_STEPS.length ? "See matches" : "Continue"}
+                  <ChevronRight size={16} aria-hidden="true" />
+                </button>
               </div>
 
               <button
