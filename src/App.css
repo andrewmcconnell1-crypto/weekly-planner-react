@@ -1246,11 +1246,13 @@ textarea:focus-visible {
   box-shadow: var(--shadow);
 }
 
-/* Empty day: an inviting outlined "add" tile, not a faded meal card. */
+/* Empty day: an inviting "add zone" — a soft olive wash, dashed border and a
+   solid olive + button, so a missing meal reads as a call to action. */
 .plan-screen .meal-card-empty,
 .home-screen .meal-card-empty {
-  background: transparent;
+  background: #f3f5e6;
   border-style: dashed;
+  border-color: #c9d0ad;
   box-shadow: none;
 }
 
@@ -1308,9 +1310,9 @@ textarea:focus-visible {
 }
 
 .meal-card-empty .meal-type-badge {
-  background: transparent;
-  border: 1.5px dashed var(--olive);
-  color: var(--olive);
+  background: var(--olive);
+  border: 0;
+  color: #ffffff;
 }
 
 .meal-row-main {
@@ -1343,6 +1345,7 @@ textarea:focus-visible {
 
 .meal-row-add {
   color: var(--olive);
+  font-weight: var(--weight-heavy);
 }
 
 .meal-row-sub {
