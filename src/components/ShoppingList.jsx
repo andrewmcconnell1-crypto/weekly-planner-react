@@ -72,7 +72,7 @@ function ShoppingList({
             type="button"
             className="shopping-row-delete"
             aria-label={`Delete ${item.name}`}
-            onClick={() => onDeleteManual(item.id)}
+            onClick={() => onDeleteManual(item.manualId)}
           >
             <X size={16} aria-hidden="true" />
           </button>
