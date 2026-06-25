@@ -37,6 +37,31 @@ describe("ErrorBoundary", () => {
     spy.mockRestore();
   });
 
+  it("renders a custom fallback when provided, with a working reset", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    let shouldThrow = true;
+    function Maybe() {
+      if (shouldThrow) throw new Error("kaboom");
+      return <p>recovered</p>;
+    }
+
+    render(
+      <ErrorBoundary fallback={(reset) => <button onClick={reset}>retry</button>}>
+        <Maybe />
+      </ErrorBoundary>
+    );
+
+    // The default full-screen card is not used.
+    expect(screen.queryByText("Something went wrong")).toBe(null);
+
+    shouldThrow = false;
+    fireEvent.click(screen.getByRole("button", { name: "retry" }));
+    expect(screen.getByText("recovered")).toBeTruthy();
+
+    spy.mockRestore();
+  });
+
   it("re-renders the children when 'Try again' is clicked and they recover", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 

@@ -2,6 +2,8 @@ import { lazy, Suspense } from "react";
 
 import WeekControls from "./WeekControls";
 import MealGroups from "./MealGroups";
+import ErrorBoundary from "./ErrorBoundary";
+import SheetError from "./SheetError";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 
@@ -91,8 +93,11 @@ export default function PlanScreen({
       </div>
 
       {expandedMealDay && (
-        <Suspense fallback={null}>
-          <MealEditorSheet
+        <ErrorBoundary
+          fallback={<SheetError onClose={() => setExpandedMealDay(null)} />}
+        >
+          <Suspense fallback={null}>
+            <MealEditorSheet
             key={expandedMealDay}
             day={expandedMealDay}
             dateLabel={expandedDayLabel}
@@ -118,8 +123,9 @@ export default function PlanScreen({
                 ? () => setExpandedMealDay(expandedNextDay)
                 : undefined
             }
-          />
-        </Suspense>
+            />
+          </Suspense>
+        </ErrorBoundary>
       )}
     </section>
   );
