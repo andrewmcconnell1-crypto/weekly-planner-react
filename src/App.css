@@ -2967,8 +2967,22 @@ textarea::placeholder {
   padding-top: var(--space-10);
 }
 
+/* Restrained outline-danger (matches the recipe editor) instead of a solid red
+   block — the row already has swipe-to-delete, so this stays quiet until used. */
 .basics-editor .delete-button {
   justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  border: 1px solid var(--danger);
+  background: #ffffff;
+  color: var(--danger);
+  font-weight: var(--weight-bold);
+}
+
+.basics-editor .delete-button:hover {
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .staple-controls {
