@@ -61,8 +61,8 @@ export function buildUnifiedShoppingList({
 
   const collected = [];
 
-  function add(name, category, tier, source) {
-    collected.push({ name, category: category || "Other", tier, source });
+  function add(name, category, tier, source, manualId) {
+    collected.push({ name, category: category || "Other", tier, source, manualId });
   }
 
   // A meal's tier from how many days away it is — counted across the week
@@ -105,7 +105,7 @@ export function buildUnifiedShoppingList({
   }
 
   for (const item of manualItems) {
-    add(item.name, item.category || "Other", item.tier || "soon", "Manual");
+    add(item.name, item.category || "Other", item.tier || "soon", "Manual", item.id);
   }
 
   // One item, one place. A manual add is an explicit choice, so its tier and
