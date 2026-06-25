@@ -151,6 +151,9 @@ function App() {
     loading: dataLoading,
     syncError,
     cloud,
+    getRecoverySnapshots,
+    captureRecoverySnapshot,
+    restoreRecoverySnapshot,
   } = usePlannerStore(user, guest);
 
   const [newItem, setNewItem] = useState("");
@@ -912,6 +915,7 @@ function App() {
 
     if (!shouldReset) return;
 
+    captureRecoverySnapshot("Before restoring default stock");
     setInventory(createStarterInventoryItems());
     setNewInventoryItem("");
   }
@@ -923,6 +927,7 @@ function App() {
 
     if (!shouldReset) return;
 
+    captureRecoverySnapshot("Before restoring default recurring buys");
     setStaples(initialStaples.map((staple) => ({ ...staple })));
     setNewStaple("");
   }
@@ -1010,6 +1015,9 @@ function App() {
   // backup actually has content for it (or you have nothing there already).
   // Returns the human-readable sections that were preserved so the UI can say so.
   function applyImportedData(backup) {
+    // Save where we are first, so a bad restore can be rolled back.
+    captureRecoverySnapshot("Before restoring a backup");
+
     const has = (key) => Object.prototype.hasOwnProperty.call(backup, key);
     const isEmpty = (value) =>
       value == null ||
@@ -1612,6 +1620,8 @@ function App() {
             onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
             resetStockToStarterList={resetStockToStarterList}
             resetStaplesToStarterList={resetStaplesToStarterList}
+            getRecoverySnapshots={getRecoverySnapshots}
+            onRestoreSnapshot={restoreRecoverySnapshot}
             onResetWelcome={() => {
               setWelcomePreview(true);
               setWelcomeDismissedFor(null);

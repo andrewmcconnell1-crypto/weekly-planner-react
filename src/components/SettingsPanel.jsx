@@ -56,10 +56,28 @@ function SettingsPanel({
   onOpenShoppingHelp,
   resetStockToStarterList,
   resetStaplesToStarterList,
+  getRecoverySnapshots,
+  onRestoreSnapshot,
   onResetWelcome,
 }) {
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
+  // Read the recovery points once when the panel opens; refresh after a restore.
+  const [snapshots, setSnapshots] = useState(
+    () => getRecoverySnapshots?.() ?? []
+  );
+
+  function handleRestoreSnapshot(snapshot) {
+    const when = new Date(snapshot.takenAt).toLocaleString();
+    const ok = window.confirm(
+      `Restore this recovery point from ${when}? It replaces your current meals, lists, stock and recipes with that saved copy.`
+    );
+    if (!ok) return;
+    if (onRestoreSnapshot(snapshot.id)) {
+      setSnapshots(getRecoverySnapshots?.() ?? []);
+      setStatus({ tone: "ok", message: "Recovery point restored." });
+    }
+  }
 
   function exportData() {
     const backup = {};
@@ -292,6 +310,37 @@ function SettingsPanel({
                 Restore default recurring buys
               </button>
             </div>
+          </section>
+        )}
+
+        {snapshots.length > 0 && (
+          <section className="settings-group">
+            <strong>Recovery points</strong>
+            <p className="small-text">
+              Snapshots saved on this device when you open the app and before any
+              restore or reset. Roll back to one to undo an accidental change.
+            </p>
+
+            <ul className="recovery-list">
+              {snapshots.map((snapshot) => (
+                <li key={snapshot.id} className="recovery-row">
+                  <span className="recovery-row-main">
+                    <strong>{snapshot.label}</strong>
+                    <span className="small-text">
+                      {new Date(snapshot.takenAt).toLocaleString()}
+                    </span>
+                  </span>
+
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() => handleRestoreSnapshot(snapshot)}
+                  >
+                    Restore
+                  </button>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
