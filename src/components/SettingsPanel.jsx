@@ -16,6 +16,12 @@ const BACKUP_KEYS = [
   { key: "settings", shape: "object" },
 ];
 
+// "a" | "a and b" | "a, b and c"
+function formatList(items) {
+  if (items.length <= 1) return items.join("");
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
+
 function isPlainObject(value) {
   return (
     typeof value === "object" && value !== null && !Array.isArray(value)
@@ -113,7 +119,7 @@ function SettingsPanel({
       }
 
       const shouldImport = window.confirm(
-        "Importing this backup will overwrite all current meals, shopping lists, stock and recipes on this device. Continue?"
+        "Restore this backup? Each section it contains (meals, shopping lists, stock, recipes) replaces what you have now. Sections the backup doesn't have are left untouched."
       );
 
       if (!shouldImport) {
@@ -121,8 +127,19 @@ function SettingsPanel({
         return;
       }
 
-      onImport(parsed);
-      setStatus({ tone: "ok", message: "Backup restored." });
+      const result = onImport(parsed);
+      const kept = result?.kept ?? [];
+      setStatus({
+        tone: "ok",
+        message:
+          kept.length > 0
+            ? `Backup restored. Your ${formatList(kept)} ${
+                kept.length === 1 ? "wasn't" : "weren't"
+              } in the backup, so ${
+                kept.length === 1 ? "it was" : "they were"
+              } kept as-is.`
+            : "Backup restored.",
+      });
     };
 
     reader.onerror = () => {
