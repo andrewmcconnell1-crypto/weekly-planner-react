@@ -1,0 +1,174 @@
+import { lazy, Suspense } from "react";
+import {
+  BookOpen,
+  Repeat2,
+  Package,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+
+const HouseholdBasics = lazy(() => import("./HouseholdBasics"));
+const RecipesList = lazy(() => import("./RecipesList"));
+
+export default function MoreScreen({
+  moreSection,
+  setMoreSection,
+  householdSection,
+  openHousehold,
+  availableCategories,
+  recipes,
+  activeStaplesCount,
+  activeInventoryCount,
+  staples,
+  inventory,
+  newStaple,
+  setNewStaple,
+  addStaple,
+  deleteStaple,
+  updateStapleFrequency,
+  updateStapleCategory,
+  updateStapleDetails,
+  toggleStapleActive,
+  loadStarterStaples,
+  newInventoryItem,
+  setNewInventoryItem,
+  addInventoryItem,
+  deleteInventoryItem,
+  updateInventoryCategory,
+  toggleInventoryActive,
+  loadStarterInventory,
+  newRecipeName,
+  setNewRecipeName,
+  addRecipe,
+  deleteRecipe,
+  addIngredientToRecipe,
+  deleteIngredientFromRecipe,
+  updateRecipe,
+}) {
+  return (
+    <section className="screen more-screen">
+      {moreSection === "overview" ? (
+        <>
+          <p className="more-intro">
+            Set up the recipes, groceries and stock behind your plan.
+          </p>
+
+          <div className="manager-list">
+            <button
+              className="manager-row"
+              type="button"
+              onClick={() => setMoreSection("recipes")}
+            >
+              <span className="manager-icon" aria-hidden="true">
+                <BookOpen size={20} strokeWidth={2} />
+              </span>
+              <span className="manager-main">
+                <strong>Recipes</strong>
+                <span>
+                  {recipes.length} saved recipe
+                  {recipes.length === 1 ? "" : "s"}
+                </span>
+              </span>
+              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
+            </button>
+
+            <button
+              className="manager-row"
+              type="button"
+              onClick={() => openHousehold("recurring")}
+            >
+              <span className="manager-icon" aria-hidden="true">
+                <Repeat2 size={20} strokeWidth={2} />
+              </span>
+              <span className="manager-main">
+                <strong>Recurring buys</strong>
+                <span>{activeStaplesCount} on your list</span>
+              </span>
+              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
+            </button>
+
+            <button
+              className="manager-row"
+              type="button"
+              onClick={() => openHousehold("stock")}
+            >
+              <span className="manager-icon" aria-hidden="true">
+                <Package size={20} strokeWidth={2} />
+              </span>
+              <span className="manager-main">
+                <strong>Stock</strong>
+                <span>{activeInventoryCount} in stock</span>
+              </span>
+              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="screen-header">
+            <div>
+              <h2>
+                {moreSection === "household"
+                  ? householdSection === "recurring"
+                    ? "Recurring buys"
+                    : "Stock"
+                  : "Recipes"}
+              </h2>
+            </div>
+          </div>
+
+          <button
+            className="back-button"
+            type="button"
+            onClick={() => setMoreSection("overview")}
+          >
+            <ChevronLeft size={18} aria-hidden="true" />
+            Back to Kitchen
+          </button>
+
+          {moreSection === "household" && (
+            <Suspense fallback={null}>
+              <HouseholdBasics
+                activeSection={householdSection}
+                availableCategories={availableCategories}
+                staples={staples}
+                inventory={inventory}
+                newStaple={newStaple}
+                setNewStaple={setNewStaple}
+                addStaple={addStaple}
+                deleteStaple={deleteStaple}
+                updateStapleFrequency={updateStapleFrequency}
+                updateStapleCategory={updateStapleCategory}
+                updateStapleDetails={updateStapleDetails}
+                toggleStapleActive={toggleStapleActive}
+                loadStarterStaples={loadStarterStaples}
+                newInventoryItem={newInventoryItem}
+                setNewInventoryItem={setNewInventoryItem}
+                addInventoryItem={addInventoryItem}
+                deleteInventoryItem={deleteInventoryItem}
+                updateInventoryCategory={updateInventoryCategory}
+                toggleInventoryActive={toggleInventoryActive}
+                loadStarterInventory={loadStarterInventory}
+              />
+            </Suspense>
+          )}
+
+          {moreSection === "recipes" && (
+            <Suspense fallback={null}>
+              <RecipesList
+                recipes={recipes}
+                newRecipeName={newRecipeName}
+                setNewRecipeName={setNewRecipeName}
+                addRecipe={addRecipe}
+                deleteRecipe={deleteRecipe}
+                addIngredientToRecipe={addIngredientToRecipe}
+                deleteIngredientFromRecipe={deleteIngredientFromRecipe}
+                updateRecipe={updateRecipe}
+              />
+            </Suspense>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
