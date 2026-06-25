@@ -125,7 +125,15 @@ export function buildUnifiedShoppingList({
       take = TIER_RANK[item.tier] < TIER_RANK[existing.tier];
     }
 
-    if (take) byName.set(id, { ...item, id, checked: Boolean(checkedMap[id]) });
+    // Manual items are removed outright when ticked, so they never carry a
+    // checked state (and never sit in Done) regardless of any stale stored tick.
+    if (take) {
+      byName.set(id, {
+        ...item,
+        id,
+        checked: item.source === "Manual" ? false : Boolean(checkedMap[id]),
+      });
+    }
   }
 
   // Meal ingredients skipped because they're already covered by stock/recurring,
