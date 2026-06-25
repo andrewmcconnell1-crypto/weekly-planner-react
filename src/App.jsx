@@ -1,101 +1,52 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import {
   House,
   CalendarDays,
   ShoppingBasket,
   CookingPot,
   Settings,
-  BookOpen,
-  Repeat2,
-  Package,
-  ChevronLeft,
-  ChevronRight,
-  X,
 } from "lucide-react";
 import "./App.css";
 
-import MealCard from "./components/MealCard";
-import MealLeftoverCluster from "./components/MealLeftoverCluster";
-import TonightCard from "./components/TonightCard";
 import ShoppingList from "./components/ShoppingList";
-import WeekControls from "./components/WeekControls";
 import SignInScreen from "./components/SignInScreen";
 import UpdateBanner from "./components/UpdateBanner";
 import UndoSnackbar from "./components/UndoSnackbar";
+import LoadingScreen from "./components/LoadingScreen";
+import HomeScreen from "./components/HomeScreen";
+import PlanScreen from "./components/PlanScreen";
+import MoreScreen from "./components/MoreScreen";
+import SettingsScreen from "./components/SettingsScreen";
 
-// Lazily loaded: bottom-sheet editors (opened on demand) and the secondary
-// Kitchen/Settings screens (behind navigation) — kept out of the initial bundle.
-const MealEditorSheet = lazy(() => import("./components/MealEditorSheet"));
+// Lazily loaded: the two overlay sheets that App still renders directly, kept
+// out of the initial bundle. (The editor / Kitchen / Settings screens lazy-load
+// their own heavy children from within their components.)
 const RecipeDiscoverySheet = lazy(
   () => import("./components/RecipeDiscoverySheet")
 );
 const ShoppingHelpSheet = lazy(() => import("./components/ShoppingHelpSheet"));
-const HouseholdBasics = lazy(() => import("./components/HouseholdBasics"));
-const RecipesList = lazy(() => import("./components/RecipesList"));
-const SettingsPanel = lazy(() => import("./components/SettingsPanel"));
 
-import { createEmptyMeal, createEmptyMeals, days } from "./utils/mealUtils";
+import { createEmptyMeals, days } from "./utils/mealUtils";
 import {
   getSunday,
   getNextSunday,
   formatDate,
   getWeekKey,
 } from "./utils/dateUtils";
-import { normaliseItemName, createCollectionId } from "./utils/itemUtils";
 import { createMealHelpers } from "./utils/mealPlanning";
 import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
-import {
-  createStarterInventoryItems,
-  normaliseInventoryItems,
-  mergeSavedRecipes,
-} from "./utils/dataLoaders";
-import { initialStaples } from "./data/initialStaples";
 import { isSupabaseConfigured } from "./lib/supabase";
+import { applyBackup } from "./lib/applyBackup";
 import { useAuth } from "./hooks/useAuth";
 import { usePlannerStore } from "./hooks/usePlannerStore";
 import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
 import useBackToClose from "./hooks/useBackToClose";
+import { useUndo } from "./hooks/useUndo";
+import { useMealPlanActions } from "./hooks/useMealPlanActions";
+import { useShoppingActions } from "./hooks/useShoppingActions";
+import { useHouseholdActions } from "./hooks/useHouseholdActions";
+import { useRecipeActions } from "./hooks/useRecipeActions";
 import { categories } from "./data/categories";
-
-function LoadingScreen({ message }) {
-  return (
-    <main className="app-shell tab-home auth-shell">
-      <section className="auth-card">
-        <p className="small-text">{message}</p>
-      </section>
-    </main>
-  );
-}
-
-// Group an ordered list of days into render groups: each cook day plus the run
-// of leftover (repeat) days that immediately follow it. Used by both the Meals
-// tab and the Home "coming up" list so they render identically.
-function buildMealGroups(dayList, mealsObj, getSummary) {
-  const groups = [];
-
-  for (let i = 0; i < dayList.length; ) {
-    const day = dayList[i];
-    const leadSummary = getSummary(day, mealsObj[day], mealsObj);
-    const repeatDays = [];
-
-    if (leadSummary.hasMeal && (mealsObj[day]?.mealType || "cook") === "cook") {
-      for (let j = i + 1; j < dayList.length; j += 1) {
-        const nextMeal = mealsObj[dayList[j]];
-
-        if (nextMeal?.mealType === "repeat" && nextMeal.repeatFromDay === day) {
-          repeatDays.push(dayList[j]);
-        } else {
-          break;
-        }
-      }
-    }
-
-    groups.push({ leadDay: day, leadSummary, repeatDays });
-    i += 1 + repeatDays.length;
-  }
-
-  return groups;
-}
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -119,6 +70,9 @@ function App() {
   // named aliases so the meal/shop-specific reads below stay readable.
   const mealWeekStart = activeWeekStart;
   const shoppingWeekStart = activeWeekStart;
+
+  const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
+  const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
 
   const {
     user,
@@ -156,13 +110,6 @@ function App() {
     restoreRecoverySnapshot,
   } = usePlannerStore(user, guest);
 
-  const [newItem, setNewItem] = useState("");
-  const [newStaple, setNewStaple] = useState("");
-  const [newInventoryItem, setNewInventoryItem] = useState("");
-  const [newRecipeName, setNewRecipeName] = useState("");
-  const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
-  const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
-
   // Let the device / browser Back button close whichever overlay sheet is open
   // instead of leaving the app. One coordinator (not one per sheet) keeps a
   // single history entry across hand-offs like editor -> discovery.
@@ -179,52 +126,120 @@ function App() {
 
   useBackToClose(Boolean(closeOpenOverlay), () => closeOpenOverlay?.());
 
-  // Transient "Undo" snackbar for destructive actions. Each action snapshots the
-  // affected state, mutates, then registers an undo that restores the snapshot.
-  const [undoState, setUndoState] = useState(null); // { message, onUndo }
-  const undoTimerRef = useRef(null);
+  const { undoState, requestUndo, runUndo } = useUndo();
 
-  function requestUndo(message, onUndo) {
-    window.clearTimeout(undoTimerRef.current);
-    setUndoState({ message, onUndo });
-    undoTimerRef.current = window.setTimeout(() => setUndoState(null), 6000);
-  }
+  const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
+  const { getMealSummary } = mealHelpers;
 
-  function runUndo() {
-    window.clearTimeout(undoTimerRef.current);
-    undoState?.onUndo?.();
-    setUndoState(null);
-  }
+  // ---- Week keys + the active week's plan (feed the action hooks below) ----
+  const mealWeekKey = getWeekKey(mealWeekStart);
+  const shoppingWeekKey = getWeekKey(shoppingWeekStart);
+  const currentWeekKey = getWeekKey(currentWeekStart);
+  const nextWeekKey = getWeekKey(nextWeekStart);
+  const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
 
-  useEffect(() => () => window.clearTimeout(undoTimerRef.current), []);
+  const today = new Date();
+  const todayDayName = days[today.getDay()];
 
   const keepStandingList = settings?.keepStandingList !== false;
   // Per-trip: are we using the saved list (online order) or shopping fresh?
   const usingSavedList =
     keepStandingList && settings?.shopUsingSavedList !== false;
 
-  const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
-  const { getMealSummary } = mealHelpers;
+  // One shopping list spanning this week + next, ordered by urgency. Ticks and
+  // manual adds are persisted (shoppingChecked / manualShoppingItems).
+  const {
+    items: unifiedItems,
+    skipped: skippedShoppingItems,
+    removals: recurringRemovals,
+  } = buildUnifiedShoppingList({
+    staples,
+    inventory,
+    mealsByWeek,
+    currentWeekKey,
+    nextWeekKey,
+    todayDayName,
+    getMealSummary,
+    keepStandingList,
+    usingSavedList,
+    manualItems: manualShoppingItems,
+    checkedMap: shoppingChecked,
+  });
+  const removalIds = new Set(recurringRemovals.map((item) => item.id));
 
-  // Whether the user has completed the full workflow (plan a meal -> tick
-  // something off the list). Derived, so we never setState inside an effect.
-  const welcomeWorkflowComplete =
-    Object.values(mealsByWeek).some((weekMeals) =>
-      days.some((d) => {
-        const m = weekMeals?.[d];
-        return (
-          m && (m.name || m.recipeId || (m.mealType && m.mealType !== "cook"))
-        );
-      })
-    ) && Object.values(shoppingChecked).some(Boolean);
+  // ---- Domain action hooks (each owns its slice's mutators + input state) ----
+  const { setLeftoverNights, clearMealDay, assignRecipeToDay, updateMeal } =
+    useMealPlanActions({
+      meals,
+      mealsByWeek,
+      setMealsByWeek,
+      mealWeekKey,
+      requestUndo,
+    });
 
-  // Identifies the current session so the welcome's dismissed/done state is
-  // per-account: a new sign-in, sign-out, or guest gets a different key and
-  // therefore sees the card again (until their data shows a completed workflow).
-  const welcomeSessionKey = guest ? "guest" : user?.id || "local";
-  const showWelcome =
-    welcomeDismissedFor !== welcomeSessionKey &&
-    (welcomePreview || !welcomeWorkflowComplete);
+  const {
+    newItem,
+    setNewItem,
+    addShoppingItem,
+    addSkippedShoppingItem,
+    deleteShoppingItem,
+    toggleShoppingChecked,
+    toggleRemovalAck,
+    setKeepStandingList,
+    setUsingSavedList,
+  } = useShoppingActions({
+    manualShoppingItems,
+    setManualShoppingItems,
+    shoppingChecked,
+    setShoppingChecked,
+    unifiedItems,
+    removalAcksByWeek,
+    setRemovalAcksByWeek,
+    currentWeekKey,
+    removalIds,
+    settings,
+    setSettings,
+    requestUndo,
+  });
+
+  const {
+    newStaple,
+    setNewStaple,
+    newInventoryItem,
+    setNewInventoryItem,
+    addStaple,
+    deleteStaple,
+    updateStapleFrequency,
+    updateStapleCategory,
+    updateStapleDetails,
+    toggleStapleActive,
+    loadStarterStaples,
+    resetStaplesToStarterList,
+    addInventoryItem,
+    deleteInventoryItem,
+    updateInventoryCategory,
+    toggleInventoryActive,
+    loadStarterInventory,
+    resetStockToStarterList,
+  } = useHouseholdActions({
+    staples,
+    setStaples,
+    inventory,
+    setInventory,
+    shoppingWeekKey,
+    captureRecoverySnapshot,
+    requestUndo,
+  });
+
+  const {
+    newRecipeName,
+    setNewRecipeName,
+    addRecipe,
+    deleteRecipe,
+    updateRecipe,
+    addIngredientToRecipe,
+    deleteIngredientFromRecipe,
+  } = useRecipeActions({ recipes, setRecipes, requestUndo });
 
   // ---- Auth / loading gates (after all hooks, before any data-derived work) ----
   if (isSupabaseConfigured && authLoading) {
@@ -247,10 +262,6 @@ function App() {
     return <LoadingScreen message="Loading your plan…" />;
   }
 
-  const mealWeekKey = getWeekKey(mealWeekStart);
-  const shoppingWeekKey = getWeekKey(shoppingWeekStart);
-  const currentWeekKey = getWeekKey(currentWeekStart);
-  const nextWeekKey = getWeekKey(nextWeekStart);
   const homeWeekMode =
     mealWeekKey === currentWeekKey && shoppingWeekKey === currentWeekKey
       ? "current"
@@ -263,11 +274,8 @@ function App() {
       : mealWeekKey === nextWeekKey
         ? "next"
         : "custom";
-  const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
 
   // "Tonight" on Home: today's meal, drawn from the current week's plan.
-  const today = new Date();
-  const todayDayName = days[today.getDay()];
   const currentWeekMeals = mealsByWeek[currentWeekKey] || createEmptyMeals();
   const tonightSummary = getMealSummary(
     todayDayName,
@@ -308,9 +316,6 @@ function App() {
 
   const mealWeekEnd = new Date(mealWeekStart);
   mealWeekEnd.setDate(mealWeekStart.getDate() + 6);
-
-  const shoppingWeekEnd = new Date(shoppingWeekStart);
-  shoppingWeekEnd.setDate(shoppingWeekStart.getDate() + 6);
 
   const planningDaySummaries = days.map((day) =>
     getMealSummary(day, meals[day], meals)
@@ -396,35 +401,35 @@ function App() {
     "Other",
   ];
 
-  // One shopping list spanning this week + next, ordered by urgency. Ticks and
-  // manual adds are persisted (shoppingChecked / manualShoppingItems).
-  const {
-    items: unifiedItems,
-    skipped: skippedShoppingItems,
-    removals: recurringRemovals,
-  } = buildUnifiedShoppingList({
-    staples,
-    inventory,
-    mealsByWeek,
-    currentWeekKey,
-    nextWeekKey,
-    todayDayName,
-    getMealSummary,
-    keepStandingList,
-    usingSavedList,
-    manualItems: manualShoppingItems,
-    checkedMap: shoppingChecked,
-  });
   const unifiedPending = unifiedItems.filter((item) => !item.checked).length;
   // Removals are about this week's standing order; their "handled" ticks are
   // kept per week, pruned to removals still present.
-  const removalIds = new Set(recurringRemovals.map((item) => item.id));
   const removalAckIds = (removalAcksByWeek[currentWeekKey] || []).filter((id) =>
     removalIds.has(id)
   );
   const pendingRemovalCount = recurringRemovals.filter(
     (item) => !removalAckIds.includes(item.id)
   ).length;
+
+  // Whether the user has completed the full workflow (plan a meal -> tick
+  // something off the list). Derived, so we never setState inside an effect.
+  const welcomeWorkflowComplete =
+    Object.values(mealsByWeek).some((weekMeals) =>
+      days.some((d) => {
+        const m = weekMeals?.[d];
+        return (
+          m && (m.name || m.recipeId || (m.mealType && m.mealType !== "cook"))
+        );
+      })
+    ) && Object.values(shoppingChecked).some(Boolean);
+
+  // Identifies the current session so the welcome's dismissed/done state is
+  // per-account: a new sign-in, sign-out, or guest gets a different key and
+  // therefore sees the card again (until their data shows a completed workflow).
+  const welcomeSessionKey = guest ? "guest" : user?.id || "local";
+  const showWelcome =
+    welcomeDismissedFor !== welcomeSessionKey &&
+    (welcomePreview || !welcomeWorkflowComplete);
 
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
@@ -463,184 +468,9 @@ function App() {
     setActiveTab("plan");
   }
 
-  // Render a list of days as MealCards / leftover clusters (shared by the Meals
-  // tab and the Home "coming up" list so the styling matches).
-  function renderMealGroups(dayList, onOpenDay) {
-    return buildMealGroups(dayList, meals, getMealSummary).map((group) =>
-      group.repeatDays.length === 0 ? (
-        <MealCard
-          key={group.leadDay}
-          day={group.leadDay}
-          meal={meals[group.leadDay]}
-          displayName={group.leadSummary.name}
-          mealLabel={group.leadSummary.label}
-          mealTone={group.leadSummary.tone}
-          hasMeal={group.leadSummary.hasMeal}
-          onOpen={() => onOpenDay(group.leadDay)}
-        />
-      ) : (
-        <MealLeftoverCluster
-          key={group.leadDay}
-          leadDay={group.leadDay}
-          leadSummary={group.leadSummary}
-          repeatDays={group.repeatDays}
-          onOpenDay={onOpenDay}
-        />
-      )
-    );
-  }
-
   function dismissWelcome() {
     setWelcomePreview(false);
     setWelcomeDismissedFor(welcomeSessionKey);
-  }
-
-  // Cook once, eat for `nights` nights: keep the meal on startDay and mark the
-  // next nights-1 consecutive days as repeats of it. Shrinking clears the
-  // trailing repeat days that pointed back at startDay; never spills past
-  // Saturday.
-  function setLeftoverNights(startDay, nights) {
-    const startIndex = days.indexOf(startDay);
-
-    if (startIndex === -1) return;
-
-    const updatedMeals = { ...meals };
-
-    for (let index = startIndex + 1; index < days.length; index += 1) {
-      const day = days[index];
-      const existingMeal = updatedMeals[day];
-      const repeatsStartDay =
-        existingMeal?.mealType === "repeat" &&
-        existingMeal.repeatFromDay === startDay;
-
-      if (index - startIndex < nights) {
-        updatedMeals[day] = {
-          name: "",
-          recipeId: "",
-          mealType: "repeat",
-          repeatFromDay: startDay,
-          ingredients: [],
-        };
-      } else if (repeatsStartDay) {
-        updatedMeals[day] = createEmptyMeal();
-      } else {
-        break;
-      }
-    }
-
-    setMealsByWeek({
-      ...mealsByWeek,
-      [mealWeekKey]: updatedMeals,
-    });
-  }
-
-  // Reset a day to unplanned, along with any repeat days that pointed at it
-  // (otherwise they'd dangle as "Same as <day>" with no source meal).
-  function clearMealDay(day) {
-    const snapshot = meals;
-    const updatedMeals = { ...meals, [day]: createEmptyMeal() };
-
-    for (const otherDay of days) {
-      const otherMeal = updatedMeals[otherDay];
-
-      if (
-        otherMeal?.mealType === "repeat" &&
-        otherMeal.repeatFromDay === day
-      ) {
-        updatedMeals[otherDay] = createEmptyMeal();
-      }
-    }
-
-    setMealsByWeek({
-      ...mealsByWeek,
-      [mealWeekKey]: updatedMeals,
-    });
-
-    requestUndo(`Removed ${day}'s plan`, () =>
-      setMealsByWeek((prev) => ({ ...prev, [mealWeekKey]: snapshot }))
-    );
-  }
-
-  // Drop a recipe onto a day as a cooked meal (used by the discovery deck),
-  // optionally cooking once for `nights` and filling the following days with
-  // leftovers. Done in a single update so the assignment and the leftovers
-  // compose, rather than two setState calls clobbering each other.
-  function assignRecipeToDay(day, recipe, nights = 1) {
-    const startIndex = days.indexOf(day);
-
-    setMealsByWeek((prevByWeek) => {
-      const current = prevByWeek[mealWeekKey] || {};
-      const nextMeals = {
-        ...current,
-        [day]: {
-          ...createEmptyMeal(),
-          mealType: "cook",
-          name: recipe.name,
-          recipeId: recipe.id,
-        },
-      };
-
-      if (startIndex !== -1) {
-        for (let index = startIndex + 1; index < days.length; index += 1) {
-          const followingDay = days[index];
-          const existingMeal = nextMeals[followingDay];
-          const repeatsStartDay =
-            existingMeal?.mealType === "repeat" &&
-            existingMeal.repeatFromDay === day;
-
-          if (index - startIndex < nights) {
-            nextMeals[followingDay] = {
-              name: "",
-              recipeId: "",
-              mealType: "repeat",
-              repeatFromDay: day,
-              ingredients: [],
-            };
-          } else if (repeatsStartDay) {
-            nextMeals[followingDay] = createEmptyMeal();
-          } else {
-            break;
-          }
-        }
-      }
-
-      return { ...prevByWeek, [mealWeekKey]: nextMeals };
-    });
-  }
-
-  function updateMeal(day, updatedMeal) {
-    const nextMeals = { ...meals, [day]: updatedMeal };
-
-    // If this day is no longer a cooked meal, it can't feed leftovers — clear
-    // the trailing days that were repeats pointing back at it, so they don't
-    // dangle as "Leftovers from <day>" with no source dish.
-    const stillCooked =
-      (updatedMeal.mealType || "cook") === "cook" &&
-      ((updatedMeal.name || "").trim() !== "" ||
-        updatedMeal.recipeId ||
-        (Array.isArray(updatedMeal.ingredients) &&
-          updatedMeal.ingredients.length > 0));
-    const dayIndex = days.indexOf(day);
-
-    if (dayIndex >= 0 && !stillCooked) {
-      for (let index = dayIndex + 1; index < days.length; index += 1) {
-        const followingMeal = nextMeals[days[index]];
-
-        if (
-          followingMeal?.mealType === "repeat" &&
-          followingMeal.repeatFromDay === day
-        ) {
-          nextMeals[days[index]] = createEmptyMeal();
-        } else {
-          break;
-        }
-      }
-    }
-
-    setMealsByWeek({
-      ...mealsByWeek,
-      [mealWeekKey]: nextMeals,
-    });
   }
 
   function openHousehold(section) {
@@ -658,409 +488,32 @@ function App() {
     setActiveTab(settingsReturnTab);
   }
 
-  // Add a one-off item to the shopping list, with a chosen category and
-  // priority tier. Manual items live in their own persisted slice and show
-  // independent of the plan.
-  // Add (or re-prioritise) a shopping item. Manual items are explicit
-  // overrides, so adding one that's already on the list moves it to the chosen
-  // category/priority rather than failing. Returns "added", "updated", or false.
-  function addManualShoppingItem(name, category = "Other", tier = "soon") {
-    const cleanedItem = name.trim();
-    if (cleanedItem === "") return false;
-
-    const normalised = normaliseItemName(cleanedItem);
-    const cleanedCategory = (category || "Other").trim() || "Other";
-    const cleanedTier = tier || "soon";
-
-    const existingManual = manualShoppingItems.find(
-      (item) => normaliseItemName(item.name) === normalised
-    );
-    const onList = unifiedItems.some(
-      (item) => normaliseItemName(item.name) === normalised
-    );
-
-    // An explicit add means "put this on my list to buy". Checked-off state is
-    // keyed by item name, so clear any stale tick for this name (e.g. a
-    // recurring or in-stock item of the same name that was ticked off earlier)
-    // — otherwise the freshly added item would inherit it and land in Done.
-    setShoppingChecked((prev) => {
-      if (!prev[normalised]) return prev;
-      const next = { ...prev };
-      delete next[normalised];
-      return next;
-    });
-
-    if (existingManual) {
-      setManualShoppingItems(
-        manualShoppingItems.map((item) =>
-          item.id === existingManual.id
-            ? { ...item, category: cleanedCategory, tier: cleanedTier }
-            : item
-        )
-      );
-    } else {
-      setManualShoppingItems([
-        ...manualShoppingItems,
-        {
-          id: createCollectionId("manual", manualShoppingItems, cleanedItem),
-          name: cleanedItem,
-          category: cleanedCategory,
-          tier: cleanedTier,
-        },
-      ]);
-    }
-
-    return onList ? "updated" : "added";
-  }
-
-  function addShoppingItem(category, priority) {
-    const result = addManualShoppingItem(newItem, category, priority);
-    if (result) setNewItem("");
-    return result;
-  }
-
-  // Override the "already have" smarts: add a skipped ingredient as a manual
-  // item so it appears on the list anyway.
-  function addSkippedShoppingItem(name) {
-    addManualShoppingItem(name);
-  }
-
-  function deleteShoppingItem(id) {
-    const snapshot = manualShoppingItems;
-    const removed = manualShoppingItems.find((item) => item.id === id);
-    setManualShoppingItems(
-      manualShoppingItems.filter((item) => item.id !== id)
-    );
-    requestUndo(
-      removed?.name ? `Removed “${removed.name}”` : "Removed item",
-      () => setManualShoppingItems(snapshot)
-    );
-  }
-
-  // Tick an item off. Keyed by item identity so the state survives the list
-  // being recomputed when the plan changes.
-  function toggleShoppingChecked(id) {
-    setShoppingChecked({
-      ...shoppingChecked,
-      [id]: !shoppingChecked[id],
-    });
-  }
-
-  function setKeepStandingList(value) {
-    setSettings({ ...settings, keepStandingList: value });
-  }
-
-  function setUsingSavedList(value) {
-    setSettings({ ...settings, shopUsingSavedList: value });
-  }
-
-  // Tick a "take off your saved list" item once handled. Kept per week and
-  // pruned to removals still present, so the set can't grow stale.
-  function toggleRemovalAck(id) {
-    const current = (removalAcksByWeek[currentWeekKey] || []).filter((ackId) =>
-      removalIds.has(ackId)
-    );
-    const next = current.includes(id)
-      ? current.filter((ackId) => ackId !== id)
-      : [...current, id];
-
-    setRemovalAcksByWeek({ ...removalAcksByWeek, [currentWeekKey]: next });
-  }
-
-  function addStaple(category = "Other") {
-    const cleanedStaple = newStaple.trim();
-    if (cleanedStaple === "") return;
-
-    setStaples([
-      ...staples,
-      {
-        id: createCollectionId("staple", staples, cleanedStaple),
-        name: cleanedStaple,
-        category: (category || "Other").trim() || "Other",
-        quantity: null,
-        unit: "",
-        frequency: "weekly",
-        startDate: shoppingWeekKey,
-        active: true,
-      },
-    ]);
-
-    setNewStaple("");
-  }
-
-  function deleteStaple(id) {
-    const snapshot = staples;
-    const removed = staples.find((staple) => staple.id === id);
-    setStaples(staples.filter((staple) => staple.id !== id));
-    requestUndo(
-      removed?.name ? `Removed “${removed.name}”` : "Removed item",
-      () => setStaples(snapshot)
-    );
-  }
-
-  function updateStapleFrequency(id, frequency) {
-    setStaples(
-      staples.map((staple) =>
-        staple.id === id ? { ...staple, frequency } : staple
-      )
-    );
-  }
-
-  function updateStapleCategory(id, category) {
-    setStaples(
-      staples.map((staple) =>
-        staple.id === id ? { ...staple, category } : staple
-      )
-    );
-  }
-
-  function updateStapleDetails(id, updates) {
-    setStaples(
-      staples.map((staple) =>
-        staple.id === id ? { ...staple, ...updates } : staple
-      )
-    );
-  }
-
-  function toggleStapleActive(id) {
-    setStaples(
-      staples.map((staple) =>
-        staple.id === id ? { ...staple, active: !staple.active } : staple
-      )
-    );
-  }
-
   function openShoppingList() {
     setActiveTab("shop");
   }
 
-  function addInventoryItem(category = "Pantry") {
-    const cleanedItem = newInventoryItem.trim();
-
-    if (cleanedItem === "") return;
-
-    setInventory([
-      ...inventory,
-      {
-        id: createCollectionId("inventory", inventory, cleanedItem),
-        name: cleanedItem,
-        category: (category || "Pantry").trim() || "Pantry",
-        quantity: null,
-        unit: "",
-        active: true,
-      },
-    ]);
-
-    setNewInventoryItem("");
-  }
-
-  function deleteInventoryItem(id) {
-    const snapshot = inventory;
-    const removed = inventory.find((item) => item.id === id);
-    setInventory(inventory.filter((item) => item.id !== id));
-    requestUndo(
-      removed?.name ? `Removed “${removed.name}”` : "Removed item",
-      () => setInventory(snapshot)
-    );
-  }
-
-  function updateInventoryCategory(id, category) {
-    setInventory(
-      inventory.map((item) =>
-        item.id === id ? { ...item, category } : item
-      )
-    );
-  }
-
-  function toggleInventoryActive(id) {
-    setInventory(
-      inventory.map((item) =>
-        item.id === id
-          ? { ...item, active: item.active === false }
-          : item
-      )
-    );
-  }
-
-  function loadStarterInventory() {
-    const existingNames = inventory.map((item) =>
-      normaliseItemName(item.name)
-    );
-
-    const starterItems = createStarterInventoryItems()
-      .filter(
-        (item) =>
-          !existingNames.includes(normaliseItemName(item.name))
-      );
-
-    setInventory([...inventory, ...starterItems]);
-  }
-
-  function loadStarterStaples() {
-    const existingNames = staples.map((staple) =>
-      normaliseItemName(staple.name)
-    );
-
-    const starterStaples = initialStaples.filter(
-      (staple) => !existingNames.includes(normaliseItemName(staple.name))
-    );
-
-    setStaples([...staples, ...starterStaples]);
-  }
-
-  function resetStockToStarterList() {
-    const shouldReset = window.confirm(
-      "Restore the default stock list? This removes your custom stock items and marks the default items as in stock."
-    );
-
-    if (!shouldReset) return;
-
-    captureRecoverySnapshot("Before restoring default stock");
-    setInventory(createStarterInventoryItems());
-    setNewInventoryItem("");
-  }
-
-  function resetStaplesToStarterList() {
-    const shouldReset = window.confirm(
-      "Restore the default recurring buys? This replaces your current recurring list with the app's default weekly buys."
-    );
-
-    if (!shouldReset) return;
-
-    captureRecoverySnapshot("Before restoring default recurring buys");
-    setStaples(initialStaples.map((staple) => ({ ...staple })));
-    setNewStaple("");
-  }
-
-  function addRecipe() {
-    const cleanedName = newRecipeName.trim();
-
-    if (cleanedName === "") return;
-
-    setRecipes([
-      ...recipes,
-      {
-        id: createCollectionId("recipe", recipes, cleanedName),
-        name: cleanedName,
-        category: "Family favourites",
-        source: "",
-        sourceUrl: "",
-        ingredients: [],
-        method: "",
-        serves: 4,
-      },
-    ]);
-
-    setNewRecipeName("");
-  }
-
-  function deleteRecipe(id) {
-    const recipe = recipes.find((item) => item.id === id);
-    const snapshot = recipes;
-    setRecipes(recipes.filter((item) => item.id !== id));
-    requestUndo(
-      recipe?.name ? `Deleted “${recipe.name}”` : "Deleted recipe",
-      () => setRecipes(snapshot)
-    );
-    return true;
-  }
-
-  function updateRecipe(recipeId, updates) {
-    setRecipes(
-      recipes.map((recipe) =>
-        recipe.id === recipeId ? { ...recipe, ...updates } : recipe
-      )
-    );
-  }
-
-  function addIngredientToRecipe(recipeId, ingredientName) {
-    const cleanedIngredient = ingredientName.trim();
-
-    if (cleanedIngredient === "") return;
-
-    setRecipes(
-      recipes.map((recipe) =>
-        recipe.id === recipeId
-          ? {
-            ...recipe,
-            ingredients: [
-              ...recipe.ingredients,
-              cleanedIngredient,
-            ],
-          }
-          : recipe
-      )
-    );
-  }
-
-  function deleteIngredientFromRecipe(recipeId, ingredientIndex) {
-    setRecipes(
-      recipes.map((recipe) =>
-        recipe.id === recipeId
-          ? {
-            ...recipe,
-            ingredients: recipe.ingredients.filter(
-              (_, index) => index !== ingredientIndex
-            ),
-          }
-          : recipe
-      )
-    );
-  }
-
-
-  // Restore a backup, but never let an empty or missing section in the backup
-  // wipe data you currently have — that's how an incomplete export silently
-  // erased people's stock/recurring. A section is only overwritten when the
-  // backup actually has content for it (or you have nothing there already).
-  // Returns the human-readable sections that were preserved so the UI can say so.
+  // Restore a backup non-destructively (see lib/applyBackup). Wired with the
+  // current slices + setters so the pure helper can do the work.
   function applyImportedData(backup) {
-    // Save where we are first, so a bad restore can be rolled back.
-    captureRecoverySnapshot("Before restoring a backup");
-
-    const has = (key) => Object.prototype.hasOwnProperty.call(backup, key);
-    const isEmpty = (value) =>
-      value == null ||
-      (Array.isArray(value)
-        ? value.length === 0
-        : typeof value === "object"
-          ? Object.keys(value).length === 0
-          : false);
-
-    const kept = [];
-
-    const apply = (key, current, setter, options = {}) => {
-      const { label, transform = (value) => value } = options;
-      const incomingEmpty = !has(key) || isEmpty(backup[key]);
-
-      if (incomingEmpty) {
-        // Nothing to restore here — keep whatever's already there, and flag it
-        // when it's real data the user would notice losing.
-        if (label && !isEmpty(current)) kept.push(label);
-        return;
-      }
-
-      setter(transform(backup[key]));
-    };
-
-    apply("mealsByWeek", mealsByWeek, setMealsByWeek, { label: "meal plan" });
-    apply("shoppingItemsByWeek", null, setShoppingItemsByWeek);
-    apply("shoppingListMetaByWeek", null, setShoppingListMetaByWeek);
-    apply("shoppingChecked", shoppingChecked, setShoppingChecked);
-    apply("manualShoppingItems", manualShoppingItems, setManualShoppingItems, {
-      label: "shopping list extras",
+    return applyBackup(backup, {
+      mealsByWeek,
+      shoppingChecked,
+      manualShoppingItems,
+      settings,
+      staples,
+      inventory,
+      recipes,
+      setMealsByWeek,
+      setShoppingItemsByWeek,
+      setShoppingListMetaByWeek,
+      setShoppingChecked,
+      setManualShoppingItems,
+      setSettings,
+      setStaples,
+      setInventory,
+      setRecipes,
+      captureRecoverySnapshot,
     });
-    apply("settings", settings, setSettings);
-    apply("staples", staples, setStaples, { label: "recurring buys" });
-    // Run imported inventory / recipes through the same migration helpers the
-    // app uses when loading from localStorage, so they normalise consistently.
-    apply("inventory", inventory, setInventory, {
-      label: "stock",
-      transform: normaliseInventoryItems,
-    });
-    apply("recipes", recipes, setRecipes, { transform: mergeSavedRecipes });
-
-    return { kept };
   }
 
   // Home shopping status, from the live unified list (this week + next).
@@ -1151,294 +604,67 @@ function App() {
       )}
 
       {activeTab === "home" && (
-        <section className="screen home-screen">
-          <TonightCard
-            dayName={todayDayName}
-            dateLabel={tonightDateLabel}
-            summary={tonightSummary}
-            coversNights={tonightCovers}
-            leftoverDaysLabel={tonightLeftoverLabel}
-            onOpenPlan={openTonightInPlan}
-          />
-
-          <div className="home-hero">
-            <div className="home-week-switch" aria-label="Home week">
-              <button
-                type="button"
-                className={homeWeekMode === "current" ? "active" : ""}
-                onClick={() => showHomeWeek(currentWeekStart)}
-              >
-                This week
-              </button>
-
-              <button
-                type="button"
-                className={homeWeekMode === "next" ? "active" : ""}
-                onClick={() => showHomeWeek(nextWeekStart)}
-              >
-                Next week
-              </button>
-            </div>
-
-            <p className="section-kicker">Planning week</p>
-            <h2>
-              {formatDate(mealWeekStart)} to {formatDate(mealWeekEnd)}
-            </h2>
-          </div>
-
-          {showWelcome && (
-            <div className="welcome-card">
-              <button
-                type="button"
-                className="welcome-dismiss"
-                aria-label="Dismiss"
-                onClick={dismissWelcome}
-              >
-                <X size={16} aria-hidden="true" />
-              </button>
-
-              <p className="section-kicker">Getting started</p>
-              <strong>Here's how it works</strong>
-
-              <div className="welcome-steps">
-                <div className="welcome-step">
-                  <span className="welcome-step-num">1</span>
-                  <p>
-                    <strong>Plan your week</strong> — pick recipes for each night
-                    on Meals; cook once and reuse leftovers.
-                  </p>
-                </div>
-
-                <div className="welcome-step">
-                  <span className="welcome-step-num">2</span>
-                  <p>
-                    <strong>Stock the basics</strong> — add recurring buys in
-                    Kitchen and tick what's already in stock.
-                  </p>
-                </div>
-
-                <div className="welcome-step">
-                  <span className="welcome-step-num">3</span>
-                  <p>
-                    <strong>Shop the auto-list</strong> — Shop builds your list
-                    from your meals, skips what's in stock, and orders it by when
-                    you'll need it.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="primary-button welcome-cta"
-                onClick={() => setActiveTab("plan")}
-              >
-                Start planning
-              </button>
-            </div>
-          )}
-
-          {homeWeekMode === "current" ? (
-            <div className="home-dashboard">
-              {comingUpDays.length > 0 && (
-                <div className="home-week-ahead">
-                  <div className="home-section-head">
-                    <p className="section-kicker">Coming up this week</p>
-                    <button
-                      type="button"
-                      className="home-link"
-                      onClick={() => setActiveTab("plan")}
-                    >
-                      Full plan
-                      <ChevronRight size={15} aria-hidden="true" />
-                    </button>
-                  </div>
-
-                  <div className="meal-grid">
-                    {renderMealGroups(comingUpDays, openHomeDayInPlan)}
-                  </div>
-                </div>
-              )}
-
-              <div className={`home-topup ${homeShopStatus.tone}`}>
-                <div className="home-topup-body">
-                  <p className="section-kicker">Shopping</p>
-                  <strong>{homeShopStatus.title}</strong>
-                  <span>{homeShopStatus.sub}</span>
-                </div>
-
-                {homeShopStatus.actionLabel && (
-                  <button
-                    type="button"
-                    className={
-                      homeShopStatus.tone === "needs"
-                        ? "primary-button"
-                        : "secondary"
-                    }
-                    onClick={homeShopStatus.onAction}
-                  >
-                    {homeShopStatus.actionLabel}
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="home-steps">
-              <button
-                className="home-step"
-                type="button"
-                onClick={() => setActiveTab("plan")}
-              >
-                <span className="home-step-num">1</span>
-
-                <span className="home-step-body">
-                  <strong>Plan meals</strong>
-                  <span>
-                    {mealsPlannedCount} of {days.length} dinners planned
-                  </span>
-                </span>
-
-                <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-              </button>
-
-              <button
-                className="home-step"
-                type="button"
-                onClick={() => openHousehold("stock")}
-              >
-                <span className="home-step-num">2</span>
-
-                <span className="home-step-body">
-                  <strong>Check stock &amp; recurring buys</strong>
-                  <span>
-                    {activeInventoryCount} in stock · {activeStaplesCount}{" "}
-                    recurring
-                  </span>
-                </span>
-
-                <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-              </button>
-
-              <button
-                className="home-step"
-                type="button"
-                onClick={() => setActiveTab("shop")}
-              >
-                <span className="home-step-num">3</span>
-
-                <span className="home-step-body">
-                  <strong>Shop</strong>
-                  <span>
-                    {unifiedPending} to buy · {unifiedItems.length - unifiedPending}{" "}
-                    done
-                  </span>
-                </span>
-
-                <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-              </button>
-            </div>
-          )}
-
-          <div className="home-quicklinks">
-            <p className="section-kicker">Set up</p>
-
-            <div className="home-actions">
-              <button
-                className="secondary"
-                onClick={() => {
-                  setMoreSection("recipes");
-                  setActiveTab("more");
-                }}
-              >
-                Recipes
-              </button>
-            </div>
-          </div>
-        </section>
+        <HomeScreen
+          todayDayName={todayDayName}
+          tonightDateLabel={tonightDateLabel}
+          tonightSummary={tonightSummary}
+          tonightCovers={tonightCovers}
+          tonightLeftoverLabel={tonightLeftoverLabel}
+          openTonightInPlan={openTonightInPlan}
+          homeWeekMode={homeWeekMode}
+          showHomeWeek={showHomeWeek}
+          currentWeekStart={currentWeekStart}
+          nextWeekStart={nextWeekStart}
+          mealWeekStart={mealWeekStart}
+          mealWeekEnd={mealWeekEnd}
+          showWelcome={showWelcome}
+          dismissWelcome={dismissWelcome}
+          setActiveTab={setActiveTab}
+          comingUpDays={comingUpDays}
+          meals={meals}
+          getMealSummary={getMealSummary}
+          openHomeDayInPlan={openHomeDayInPlan}
+          homeShopStatus={homeShopStatus}
+          mealsPlannedCount={mealsPlannedCount}
+          openHousehold={openHousehold}
+          activeInventoryCount={activeInventoryCount}
+          activeStaplesCount={activeStaplesCount}
+          unifiedPending={unifiedPending}
+          unifiedItems={unifiedItems}
+          setMoreSection={setMoreSection}
+        />
       )}
 
       {activeTab === "plan" && (
-        <section className="screen plan-screen">
-          <div className="page-hero plan-hero">
-            <p className="page-hero-kicker">
-              Meal plan · {formatDate(mealWeekStart)} – {formatDate(mealWeekEnd)}
-            </p>
-
-            <strong className="page-hero-count">
-              {mealsPlannedCount} of {days.length} dinners planned
-            </strong>
-
-            <p className="page-hero-sub">{planGapsLabel}</p>
-
-            <div className="page-hero-actions">
-              {firstUnplannedDay && (
-                <button
-                  type="button"
-                  className="page-hero-action"
-                  onClick={() => setExpandedMealDay(firstUnplannedDay)}
-                >
-                  Plan {firstUnplannedDay}
-                </button>
-              )}
-
-              <button
-                type="button"
-                className="page-hero-action page-hero-action-ghost"
-                onClick={() => {
-                  setDiscoverDay(null);
-                  setDiscoverOpen(true);
-                }}
-              >
-                Find meals by swiping
-              </button>
-            </div>
-          </div>
-
-          <WeekControls
-            activePreset={mealWeekMode}
-            onThisWeek={goToThisMealWeek}
-            onNextWeekPreset={goToNextMealWeekDefault}
-            onPreviousWeek={goToPreviousMealWeek}
-            onNextWeek={goToNextMealWeek}
-          />
-
-          <div className="meal-grid">
-            {renderMealGroups(days, setExpandedMealDay)}
-          </div>
-
-          {expandedMealDay && (
-            <Suspense fallback={null}>
-              <MealEditorSheet
-              key={expandedMealDay}
-              day={expandedMealDay}
-              dateLabel={expandedDayLabel}
-              meal={expandedMeal}
-              days={days}
-              recipes={recipes}
-              linkedRecipe={expandedDaySummary?.linkedRecipe}
-              weekDaySummaries={planningDaySummaries}
-              leftoverNights={expandedLeftoverNights}
-              maxNights={expandedMaxNights}
-              onSetNights={(nights) =>
-                setLeftoverNights(expandedMealDay, nights)
-              }
-              onClearDay={() => clearMealDay(expandedMealDay)}
-              updateMeal={updateMeal}
-              onClose={() => setExpandedMealDay(null)}
-              onFindMeals={() => {
-                const day = expandedMealDay;
-                setExpandedMealDay(null);
-                setDiscoverDay(day);
-                setDiscoverOpen(true);
-              }}
-              onNextDay={
-                expandedNextDay
-                  ? () => setExpandedMealDay(expandedNextDay)
-                  : undefined
-              }
-              />
-            </Suspense>
-          )}
-        </section>
+        <PlanScreen
+          mealWeekStart={mealWeekStart}
+          mealWeekEnd={mealWeekEnd}
+          mealsPlannedCount={mealsPlannedCount}
+          planGapsLabel={planGapsLabel}
+          firstUnplannedDay={firstUnplannedDay}
+          setExpandedMealDay={setExpandedMealDay}
+          setDiscoverDay={setDiscoverDay}
+          setDiscoverOpen={setDiscoverOpen}
+          mealWeekMode={mealWeekMode}
+          goToThisMealWeek={goToThisMealWeek}
+          goToNextMealWeekDefault={goToNextMealWeekDefault}
+          goToPreviousMealWeek={goToPreviousMealWeek}
+          goToNextMealWeek={goToNextMealWeek}
+          meals={meals}
+          getMealSummary={getMealSummary}
+          recipes={recipes}
+          expandedMealDay={expandedMealDay}
+          expandedDayLabel={expandedDayLabel}
+          expandedMeal={expandedMeal}
+          expandedDaySummary={expandedDaySummary}
+          planningDaySummaries={planningDaySummaries}
+          expandedLeftoverNights={expandedLeftoverNights}
+          expandedMaxNights={expandedMaxNights}
+          expandedNextDay={expandedNextDay}
+          setLeftoverNights={setLeftoverNights}
+          clearMealDay={clearMealDay}
+          updateMeal={updateMeal}
+        />
       )}
 
       {activeTab === "shop" && (
@@ -1467,169 +693,68 @@ function App() {
       )}
 
       {activeTab === "more" && (
-        <section className="screen more-screen">
-          {moreSection === "overview" ? (
-            <>
-              <p className="more-intro">
-                Set up the recipes, groceries and stock behind your plan.
-              </p>
-
-              <div className="manager-list">
-                <button
-                  className="manager-row"
-                  type="button"
-                  onClick={() => setMoreSection("recipes")}
-                >
-                  <span className="manager-icon" aria-hidden="true">
-                    <BookOpen size={20} strokeWidth={2} />
-                  </span>
-                  <span className="manager-main">
-                    <strong>Recipes</strong>
-                    <span>
-                      {recipes.length} saved recipe
-                      {recipes.length === 1 ? "" : "s"}
-                    </span>
-                  </span>
-                  <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-                </button>
-
-                <button
-                  className="manager-row"
-                  type="button"
-                  onClick={() => openHousehold("recurring")}
-                >
-                  <span className="manager-icon" aria-hidden="true">
-                    <Repeat2 size={20} strokeWidth={2} />
-                  </span>
-                  <span className="manager-main">
-                    <strong>Recurring buys</strong>
-                    <span>{activeStaplesCount} on your list</span>
-                  </span>
-                  <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-                </button>
-
-                <button
-                  className="manager-row"
-                  type="button"
-                  onClick={() => openHousehold("stock")}
-                >
-                  <span className="manager-icon" aria-hidden="true">
-                    <Package size={20} strokeWidth={2} />
-                  </span>
-                  <span className="manager-main">
-                    <strong>Stock</strong>
-                    <span>{activeInventoryCount} in stock</span>
-                  </span>
-                  <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="screen-header">
-                <div>
-                  <h2>
-                    {moreSection === "household"
-                      ? householdSection === "recurring"
-                        ? "Recurring buys"
-                        : "Stock"
-                      : "Recipes"}
-                  </h2>
-                </div>
-              </div>
-
-              <button
-                className="back-button"
-                type="button"
-                onClick={() => setMoreSection("overview")}
-              >
-                <ChevronLeft size={18} aria-hidden="true" />
-                Back to Kitchen
-              </button>
-
-              {moreSection === "household" && (
-                <Suspense fallback={null}>
-                <HouseholdBasics
-                  activeSection={householdSection}
-                  availableCategories={availableCategories}
-                  staples={staples}
-                  inventory={inventory}
-                  newStaple={newStaple}
-                  setNewStaple={setNewStaple}
-                  addStaple={addStaple}
-                  deleteStaple={deleteStaple}
-                  updateStapleFrequency={updateStapleFrequency}
-                  updateStapleCategory={updateStapleCategory}
-                  updateStapleDetails={updateStapleDetails}
-                  toggleStapleActive={toggleStapleActive}
-                  loadStarterStaples={loadStarterStaples}
-                  newInventoryItem={newInventoryItem}
-                  setNewInventoryItem={setNewInventoryItem}
-                  addInventoryItem={addInventoryItem}
-                  deleteInventoryItem={deleteInventoryItem}
-                  updateInventoryCategory={updateInventoryCategory}
-                  toggleInventoryActive={toggleInventoryActive}
-                  loadStarterInventory={loadStarterInventory}
-                />
-                </Suspense>
-              )}
-
-              {moreSection === "recipes" && (
-                <Suspense fallback={null}>
-                <RecipesList
-                  recipes={recipes}
-                  newRecipeName={newRecipeName}
-                  setNewRecipeName={setNewRecipeName}
-                  addRecipe={addRecipe}
-                  deleteRecipe={deleteRecipe}
-                  addIngredientToRecipe={addIngredientToRecipe}
-                  deleteIngredientFromRecipe={deleteIngredientFromRecipe}
-                  updateRecipe={updateRecipe}
-                />
-                </Suspense>
-              )}
-            </>
-          )}
-        </section>
+        <MoreScreen
+          moreSection={moreSection}
+          setMoreSection={setMoreSection}
+          householdSection={householdSection}
+          openHousehold={openHousehold}
+          availableCategories={availableCategories}
+          recipes={recipes}
+          activeStaplesCount={activeStaplesCount}
+          activeInventoryCount={activeInventoryCount}
+          staples={staples}
+          inventory={inventory}
+          newStaple={newStaple}
+          setNewStaple={setNewStaple}
+          addStaple={addStaple}
+          deleteStaple={deleteStaple}
+          updateStapleFrequency={updateStapleFrequency}
+          updateStapleCategory={updateStapleCategory}
+          updateStapleDetails={updateStapleDetails}
+          toggleStapleActive={toggleStapleActive}
+          loadStarterStaples={loadStarterStaples}
+          newInventoryItem={newInventoryItem}
+          setNewInventoryItem={setNewInventoryItem}
+          addInventoryItem={addInventoryItem}
+          deleteInventoryItem={deleteInventoryItem}
+          updateInventoryCategory={updateInventoryCategory}
+          toggleInventoryActive={toggleInventoryActive}
+          loadStarterInventory={loadStarterInventory}
+          newRecipeName={newRecipeName}
+          setNewRecipeName={setNewRecipeName}
+          addRecipe={addRecipe}
+          deleteRecipe={deleteRecipe}
+          addIngredientToRecipe={addIngredientToRecipe}
+          deleteIngredientFromRecipe={deleteIngredientFromRecipe}
+          updateRecipe={updateRecipe}
+        />
       )}
 
       {activeTab === "settings" && (
-        <section className="screen settings-screen">
-          <button
-            type="button"
-            className="back-button"
-            onClick={closeSettings}
-          >
-            <ChevronLeft size={18} aria-hidden="true" />
-            Back
-          </button>
-
-          <Suspense fallback={null}>
-          <SettingsPanel
-            onImport={applyImportedData}
-            user={user}
-            cloud={cloud}
-            onSignOut={() => {
-              // Sign out happens from the Settings screen; reset the tab so the
-              // next sign-in lands on Home, not back on Settings.
-              setActiveTab("home");
-              signOut();
-            }}
-            keepStandingList={keepStandingList}
-            onSetKeepStandingList={setKeepStandingList}
-            onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
-            resetStockToStarterList={resetStockToStarterList}
-            resetStaplesToStarterList={resetStaplesToStarterList}
-            getRecoverySnapshots={getRecoverySnapshots}
-            onRestoreSnapshot={restoreRecoverySnapshot}
-            onResetWelcome={() => {
-              setWelcomePreview(true);
-              setWelcomeDismissedFor(null);
-              setActiveTab("home");
-            }}
-          />
-          </Suspense>
-        </section>
+        <SettingsScreen
+          closeSettings={closeSettings}
+          onImport={applyImportedData}
+          user={user}
+          cloud={cloud}
+          onSignOut={() => {
+            // Sign out happens from the Settings screen; reset the tab so the
+            // next sign-in lands on Home, not back on Settings.
+            setActiveTab("home");
+            signOut();
+          }}
+          keepStandingList={keepStandingList}
+          onSetKeepStandingList={setKeepStandingList}
+          onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
+          resetStockToStarterList={resetStockToStarterList}
+          resetStaplesToStarterList={resetStaplesToStarterList}
+          getRecoverySnapshots={getRecoverySnapshots}
+          onRestoreSnapshot={restoreRecoverySnapshot}
+          onResetWelcome={() => {
+            setWelcomePreview(true);
+            setWelcomeDismissedFor(null);
+            setActiveTab("home");
+          }}
+        />
       )}
 
       {updateReady && (
