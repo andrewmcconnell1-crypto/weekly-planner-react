@@ -95,13 +95,22 @@ describe("buildUnifiedShoppingList", () => {
     expect(rows[0].tier).toBe("next");
   });
 
-  it("marks items checked from the checked map", () => {
+  it("marks non-manual items checked from the checked map", () => {
+    const { items } = buildUnifiedShoppingList({
+      ...base,
+      checkedMap: { "beef mince": true },
+    });
+
+    expect(items.find((i) => i.name === "beef mince").checked).toBe(true);
+  });
+
+  it("never marks a manual item checked (it's removed on tick, not parked in Done)", () => {
     const { items } = buildUnifiedShoppingList({
       ...base,
       manualItems: [{ name: "Milk", category: "Dairy", tier: "soon" }],
       checkedMap: { milk: true },
     });
 
-    expect(items.find((i) => i.name === "Milk").checked).toBe(true);
+    expect(items.find((i) => i.name === "Milk").checked).toBe(false);
   });
 });
