@@ -676,6 +676,17 @@ function App() {
       (item) => normaliseItemName(item.name) === normalised
     );
 
+    // An explicit add means "put this on my list to buy". Checked-off state is
+    // keyed by item name, so clear any stale tick for this name (e.g. a
+    // recurring or in-stock item of the same name that was ticked off earlier)
+    // — otherwise the freshly added item would inherit it and land in Done.
+    setShoppingChecked((prev) => {
+      if (!prev[normalised]) return prev;
+      const next = { ...prev };
+      delete next[normalised];
+      return next;
+    });
+
     if (existingManual) {
       setManualShoppingItems(
         manualShoppingItems.map((item) =>
