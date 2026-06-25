@@ -1,4 +1,4 @@
-import { ChevronDown, HelpCircle, X } from "lucide-react";
+import { ChevronDown, HelpCircle } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
 import {
@@ -51,6 +51,10 @@ function ShoppingList({
   const pendingAisles = priorityLayout ? null : groupByAisle(pendingItems);
 
   function renderRow(item) {
+    const isManual = item.source === "Manual";
+
+    // Manual items are ad-hoc, so ticking one removes it for good (with undo)
+    // rather than parking it in Done. Meal / recurring items toggle to Done.
     return (
       <li
         className={`shopping-row ${item.checked ? "checked-row" : ""}`}
@@ -60,23 +64,16 @@ function ShoppingList({
           <input
             type="checkbox"
             checked={item.checked}
-            onChange={() => onToggleChecked(item.id)}
+            onChange={() =>
+              isManual
+                ? onDeleteManual(item.manualId)
+                : onToggleChecked(item.id)
+            }
           />
           <span className="shopping-item-content">
             <span className="shopping-item-name">{item.name}</span>
           </span>
         </label>
-
-        {item.source === "Manual" && (
-          <button
-            type="button"
-            className="shopping-row-delete"
-            aria-label={`Delete ${item.name}`}
-            onClick={() => onDeleteManual(item.manualId)}
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        )}
       </li>
     );
   }
