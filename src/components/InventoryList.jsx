@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
@@ -119,6 +119,7 @@ function InventoryList({
               className="delete-button"
               onClick={() => deleteInventoryItem(item.id)}
             >
+              <Trash2 size={15} aria-hidden="true" />
               Delete
             </button>
           </div>

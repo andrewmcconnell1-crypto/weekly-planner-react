@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
 import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
@@ -189,9 +189,11 @@ function StaplesList({
             <p className="small-text">Starts: {staple.startDate}</p>
 
             <button
+              type="button"
               className="delete-button"
               onClick={() => deleteStaple(staple.id)}
             >
+              <Trash2 size={15} aria-hidden="true" />
               Delete
             </button>
           </div>
