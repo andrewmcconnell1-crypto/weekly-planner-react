@@ -993,32 +993,55 @@ function App() {
   }
 
 
+  // Restore a backup, but never let an empty or missing section in the backup
+  // wipe data you currently have — that's how an incomplete export silently
+  // erased people's stock/recurring. A section is only overwritten when the
+  // backup actually has content for it (or you have nothing there already).
+  // Returns the human-readable sections that were preserved so the UI can say so.
   function applyImportedData(backup) {
     const has = (key) => Object.prototype.hasOwnProperty.call(backup, key);
+    const isEmpty = (value) =>
+      value == null ||
+      (Array.isArray(value)
+        ? value.length === 0
+        : typeof value === "object"
+          ? Object.keys(value).length === 0
+          : false);
 
-    if (has("mealsByWeek")) setMealsByWeek(backup.mealsByWeek);
-    if (has("shoppingItemsByWeek")) {
-      setShoppingItemsByWeek(backup.shoppingItemsByWeek);
-    }
-    if (has("shoppingListMetaByWeek")) {
-      setShoppingListMetaByWeek(backup.shoppingListMetaByWeek);
-    }
-    if (has("shoppingChecked")) setShoppingChecked(backup.shoppingChecked);
-    if (has("manualShoppingItems")) {
-      setManualShoppingItems(backup.manualShoppingItems);
-    }
-    if (has("settings")) setSettings(backup.settings);
-    if (has("staples")) {
-      setStaples(backup.staples);
-    }
+    const kept = [];
+
+    const apply = (key, current, setter, options = {}) => {
+      const { label, transform = (value) => value } = options;
+      const incomingEmpty = !has(key) || isEmpty(backup[key]);
+
+      if (incomingEmpty) {
+        // Nothing to restore here — keep whatever's already there, and flag it
+        // when it's real data the user would notice losing.
+        if (label && !isEmpty(current)) kept.push(label);
+        return;
+      }
+
+      setter(transform(backup[key]));
+    };
+
+    apply("mealsByWeek", mealsByWeek, setMealsByWeek, { label: "meal plan" });
+    apply("shoppingItemsByWeek", null, setShoppingItemsByWeek);
+    apply("shoppingListMetaByWeek", null, setShoppingListMetaByWeek);
+    apply("shoppingChecked", shoppingChecked, setShoppingChecked);
+    apply("manualShoppingItems", manualShoppingItems, setManualShoppingItems, {
+      label: "shopping list extras",
+    });
+    apply("settings", settings, setSettings);
+    apply("staples", staples, setStaples, { label: "recurring buys" });
     // Run imported inventory / recipes through the same migration helpers the
     // app uses when loading from localStorage, so they normalise consistently.
-    if (Object.prototype.hasOwnProperty.call(backup, "inventory")) {
-      setInventory(normaliseInventoryItems(backup.inventory));
-    }
-    if (Object.prototype.hasOwnProperty.call(backup, "recipes")) {
-      setRecipes(mergeSavedRecipes(backup.recipes));
-    }
+    apply("inventory", inventory, setInventory, {
+      label: "stock",
+      transform: normaliseInventoryItems,
+    });
+    apply("recipes", recipes, setRecipes, { transform: mergeSavedRecipes });
+
+    return { kept };
   }
 
   // Home shopping status, from the live unified list (this week + next).
