@@ -8,6 +8,7 @@ import {
   recipeSourceLabel,
   recipeTags,
 } from "../utils/recipeUtils";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
@@ -24,6 +25,9 @@ function RecipeEditorSheet({
   const [mode, setMode] = useState("view");
   const [closing, setClosing] = useState(false);
   const closeTimerRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  useDialogFocus(dialogRef);
 
   // Play the sheet's exit animation, then unmount.
   function requestClose() {
@@ -80,6 +84,8 @@ function RecipeEditorSheet({
       onClick={requestClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className={`sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"

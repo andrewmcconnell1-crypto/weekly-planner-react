@@ -1,7 +1,11 @@
 {
+  "id": "./",
+  "lang": "en",
+  "dir": "ltr",
   "name": "Meal Planner",
   "short_name": "Meals",
   "description": "Plan your week's meals and generate a shopping list.",
+  "categories": ["food", "lifestyle", "productivity"],
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

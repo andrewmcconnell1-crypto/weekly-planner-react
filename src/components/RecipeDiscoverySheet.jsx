@@ -17,6 +17,7 @@ import {
   recipeTags,
 } from "../utils/recipeUtils";
 import { days } from "../utils/mealUtils";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 
 // Swipe-to-plan: a filtered deck of recipe cards. Swipe right (or "Add") drops
 // the recipe onto the next empty night; swipe left (or "Skip") passes. Filters
@@ -85,6 +86,9 @@ function RecipeDiscoverySheet({
   const activePointer = useRef(null);
   const closeTimer = useRef(null);
   const commitTimer = useRef(null);
+  const dialogRef = useRef(null);
+
+  useDialogFocus(dialogRef);
 
   const plannedSet = useMemo(
     () => new Set(plannedRecipeIds),
@@ -315,6 +319,8 @@ function RecipeDiscoverySheet({
       onClick={requestClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className={`sheet discover-sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"

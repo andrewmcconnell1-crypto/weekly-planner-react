@@ -19,6 +19,7 @@ import { groupRecipesByCategory } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import RecipeFilter from "./RecipeFilter";
+import { useDialogFocus } from "../hooks/useDialogFocus";
 
 // The meal-type choices presented on the chooser step. Each maps to one
 // focused detail view, so the user makes a single decision at a time instead
@@ -123,6 +124,9 @@ function MealEditorSheet({
   const [closing, setClosing] = useState(false);
   const nameInputRef = useRef(null);
   const closeTimerRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  useDialogFocus(dialogRef);
 
   // Play the sheet's exit animation, then actually unmount. Guarded by the
   // timer ref so repeated triggers (backdrop + Escape) can't double-close.
@@ -699,6 +703,8 @@ function MealEditorSheet({
       onClick={requestClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className={`sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"
