@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import {
@@ -54,6 +54,37 @@ export function usePlannerStore(user, guest = false) {
   const prevGuestRef = useRef(guest);
   // Throttles the auto-snapshot check so it doesn't read storage on every edit.
   const lastAutoSnapshotRef = useRef(0);
+  // Latest data, so the focus / realtime handlers can diff against what's on
+  // screen without depending on (and re-subscribing per) every edit.
+  const dataRef = useRef(data);
+  // Whether we hold local edits not yet written to the cloud — so an incoming
+  // remote change defers to a prompt instead of silently overwriting them.
+  const dirtyRef = useRef(false);
+  // A remote version that landed while we had unsaved edits, parked until the
+  // user chooses to take it or keep editing.
+  const [remoteUpdate, setRemoteUpdate] = useState(null);
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+
+  // Apply a freshly fetched / pushed remote row. No-ops when it matches what we
+  // already have (which also absorbs the echo of our own write). If we have
+  // unsaved local edits it parks the remote copy for the user to resolve rather
+  // than clobbering their work; otherwise (the common "edited on another
+  // device" case) it applies straight away.
+  const receiveRemote = useCallback((remote) => {
+    if (!remote) return;
+    const normalised = normaliseData(remote);
+    if (JSON.stringify(normalised) === JSON.stringify(dataRef.current)) return;
+
+    if (dirtyRef.current) {
+      setRemoteUpdate(normalised);
+    } else {
+      skipNextSaveRef.current = true;
+      setData(normalised);
+    }
+  }, []);
 
   // Load from the cloud (state updates happen inside the async callback, never
   // synchronously in the effect body).
@@ -141,10 +172,14 @@ export function usePlannerStore(user, guest = false) {
     }
 
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    // A real edit is queued but not yet persisted — mark us dirty so an
+    // incoming remote change won't silently overwrite it.
+    dirtyRef.current = true;
     saveTimerRef.current = setTimeout(() => {
       saveCloudData(userId, data)
         .then((writtenAt) => {
           lastWrittenAtRef.current = writtenAt;
+          dirtyRef.current = false;
         })
         .catch(() => setSyncError(true));
     }, SAVE_DEBOUNCE_MS);
@@ -160,17 +195,13 @@ export function usePlannerStore(user, guest = false) {
 
     function handleFocus() {
       fetchCloudData(userId)
-        .then((remote) => {
-          if (!remote) return;
-          skipNextSaveRef.current = true;
-          setData(normaliseData(remote));
-        })
+        .then((remote) => receiveRemote(remote))
         .catch(() => {});
     }
 
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, [cloud, userId]);
+  }, [cloud, userId, receiveRemote]);
 
   // Live updates: when another device writes our row, reflect it immediately.
   // (Requires the table to be in the supabase_realtime publication; if it's not,
@@ -195,8 +226,7 @@ export function usePlannerStore(user, guest = false) {
           if (row.updated_at && row.updated_at === lastWrittenAtRef.current) {
             return;
           }
-          skipNextSaveRef.current = true;
-          setData(normaliseData(row.data));
+          receiveRemote(row.data);
         }
       )
       .subscribe();
@@ -204,7 +234,7 @@ export function usePlannerStore(user, guest = false) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [cloud, userId]);
+  }, [cloud, userId, receiveRemote]);
 
   // Auto-capture a recovery point when the app is in a settled state, throttled
   // so edits don't pile up snapshots. Reads `data` and writes localStorage only
@@ -240,6 +270,21 @@ export function usePlannerStore(user, guest = false) {
     return true;
   }
 
+  // Resolve a parked remote update: take the other device's version, dropping
+  // the unsaved local edits that were holding it back.
+  function applyRemoteUpdate() {
+    if (!remoteUpdate) return;
+    skipNextSaveRef.current = true;
+    setData(remoteUpdate);
+    dirtyRef.current = false;
+    setRemoteUpdate(null);
+  }
+
+  // Dismiss it and keep editing; the local version stays and will sync, winning.
+  function dismissRemoteUpdate() {
+    setRemoteUpdate(null);
+  }
+
   const setters = useMemo(() => {
     function makeSetter(key) {
       return (next) =>
@@ -270,6 +315,9 @@ export function usePlannerStore(user, guest = false) {
     loading,
     syncError,
     cloud,
+    remoteUpdatePending: Boolean(remoteUpdate),
+    applyRemoteUpdate,
+    dismissRemoteUpdate,
     getRecoverySnapshots: loadSnapshots,
     captureRecoverySnapshot,
     restoreRecoverySnapshot,

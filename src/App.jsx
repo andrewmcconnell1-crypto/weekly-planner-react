@@ -101,6 +101,9 @@ function App() {
     loading: dataLoading,
     syncError,
     cloud,
+    remoteUpdatePending,
+    applyRemoteUpdate,
+    dismissRemoteUpdate,
     getRecoverySnapshots,
     captureRecoverySnapshot,
     restoreRecoverySnapshot,
@@ -462,6 +465,32 @@ function App() {
           Couldn't sync with the cloud — your latest changes may not be saved.
           Check your connection.
         </p>
+      )}
+
+      {remoteUpdatePending && (
+        <div className="conflict-banner" role="status">
+          <span>
+            Your plan was updated on another device while you were editing.
+          </span>
+
+          <div className="conflict-actions">
+            <button
+              type="button"
+              className="primary-button"
+              onClick={applyRemoteUpdate}
+            >
+              Use the update
+            </button>
+
+            <button
+              type="button"
+              className="secondary"
+              onClick={dismissRemoteUpdate}
+            >
+              Keep editing
+            </button>
+          </div>
+        </div>
       )}
 
       {isSupabaseConfigured && !user && guest && (
