@@ -7,6 +7,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import ErrorBoundary from "./ErrorBoundary";
+import PanelError from "./PanelError";
+
 const HouseholdBasics = lazy(() => import("./HouseholdBasics"));
 const RecipesList = lazy(() => import("./RecipesList"));
 
@@ -127,6 +130,7 @@ export default function MoreScreen({
           </button>
 
           {moreSection === "household" && (
+            <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
             <Suspense fallback={null}>
               <HouseholdBasics
                 activeSection={householdSection}
@@ -151,9 +155,11 @@ export default function MoreScreen({
                 loadStarterInventory={loadStarterInventory}
               />
             </Suspense>
+            </ErrorBoundary>
           )}
 
           {moreSection === "recipes" && (
+            <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
             <Suspense fallback={null}>
               <RecipesList
                 recipes={recipes}
@@ -166,6 +172,7 @@ export default function MoreScreen({
                 updateRecipe={updateRecipe}
               />
             </Suspense>
+            </ErrorBoundary>
           )}
         </>
       )}

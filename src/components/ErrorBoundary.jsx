@@ -38,6 +38,15 @@ export default class ErrorBoundary extends Component {
 
     if (!error) return this.props.children;
 
+    // A caller can supply a scoped fallback (e.g. a dismissible sheet for a
+    // crashed overlay) instead of the default full-screen card — as a node or
+    // as a (reset) => node function so it can offer a retry.
+    if (this.props.fallback !== undefined) {
+      return typeof this.props.fallback === "function"
+        ? this.props.fallback(this.handleReset)
+        : this.props.fallback;
+    }
+
     return (
       <main className="app-shell tab-home auth-shell">
         <section className="auth-card" role="alert">

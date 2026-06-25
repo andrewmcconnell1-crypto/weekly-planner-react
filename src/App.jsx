@@ -13,6 +13,8 @@ import SignInScreen from "./components/SignInScreen";
 import UpdateBanner from "./components/UpdateBanner";
 import UndoSnackbar from "./components/UndoSnackbar";
 import LoadingScreen from "./components/LoadingScreen";
+import ErrorBoundary from "./components/ErrorBoundary";
+import SheetError from "./components/SheetError";
 import HomeScreen from "./components/HomeScreen";
 import PlanScreen from "./components/PlanScreen";
 import MoreScreen from "./components/MoreScreen";
@@ -675,28 +677,43 @@ function App() {
       )}
 
       {discoverOpen && (
-        <Suspense fallback={null}>
-          <RecipeDiscoverySheet
-            recipes={recipes}
-            unplannedDays={unplannedDays}
-            initialDay={discoverDay}
-            plannedRecipeIds={plannedRecipeIds}
-            onAssign={assignRecipeToDay}
-            onClose={() => {
-              setDiscoverOpen(false);
-              setDiscoverDay(null);
-            }}
-          />
-        </Suspense>
+        <ErrorBoundary
+          fallback={
+            <SheetError
+              onClose={() => {
+                setDiscoverOpen(false);
+                setDiscoverDay(null);
+              }}
+            />
+          }
+        >
+          <Suspense fallback={null}>
+            <RecipeDiscoverySheet
+              recipes={recipes}
+              unplannedDays={unplannedDays}
+              initialDay={discoverDay}
+              plannedRecipeIds={plannedRecipeIds}
+              onAssign={assignRecipeToDay}
+              onClose={() => {
+                setDiscoverOpen(false);
+                setDiscoverDay(null);
+              }}
+            />
+          </Suspense>
+        </ErrorBoundary>
       )}
 
       {shoppingHelpOpen && (
-        <Suspense fallback={null}>
-          <ShoppingHelpSheet
-            keepStandingList={keepStandingList}
-            onClose={() => setShoppingHelpOpen(false)}
-          />
-        </Suspense>
+        <ErrorBoundary
+          fallback={<SheetError onClose={() => setShoppingHelpOpen(false)} />}
+        >
+          <Suspense fallback={null}>
+            <ShoppingHelpSheet
+              keepStandingList={keepStandingList}
+              onClose={() => setShoppingHelpOpen(false)}
+            />
+          </Suspense>
+        </ErrorBoundary>
       )}
 
       <nav className="bottom-nav" aria-label="Primary">

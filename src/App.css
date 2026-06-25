@@ -4165,6 +4165,15 @@ textarea::placeholder {
   word-break: break-word;
 }
 
+/* Inline fallback for a crashed lazily-loaded panel (More / Settings). */
+.panel-error {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-10);
+  padding: var(--space-20);
+  text-align: center;
+}
+
 .auth-note {
   margin: 0;
 }

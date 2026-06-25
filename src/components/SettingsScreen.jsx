@@ -1,6 +1,9 @@
 import { lazy, Suspense } from "react";
 import { ChevronLeft } from "lucide-react";
 
+import ErrorBoundary from "./ErrorBoundary";
+import PanelError from "./PanelError";
+
 const SettingsPanel = lazy(() => import("./SettingsPanel"));
 
 export default function SettingsScreen({
@@ -25,22 +28,24 @@ export default function SettingsScreen({
         Back
       </button>
 
-      <Suspense fallback={null}>
-        <SettingsPanel
-          onImport={onImport}
-          user={user}
-          cloud={cloud}
-          onSignOut={onSignOut}
-          keepStandingList={keepStandingList}
-          onSetKeepStandingList={onSetKeepStandingList}
-          onOpenShoppingHelp={onOpenShoppingHelp}
-          resetStockToStarterList={resetStockToStarterList}
-          resetStaplesToStarterList={resetStaplesToStarterList}
-          getRecoverySnapshots={getRecoverySnapshots}
-          onRestoreSnapshot={onRestoreSnapshot}
-          onResetWelcome={onResetWelcome}
-        />
-      </Suspense>
+      <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
+        <Suspense fallback={null}>
+          <SettingsPanel
+            onImport={onImport}
+            user={user}
+            cloud={cloud}
+            onSignOut={onSignOut}
+            keepStandingList={keepStandingList}
+            onSetKeepStandingList={onSetKeepStandingList}
+            onOpenShoppingHelp={onOpenShoppingHelp}
+            resetStockToStarterList={resetStockToStarterList}
+            resetStaplesToStarterList={resetStaplesToStarterList}
+            getRecoverySnapshots={getRecoverySnapshots}
+            onRestoreSnapshot={onRestoreSnapshot}
+            onResetWelcome={onResetWelcome}
+          />
+        </Suspense>
+      </ErrorBoundary>
     </section>
   );
 }
