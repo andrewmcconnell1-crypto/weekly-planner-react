@@ -14,8 +14,6 @@ function SwipeRow({ onDelete, itemName = "item", children }) {
   const start = useRef({ x: 0, y: 0, base: 0 });
   const axis = useRef(null); // "h" | "v" | null
 
-  const isOpen = offset <= -OPEN_AT;
-
   function onPointerDown(event) {
     if (event.pointerType === "mouse" && event.button !== 0) return;
     start.current = { x: event.clientX, y: event.clientY, base: offset };
@@ -65,8 +63,12 @@ function SwipeRow({ onDelete, itemName = "item", children }) {
         type="button"
         className="swipe-row-action"
         aria-label={`Delete ${itemName}`}
-        tabIndex={isOpen ? 0 : -1}
-        aria-hidden={!isOpen}
+        // Keyboard users can't swipe, so the action stays in the tab order and
+        // reveals itself on focus (mirroring the swipe) — pressing it deletes.
+        onFocus={() => setOffset(-ACTION_WIDTH)}
+        onBlur={() => {
+          if (!dragging) setOffset(0);
+        }}
         onClick={() => {
           setOffset(0);
           onDelete();

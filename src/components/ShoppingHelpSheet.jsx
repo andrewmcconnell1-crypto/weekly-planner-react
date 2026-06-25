@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
+import { useDialogFocus } from "../hooks/useDialogFocus";
+
 // Explains the (non-obvious) shopping model: stock vs recurring buys vs meals,
 // how the generated list is a "top-up" of a standing grocery list, and the
 // options for people who shop differently.
 function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
   const [closing, setClosing] = useState(false);
   const closeTimerRef = useRef(null);
+  const dialogRef = useRef(null);
+
+  useDialogFocus(dialogRef);
 
   // Play the sheet's exit animation, then unmount.
   function requestClose() {
@@ -43,6 +48,8 @@ function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
       onClick={requestClose}
     >
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className={`sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"
