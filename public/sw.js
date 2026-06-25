@@ -5,7 +5,7 @@
 // hashed assets become available without a connection (e.g. in-store). App data
 // itself lives in localStorage, so nothing here needs to cache user data.
 
-const CACHE = "meal-planner-v1";
+const CACHE = "meal-planner-v2";
 
 // The app root, derived from where this service worker is served, so it works
 // at the domain root or under a subpath (e.g. GitHub Pages).
