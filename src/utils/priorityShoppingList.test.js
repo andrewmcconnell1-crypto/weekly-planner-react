@@ -113,4 +113,15 @@ describe("buildUnifiedShoppingList", () => {
 
     expect(items.find((i) => i.name === "Milk").checked).toBe(false);
   });
+
+  it("carries a manual item's id so the row can delete the right one", () => {
+    const { items } = buildUnifiedShoppingList({
+      ...base,
+      manualItems: [
+        { id: "manual-milk", name: "Milk", category: "Dairy", tier: "soon" },
+      ],
+    });
+
+    expect(items.find((i) => i.name === "Milk").manualId).toBe("manual-milk");
+  });
 });

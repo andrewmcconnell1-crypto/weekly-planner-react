@@ -352,10 +352,11 @@ function MealEditorSheet({
 
                 <button
                   type="button"
-                  className="delete-button"
+                  className="ingredient-delete"
+                  aria-label={`Remove ${ingredient}`}
                   onClick={() => deleteIngredient(index)}
                 >
-                  Delete
+                  <Trash2 size={16} aria-hidden="true" />
                 </button>
               </li>
             ))}
