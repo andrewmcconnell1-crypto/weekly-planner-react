@@ -916,6 +916,17 @@ function App() {
     setNewInventoryItem("");
   }
 
+  function resetStaplesToStarterList() {
+    const shouldReset = window.confirm(
+      "Restore the default recurring buys? This replaces your current recurring list with the app's default weekly buys."
+    );
+
+    if (!shouldReset) return;
+
+    setStaples(initialStaples.map((staple) => ({ ...staple })));
+    setNewStaple("");
+  }
+
   function addRecipe() {
     const cleanedName = newRecipeName.trim();
 
@@ -1600,6 +1611,7 @@ function App() {
             onSetKeepStandingList={setKeepStandingList}
             onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
             resetStockToStarterList={resetStockToStarterList}
+            resetStaplesToStarterList={resetStaplesToStarterList}
             onResetWelcome={() => {
               setWelcomePreview(true);
               setWelcomeDismissedFor(null);

@@ -55,6 +55,7 @@ function SettingsPanel({
   onSetKeepStandingList,
   onOpenShoppingHelp,
   resetStockToStarterList,
+  resetStaplesToStarterList,
   onResetWelcome,
 }) {
   const fileInputRef = useRef(null);
@@ -269,6 +270,26 @@ function SettingsPanel({
                 onClick={resetStockToStarterList}
               >
                 Restore default stock list
+              </button>
+            </div>
+          </section>
+        )}
+
+        {resetStaplesToStarterList && (
+          <section className="settings-group">
+            <strong>Restore default recurring buys</strong>
+            <p className="small-text">
+              Replace your recurring buys with the app's default weekly list.
+              Removes any custom recurring items.
+            </p>
+
+            <div className="settings-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={resetStaplesToStarterList}
+              >
+                Restore default recurring buys
               </button>
             </div>
           </section>
