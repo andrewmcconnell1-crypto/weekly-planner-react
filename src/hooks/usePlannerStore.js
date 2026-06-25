@@ -11,6 +11,14 @@ import {
   saveCloudData,
 } from "../lib/plannerData";
 import { demoData } from "../lib/demoData";
+import {
+  loadSnapshots,
+  saveSnapshots,
+  addSnapshot,
+  makeSnapshot,
+  shouldAutoSnapshot,
+  AUTO_SNAPSHOT_GAP_MS,
+} from "../lib/recoverySnapshots";
 
 const SAVE_DEBOUNCE_MS = 800;
 
@@ -44,6 +52,8 @@ export function usePlannerStore(user, guest = false) {
   // Detects entering/leaving guest mode so we can swap in (and later discard)
   // the in-memory demo without ever touching storage.
   const prevGuestRef = useRef(guest);
+  // Throttles the auto-snapshot check so it doesn't read storage on every edit.
+  const lastAutoSnapshotRef = useRef(0);
 
   // Load from the cloud (state updates happen inside the async callback, never
   // synchronously in the effect body).
@@ -196,6 +206,40 @@ export function usePlannerStore(user, guest = false) {
     };
   }, [cloud, userId]);
 
+  // Auto-capture a recovery point when the app is in a settled state, throttled
+  // so edits don't pile up snapshots. Reads `data` and writes localStorage only
+  // — never touches React state or the synced data.
+  useEffect(() => {
+    if (loading || guest) return;
+
+    const now = Date.now();
+    // Cheap in-memory gate first, so editing doesn't touch storage every change.
+    if (now - lastAutoSnapshotRef.current < AUTO_SNAPSHOT_GAP_MS) return;
+    lastAutoSnapshotRef.current = now;
+
+    const current = loadSnapshots();
+    if (!shouldAutoSnapshot(current, now)) return;
+    saveSnapshots(addSnapshot(current, makeSnapshot("Auto-saved", data)));
+  }, [data, loading, guest]);
+
+  // Take a recovery point immediately (used before destructive actions like an
+  // import or a reset, which would otherwise be unrecoverable).
+  function captureRecoverySnapshot(label) {
+    saveSnapshots(addSnapshot(loadSnapshots(), makeSnapshot(label, data)));
+  }
+
+  // Roll back to a snapshot. This is a normal data change, so it syncs to the
+  // cloud like any other edit.
+  function restoreRecoverySnapshot(id) {
+    const snapshot = loadSnapshots().find((entry) => entry.id === id);
+    if (!snapshot) return false;
+    // Keep a point for the state we're leaving, so a restore is itself undoable.
+    captureRecoverySnapshot("Before restoring a recovery point");
+    skipNextSaveRef.current = false;
+    setData(normaliseData(snapshot.data));
+    return true;
+  }
+
   const setters = useMemo(() => {
     function makeSetter(key) {
       return (next) =>
@@ -220,5 +264,14 @@ export function usePlannerStore(user, guest = false) {
     };
   }, []);
 
-  return { ...data, ...setters, loading, syncError, cloud };
+  return {
+    ...data,
+    ...setters,
+    loading,
+    syncError,
+    cloud,
+    getRecoverySnapshots: loadSnapshots,
+    captureRecoverySnapshot,
+    restoreRecoverySnapshot,
+  };
 }
