@@ -4,8 +4,11 @@ import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupLabelFor } from "../utils/ingredientMatch";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
+import { ingredientCatalog } from "../data/ingredientCatalog";
 import AddItemRow from "./AddItemRow";
 import SwipeRow from "./SwipeRow";
+
+const catalogNames = ingredientCatalog.map((item) => item.name);
 
 // Stock items, grouped into collapsible category sections. Each row is a
 // compact tick + name; the category dropdown and Delete live behind the
@@ -20,6 +23,7 @@ function InventoryList({
   updateInventoryCategory,
   toggleInventoryActive,
   loadStarterInventory,
+  onOpenStockCatalog,
   ingredientGroups = {},
   availableGroups = [],
   updateIngredientGroup,
@@ -274,6 +278,16 @@ function InventoryList({
         })
       )}
 
+      {onOpenStockCatalog && (
+        <button
+          type="button"
+          className="tertiary-button browse-catalog"
+          onClick={onOpenStockCatalog}
+        >
+          Browse common items
+        </button>
+      )}
+
       <AddItemRow
         value={newInventoryItem}
         setValue={setNewInventoryItem}
@@ -282,6 +296,7 @@ function InventoryList({
         placeholder="e.g. Olive oil"
         availableCategories={availableCategories}
         defaultCategory="Pantry"
+        suggestions={catalogNames}
       />
 
       {inventory.length === 0 && (

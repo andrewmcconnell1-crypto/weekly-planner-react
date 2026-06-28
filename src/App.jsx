@@ -27,6 +27,7 @@ const RecipeDiscoverySheet = lazy(
   () => import("./components/RecipeDiscoverySheet")
 );
 const ShoppingHelpSheet = lazy(() => import("./components/ShoppingHelpSheet"));
+const StockCatalogSheet = lazy(() => import("./components/StockCatalogSheet"));
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 import { getSunday, getNextSunday, getWeekKey } from "./utils/dateUtils";
@@ -72,6 +73,7 @@ function App() {
 
   const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
+  const [stockCatalogOpen, setStockCatalogOpen] = useState(false);
 
   const {
     user,
@@ -126,7 +128,9 @@ function App() {
         }
       : shoppingHelpOpen
         ? () => setShoppingHelpOpen(false)
-        : null;
+        : stockCatalogOpen
+          ? () => setStockCatalogOpen(false)
+          : null;
 
   useBackToClose(Boolean(closeOpenOverlay), () => closeOpenOverlay?.());
 
@@ -222,6 +226,7 @@ function App() {
     loadStarterStaples,
     resetStaplesToStarterList,
     addInventoryItem,
+    activateStockItem,
     deleteInventoryItem,
     updateInventoryCategory,
     toggleInventoryActive,
@@ -641,6 +646,7 @@ function App() {
           updateInventoryCategory={updateInventoryCategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
+          onOpenStockCatalog={() => setStockCatalogOpen(true)}
           ingredientGroups={ingredientGroups}
           availableGroups={availableGroups}
           updateIngredientGroup={updateIngredientGroup}
@@ -724,6 +730,20 @@ function App() {
             <ShoppingHelpSheet
               keepStandingList={keepStandingList}
               onClose={() => setShoppingHelpOpen(false)}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+
+      {stockCatalogOpen && (
+        <ErrorBoundary
+          fallback={<SheetError onClose={() => setStockCatalogOpen(false)} />}
+        >
+          <Suspense fallback={null}>
+            <StockCatalogSheet
+              inventory={inventory}
+              onActivate={activateStockItem}
+              onClose={() => setStockCatalogOpen(false)}
             />
           </Suspense>
         </ErrorBoundary>

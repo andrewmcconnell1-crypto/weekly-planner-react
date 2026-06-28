@@ -25,6 +25,7 @@ function HouseholdBasics({
   updateInventoryCategory,
   toggleInventoryActive,
   loadStarterInventory,
+  onOpenStockCatalog,
   ingredientGroups,
   availableGroups,
   updateIngredientGroup,
@@ -96,6 +97,7 @@ function HouseholdBasics({
           updateInventoryCategory={updateInventoryCategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
+          onOpenStockCatalog={onOpenStockCatalog}
           ingredientGroups={ingredientGroups}
           availableGroups={availableGroups}
           updateIngredientGroup={updateIngredientGroup}
