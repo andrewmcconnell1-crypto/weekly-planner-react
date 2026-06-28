@@ -17,6 +17,9 @@ function RecipesList({
   addIngredientToRecipe,
   deleteIngredientFromRecipe,
   updateRecipe,
+  ingredientGroups,
+  availableGroups,
+  updateIngredientGroup,
 }) {
   const [searchText, setSearchText] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -230,6 +233,9 @@ function RecipesList({
           addIngredientToRecipe={addIngredientToRecipe}
           deleteIngredientFromRecipe={deleteIngredientFromRecipe}
           deleteRecipe={deleteRecipe}
+          ingredientGroups={ingredientGroups}
+          availableGroups={availableGroups}
+          updateIngredientGroup={updateIngredientGroup}
           onClose={() => setOpenRecipeId(null)}
         />
       )}

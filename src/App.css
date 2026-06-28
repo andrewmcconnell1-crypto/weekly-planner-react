@@ -2052,6 +2052,46 @@ textarea::placeholder {
   padding-top: var(--space-8);
 }
 
+/* Edit-mode ingredient row: name + delete on top, a compact "counts as" group
+   field beneath, so a mismatch can be fixed right from the recipe. */
+.ingredient-row-editing {
+  display: grid;
+  gap: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+
+.ingredient-row-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-10);
+}
+
+.ingredient-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.ingredient-group-label {
+  flex-shrink: 0;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.ingredient-group-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 34px;
+}
+
+.ingredient-group-hint {
+  margin: var(--space-2) 0 0;
+}
+
 .read-only-row {
   justify-content: flex-start;
   color: var(--ink);
