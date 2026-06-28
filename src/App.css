@@ -4789,13 +4789,22 @@ textarea::placeholder {
   margin: -4px 0 2px;
 }
 
+/* Pin the aisle label to the top while its aisle is on screen, so on a long
+   shopping list you always see which aisle you're in. Opaque page-coloured
+   background (the rows sit on panel cards above this) masks them passing
+   behind; padding gives the pinned bar a solid height. */
 .priority-aisle {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   color: var(--olive);
   font-size: var(--text-xs);
   font-weight: var(--weight-heavy);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin: var(--space-4) 0 var(--space-2);
+  margin: 0;
+  padding: var(--space-6) 0;
+  background: var(--bg);
 }
 
 /* ---- How-shopping-works help sheet ---- */
