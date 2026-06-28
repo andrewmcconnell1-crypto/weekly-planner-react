@@ -61,8 +61,15 @@ export function buildUnifiedShoppingList({
 
   const collected = [];
 
-  function add(name, category, tier, source, manualId) {
-    collected.push({ name, category: category || "Other", tier, source, manualId });
+  function add(name, category, tier, source, manualId, sourceId) {
+    collected.push({
+      name,
+      category: category || "Other",
+      tier,
+      source,
+      manualId,
+      sourceId,
+    });
   }
 
   // A meal's tier from how many days away it is — counted across the week
@@ -81,7 +88,7 @@ export function buildUnifiedShoppingList({
       const tier = mealTier(item.day, 0);
       if (tier) add(item.name, categoriseIngredient(item.name), tier, "Meal");
     } else if (item.source === "Restock") {
-      add(item.name, item.category, "soon", "Restock");
+      add(item.name, item.category, "soon", "Restock", null, item.sourceId);
     } else {
       add(item.name, item.category, "week", item.source);
     }
