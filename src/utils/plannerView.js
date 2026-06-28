@@ -117,8 +117,6 @@ export function buildPlannerView({
   const expandedDaySummary = expandedMealDay
     ? getMealSummary(expandedMealDay, expandedMeal, meals)
     : null;
-  const expandedNextDay =
-    expandedDayIndex >= 0 ? days[expandedDayIndex + 1] : undefined;
   let expandedDayLabel = "";
   if (expandedDayIndex >= 0) {
     const expandedDate = new Date(mealWeekStart);
@@ -220,7 +218,6 @@ export function buildPlannerView({
     planGapsLabel,
     expandedMeal,
     expandedDaySummary,
-    expandedNextDay,
     expandedDayLabel,
     expandedLeftoverNights,
     expandedMaxNights,
