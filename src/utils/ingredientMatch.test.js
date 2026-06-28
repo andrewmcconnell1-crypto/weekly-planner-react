@@ -4,6 +4,7 @@ import {
   buildCoverageIndex,
   findCoverage,
   isIngredientCovered,
+  canonicalKey,
 } from "./ingredientMatch";
 
 // Helper: is `ingredient` covered by a stock/recurring list of `have` names?
@@ -88,5 +89,36 @@ describe("ingredientMatch — group hierarchy", () => {
 
     const index = buildCoverageIndex(["Rice"]);
     expect(findCoverage("1 cup jasmine rice", index)).toBe("Rice");
+  });
+});
+
+describe("ingredientMatch — user group overrides", () => {
+  function coveredWith(ingredient, have, overrides) {
+    return isIngredientCovered(
+      ingredient,
+      buildCoverageIndex(have, overrides),
+      overrides
+    );
+  }
+
+  it("groups a previously-ungrouped item so the generic now matches", () => {
+    // Not in the seed: spelt flour is unrelated to flour until the user says so.
+    // Overrides are keyed by canonical key, exactly as updateIngredientGroup stores them.
+    expect(coveredWith("flour", ["Spelt flour"], {})).toBe(false);
+    expect(
+      coveredWith("flour", ["Spelt flour"], {
+        [canonicalKey("Spelt flour")]: "flour",
+      })
+    ).toBe(true);
+  });
+
+  it("lets an override win over the seed group", () => {
+    // Seed groups basmati under rice; user re-points it at its own group.
+    const overrides = { [canonicalKey("Basmati rice")]: "basmati rice" };
+    expect(coveredWith("rice", ["Basmati rice"], overrides)).toBe(false);
+  });
+
+  it("falls back to the seed when the override is blank/missing", () => {
+    expect(coveredWith("rice", ["Basmati rice"], {})).toBe(true);
   });
 });

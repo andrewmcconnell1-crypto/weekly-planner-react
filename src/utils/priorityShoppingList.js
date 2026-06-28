@@ -39,6 +39,7 @@ export function buildUnifiedShoppingList({
   usingSavedList = false,
   manualItems = [],
   checkedMap = {},
+  ingredientGroups = {},
 }) {
   const todayIndex = days.indexOf(todayDayName);
 
@@ -49,6 +50,7 @@ export function buildUnifiedShoppingList({
     weekMeals: mealsByWeek[currentWeekKey] || {},
     weekKey: currentWeekKey,
     getMealSummary,
+    ingredientGroups,
   });
   const nextPlan = buildShoppingPlan({
     staples,
@@ -57,6 +59,7 @@ export function buildUnifiedShoppingList({
     weekMeals: mealsByWeek[nextWeekKey] || {},
     weekKey: nextWeekKey,
     getMealSummary,
+    ingredientGroups,
   });
 
   const collected = [];

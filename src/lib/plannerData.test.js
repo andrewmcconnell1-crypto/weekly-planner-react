@@ -43,4 +43,16 @@ describe("normaliseData", () => {
       shopUsingSavedList: false,
     });
   });
+
+  it("defaults ingredientGroups to an object and coerces non-objects", () => {
+    expect(normaliseData(null).ingredientGroups).toEqual({});
+    expect(normaliseData({ ingredientGroups: "nope" }).ingredientGroups).toEqual(
+      {}
+    );
+
+    const overrides = { "basmati rice": "rice" };
+    expect(
+      normaliseData({ ingredientGroups: overrides }).ingredientGroups
+    ).toEqual(overrides);
+  });
 });

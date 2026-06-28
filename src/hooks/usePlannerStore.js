@@ -306,6 +306,7 @@ export function usePlannerStore(user, guest = false) {
       setInventory: makeSetter("inventory"),
       setRecipes: makeSetter("recipes"),
       setSettings: makeSetter("settings"),
+      setIngredientGroups: makeSetter("ingredientGroups"),
     };
   }, []);
 

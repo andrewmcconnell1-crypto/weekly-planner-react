@@ -7,6 +7,7 @@ import {
   categoryRank,
 } from "./priorityShoppingList";
 import { categories } from "../data/categories";
+import { canonicalKey } from "./ingredientMatch";
 
 describe("categoryRank", () => {
   it("ranks known aisles by their canonical order", () => {
@@ -148,5 +149,29 @@ describe("buildUnifiedShoppingList", () => {
     });
 
     expect(items.some((i) => i.source === "Restock")).toBe(false);
+  });
+
+  it("applies user ingredient-group overrides to coverage", () => {
+    const args = {
+      ...base,
+      getMealSummary: (day) =>
+        day === "Monday"
+          ? { hasMeal: true, name: "Pancakes", ingredients: ["1 cup flour"] }
+          : { hasMeal: false, name: day, ingredients: [] },
+      inventory: [
+        { id: "inv-spelt", name: "Spelt flour", category: "Pantry", active: true },
+      ],
+    };
+
+    // Without an override, spelt flour doesn't cover the recipe's "flour".
+    const before = buildUnifiedShoppingList(args);
+    expect(before.items.some((i) => i.name === "1 cup flour")).toBe(true);
+
+    // Grouping spelt flour under "flour" covers it, dropping it from the list.
+    const after = buildUnifiedShoppingList({
+      ...args,
+      ingredientGroups: { [canonicalKey("Spelt flour")]: "flour" },
+    });
+    expect(after.items.some((i) => i.name === "1 cup flour")).toBe(false);
   });
 });

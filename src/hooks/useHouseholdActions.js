@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { normaliseItemName, createCollectionId } from "../utils/itemUtils";
+import { canonicalKey } from "../utils/ingredientMatch";
 import { createStarterInventoryItems } from "../utils/dataLoaders";
 import { initialStaples } from "../data/initialStaples";
 
@@ -13,6 +14,7 @@ export function useHouseholdActions({
   inventory,
   setInventory,
   shoppingWeekKey,
+  setIngredientGroups,
   captureRecoverySnapshot,
   requestUndo,
 }) {
@@ -180,6 +182,26 @@ export function useHouseholdActions({
     setNewStaple("");
   }
 
+  // Override an item's overarching group for matching. Keyed by the item's
+  // canonical key, so it applies wherever that name appears (stock, recurring,
+  // or a recipe). A blank group clears the override (falls back to the seed).
+  function updateIngredientGroup(name, group) {
+    const key = canonicalKey(name);
+    if (!key) return;
+
+    const cleaned = (group || "").trim();
+    setIngredientGroups((current) => {
+      const next = { ...current };
+      if (cleaned === "" || canonicalKey(cleaned) === key) {
+        // Blank, or "group is itself" — no override needed.
+        delete next[key];
+      } else {
+        next[key] = cleaned;
+      }
+      return next;
+    });
+  }
+
   return {
     newStaple,
     setNewStaple,
@@ -199,5 +221,6 @@ export function useHouseholdActions({
     toggleInventoryActive,
     loadStarterInventory,
     resetStockToStarterList,
+    updateIngredientGroup,
   };
 }

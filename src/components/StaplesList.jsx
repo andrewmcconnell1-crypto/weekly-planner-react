@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
 import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
+import { groupLabelFor } from "../utils/ingredientMatch";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
 import AddItemRow from "./AddItemRow";
 import SwipeRow from "./SwipeRow";
@@ -51,11 +52,15 @@ function StaplesList({
   updateStapleDetails,
   toggleStapleActive,
   loadStarterStaples,
+  ingredientGroups = {},
+  availableGroups = [],
+  updateIngredientGroup,
 }) {
   const [searchText, setSearchText] = useState("");
   const [openCategories, setOpenCategories] = useState({});
   const [openSubcategories, setOpenSubcategories] = useState({});
   const [expandedStapleId, setExpandedStapleId] = useState(null);
+  const [groupDraft, setGroupDraft] = useState("");
 
   const filteredStaples = staples.filter((staple) =>
     normaliseItemName(staple.name).includes(normaliseItemName(searchText))
@@ -115,7 +120,13 @@ function StaplesList({
             className="basics-edit-toggle"
             aria-expanded={isExpanded}
             aria-label={`Edit ${staple.name}`}
-            onClick={() => setExpandedStapleId(isExpanded ? null : staple.id)}
+            onClick={() => {
+              const opening = !isExpanded;
+              setExpandedStapleId(opening ? staple.id : null);
+              if (opening) {
+                setGroupDraft(groupLabelFor(staple.name, ingredientGroups));
+              }
+            }}
           >
             {isExpanded ? (
               <ChevronUp size={17} aria-hidden="true" />
@@ -186,6 +197,28 @@ function StaplesList({
               </select>
             </div>
 
+            {updateIngredientGroup && (
+              <label className="basics-group">
+                <span className="basics-group-label">Group</span>
+                <input
+                  type="text"
+                  list="ingredient-group-options"
+                  className="basics-group-input"
+                  placeholder="e.g. rice"
+                  aria-label={`${staple.name} group`}
+                  value={groupDraft}
+                  onChange={(event) => setGroupDraft(event.target.value)}
+                  onBlur={() => updateIngredientGroup(staple.name, groupDraft)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") event.currentTarget.blur();
+                  }}
+                />
+                <span className="basics-group-hint small-text">
+                  Items in the same group cover each other on your list.
+                </span>
+              </label>
+            )}
+
             <p className="small-text">Starts: {staple.startDate}</p>
 
             <button
@@ -217,6 +250,12 @@ function StaplesList({
         Ticked items stay on your Woolworths list. Untick one to flag it for
         removal this week.
       </p>
+
+      <datalist id="ingredient-group-options">
+        {availableGroups.map((group) => (
+          <option key={group} value={group} />
+        ))}
+      </datalist>
 
       {staples.length === 0 ? (
         <p className="empty-state">No recurring buys yet.</p>

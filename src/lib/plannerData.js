@@ -32,6 +32,7 @@ export const DATA_KEYS = [
   "recipes",
   "recipesVersion",
   "settings",
+  "ingredientGroups",
 ];
 
 const TABLE = "app_data";
@@ -72,6 +73,9 @@ export function defaultData() {
     recipes: initialRecipes,
     recipesVersion: RECIPES_VERSION,
     settings: { ...defaultSettings },
+    // User overrides for ingredient groups (canonicalKey -> overarching name),
+    // layered over the seed catalog by the matcher.
+    ingredientGroups: {},
   };
 }
 
@@ -111,6 +115,10 @@ export function normaliseData(raw) {
     ),
     recipesVersion: RECIPES_VERSION,
     settings: normaliseSettings(data.settings),
+    ingredientGroups:
+      data.ingredientGroups && typeof data.ingredientGroups === "object"
+        ? data.ingredientGroups
+        : base.ingredientGroups,
   };
 }
 

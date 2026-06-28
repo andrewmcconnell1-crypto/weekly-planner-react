@@ -145,24 +145,36 @@ export function canonicalKey(name) {
   return [...extractCoreTokens(name)].sort().join(" ");
 }
 
-// Seed catalog, keyed and grouped by canonical key (so "Basmati Rice" and
-// "basmati rice" resolve the same). Built once at module load.
-const GROUP_BY_KEY = (() => {
-  const map = new Map();
+// Seed catalog, keyed by canonical key (so "Basmati Rice" and "basmati rice"
+// resolve the same). GROUP_BY_KEY holds the canonical group key used for
+// matching; GROUP_LABEL_BY_KEY keeps the readable group name for the editor.
+const { GROUP_BY_KEY, GROUP_LABEL_BY_KEY } = (() => {
+  const byKey = new Map();
+  const labelByKey = new Map();
   for (const [specific, group] of Object.entries(INGREDIENT_GROUPS)) {
     const specificKey = canonicalKey(specific);
     const groupKey = canonicalKey(group);
-    if (specificKey && groupKey) map.set(specificKey, groupKey);
+    if (specificKey && groupKey) {
+      byKey.set(specificKey, groupKey);
+      labelByKey.set(specificKey, group);
+    }
   }
-  return map;
+  return { GROUP_BY_KEY: byKey, GROUP_LABEL_BY_KEY: labelByKey };
 })();
 
 // Resolve a name to its identity for matching: its own key, the group it rolls
 // up to (itself when ungrouped), and whether it *is* that group (the generic).
-export function resolveIngredient(name) {
+// `overrides` is the user's per-household group map (canonicalKey -> name); it
+// wins over the seed catalog, so people can fix or add groupings themselves.
+export function resolveIngredient(name, overrides = {}) {
   const key = canonicalKey(name);
   if (!key) return null;
-  const group = GROUP_BY_KEY.get(key) || key;
+
+  const override = overrides[key];
+  const group = override
+    ? canonicalKey(override) || key
+    : GROUP_BY_KEY.get(key) || key;
+
   return { key, group, isGeneric: key === group };
 }
 
@@ -181,22 +193,51 @@ function entryCovers(have, want) {
 
 // Pre-compute the resolved identity for the things you already have, once.
 // Keeps the original name so we can tell the user what covered an ingredient.
-export function buildCoverageIndex(names) {
+export function buildCoverageIndex(names, overrides = {}) {
   return names
-    .map((name) => ({ name, ...resolveIngredient(name) }))
+    .map((name) => ({ name, ...resolveIngredient(name, overrides) }))
     .filter((entry) => entry.key);
 }
 
 // Returns the name of the stock / recurring item covering this ingredient, or
 // null if nothing covers it.
-export function findCoverage(ingredientName, coverageIndex) {
-  const want = resolveIngredient(ingredientName);
+export function findCoverage(ingredientName, coverageIndex, overrides = {}) {
+  const want = resolveIngredient(ingredientName, overrides);
   if (!want) return null;
 
   const match = coverageIndex.find((entry) => entryCovers(entry, want));
   return match ? match.name : null;
 }
 
-export function isIngredientCovered(ingredientName, coverageIndex) {
-  return findCoverage(ingredientName, coverageIndex) !== null;
+export function isIngredientCovered(ingredientName, coverageIndex, overrides) {
+  return findCoverage(ingredientName, coverageIndex, overrides) !== null;
+}
+
+// The readable group label for a name, for the group editor: the user's
+// override if set, else the seed group, else "" when the item is ungrouped
+// (its own group). Note resolveIngredient returns the canonical group *key*
+// (sorted tokens) for matching; this returns the human spelling.
+export function groupLabelFor(name, overrides = {}) {
+  const key = canonicalKey(name);
+  if (!key) return "";
+  if (overrides[key]) return overrides[key];
+  return GROUP_LABEL_BY_KEY.get(key) || "";
+}
+
+// Distinct overarching group names the app knows about — the seed groups plus
+// any the user has assigned — to suggest in the group editor. Deduped
+// case-insensitively, keeping the first spelling seen.
+export function listKnownGroups(overrides = {}) {
+  const byKey = new Map();
+  const add = (value) => {
+    const trimmed = (value || "").trim();
+    if (trimmed && !byKey.has(trimmed.toLowerCase())) {
+      byKey.set(trimmed.toLowerCase(), trimmed);
+    }
+  };
+
+  Object.values(INGREDIENT_GROUPS).forEach(add);
+  Object.values(overrides).forEach(add);
+
+  return [...byKey.values()].sort((a, b) => a.localeCompare(b));
 }

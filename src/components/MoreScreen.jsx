@@ -40,6 +40,9 @@ export default function MoreScreen({
   updateInventoryCategory,
   toggleInventoryActive,
   loadStarterInventory,
+  ingredientGroups,
+  availableGroups,
+  updateIngredientGroup,
   newRecipeName,
   setNewRecipeName,
   addRecipe,
@@ -153,6 +156,9 @@ export default function MoreScreen({
                 updateInventoryCategory={updateInventoryCategory}
                 toggleInventoryActive={toggleInventoryActive}
                 loadStarterInventory={loadStarterInventory}
+                ingredientGroups={ingredientGroups}
+                availableGroups={availableGroups}
+                updateIngredientGroup={updateIngredientGroup}
               />
             </Suspense>
             </ErrorBoundary>
