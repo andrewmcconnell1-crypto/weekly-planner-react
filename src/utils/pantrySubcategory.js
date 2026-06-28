@@ -1,4 +1,4 @@
-import { tokenise } from "./categoriseIngredient";
+import { tokenise, singularise } from "./categoriseIngredient";
 
 // Display-only breakdown of the Pantry aisle for the Stock & Recurring lists.
 // The shopping list still treats Pantry as one store aisle — this only
@@ -57,12 +57,19 @@ const PANTRY_SUBCATEGORIES = [
 const OTHER = { key: "other", label: "Other pantry" };
 const ORDERED = [...PANTRY_SUBCATEGORIES, OTHER];
 
+// Pre-singularise keywords so they match the tokenizer's singular output (e.g.
+// "couscous" -> "couscou"), letting the lists above stay readable.
+const SUBCATEGORY_SETS = PANTRY_SUBCATEGORIES.map((sub) => ({
+  key: sub.key,
+  keywordSet: new Set(sub.keywords.map(singularise)),
+}));
+
 export function pantrySubcategory(name) {
   const tokens = tokenise(name);
 
-  for (const sub of PANTRY_SUBCATEGORIES) {
+  for (const sub of SUBCATEGORY_SETS) {
     for (const token of tokens) {
-      if (sub.keywords.includes(token)) return sub.key;
+      if (sub.keywordSet.has(token)) return sub.key;
     }
   }
 

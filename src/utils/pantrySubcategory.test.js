@@ -30,6 +30,12 @@ describe("pantrySubcategory", () => {
     expect(pantrySubcategory("Breadcrumbs")).toBe("grains");
   });
 
+  it("matches keywords the tokenizer singularises (e.g. couscous)", () => {
+    // "couscous" tokenises to "couscou"; the keyword is singularised to match.
+    expect(pantrySubcategory("Couscous")).toBe("grains");
+    expect(pantrySubcategory("Quinoa")).toBe("grains");
+  });
+
   it("distinguishes baking powder from spice powders", () => {
     expect(pantrySubcategory("Baking Powder")).toBe("baking");
     expect(pantrySubcategory("Sugar")).toBe("baking");
