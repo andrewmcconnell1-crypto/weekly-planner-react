@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
+import { groupLabelFor } from "../utils/ingredientMatch";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
 import AddItemRow from "./AddItemRow";
 import SwipeRow from "./SwipeRow";
@@ -19,11 +20,15 @@ function InventoryList({
   updateInventoryCategory,
   toggleInventoryActive,
   loadStarterInventory,
+  ingredientGroups = {},
+  availableGroups = [],
+  updateIngredientGroup,
 }) {
   const [searchText, setSearchText] = useState("");
   const [openCategories, setOpenCategories] = useState({});
   const [openSubcategories, setOpenSubcategories] = useState({});
   const [expandedItemId, setExpandedItemId] = useState(null);
+  const [groupDraft, setGroupDraft] = useState("");
 
   const filteredInventory = inventory.filter((item) =>
     normaliseItemName(item.name).includes(normaliseItemName(searchText))
@@ -88,7 +93,13 @@ function InventoryList({
             className="basics-edit-toggle"
             aria-expanded={isExpanded}
             aria-label={`Edit ${item.name}`}
-            onClick={() => setExpandedItemId(isExpanded ? null : item.id)}
+            onClick={() => {
+              const opening = !isExpanded;
+              setExpandedItemId(opening ? item.id : null);
+              if (opening) {
+                setGroupDraft(groupLabelFor(item.name, ingredientGroups));
+              }
+            }}
           >
             {isExpanded ? (
               <ChevronUp size={17} aria-hidden="true" />
@@ -113,6 +124,28 @@ function InventoryList({
                 </option>
               ))}
             </select>
+
+            {updateIngredientGroup && (
+              <label className="basics-group">
+                <span className="basics-group-label">Group</span>
+                <input
+                  type="text"
+                  list="ingredient-group-options"
+                  className="basics-group-input"
+                  placeholder="e.g. rice"
+                  aria-label={`${item.name} group`}
+                  value={groupDraft}
+                  onChange={(event) => setGroupDraft(event.target.value)}
+                  onBlur={() => updateIngredientGroup(item.name, groupDraft)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") event.currentTarget.blur();
+                  }}
+                />
+                <span className="basics-group-hint small-text">
+                  Items in the same group cover each other on your list.
+                </span>
+              </label>
+            )}
 
             <button
               type="button"
@@ -142,6 +175,12 @@ function InventoryList({
       <p className="small-text stock-hint">
         Ticked items are in stock. Untick one to add it to your shopping list.
       </p>
+
+      <datalist id="ingredient-group-options">
+        {availableGroups.map((group) => (
+          <option key={group} value={group} />
+        ))}
+      </datalist>
 
       {filteredInventory.length === 0 ? (
         <p className="empty-state">

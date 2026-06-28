@@ -2967,6 +2967,21 @@ textarea::placeholder {
   padding-top: var(--space-10);
 }
 
+.basics-group {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.basics-group-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+}
+
+.basics-group-hint {
+  margin: 0;
+}
+
 /* Restrained outline-danger (matches the recipe editor) instead of a solid red
    block — the row already has swipe-to-delete, so this stays quiet until used. */
 .basics-editor .delete-button {

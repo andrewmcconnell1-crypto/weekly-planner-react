@@ -25,6 +25,9 @@ function HouseholdBasics({
   updateInventoryCategory,
   toggleInventoryActive,
   loadStarterInventory,
+  ingredientGroups,
+  availableGroups,
+  updateIngredientGroup,
 }) {
   const activeStaplesCount = staples.filter(
     (staple) => staple.active !== false
@@ -78,6 +81,9 @@ function HouseholdBasics({
           updateStapleDetails={updateStapleDetails}
           toggleStapleActive={toggleStapleActive}
           loadStarterStaples={loadStarterStaples}
+          ingredientGroups={ingredientGroups}
+          availableGroups={availableGroups}
+          updateIngredientGroup={updateIngredientGroup}
         />
       ) : (
         <InventoryList
@@ -90,6 +96,9 @@ function HouseholdBasics({
           updateInventoryCategory={updateInventoryCategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
+          ingredientGroups={ingredientGroups}
+          availableGroups={availableGroups}
+          updateIngredientGroup={updateIngredientGroup}
         />
       )}
     </div>

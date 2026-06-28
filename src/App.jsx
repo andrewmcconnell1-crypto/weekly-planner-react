@@ -33,6 +33,7 @@ import { getSunday, getNextSunday, getWeekKey } from "./utils/dateUtils";
 import { createMealHelpers } from "./utils/mealPlanning";
 import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
 import { buildPlannerView } from "./utils/plannerView";
+import { listKnownGroups } from "./utils/ingredientMatch";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { applyBackup } from "./lib/applyBackup";
 
@@ -100,6 +101,8 @@ function App() {
     setRecipes,
     settings,
     setSettings,
+    ingredientGroups,
+    setIngredientGroups,
     loading: dataLoading,
     syncError,
     cloud,
@@ -165,6 +168,7 @@ function App() {
     usingSavedList,
     manualItems: manualShoppingItems,
     checkedMap: shoppingChecked,
+    ingredientGroups,
   });
   const removalIds = new Set(recurringRemovals.map((item) => item.id));
 
@@ -223,12 +227,14 @@ function App() {
     toggleInventoryActive,
     loadStarterInventory,
     resetStockToStarterList,
+    updateIngredientGroup,
   } = useHouseholdActions({
     staples,
     setStaples,
     inventory,
     setInventory,
     shoppingWeekKey,
+    setIngredientGroups,
     captureRecoverySnapshot,
     requestUndo,
   });
@@ -318,6 +324,9 @@ function App() {
     welcomeDismissedFor,
     welcomePreview,
   });
+
+  // Group-name suggestions for the stock / recurring editors' datalist.
+  const availableGroups = listKnownGroups(ingredientGroups);
 
   function goToPreviousMealWeek() {
     const previousWeek = new Date(mealWeekStart);
@@ -632,6 +641,9 @@ function App() {
           updateInventoryCategory={updateInventoryCategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
+          ingredientGroups={ingredientGroups}
+          availableGroups={availableGroups}
+          updateIngredientGroup={updateIngredientGroup}
           newRecipeName={newRecipeName}
           setNewRecipeName={setNewRecipeName}
           addRecipe={addRecipe}

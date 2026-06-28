@@ -45,6 +45,7 @@ export function buildShoppingPlan({
   weekMeals,
   weekKey,
   getMealSummary,
+  ingredientGroups = {},
 }) {
   const recurringBuys = staples
     .filter(
@@ -101,19 +102,23 @@ export function buildShoppingPlan({
   // Fuzzy coverage: a meal ingredient is "already covered" if its core food
   // words match anything you keep in stock or buy recurringly (active staples,
   // regardless of whether they're due this week — you have them either way).
-  const coverageIndex = buildCoverageIndex([
-    ...activeStockItems.map((item) => item.name),
-    ...staples
-      .filter((staple) => staple.active !== false)
-      .map((staple) => staple.name),
-  ]);
+  const coverageIndex = buildCoverageIndex(
+    [
+      ...activeStockItems.map((item) => item.name),
+      ...staples
+        .filter((staple) => staple.active !== false)
+        .map((staple) => staple.name),
+    ],
+    ingredientGroups
+  );
   // Out-of-stock items already go on the list as a "Restock" row, so a meal
   // ingredient that matches one shouldn't be added again (it would appear
   // twice — once as the restock, once as the meal ingredient).
   const restockCoverageIndex = buildCoverageIndex(
     inventory
       .filter((item) => item.active === false)
-      .map((item) => item.name)
+      .map((item) => item.name),
+    ingredientGroups
   );
   // Recurring buys the user has switched off still sit on the standing
   // Woolworths list, so flag them for removal too (only in weeks they'd
@@ -201,7 +206,7 @@ export function buildShoppingPlan({
       // Fuzzy coverage applies to meal ingredients only — restock rows are the
       // stock you're deliberately rebuying, so they must never be suppressed.
       if (item.source === "Meal") {
-        const coveredBy = findCoverage(item.name, coverageIndex);
+        const coveredBy = findCoverage(item.name, coverageIndex, ingredientGroups);
 
         if (coveredBy) {
           summary.skippedAlreadyHave += 1;
@@ -220,7 +225,7 @@ export function buildShoppingPlan({
         }
 
         // Already going on the list as a "Restock" row — don't list it twice.
-        if (findCoverage(item.name, restockCoverageIndex)) {
+        if (findCoverage(item.name, restockCoverageIndex, ingredientGroups)) {
           summary.skippedDuplicates += 1;
           return false;
         }
@@ -272,10 +277,11 @@ export function buildShoppingPlan({
   // "you need to buy this" meaning. Items the generator suppressed (e.g. an
   // "already have" override) have no competing row here, so they're preserved.
   const generatedCoverageIndex = buildCoverageIndex(
-    newItems.map((item) => item.name)
+    newItems.map((item) => item.name),
+    ingredientGroups
   );
   const dedupedRetainedItems = retainedShoppingItems.filter(
-    (item) => !findCoverage(item.name, generatedCoverageIndex)
+    (item) => !findCoverage(item.name, generatedCoverageIndex, ingredientGroups)
   );
   summary.manualItemsKept = dedupedRetainedItems.length;
   summary.duplicateManualDropped =
