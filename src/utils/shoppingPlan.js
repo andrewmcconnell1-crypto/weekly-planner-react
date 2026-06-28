@@ -69,6 +69,8 @@ export function buildShoppingPlan({
       category: item.category || "Household",
       source: "Restock",
       sourceDetail: "Stock",
+      // The stock item this restocks, so ticking it off can mark it in stock.
+      sourceId: item.id,
     }));
 
   const mealIngredients = days.flatMap((day) => {
@@ -247,6 +249,7 @@ export function buildShoppingPlan({
       category: item.category,
       source: item.source || "Generated",
       sourceDetail: item.sourceDetail || "",
+      sourceId: item.sourceId || "",
       day: item.day || "",
       checked:
         existingGeneratedItemsByName.get(normaliseItemName(item.name))

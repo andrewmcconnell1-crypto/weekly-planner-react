@@ -194,6 +194,7 @@ function App() {
     shoppingChecked,
     setShoppingChecked,
     unifiedItems,
+    setInventory,
     removalAcksByWeek,
     setRemovalAcksByWeek,
     currentWeekKey,

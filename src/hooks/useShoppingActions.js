@@ -11,6 +11,7 @@ export function useShoppingActions({
   shoppingChecked,
   setShoppingChecked,
   unifiedItems,
+  setInventory,
   removalAcksByWeek,
   setRemovalAcksByWeek,
   currentWeekKey,
@@ -103,6 +104,30 @@ export function useShoppingActions({
   // Tick an item off. Keyed by item identity so the state survives the list
   // being recomputed when the plan changes.
   function toggleShoppingChecked(id) {
+    const item = unifiedItems.find((entry) => entry.id === id);
+
+    // A "Restock" row is an out-of-stock item you're rebuying. Ticking it means
+    // you've bought it, so put the stock item back in stock — which drops the
+    // row from the list on the next build — rather than just marking it done
+    // (which left it flagged out of stock forever). Clear any stale tick so the
+    // item doesn't come back pre-checked if it later runs out again.
+    if (item?.source === "Restock" && item.sourceId) {
+      setInventory((inventory) =>
+        inventory.map((stockItem) =>
+          stockItem.id === item.sourceId
+            ? { ...stockItem, active: true }
+            : stockItem
+        )
+      );
+      setShoppingChecked((prev) => {
+        if (!prev[id]) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      return;
+    }
+
     setShoppingChecked({
       ...shoppingChecked,
       [id]: !shoppingChecked[id],

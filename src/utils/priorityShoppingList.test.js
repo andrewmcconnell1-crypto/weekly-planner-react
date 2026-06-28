@@ -124,4 +124,29 @@ describe("buildUnifiedShoppingList", () => {
 
     expect(items.find((i) => i.name === "Milk").manualId).toBe("manual-milk");
   });
+
+  it("surfaces an out-of-stock item as a Restock row carrying its stock id", () => {
+    const { items } = buildUnifiedShoppingList({
+      ...base,
+      inventory: [
+        { id: "inv-flour", name: "Flour", category: "Pantry", active: false },
+      ],
+    });
+
+    const restock = items.find((i) => i.source === "Restock");
+    expect(restock.name).toBe("Flour");
+    // The link back to the inventory item, so ticking it can mark it in stock.
+    expect(restock.sourceId).toBe("inv-flour");
+  });
+
+  it("does not surface an in-stock item as a restock", () => {
+    const { items } = buildUnifiedShoppingList({
+      ...base,
+      inventory: [
+        { id: "inv-flour", name: "Flour", category: "Pantry", active: true },
+      ],
+    });
+
+    expect(items.some((i) => i.source === "Restock")).toBe(false);
+  });
 });
