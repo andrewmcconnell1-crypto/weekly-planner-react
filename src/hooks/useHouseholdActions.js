@@ -104,6 +104,39 @@ export function useHouseholdActions({
     setNewInventoryItem("");
   }
 
+  // Activate a catalog item: if it's already in the stock list, mark it in
+  // stock; otherwise add it as a new in-stock item with the catalog's aisle.
+  function activateStockItem(name, category = "Pantry") {
+    const cleanedName = (name || "").trim();
+    if (cleanedName === "") return;
+
+    const normalised = normaliseItemName(cleanedName);
+    const existing = inventory.find(
+      (item) => normaliseItemName(item.name) === normalised
+    );
+
+    if (existing) {
+      setInventory(
+        inventory.map((item) =>
+          item.id === existing.id ? { ...item, active: true } : item
+        )
+      );
+      return;
+    }
+
+    setInventory([
+      ...inventory,
+      {
+        id: createCollectionId("inventory", inventory, cleanedName),
+        name: cleanedName,
+        category: (category || "Pantry").trim() || "Pantry",
+        quantity: null,
+        unit: "",
+        active: true,
+      },
+    ]);
+  }
+
   function deleteInventoryItem(id) {
     const snapshot = inventory;
     const removed = inventory.find((item) => item.id === id);
@@ -216,6 +249,7 @@ export function useHouseholdActions({
     loadStarterStaples,
     resetStaplesToStarterList,
     addInventoryItem,
+    activateStockItem,
     deleteInventoryItem,
     updateInventoryCategory,
     toggleInventoryActive,

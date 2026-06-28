@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const NEW_CATEGORY = "__new__";
@@ -17,7 +17,9 @@ function AddItemRow({
   defaultCategory,
   priorityOptions = null,
   defaultPriority,
+  suggestions = null,
 }) {
+  const suggestionsId = useId();
   const [category, setCategory] = useState(
     defaultCategory || availableCategories[0] || "Other"
   );
@@ -64,6 +66,7 @@ function AddItemRow({
         className="add-panel-name"
         placeholder={placeholder}
         value={value}
+        list={suggestions ? suggestionsId : undefined}
         onChange={(event) => {
           setValue(event.target.value);
           if (status) setStatus(null);
@@ -72,6 +75,14 @@ function AddItemRow({
           if (event.key === "Enter") handleAdd();
         }}
       />
+
+      {suggestions && (
+        <datalist id={suggestionsId}>
+          {suggestions.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
+      )}
 
       {status && <p className="add-panel-status small-text">{status}</p>}
 

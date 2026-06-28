@@ -4680,6 +4680,66 @@ textarea::placeholder {
 
 /* ---- How-shopping-works help sheet ---- */
 
+/* Stock catalog picker */
+.catalog-body {
+  gap: var(--space-12);
+}
+
+.catalog-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.catalog-aisle {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.catalog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-8) 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.catalog-name {
+  font-weight: var(--weight-medium);
+}
+
+.catalog-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: var(--space-4) var(--space-12);
+  border: 1px solid var(--olive);
+  background: var(--olive);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.catalog-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.catalog-status-in {
+  color: var(--olive);
+}
+
+.browse-catalog {
+  width: 100%;
+}
+
 .help-body {
   display: grid;
   gap: var(--space-12);

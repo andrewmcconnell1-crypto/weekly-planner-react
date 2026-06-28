@@ -5,21 +5,22 @@ import { renderHook, act } from "@testing-library/react";
 import { useHouseholdActions } from "./useHouseholdActions";
 import { canonicalKey } from "../utils/ingredientMatch";
 
-function setup() {
+function setup({ inventory = [] } = {}) {
   const setIngredientGroups = vi.fn();
+  const setInventory = vi.fn();
   const { result } = renderHook(() =>
     useHouseholdActions({
       staples: [],
       setStaples: vi.fn(),
-      inventory: [],
-      setInventory: vi.fn(),
+      inventory,
+      setInventory,
       shoppingWeekKey: "wk",
       setIngredientGroups,
       captureRecoverySnapshot: vi.fn(),
       requestUndo: vi.fn(),
     })
   );
-  return { result, setIngredientGroups };
+  return { result, setIngredientGroups, setInventory };
 }
 
 // Apply the functional updater the hook passes to setIngredientGroups.
@@ -57,5 +58,47 @@ describe("useHouseholdActions — updateIngredientGroup", () => {
     act(() => result.current.updateIngredientGroup("Rice", "rice"));
 
     expect(applyUpdater(setIngredientGroups, { [key]: "rice" })).toEqual({});
+  });
+});
+
+describe("useHouseholdActions — activateStockItem", () => {
+  it("adds a new in-stock item with the catalog aisle", () => {
+    const { result, setInventory } = setup({ inventory: [] });
+
+    act(() => result.current.activateStockItem("Basmati Rice", "Pantry"));
+
+    expect(setInventory).toHaveBeenCalledTimes(1);
+    const added = setInventory.mock.calls[0][0];
+    expect(added).toHaveLength(1);
+    expect(added[0]).toMatchObject({
+      name: "Basmati Rice",
+      category: "Pantry",
+      active: true,
+    });
+  });
+
+  it("re-activates an existing out-of-stock item instead of duplicating", () => {
+    const { result, setInventory } = setup({
+      inventory: [{ id: "i1", name: "Milk", category: "Dairy", active: false }],
+    });
+
+    act(() => result.current.activateStockItem("milk", "Dairy"));
+
+    expect(setInventory).toHaveBeenCalledWith([
+      { id: "i1", name: "Milk", category: "Dairy", active: true },
+    ]);
+  });
+
+  it("leaves an already in-stock item as a no-op re-activation", () => {
+    const { result, setInventory } = setup({
+      inventory: [{ id: "i1", name: "Milk", category: "Dairy", active: true }],
+    });
+
+    act(() => result.current.activateStockItem("Milk", "Dairy"));
+
+    // Maps to the same in-stock item (no duplicate row).
+    expect(setInventory).toHaveBeenCalledWith([
+      { id: "i1", name: "Milk", category: "Dairy", active: true },
+    ]);
   });
 });
