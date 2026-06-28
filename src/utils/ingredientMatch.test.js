@@ -12,17 +12,15 @@ function covered(ingredient, have) {
 }
 
 describe("ingredientMatch — exact core-token coverage", () => {
-  it("does NOT treat a generic ingredient as covered by a specific product", () => {
-    // The reported bug: coconut milk in stock should not cover plain milk.
+  it("does NOT treat a generic as covered by a different-food look-alike", () => {
+    // The reported bug: these merely share a word, so they're never grouped and
+    // must not cover each other (unlike true varieties — see the group tests).
     expect(covered("milk", ["Coconut milk"])).toBe(false);
-    expect(covered("rice", ["Basmati rice"])).toBe(false);
-    expect(covered("stock", ["Fish stock"])).toBe(false);
     expect(covered("cream", ["Coconut cream"])).toBe(false);
   });
 
-  it("does NOT treat a specific ingredient as covered by a generic product", () => {
+  it("does NOT treat a specific as covered by a different-food look-alike", () => {
     expect(covered("coconut milk", ["Milk"])).toBe(false);
-    expect(covered("basmati rice", ["Rice"])).toBe(false);
   });
 
   it("matches when the only difference is stripped qualifiers / units / quantity", () => {
@@ -57,5 +55,38 @@ describe("ingredientMatch — exact core-token coverage", () => {
   it("never matches on empty / non-food input", () => {
     expect(covered("", ["Milk"])).toBe(false);
     expect(covered("2 cups", ["Milk"])).toBe(false);
+  });
+});
+
+describe("ingredientMatch — group hierarchy", () => {
+  it("covers a generic recipe ingredient from any variety in stock", () => {
+    expect(covered("2 cups rice", ["Basmati rice"])).toBe(true);
+    expect(covered("rice", ["Sushi rice"])).toBe(true);
+    expect(covered("300 g pasta", ["Spaghetti"])).toBe(true);
+    expect(covered("chicken stock", ["Stock cubes"])).toBe(true);
+  });
+
+  it("covers a specific recipe ingredient from the generic in stock", () => {
+    expect(covered("2 cups basmati rice", ["Rice"])).toBe(true);
+    expect(covered("400 g spaghetti", ["Pasta"])).toBe(true);
+  });
+
+  it("does NOT let two varieties in the same group cover each other", () => {
+    expect(covered("basmati rice", ["Sushi rice"])).toBe(false);
+    expect(covered("penne", ["Spaghetti"])).toBe(false);
+    expect(covered("beef stock", ["Chicken stock"])).toBe(false);
+  });
+
+  it("keeps deliberately-ungrouped look-alikes apart", () => {
+    // The whole reason for this work — and oils, which are separate items.
+    expect(covered("milk", ["Coconut milk"])).toBe(false);
+    expect(covered("olive oil", ["Vegetable oil"])).toBe(false);
+  });
+
+  it("treats broth as stock and reports the covering stock item", () => {
+    expect(covered("2 cups chicken broth", ["Stock cubes"])).toBe(true);
+
+    const index = buildCoverageIndex(["Rice"]);
+    expect(findCoverage("1 cup jasmine rice", index)).toBe("Rice");
   });
 });
