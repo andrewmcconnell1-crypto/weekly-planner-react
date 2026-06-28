@@ -104,9 +104,10 @@ export function useHouseholdActions({
     setNewInventoryItem("");
   }
 
-  // Activate a catalog item: if it's already in the stock list, mark it in
-  // stock; otherwise add it as a new in-stock item with the catalog's aisle.
-  function activateStockItem(name, category = "Pantry") {
+  // Activate a catalog item, either in stock or out of stock (out → it lands on
+  // the shopping list as a restock). If it's already in the stock list, just
+  // set its in/out state; otherwise add it as a new item with the catalog aisle.
+  function activateStockItem(name, category = "Pantry", inStock = true) {
     const cleanedName = (name || "").trim();
     if (cleanedName === "") return;
 
@@ -118,7 +119,7 @@ export function useHouseholdActions({
     if (existing) {
       setInventory(
         inventory.map((item) =>
-          item.id === existing.id ? { ...item, active: true } : item
+          item.id === existing.id ? { ...item, active: inStock } : item
         )
       );
       return;
@@ -132,7 +133,7 @@ export function useHouseholdActions({
         category: (category || "Pantry").trim() || "Pantry",
         quantity: null,
         unit: "",
-        active: true,
+        active: inStock,
       },
     ]);
   }

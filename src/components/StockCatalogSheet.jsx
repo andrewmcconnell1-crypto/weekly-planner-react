@@ -69,7 +69,7 @@ function StockCatalogSheet({ inventory = [], onActivate, onClose }) {
         <div className="sheet-header">
           <div className="sheet-title">
             <strong>Common items</strong>
-            <span>Tap to add the ones you keep</span>
+            <span>Add the ones you keep — in or out of stock</span>
           </div>
 
           <button
@@ -107,14 +107,30 @@ function StockCatalogSheet({ inventory = [], onActivate, onClose }) {
                         <span className="catalog-name">{item.name}</span>
 
                         {status === "off" ? (
-                          <button
-                            type="button"
-                            className="catalog-add"
-                            onClick={() => onActivate(item.name, item.category)}
-                          >
-                            <Plus size={15} aria-hidden="true" />
-                            Add
-                          </button>
+                          <span className="catalog-actions">
+                            <button
+                              type="button"
+                              className="catalog-add"
+                              aria-label={`Add ${item.name} as in stock`}
+                              onClick={() =>
+                                onActivate(item.name, item.category, true)
+                              }
+                            >
+                              <Plus size={15} aria-hidden="true" />
+                              In stock
+                            </button>
+
+                            <button
+                              type="button"
+                              className="catalog-add-out"
+                              aria-label={`Add ${item.name} as out of stock`}
+                              onClick={() =>
+                                onActivate(item.name, item.category, false)
+                              }
+                            >
+                              Out
+                            </button>
+                          </span>
                         ) : (
                           <span
                             className={`catalog-status catalog-status-${status}`}
