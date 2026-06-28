@@ -9,6 +9,7 @@ import {
   recipeTags,
 } from "../utils/recipeUtils";
 import { useDialogFocus } from "../hooks/useDialogFocus";
+import { groupLabelFor } from "../utils/ingredientMatch";
 
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
@@ -19,15 +20,30 @@ function RecipeEditorSheet({
   addIngredientToRecipe,
   deleteIngredientFromRecipe,
   deleteRecipe,
+  ingredientGroups = {},
+  availableGroups = [],
+  updateIngredientGroup,
   onClose,
 }) {
   const [newIngredient, setNewIngredient] = useState("");
   const [mode, setMode] = useState("view");
   const [closing, setClosing] = useState(false);
+  const [groupDrafts, setGroupDrafts] = useState({});
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
 
   useDialogFocus(dialogRef);
+
+  // The group an ingredient counts as for matching: the in-progress edit if any,
+  // else its current resolved group (override or seed). Keyed by the ingredient
+  // text so it survives row reordering.
+  function groupValueFor(ingredient) {
+    return groupDrafts[ingredient] ?? groupLabelFor(ingredient, ingredientGroups);
+  }
+
+  function commitGroup(ingredient) {
+    updateIngredientGroup?.(ingredient, groupValueFor(ingredient));
+  }
 
   // Play the sheet's exit animation, then unmount.
   function requestClose() {
@@ -326,25 +342,66 @@ function RecipeEditorSheet({
                 {recipe.ingredients.length > 0 ? (
                   <ul className="ingredient-list">
                     {recipe.ingredients.map((ingredient, index) => (
-                      <li className="ingredient-row" key={index}>
-                        <span>{ingredient}</span>
+                      <li className="ingredient-row ingredient-row-editing" key={index}>
+                        <div className="ingredient-row-line">
+                          <span>{ingredient}</span>
 
-                        <button
-                          type="button"
-                          className="ingredient-delete"
-                          aria-label={`Remove ${ingredient}`}
-                          onClick={() =>
-                            deleteIngredientFromRecipe(recipe.id, index)
-                          }
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
+                          <button
+                            type="button"
+                            className="ingredient-delete"
+                            aria-label={`Remove ${ingredient}`}
+                            onClick={() =>
+                              deleteIngredientFromRecipe(recipe.id, index)
+                            }
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </button>
+                        </div>
+
+                        {updateIngredientGroup && (
+                          <label className="ingredient-group">
+                            <span className="ingredient-group-label">
+                              Counts as
+                            </span>
+                            <input
+                              type="text"
+                              list="recipe-group-options"
+                              className="ingredient-group-input"
+                              placeholder="(itself)"
+                              aria-label={`Group for ${ingredient}`}
+                              value={groupValueFor(ingredient)}
+                              onChange={(event) =>
+                                setGroupDrafts((drafts) => ({
+                                  ...drafts,
+                                  [ingredient]: event.target.value,
+                                }))
+                              }
+                              onBlur={() => commitGroup(ingredient)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter")
+                                  event.currentTarget.blur();
+                              }}
+                            />
+                          </label>
+                        )}
                       </li>
                     ))}
                   </ul>
                 ) : (
                   <p className="empty-state">No ingredients yet.</p>
                 )}
+
+                <datalist id="recipe-group-options">
+                  {availableGroups.map((group) => (
+                    <option key={group} value={group} />
+                  ))}
+                </datalist>
+
+                <p className="small-text ingredient-group-hint">
+                  “Counts as” groups an ingredient with what you stock — e.g. set
+                  “jasmine rice” to count as “rice”, so rice in your pantry covers
+                  it.
+                </p>
               </div>
 
               <label className="recipe-method-field">

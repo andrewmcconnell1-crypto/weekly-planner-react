@@ -178,6 +178,9 @@ export default function MoreScreen({
                 addIngredientToRecipe={addIngredientToRecipe}
                 deleteIngredientFromRecipe={deleteIngredientFromRecipe}
                 updateRecipe={updateRecipe}
+                ingredientGroups={ingredientGroups}
+                availableGroups={availableGroups}
+                updateIngredientGroup={updateIngredientGroup}
               />
             </Suspense>
             </ErrorBoundary>
