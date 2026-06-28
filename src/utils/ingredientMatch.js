@@ -1,13 +1,19 @@
-// Smart-ish matching so a recipe ingredient already covered by stock or a
-// recurring buy isn't re-added to the shopping list.
+// Matching so a recipe ingredient already covered by stock or a recurring buy
+// isn't re-added to the shopping list.
 //
 // Recipe ingredients ("2 cups basmati rice", "1 onion, finely chopped") and
 // pantry/recurring names ("Rice", "Onion Brown", "Woolworths ... Rice 450g")
-// almost never match exactly. So we reduce each side to its core food words —
-// dropping quantities, units, prep notes, brand/size and common qualifiers —
-// then treat them as a match when the shorter set of core words is fully
-// contained in the other. This is deliberately generous: a generic ingredient
-// ("rice") matches a specific pantry item ("Basmati Rice") and vice versa.
+// almost never match character-for-character. So we reduce each side to its
+// core food words — dropping quantities, units, prep notes, brand/size and
+// common qualifiers — and canonicalise a few regional synonyms, then treat two
+// names as a match only when those core-word sets are *equal*.
+//
+// This is deliberately strict (equal sets, not subset): a generic "milk" must
+// NOT be considered covered by "coconut milk", and "rice" is not "basmati
+// rice". The trade-off is that a genuine generic↔specific pair only matches
+// when the difference is a stripped qualifier ("brown onion" == "onion",
+// "extra virgin olive oil" == "olive oil") or a listed synonym — a true variety
+// word (coconut, basmati) keeps them apart, which is the intended behaviour.
 
 const UNIT_WORDS = new Set([
   "cup", "cups", "tablespoon", "tablespoons", "tbsp", "tbs", "teaspoon",
@@ -47,6 +53,45 @@ const BRAND_WORDS = new Set([
   "carmans", "carman",
 ]);
 
+// Regional / common synonyms, collapsed to one canonical phrase so equivalent
+// names share core tokens. Applied as whole-word phrase replacements (with an
+// optional trailing "s") before tokenising, so multi-word variants work. Easy
+// to extend — order doesn't matter as the canonical forms don't overlap.
+const SYNONYM_RULES = [
+  ["cilantro", "coriander"],
+  ["scallion", "spring onion"],
+  ["green onion", "spring onion"],
+  ["spring onions", "spring onion"],
+  ["garbanzo bean", "chickpea"],
+  ["garbanzo", "chickpea"],
+  ["aubergine", "eggplant"],
+  ["courgette", "zucchini"],
+  ["arugula", "rocket"],
+  ["shrimp", "prawn"],
+  ["mangetout", "snow pea"],
+  ["bell pepper", "capsicum"],
+  ["all purpose flour", "plain flour"],
+  ["all-purpose flour", "plain flour"],
+  ["powdered sugar", "icing sugar"],
+  ["confectioners sugar", "icing sugar"],
+  ["confectioner sugar", "icing sugar"],
+  ["baking soda", "bicarbonate soda"],
+  ["bicarbonate of soda", "bicarbonate soda"],
+  ["ground beef", "beef mince"],
+  ["minced beef", "beef mince"],
+].map(([from, to]) => [
+  new RegExp(`\\b${from.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}s?\\b`, "g"),
+  to,
+]);
+
+function applySynonyms(text) {
+  let result = text;
+  for (const [pattern, canonical] of SYNONYM_RULES) {
+    result = result.replace(pattern, canonical);
+  }
+  return result;
+}
+
 function singularize(word) {
   if (word.length <= 3) return word;
   if (word.endsWith("ies")) return `${word.slice(0, -3)}y`;
@@ -62,6 +107,8 @@ export function extractCoreTokens(rawName) {
   text = text.replace(/\([^)]*\)/g, " "); // drop parentheticals
   text = text.split(",")[0]; // drop prep notes after the first comma
   text = text.replace(/[^a-z0-9\s]/g, " "); // strip punctuation incl. fractions
+  text = text.replace(/\s+/g, " ").trim();
+  text = applySynonyms(text);
 
   const tokens = new Set();
 
@@ -82,14 +129,15 @@ export function extractCoreTokens(rawName) {
   return tokens;
 }
 
-// Covered when the smaller core-word set is fully contained in the larger.
-function coversTokens(a, b) {
+// A match only when the two core-word sets are identical — so "coconut milk"
+// never covers "milk", but "brown onion" still covers "onion" (the difference
+// is a stripped qualifier).
+function tokensEqual(a, b) {
   if (a.size === 0 || b.size === 0) return false;
+  if (a.size !== b.size) return false;
 
-  const [smaller, larger] = a.size <= b.size ? [a, b] : [b, a];
-
-  for (const token of smaller) {
-    if (!larger.has(token)) return false;
+  for (const token of a) {
+    if (!b.has(token)) return false;
   }
 
   return true;
@@ -110,7 +158,7 @@ export function findCoverage(ingredientName, coverageIndex) {
   if (ingredientTokens.size === 0) return null;
 
   const match = coverageIndex.find((entry) =>
-    coversTokens(ingredientTokens, entry.tokens)
+    tokensEqual(ingredientTokens, entry.tokens)
   );
 
   return match ? match.name : null;
