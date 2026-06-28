@@ -292,7 +292,6 @@ function App() {
     planGapsLabel,
     expandedMeal,
     expandedDaySummary,
-    expandedNextDay,
     expandedDayLabel,
     expandedLeftoverNights,
     expandedMaxNights,
@@ -586,7 +585,6 @@ function App() {
           planningDaySummaries={planningDaySummaries}
           expandedLeftoverNights={expandedLeftoverNights}
           expandedMaxNights={expandedMaxNights}
-          expandedNextDay={expandedNextDay}
           setLeftoverNights={setLeftoverNights}
           clearMealDay={clearMealDay}
           updateMeal={updateMeal}

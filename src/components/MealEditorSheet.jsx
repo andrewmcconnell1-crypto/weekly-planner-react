@@ -85,7 +85,6 @@ function MealEditorSheet({
   updateMeal,
   onClose,
   onFindMeals,
-  onNextDay,
 }) {
   const manualIngredients = Array.isArray(meal.ingredients)
     ? meal.ingredients
@@ -125,6 +124,10 @@ function MealEditorSheet({
   const nameInputRef = useRef(null);
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
+  // The day's meal exactly as it was when this sheet opened, captured once on
+  // mount (the sheet is keyed by day, so it remounts per day). "Undo changes"
+  // writes this back to discard everything edited in this session.
+  const initialMealRef = useRef(meal);
 
   useDialogFocus(dialogRef);
 
@@ -320,11 +323,14 @@ function MealEditorSheet({
   }
 
   function finishDay() {
-    if (onNextDay) {
-      onNextDay();
-    } else {
-      requestClose();
-    }
+    requestClose();
+  }
+
+  // Discard this session's edits: restore the day's meal to its opening
+  // snapshot, then close.
+  function undoChanges() {
+    updateMeal(day, initialMealRef.current);
+    requestClose();
   }
 
   function renderExtraIngredients(placeholder) {
@@ -756,15 +762,17 @@ function MealEditorSheet({
         </div>
 
         <div className="sheet-footer">
-          <button type="button" className="secondary" onClick={requestClose}>
-            Save
+          <button type="button" className="secondary" onClick={undoChanges}>
+            Undo changes
           </button>
 
-          {onNextDay && (
-            <button type="button" className="primary-button" onClick={onNextDay}>
-              Next day
-            </button>
-          )}
+          <button
+            type="button"
+            className="primary-button"
+            onClick={requestClose}
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>

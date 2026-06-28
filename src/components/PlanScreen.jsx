@@ -33,7 +33,6 @@ export default function PlanScreen({
   planningDaySummaries,
   expandedLeftoverNights,
   expandedMaxNights,
-  expandedNextDay,
   setLeftoverNights,
   clearMealDay,
   updateMeal,
@@ -118,11 +117,6 @@ export default function PlanScreen({
               setDiscoverDay(day);
               setDiscoverOpen(true);
             }}
-            onNextDay={
-              expandedNextDay
-                ? () => setExpandedMealDay(expandedNextDay)
-                : undefined
-            }
             />
           </Suspense>
         </ErrorBoundary>
