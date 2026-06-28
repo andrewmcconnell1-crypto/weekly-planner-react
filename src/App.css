@@ -4691,11 +4691,6 @@ textarea::placeholder {
   z-index: 1;
 }
 
-.catalog-aisle {
-  display: grid;
-  gap: var(--space-6);
-}
-
 .catalog-row {
   display: flex;
   align-items: center;

@@ -47,6 +47,18 @@ describe("StockCatalogSheet", () => {
     expect(within(row).getByText(/In stock/i)).toBeTruthy();
   });
 
+  it("collapses aisles by default and toggles one open", () => {
+    render(
+      <StockCatalogSheet inventory={[]} onActivate={vi.fn()} onClose={() => {}} />
+    );
+
+    const pantryToggle = screen.getByRole("button", { name: /Pantry/ });
+    expect(pantryToggle.getAttribute("aria-expanded")).toBe("false");
+
+    fireEvent.click(pantryToggle);
+    expect(pantryToggle.getAttribute("aria-expanded")).toBe("true");
+  });
+
   it("filters the list by the search text", () => {
     render(
       <StockCatalogSheet inventory={[]} onActivate={vi.fn()} onClose={() => {}} />

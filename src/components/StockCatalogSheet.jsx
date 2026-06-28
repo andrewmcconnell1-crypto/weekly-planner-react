@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Plus, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 
 import { ingredientCatalog } from "../data/ingredientCatalog";
 import { catalogItemStatus, groupCatalogByAisle } from "../utils/catalogUtils";
@@ -13,10 +13,59 @@ import { useDialogFocus } from "../hooks/useDialogFocus";
 function StockCatalogSheet({ inventory = [], onActivate, onClose }) {
   const [closing, setClosing] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [openAisles, setOpenAisles] = useState({});
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
 
   useDialogFocus(dialogRef);
+
+  function toggleAisle(aisle) {
+    setOpenAisles((open) => ({ ...open, [aisle]: !open[aisle] }));
+  }
+
+  function renderItem(item) {
+    const status = catalogItemStatus(item.name, inventory);
+
+    return (
+      <li key={item.name} className="catalog-row">
+        <span className="catalog-name">{item.name}</span>
+
+        {status === "off" ? (
+          <span className="catalog-actions">
+            <button
+              type="button"
+              className="catalog-add"
+              aria-label={`Add ${item.name} as in stock`}
+              onClick={() => onActivate(item.name, item.category, true)}
+            >
+              <Plus size={15} aria-hidden="true" />
+              In stock
+            </button>
+
+            <button
+              type="button"
+              className="catalog-add-out"
+              aria-label={`Add ${item.name} as out of stock`}
+              onClick={() => onActivate(item.name, item.category, false)}
+            >
+              Out
+            </button>
+          </span>
+        ) : (
+          <span className={`catalog-status catalog-status-${status}`}>
+            {status === "in" ? (
+              <>
+                <Check size={14} aria-hidden="true" />
+                In stock
+              </>
+            ) : (
+              "Out — on your list"
+            )}
+          </span>
+        )}
+      </li>
+    );
+  }
 
   function requestClose() {
     if (closeTimerRef.current) return;
@@ -94,63 +143,44 @@ function StockCatalogSheet({ inventory = [], onActivate, onClose }) {
           {groups.length === 0 ? (
             <p className="empty-state">No matching items.</p>
           ) : (
-            groups.map((group) => (
-              <div className="catalog-aisle" key={group.aisle}>
-                <p className="section-kicker">{group.aisle}</p>
+            groups.map((group) => {
+              // Searching forces every matching aisle open so results are
+              // visible; otherwise each aisle remembers its own state.
+              const isOpen = searchText ? true : openAisles[group.aisle] ?? false;
 
-                <ul className="clean-list">
-                  {group.items.map((item) => {
-                    const status = catalogItemStatus(item.name, inventory);
+              return (
+                <div className="shopping-group" key={group.aisle}>
+                  <button
+                    type="button"
+                    className="category-toggle"
+                    aria-expanded={isOpen}
+                    onClick={() => toggleAisle(group.aisle)}
+                  >
+                    <span>{group.aisle}</span>
+                    <span className="category-toggle-meta">
+                      {group.items.length} item
+                      {group.items.length === 1 ? "" : "s"}
+                      {isOpen ? (
+                        <ChevronUp size={16} aria-hidden="true" />
+                      ) : (
+                        <ChevronDown size={16} aria-hidden="true" />
+                      )}
+                    </span>
+                  </button>
 
-                    return (
-                      <li key={item.name} className="catalog-row">
-                        <span className="catalog-name">{item.name}</span>
-
-                        {status === "off" ? (
-                          <span className="catalog-actions">
-                            <button
-                              type="button"
-                              className="catalog-add"
-                              aria-label={`Add ${item.name} as in stock`}
-                              onClick={() =>
-                                onActivate(item.name, item.category, true)
-                              }
-                            >
-                              <Plus size={15} aria-hidden="true" />
-                              In stock
-                            </button>
-
-                            <button
-                              type="button"
-                              className="catalog-add-out"
-                              aria-label={`Add ${item.name} as out of stock`}
-                              onClick={() =>
-                                onActivate(item.name, item.category, false)
-                              }
-                            >
-                              Out
-                            </button>
-                          </span>
-                        ) : (
-                          <span
-                            className={`catalog-status catalog-status-${status}`}
-                          >
-                            {status === "in" ? (
-                              <>
-                                <Check size={14} aria-hidden="true" />
-                                In stock
-                              </>
-                            ) : (
-                              "Out — on your list"
-                            )}
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))
+                  <div className={`collapsible ${isOpen ? "open" : ""}`}>
+                    <div
+                      className="collapsible-inner"
+                      inert={!isOpen ? true : undefined}
+                    >
+                      <ul className="clean-list">
+                        {group.items.map(renderItem)}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
       </div>
