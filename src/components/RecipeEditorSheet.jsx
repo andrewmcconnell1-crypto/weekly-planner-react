@@ -422,7 +422,7 @@ function RecipeEditorSheet({
           {mode === "view" ? (
             <>
               <button type="button" className="secondary" onClick={requestClose}>
-                Done
+                Close
               </button>
 
               <button
@@ -438,19 +438,19 @@ function RecipeEditorSheet({
             <>
               <button
                 type="button"
-                className="secondary"
-                onClick={() => setMode("view")}
-              >
-                Done editing
-              </button>
-
-              <button
-                type="button"
                 className="recipe-delete-button with-icon"
                 onClick={handleDelete}
               >
                 <Trash2 size={16} aria-hidden="true" />
                 Delete recipe
+              </button>
+
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => setMode("view")}
+              >
+                Save
               </button>
             </>
           )}

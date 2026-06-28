@@ -60,7 +60,40 @@ function StaplesList({
   const [openCategories, setOpenCategories] = useState({});
   const [openSubcategories, setOpenSubcategories] = useState({});
   const [expandedStapleId, setExpandedStapleId] = useState(null);
-  const [groupDraft, setGroupDraft] = useState("");
+  // Edits to the expanded row are buffered here and only applied on Save, so
+  // Cancel can discard them.
+  const [draft, setDraft] = useState(null);
+
+  function openEditor(staple) {
+    setExpandedStapleId(staple.id);
+    setDraft({
+      quantity: staple.quantity ?? "",
+      unit: staple.unit || "",
+      frequency: staple.frequency,
+      category: staple.category || "Other",
+      group: groupLabelFor(staple.name, ingredientGroups),
+    });
+  }
+
+  function closeEditor() {
+    setExpandedStapleId(null);
+    setDraft(null);
+  }
+
+  function saveEditor(staple) {
+    updateStapleDetails(staple.id, {
+      quantity: draft.quantity === "" ? null : Number(draft.quantity),
+      unit: draft.unit,
+    });
+    if (draft.frequency !== staple.frequency) {
+      updateStapleFrequency(staple.id, draft.frequency);
+    }
+    if (draft.category !== (staple.category || "Other")) {
+      updateStapleCategory(staple.id, draft.category);
+    }
+    updateIngredientGroup?.(staple.name, draft.group);
+    closeEditor();
+  }
 
   const filteredStaples = staples.filter((staple) =>
     normaliseItemName(staple.name).includes(normaliseItemName(searchText))
@@ -121,11 +154,8 @@ function StaplesList({
             aria-expanded={isExpanded}
             aria-label={`Edit ${staple.name}`}
             onClick={() => {
-              const opening = !isExpanded;
-              setExpandedStapleId(opening ? staple.id : null);
-              if (opening) {
-                setGroupDraft(groupLabelFor(staple.name, ingredientGroups));
-              }
+              if (isExpanded) closeEditor();
+              else openEditor(staple);
             }}
           >
             {isExpanded ? (
@@ -136,7 +166,7 @@ function StaplesList({
           </button>
         </div>
 
-        {isExpanded && (
+        {isExpanded && draft && (
           <div className="basics-editor">
             <div className="staple-quantity-row">
               <input
@@ -146,14 +176,12 @@ function StaplesList({
                 inputMode="decimal"
                 placeholder="Qty"
                 aria-label={`${staple.name} quantity`}
-                value={staple.quantity ?? ""}
+                value={draft.quantity}
                 onChange={(event) =>
-                  updateStapleDetails(staple.id, {
-                    quantity:
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                  })
+                  setDraft((current) => ({
+                    ...current,
+                    quantity: event.target.value,
+                  }))
                 }
               />
 
@@ -161,20 +189,24 @@ function StaplesList({
                 type="text"
                 placeholder="unit (e.g. pack)"
                 aria-label={`${staple.name} unit`}
-                value={staple.unit || ""}
+                value={draft.unit}
                 onChange={(event) =>
-                  updateStapleDetails(staple.id, {
+                  setDraft((current) => ({
+                    ...current,
                     unit: event.target.value,
-                  })
+                  }))
                 }
               />
             </div>
 
             <div className="staple-controls">
               <select
-                value={staple.frequency}
+                value={draft.frequency}
                 onChange={(event) =>
-                  updateStapleFrequency(staple.id, event.target.value)
+                  setDraft((current) => ({
+                    ...current,
+                    frequency: event.target.value,
+                  }))
                 }
               >
                 <option value="weekly">Weekly</option>
@@ -184,9 +216,12 @@ function StaplesList({
               </select>
 
               <select
-                value={staple.category || "Other"}
+                value={draft.category}
                 onChange={(event) =>
-                  updateStapleCategory(staple.id, event.target.value)
+                  setDraft((current) => ({
+                    ...current,
+                    category: event.target.value,
+                  }))
                 }
               >
                 {availableCategories.map((category) => (
@@ -206,11 +241,15 @@ function StaplesList({
                   className="basics-group-input"
                   placeholder="e.g. rice"
                   aria-label={`${staple.name} group`}
-                  value={groupDraft}
-                  onChange={(event) => setGroupDraft(event.target.value)}
-                  onBlur={() => updateIngredientGroup(staple.name, groupDraft)}
+                  value={draft.group}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      group: event.target.value,
+                    }))
+                  }
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") event.currentTarget.blur();
+                    if (event.key === "Enter") saveEditor(staple);
                   }}
                 />
                 <span className="basics-group-hint small-text">
@@ -229,6 +268,23 @@ function StaplesList({
               <Trash2 size={15} aria-hidden="true" />
               Delete
             </button>
+
+            <div className="basics-editor-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={closeEditor}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => saveEditor(staple)}
+              >
+                Save
+              </button>
+            </div>
           </div>
         )}
           </div>

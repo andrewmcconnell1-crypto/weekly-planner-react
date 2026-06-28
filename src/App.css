@@ -3078,6 +3078,19 @@ textarea::placeholder {
   color: #ffffff;
 }
 
+/* Explicit Save / Cancel so row edits (incl. the group) commit on a tap rather
+   than silently on blur. Sits below Delete, separated by the editor's divider. */
+.basics-editor-actions {
+  display: flex;
+  gap: var(--space-8);
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-10);
+}
+
+.basics-editor-actions button {
+  flex: 1;
+}
+
 .staple-controls {
   display: grid;
   gap: var(--space-8);

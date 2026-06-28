@@ -648,7 +648,7 @@ function MealEditorSheet({
         )}
 
         <p className="meal-away-hint">
-          {label} needs nothing else — you&apos;re all set. Tap Done, or change
+          {label} needs nothing else — you&apos;re all set. Tap Save, or change
           the type above.
         </p>
       </>
@@ -757,7 +757,7 @@ function MealEditorSheet({
 
         <div className="sheet-footer">
           <button type="button" className="secondary" onClick={requestClose}>
-            Done
+            Save
           </button>
 
           {onNextDay && (
