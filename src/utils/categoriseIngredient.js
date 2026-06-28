@@ -2,7 +2,7 @@
 // matcher's tokenizer (ingredientMatch) this keeps words like "cream" or
 // "white" — they're qualifiers when matching products, but real food words when
 // deciding an aisle.
-function singularise(word) {
+export function singularise(word) {
   if (word.length <= 3) return word;
   if (word.endsWith("ies")) return `${word.slice(0, -3)}y`;
   if (word.endsWith("oes")) return word.slice(0, -2);
@@ -115,6 +115,13 @@ const CATEGORY_KEYWORDS = [
 // "milk" would otherwise match Dairy first.
 const PLANT_MILK_TOKENS = ["coconut", "almond", "soy", "oat", "cashew"];
 
+// Pre-singularise the keyword sets so they match the tokenizer's singular output
+// (e.g. "couscous" -> "couscou"), letting the lists above stay readable.
+const CATEGORY_KEYWORD_SETS = CATEGORY_KEYWORDS.map(([category, keywords]) => [
+  category,
+  new Set(keywords.map(singularise)),
+]);
+
 export function categoriseIngredient(name) {
   const tokens = tokenise(name);
   if (tokens.size === 0) return "Other";
@@ -126,9 +133,9 @@ export function categoriseIngredient(name) {
     return "Pantry";
   }
 
-  for (const [category, keywords] of CATEGORY_KEYWORDS) {
+  for (const [category, keywords] of CATEGORY_KEYWORD_SETS) {
     for (const token of tokens) {
-      if (keywords.includes(token)) return category;
+      if (keywords.has(token)) return category;
     }
   }
 
