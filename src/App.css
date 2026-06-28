@@ -1284,6 +1284,35 @@ textarea:focus-visible {
   padding-top: var(--space-8);
 }
 
+/* Pin each category header while its section is on screen, so on a long open
+   category you always see which one you're in and can tap it to collapse
+   without scrolling back to the top. Scoped to these lists (not the catalog
+   sheet, which reuses .category-toggle in its own scroll container). The opaque
+   page-coloured background masks rows passing behind; the existing bottom border
+   doubles as the pinned separator. */
+.inventory-panel .category-toggle,
+.staples-panel .category-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+}
+
+.inventory-panel .category-toggle[aria-expanded="true"],
+.inventory-panel .category-toggle:hover,
+.inventory-panel .category-toggle:focus-visible,
+.staples-panel .category-toggle[aria-expanded="true"],
+.staples-panel .category-toggle:hover,
+.staples-panel .category-toggle:focus-visible {
+  background: var(--bg);
+}
+
+/* A press-scale on a pinned header reads as a jump — keep it steady. */
+.inventory-panel .category-toggle:active:not(:disabled),
+.staples-panel .category-toggle:active:not(:disabled) {
+  transform: none;
+}
+
 /* Slim, flat Stock / Recurring item rows: a single grouped card with hairline
    dividers (like the Shop list) instead of a stack of separate shadowed pills. */
 .inventory-panel .clean-list,
