@@ -1284,6 +1284,36 @@ textarea:focus-visible {
   padding-top: var(--space-8);
 }
 
+/* Slim, flat Stock / Recurring item rows: a single grouped card with hairline
+   dividers (like the Shop list) instead of a stack of separate shadowed pills. */
+.inventory-panel .clean-list,
+.staples-panel .clean-list {
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  box-shadow: var(--elev-1);
+  overflow: hidden;
+}
+
+.inventory-panel .clean-list > li + li,
+.staples-panel .clean-list > li + li {
+  border-top: 1px solid var(--line);
+}
+
+.inventory-panel .swipe-row,
+.staples-panel .swipe-row {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.inventory-panel .swipe-row .card,
+.staples-panel .swipe-row .card {
+  border: none;
+  border-radius: 0;
+  padding: var(--space-10) var(--space-12);
+}
+
 .card {
   padding: var(--space-14);
 }
@@ -1997,7 +2027,7 @@ textarea::placeholder {
 }
 
 .shopping-rows > .shopping-row {
-  padding: var(--space-12) var(--space-14);
+  padding: var(--space-10) var(--space-12);
 }
 
 .shopping-rows > .shopping-row + .shopping-row {
