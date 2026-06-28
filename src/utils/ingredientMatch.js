@@ -1,3 +1,5 @@
+import { INGREDIENT_GROUPS } from "../data/ingredientGroups";
+
 // Matching so a recipe ingredient already covered by stock or a recurring buy
 // isn't re-added to the shopping list.
 //
@@ -9,11 +11,16 @@
 // names as a match only when those core-word sets are *equal*.
 //
 // This is deliberately strict (equal sets, not subset): a generic "milk" must
-// NOT be considered covered by "coconut milk", and "rice" is not "basmati
-// rice". The trade-off is that a genuine generic↔specific pair only matches
-// when the difference is a stripped qualifier ("brown onion" == "onion",
-// "extra virgin olive oil" == "olive oil") or a listed synonym — a true variety
-// word (coconut, basmati) keeps them apart, which is the intended behaviour.
+// NOT be considered covered by "coconut milk". Where the difference is only a
+// stripped qualifier ("brown onion" == "onion", "extra virgin olive oil" ==
+// "olive oil") or a listed synonym, the two still match.
+//
+// Genuine generic↔specific pairs (recipe wants "rice", you stock "basmati
+// rice") are reconnected through a seed catalog of groups (data/ingredientGroups):
+// a specific rolls up to an overarching item, so the generic covers any variety
+// and a variety covers the generic — but two different varieties in the same
+// group never cover each other. A true cross-food pair (coconut milk vs milk)
+// is simply never grouped, so it stays apart.
 
 const UNIT_WORDS = new Set([
   "cup", "cups", "tablespoon", "tablespoons", "tbsp", "tbs", "teaspoon",
@@ -40,6 +47,7 @@ const QUALIFIER_WORDS = new Set([
   "wild", "long", "grain", "short", "australian", "grown", "homogenised",
   "full", "cream", "reduced", "fat", "skim", "thinly", "good", "quality",
   "unsalted", "salted", "caster", "icing", "soft", "firm", "mixed", "assorted",
+  "shredded",
 ]);
 
 const FILLER_WORDS = new Set([
@@ -79,6 +87,7 @@ const SYNONYM_RULES = [
   ["bicarbonate of soda", "bicarbonate soda"],
   ["ground beef", "beef mince"],
   ["minced beef", "beef mince"],
+  ["broth", "stock"],
 ].map(([from, to]) => [
   new RegExp(`\\b${from.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")}s?\\b`, "g"),
   to,
@@ -129,38 +138,62 @@ export function extractCoreTokens(rawName) {
   return tokens;
 }
 
-// A match only when the two core-word sets are identical — so "coconut milk"
-// never covers "milk", but "brown onion" still covers "onion" (the difference
-// is a stripped qualifier).
-function tokensEqual(a, b) {
-  if (a.size === 0 || b.size === 0) return false;
-  if (a.size !== b.size) return false;
-
-  for (const token of a) {
-    if (!b.has(token)) return false;
-  }
-
-  return true;
+// A name's canonical key: its core food words, singularised and sorted, joined
+// by a space ("" when there are no food words). Two names with the same key are
+// the same item; this is the exact-match unit everything else builds on.
+export function canonicalKey(name) {
+  return [...extractCoreTokens(name)].sort().join(" ");
 }
 
-// Pre-compute the core token sets for the things you already have, once. Keeps
-// the original name so we can tell the user what covered an ingredient.
+// Seed catalog, keyed and grouped by canonical key (so "Basmati Rice" and
+// "basmati rice" resolve the same). Built once at module load.
+const GROUP_BY_KEY = (() => {
+  const map = new Map();
+  for (const [specific, group] of Object.entries(INGREDIENT_GROUPS)) {
+    const specificKey = canonicalKey(specific);
+    const groupKey = canonicalKey(group);
+    if (specificKey && groupKey) map.set(specificKey, groupKey);
+  }
+  return map;
+})();
+
+// Resolve a name to its identity for matching: its own key, the group it rolls
+// up to (itself when ungrouped), and whether it *is* that group (the generic).
+export function resolveIngredient(name) {
+  const key = canonicalKey(name);
+  if (!key) return null;
+  const group = GROUP_BY_KEY.get(key) || key;
+  return { key, group, isGeneric: key === group };
+}
+
+// Does a stock/recurring item cover a wanted ingredient? Covered when they are
+// the same item, or when one is the other's group — but never two different
+// specifics in the same group (basmati never covers sushi; coconut milk never
+// covers milk, since they aren't grouped together at all).
+function entryCovers(have, want) {
+  if (have.key === want.key) return true;
+  // A generic you stock ("rice") covers a specific the recipe wants ("basmati").
+  if (have.isGeneric && have.key === want.group) return true;
+  // A specific you stock ("basmati") covers the generic the recipe wants ("rice").
+  if (want.isGeneric && want.key === have.group) return true;
+  return false;
+}
+
+// Pre-compute the resolved identity for the things you already have, once.
+// Keeps the original name so we can tell the user what covered an ingredient.
 export function buildCoverageIndex(names) {
   return names
-    .map((name) => ({ name, tokens: extractCoreTokens(name) }))
-    .filter((entry) => entry.tokens.size > 0);
+    .map((name) => ({ name, ...resolveIngredient(name) }))
+    .filter((entry) => entry.key);
 }
 
 // Returns the name of the stock / recurring item covering this ingredient, or
 // null if nothing covers it.
 export function findCoverage(ingredientName, coverageIndex) {
-  const ingredientTokens = extractCoreTokens(ingredientName);
-  if (ingredientTokens.size === 0) return null;
+  const want = resolveIngredient(ingredientName);
+  if (!want) return null;
 
-  const match = coverageIndex.find((entry) =>
-    tokensEqual(ingredientTokens, entry.tokens)
-  );
-
+  const match = coverageIndex.find((entry) => entryCovers(entry, want));
   return match ? match.name : null;
 }
 
