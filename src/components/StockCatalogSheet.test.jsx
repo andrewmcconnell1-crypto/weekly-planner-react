@@ -7,7 +7,7 @@ import StockCatalogSheet from "./StockCatalogSheet";
 afterEach(cleanup);
 
 describe("StockCatalogSheet", () => {
-  it("offers + Add on items not yet in stock and activates them", () => {
+  it("can add a not-yet-stocked item as in stock or out of stock", () => {
     const onActivate = vi.fn();
     render(
       <StockCatalogSheet inventory={[]} onActivate={onActivate} onClose={() => {}} />
@@ -18,12 +18,18 @@ describe("StockCatalogSheet", () => {
       target: { value: "vegemite" },
     });
 
-    const addButton = screen.getByRole("button", { name: /Add/ });
-    fireEvent.click(addButton);
-    expect(onActivate).toHaveBeenCalledWith("Vegemite", "Pantry");
+    fireEvent.click(
+      screen.getByRole("button", { name: /Add Vegemite as in stock/i })
+    );
+    expect(onActivate).toHaveBeenCalledWith("Vegemite", "Pantry", true);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Add Vegemite as out of stock/i })
+    );
+    expect(onActivate).toHaveBeenCalledWith("Vegemite", "Pantry", false);
   });
 
-  it("shows status instead of an Add button for items already in stock", () => {
+  it("shows status instead of add buttons for items already in stock", () => {
     render(
       <StockCatalogSheet
         inventory={[{ id: "1", name: "Vegemite", active: true }]}
@@ -37,7 +43,7 @@ describe("StockCatalogSheet", () => {
     });
 
     const row = screen.getByText("Vegemite").closest("li");
-    expect(within(row).queryByRole("button", { name: /Add/ })).toBe(null);
+    expect(within(row).queryByRole("button")).toBe(null);
     expect(within(row).getByText(/In stock/i)).toBeTruthy();
   });
 

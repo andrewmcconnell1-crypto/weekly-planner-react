@@ -77,6 +77,19 @@ describe("useHouseholdActions — activateStockItem", () => {
     });
   });
 
+  it("can add a new item as out of stock", () => {
+    const { result, setInventory } = setup({ inventory: [] });
+
+    act(() => result.current.activateStockItem("Olive Oil", "Pantry", false));
+
+    const added = setInventory.mock.calls[0][0];
+    expect(added[0]).toMatchObject({
+      name: "Olive Oil",
+      category: "Pantry",
+      active: false,
+    });
+  });
+
   it("re-activates an existing out-of-stock item instead of duplicating", () => {
     const { result, setInventory } = setup({
       inventory: [{ id: "i1", name: "Milk", category: "Dairy", active: false }],
