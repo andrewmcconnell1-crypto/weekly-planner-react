@@ -32,7 +32,31 @@ function InventoryList({
   const [openCategories, setOpenCategories] = useState({});
   const [openSubcategories, setOpenSubcategories] = useState({});
   const [expandedItemId, setExpandedItemId] = useState(null);
-  const [groupDraft, setGroupDraft] = useState("");
+  // Edits to the expanded row are buffered here and only applied on Save, so
+  // Cancel can discard them — including the group, which used to commit silently
+  // on blur.
+  const [draft, setDraft] = useState(null);
+
+  function openEditor(item) {
+    setExpandedItemId(item.id);
+    setDraft({
+      category: item.category || "Other",
+      group: groupLabelFor(item.name, ingredientGroups),
+    });
+  }
+
+  function closeEditor() {
+    setExpandedItemId(null);
+    setDraft(null);
+  }
+
+  function saveEditor(item) {
+    if (draft.category !== (item.category || "Other")) {
+      updateInventoryCategory(item.id, draft.category);
+    }
+    updateIngredientGroup?.(item.name, draft.group);
+    closeEditor();
+  }
 
   const filteredInventory = inventory.filter((item) =>
     normaliseItemName(item.name).includes(normaliseItemName(searchText))
@@ -98,11 +122,8 @@ function InventoryList({
             aria-expanded={isExpanded}
             aria-label={`Edit ${item.name}`}
             onClick={() => {
-              const opening = !isExpanded;
-              setExpandedItemId(opening ? item.id : null);
-              if (opening) {
-                setGroupDraft(groupLabelFor(item.name, ingredientGroups));
-              }
+              if (isExpanded) closeEditor();
+              else openEditor(item);
             }}
           >
             {isExpanded ? (
@@ -113,13 +134,16 @@ function InventoryList({
           </button>
         </div>
 
-        {isExpanded && (
+        {isExpanded && draft && (
           <div className="basics-editor">
             <select
-              value={item.category || "Other"}
+              value={draft.category}
               aria-label={`${item.name} category`}
               onChange={(event) =>
-                updateInventoryCategory(item.id, event.target.value)
+                setDraft((current) => ({
+                  ...current,
+                  category: event.target.value,
+                }))
               }
             >
               {availableCategories.map((category) => (
@@ -138,11 +162,15 @@ function InventoryList({
                   className="basics-group-input"
                   placeholder="e.g. rice"
                   aria-label={`${item.name} group`}
-                  value={groupDraft}
-                  onChange={(event) => setGroupDraft(event.target.value)}
-                  onBlur={() => updateIngredientGroup(item.name, groupDraft)}
+                  value={draft.group}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      group: event.target.value,
+                    }))
+                  }
                   onKeyDown={(event) => {
-                    if (event.key === "Enter") event.currentTarget.blur();
+                    if (event.key === "Enter") saveEditor(item);
                   }}
                 />
                 <span className="basics-group-hint small-text">
@@ -159,6 +187,23 @@ function InventoryList({
               <Trash2 size={15} aria-hidden="true" />
               Delete
             </button>
+
+            <div className="basics-editor-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={closeEditor}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => saveEditor(item)}
+              >
+                Save
+              </button>
+            </div>
           </div>
         )}
           </div>
