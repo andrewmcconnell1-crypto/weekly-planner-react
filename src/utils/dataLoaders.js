@@ -121,5 +121,12 @@ export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
     .filter((recipe) => !savedRecipeIds.has(recipe.id))
     .map((recipe) => ({ ...recipe, serves: recipe.serves ?? 4 }));
 
-  return [...merged, ...missingStarterRecipes];
+  // Guard against duplicate ids (e.g. a legacy collision in saved data): keep
+  // the first of each so the UI never renders two list items with the same key.
+  const seenIds = new Set();
+  return [...merged, ...missingStarterRecipes].filter((recipe) => {
+    if (seenIds.has(recipe.id)) return false;
+    seenIds.add(recipe.id);
+    return true;
+  });
 }

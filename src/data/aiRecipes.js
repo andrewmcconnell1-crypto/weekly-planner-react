@@ -1029,7 +1029,7 @@ export const aiRecipes = [
     ].join("\n"),
   }),
   aiRecipe({
-    id: "tuna-pasta-bake",
+    id: "tuna-pasta-bake-original",
     name: "Tuna Pasta Bake",
     category: "Pasta",
     ingredients: [
