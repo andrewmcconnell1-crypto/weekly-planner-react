@@ -3371,6 +3371,23 @@ textarea::placeholder {
   gap: var(--space-10);
 }
 
+.recipe-image-fetch {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.recipe-image-fetch button {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.recipe-image-error {
+  margin: 0;
+  color: var(--danger);
+}
+
 .recipe-detail-fields label {
   display: grid;
   gap: var(--space-6);
