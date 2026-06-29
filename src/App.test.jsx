@@ -3,6 +3,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 
 import App from "./App";
+import { greeting } from "./utils/greeting";
 
 afterEach(cleanup);
 
@@ -13,8 +14,9 @@ describe("App smoke", () => {
   it("renders Home and navigates every tab", () => {
     render(<App />);
 
+    // Home header shows a time-of-day greeting.
     expect(
-      screen.getByRole("heading", { level: 1, name: "Home" })
+      screen.getByRole("heading", { level: 1, name: greeting() })
     ).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /Meals/ }));
