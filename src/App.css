@@ -2922,8 +2922,10 @@ textarea::placeholder {
   gap: var(--space-10);
 }
 
-/* Recipe imagery tile: a photo or a generated gradient + dish emoji. */
+/* Recipe imagery tile: a gradient + dish emoji base, with a photo or generated
+   AI image layered on top (which shows the emoji through while it loads). */
 .recipe-thumb {
+  position: relative;
   flex-shrink: 0;
   display: grid;
   place-items: center;
@@ -2933,6 +2935,8 @@ textarea::placeholder {
 }
 
 .recipe-thumb img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
