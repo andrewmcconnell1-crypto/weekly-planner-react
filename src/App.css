@@ -2866,6 +2866,55 @@ textarea::placeholder {
   --recipe-tone: #a89683;
 }
 
+/* Aisle / stock-category tone palette (utils/categoryColour). A leading colour
+   dot on each Stock, Recurring and Shop heading gives the long lists rhythm
+   instead of rows of identical olive headings. */
+[data-aisle-tone="produce"] { --aisle-tone: #5a8a3c; }
+[data-aisle-tone="dairy"] { --aisle-tone: #4a7fa0; }
+[data-aisle-tone="bakery"] { --aisle-tone: #b07e2a; }
+[data-aisle-tone="meat"] { --aisle-tone: #b0503c; }
+[data-aisle-tone="pantry"] { --aisle-tone: #8a6d3f; }
+[data-aisle-tone="snacks"] { --aisle-tone: #9a5680; }
+[data-aisle-tone="frozen"] { --aisle-tone: #3d8a82; }
+[data-aisle-tone="household"] { --aisle-tone: #5d6b7d; }
+[data-aisle-tone="toiletries"] { --aisle-tone: #6f5fa0; }
+[data-aisle-tone="other"] { --aisle-tone: #9a8a76; }
+
+/* Colour dot before each Stock / Recurring category heading. Lives inside the
+   first span so the flex header keeps its label-left / count-right layout. */
+.inventory-panel .category-toggle > span:first-child,
+.staples-panel .category-toggle > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.inventory-panel .category-toggle > span:first-child::before,
+.staples-panel .category-toggle > span:first-child::before {
+  content: "";
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--aisle-tone, var(--olive));
+}
+
+/* Shop aisle label: tint the kicker and prefix a colour dot. */
+.priority-aisle {
+  color: var(--aisle-tone, var(--olive));
+}
+
+.priority-aisle::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--aisle-tone, var(--olive));
+  vertical-align: middle;
+}
+
 .recipe-row-inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;

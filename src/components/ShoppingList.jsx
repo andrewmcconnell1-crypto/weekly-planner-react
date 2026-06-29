@@ -6,6 +6,7 @@ import {
   groupByAisle,
   PRIORITY_TIERS,
 } from "../utils/priorityShoppingList";
+import { aisleTone } from "../utils/categoryColour";
 import AddItemRow from "./AddItemRow";
 
 const PRIORITY_OPTIONS = PRIORITY_TIERS.map((tier) => ({
@@ -81,7 +82,9 @@ function ShoppingList({
   function renderAisle(group) {
     return (
       <div className="shopping-group" key={group.category}>
-        <div className="priority-aisle">{group.category}</div>
+        <div className="priority-aisle" data-aisle-tone={aisleTone(group.category)}>
+          {group.category}
+        </div>
         <ul className="clean-list shopping-rows">{group.items.map(renderRow)}</ul>
       </div>
     );

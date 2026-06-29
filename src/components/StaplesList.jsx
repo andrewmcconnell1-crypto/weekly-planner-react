@@ -5,6 +5,7 @@ import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupLabelFor } from "../utils/ingredientMatch";
 import { groupBySubcategory } from "../utils/pantrySubcategory";
+import { aisleTone } from "../utils/categoryColour";
 import AddItemRow from "./AddItemRow";
 import SwipeRow from "./SwipeRow";
 
@@ -326,6 +327,7 @@ function StaplesList({
               <button
                 type="button"
                 className="category-toggle"
+                data-aisle-tone={aisleTone(category)}
                 aria-expanded={isOpen}
                 onClick={() => toggleCategory(category)}
               >
