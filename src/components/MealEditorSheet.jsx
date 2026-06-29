@@ -9,6 +9,7 @@ import {
   Replace,
   Search,
   ShoppingBag,
+  SlidersHorizontal,
   Sparkles,
   Trash2,
   UtensilsCrossed,
@@ -17,7 +18,7 @@ import {
 
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
-import RecipeFilters from "./RecipeFilters";
+import RecipeFilterSheet from "./RecipeFilterSheet";
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 
@@ -119,6 +120,7 @@ function MealEditorSheet({
   const [changingRecipe, setChangingRecipe] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
   const recipeFilters = useRecipeFilters(recipes);
+  const [recipeFiltersOpen, setRecipeFiltersOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const nameInputRef = useRef(null);
   const closeTimerRef = useRef(null);
@@ -554,19 +556,39 @@ function MealEditorSheet({
             </button>
           )}
 
-          <div className="recipe-search">
-            <Search className="recipe-search-icon" size={16} aria-hidden="true" />
-            <input
-              type="search"
-              placeholder="Search recipes..."
-              value={recipeFilters.searchText}
-              onChange={(event) =>
-                recipeFilters.setSearchText(event.target.value)
-              }
-            />
-          </div>
+          <div className="recipe-search-row">
+            <div className="recipe-search">
+              <Search
+                className="recipe-search-icon"
+                size={16}
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                placeholder="Search recipes..."
+                value={recipeFilters.searchText}
+                onChange={(event) =>
+                  recipeFilters.setSearchText(event.target.value)
+                }
+              />
+            </div>
 
-          <RecipeFilters filters={recipeFilters} />
+            <button
+              type="button"
+              className={`recipe-filter-button ${
+                recipeFilters.activeFilterCount > 0 ? "active" : ""
+              }`}
+              onClick={() => setRecipeFiltersOpen(true)}
+            >
+              <SlidersHorizontal size={16} aria-hidden="true" />
+              Filters
+              {recipeFilters.activeFilterCount > 0 && (
+                <span className="recipe-filter-count">
+                  {recipeFilters.activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
 
           <div className="recipe-picker-results recipe-picker-flat">
             {recipeFilters.visibleRecipes.length === 0 ? (
@@ -681,6 +703,7 @@ function MealEditorSheet({
   }
 
   return (
+    <>
     <div
       className={`sheet-backdrop ${closing ? "closing" : ""}`}
       role="presentation"
@@ -754,6 +777,14 @@ function MealEditorSheet({
         </div>
       </div>
     </div>
+
+    {recipeFiltersOpen && (
+      <RecipeFilterSheet
+        filters={recipeFilters}
+        onClose={() => setRecipeFiltersOpen(false)}
+      />
+    )}
+    </>
   );
 }
 

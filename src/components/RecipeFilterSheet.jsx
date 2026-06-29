@@ -25,15 +25,21 @@ function RecipeFilterSheet({ filters, onClose }) {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    // Capture-phase + stopImmediatePropagation so that when this sheet is
+    // stacked over another (the meal editor's picker), Escape closes only this
+    // one, not the sheet underneath.
     function handleKey(event) {
-      if (event.key === "Escape") requestClose();
+      if (event.key === "Escape") {
+        event.stopImmediatePropagation();
+        requestClose();
+      }
     }
 
-    window.addEventListener("keydown", handleKey);
+    window.addEventListener("keydown", handleKey, true);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("keydown", handleKey, true);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose]);
