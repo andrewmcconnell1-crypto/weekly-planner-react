@@ -304,6 +304,7 @@ function App() {
     welcomeSessionKey,
     showWelcome,
     currentWeekMeals,
+    nextWeekPlannedCount,
   } = buildPlannerView({
     mealWeekStart,
     mealWeekKey,
@@ -361,6 +362,12 @@ function App() {
   function openHomeDayInPlan(day) {
     setActiveWeekStart(new Date(currentWeekStart));
     setExpandedMealDay(day);
+    setActiveTab("plan");
+  }
+
+  function openNextWeekPlan() {
+    setActiveWeekStart(new Date(nextWeekStart));
+    setExpandedMealDay(null);
     setActiveTab("plan");
   }
 
@@ -540,6 +547,8 @@ function App() {
           getMealSummary={getMealSummary}
           openHomeDayInPlan={openHomeDayInPlan}
           homeShopStatus={homeShopStatus}
+          nextWeekPlannedCount={nextWeekPlannedCount}
+          openNextWeekPlan={openNextWeekPlan}
         />
       )}
 

@@ -1126,6 +1126,26 @@ textarea:focus-visible {
   font-weight: var(--weight-semibold);
 }
 
+/* Quiet next-week status / jump link at the foot of the week glance. */
+.home-nextweek {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--accent-strong);
+  padding: var(--space-12) var(--space-14);
+  font-weight: var(--weight-semibold);
+  text-align: left;
+}
+
+.home-nextweek:hover {
+  background: var(--soft);
+}
+
 .home-section-head {
   display: flex;
   align-items: baseline;
