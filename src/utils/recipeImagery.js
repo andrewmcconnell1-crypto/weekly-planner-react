@@ -52,49 +52,14 @@ function dishEmoji(name, toneEmoji) {
   return toneEmoji;
 }
 
-// A stable seed from the name so a recipe's generated image stays the same
-// across loads (and is cached) instead of regenerating differently each time.
-function stableSeed(text) {
-  let hash = 0;
-  for (let i = 0; i < text.length; i += 1) {
-    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
-  }
-  return hash % 100000;
-}
-
-// Keyless AI food photo for a recipe, built from its name. Pollinations
-// generates an image straight from the prompt in the URL — no API key, usable
-// directly as an <img src>. Seeded so it's stable and cacheable.
-export function aiImageUrl(name) {
-  const clean = String(name || "").trim();
-  if (!clean) return "";
-
-  const prompt =
-    `appetising professional food photography of ${clean}, ` +
-    `plated, natural light, shallow depth of field, no text`;
-  const seed = stableSeed(clean);
-
-  return (
-    "https://image.pollinations.ai/prompt/" +
-    `${encodeURIComponent(prompt)}?width=512&height=384&seed=${seed}` +
-    "&nologo=true&model=flux"
-  );
-}
-
-// Resolve a recipe to its display imagery. The gradient + emoji placeholder is
-// always computed as the loading/fallback layer. `type` is "photo" when the
-// recipe has its own image, else "ai" when a generated image can be built from
-// the name, else "placeholder".
+// Resolve a recipe to its display tile: a warm gradient keyed to the category
+// tone plus a dish emoji from the name. Deliberately illustrative icons (no
+// photos) so the Recipes and Meals screens look lively with no external images.
 export function recipeImagery(recipe) {
-  const url = (recipe?.image || "").trim();
   const tone = getRecipeTone(recipe?.category);
   const visual = TONE_VISUAL[tone] || TONE_VISUAL.other;
-  const aiUrl = aiImageUrl(recipe?.name);
 
   return {
-    type: url ? "photo" : aiUrl ? "ai" : "placeholder",
-    url,
-    aiUrl,
     tone,
     gradient: `linear-gradient(135deg, ${visual.from}, ${visual.to})`,
     emoji: dishEmoji(recipe?.name, visual.emoji),

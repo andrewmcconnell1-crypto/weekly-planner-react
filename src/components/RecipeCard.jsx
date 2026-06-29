@@ -19,7 +19,7 @@ function RecipeCard({ recipe, active = false, onClick }) {
       onClick={onClick}
     >
       <span className="recipe-row-inner">
-        <RecipeThumb imagery={recipeImagery(recipe)} name={recipe.name} size="sm" />
+        <RecipeThumb imagery={recipeImagery(recipe)} size="sm" />
 
         <span className="recipe-row-main">
           <strong>{recipe.name}</strong>
