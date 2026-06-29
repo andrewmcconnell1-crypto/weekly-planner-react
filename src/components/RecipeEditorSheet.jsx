@@ -10,6 +10,8 @@ import {
 } from "../utils/recipeUtils";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 import { groupLabelFor } from "../utils/ingredientMatch";
+import { recipeImagery } from "../utils/recipeImagery";
+import RecipeThumb from "./RecipeThumb";
 
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
@@ -127,6 +129,12 @@ function RecipeEditorSheet({
         <div className="sheet-body">
           {mode === "view" ? (
             <div className="recipe-view">
+              <RecipeThumb
+                imagery={recipeImagery(recipe)}
+                name={recipe.name}
+                size="lg"
+              />
+
               <div className="recipe-view-head">
                 <span
                   className="recipe-source"
@@ -289,6 +297,18 @@ function RecipeEditorSheet({
                     value={recipe.sourceUrl || ""}
                     onChange={(event) =>
                       updateRecipe(recipe.id, { sourceUrl: event.target.value })
+                    }
+                  />
+                </label>
+
+                <label className="recipe-image-field">
+                  <span>Photo URL</span>
+                  <input
+                    type="url"
+                    placeholder="https://… (leave blank for a coloured tile)"
+                    value={recipe.image || ""}
+                    onChange={(event) =>
+                      updateRecipe(recipe.id, { image: event.target.value })
                     }
                   />
                 </label>

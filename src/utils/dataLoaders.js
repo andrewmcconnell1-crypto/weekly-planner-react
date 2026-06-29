@@ -73,6 +73,7 @@ function normaliseRecipe(recipe, index) {
     sourceUrl: recipe.sourceUrl || "",
     ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
     method: recipe.method || "",
+    image: typeof recipe.image === "string" ? recipe.image : "",
     serves:
       recipe.serves != null && recipe.serves !== "" ? recipe.serves : null,
     tags: Array.isArray(recipe.tags) ? recipe.tags : [],
