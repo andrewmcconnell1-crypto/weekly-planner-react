@@ -8,6 +8,7 @@ import ProgressRing from "./ProgressRing";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 import { useCountUp } from "../hooks/useCountUp";
+import { useCelebrate } from "../hooks/useCelebrate";
 
 const MealEditorSheet = lazy(() => import("./MealEditorSheet"));
 
@@ -40,6 +41,9 @@ export default function PlanScreen({
   updateMeal,
 }) {
   const animatedPlanned = useCountUp(mealsPlannedCount);
+
+  // Confetti when the last empty night gets a meal.
+  useCelebrate(days.length > 0 && mealsPlannedCount === days.length);
 
   return (
     <section className="screen plan-screen">
