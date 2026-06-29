@@ -4,8 +4,10 @@ import WeekControls from "./WeekControls";
 import MealGroups from "./MealGroups";
 import ErrorBoundary from "./ErrorBoundary";
 import SheetError from "./SheetError";
+import ProgressRing from "./ProgressRing";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
+import { useCountUp } from "../hooks/useCountUp";
 
 const MealEditorSheet = lazy(() => import("./MealEditorSheet"));
 
@@ -37,15 +39,23 @@ export default function PlanScreen({
   clearMealDay,
   updateMeal,
 }) {
+  const animatedPlanned = useCountUp(mealsPlannedCount);
+
   return (
     <section className="screen plan-screen">
       <div className="page-hero plan-hero">
+        <ProgressRing
+          value={mealsPlannedCount}
+          max={days.length}
+          className="page-hero-ring"
+        />
+
         <p className="page-hero-kicker">
           Meal plan · {formatDate(mealWeekStart)} – {formatDate(mealWeekEnd)}
         </p>
 
         <strong className="page-hero-count">
-          {mealsPlannedCount} of {days.length} dinners planned
+          {animatedPlanned} of {days.length} dinners planned
         </strong>
 
         <p className="page-hero-sub">{planGapsLabel}</p>

@@ -7,6 +7,7 @@ import {
   PRIORITY_TIERS,
 } from "../utils/priorityShoppingList";
 import { aisleTone } from "../utils/categoryColour";
+import { useCountUp } from "../hooks/useCountUp";
 import AddItemRow from "./AddItemRow";
 
 const PRIORITY_OPTIONS = PRIORITY_TIERS.map((tier) => ({
@@ -45,6 +46,8 @@ function ShoppingList({
   const doneItems = unifiedItems.filter((item) => item.checked);
   const total = unifiedItems.length;
   const donePct = total > 0 ? Math.round((doneItems.length / total) * 100) : 0;
+  const allDone = total > 0 && doneItems.length === total;
+  const animatedPending = useCountUp(unifiedPending);
 
   const pendingSections = priorityLayout
     ? groupByTier(pendingItems)
@@ -95,7 +98,9 @@ function ShoppingList({
       <div className="page-hero shop-hero">
         <p className="page-hero-kicker">Shopping list · this week + next</p>
 
-        <strong className="page-hero-count">{unifiedPending} to buy</strong>
+        <strong className="page-hero-count">
+          {allDone ? "All done 🎉" : `${animatedPending} to buy`}
+        </strong>
 
         <p className="page-hero-sub">
           {doneItems.length} done · {total} total
@@ -103,7 +108,7 @@ function ShoppingList({
 
         {total > 0 && (
           <div
-            className="shop-hero-progress"
+            className={`shop-hero-progress ${allDone ? "complete" : ""}`}
             role="progressbar"
             aria-valuenow={donePct}
             aria-valuemin={0}

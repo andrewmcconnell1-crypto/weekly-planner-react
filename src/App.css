@@ -2168,12 +2168,39 @@ textarea::placeholder {
 /* Lighter page heroes (Meals + Shop). The bold dark hero is reserved for
    Home's "Tonight" card; these give each page its own tone + headline. */
 .page-hero {
+  position: relative;
   display: grid;
   gap: var(--space-8);
   border-radius: var(--radius-lg);
   padding: var(--space-16);
   box-shadow: var(--shadow);
   margin-bottom: var(--space-14);
+}
+
+/* Progress ring tucked into the hero's top-right corner. */
+.page-hero-ring {
+  position: absolute;
+  top: var(--space-16);
+  right: var(--space-16);
+}
+
+.progress-ring-track {
+  stroke: rgba(76, 85, 48, 0.18);
+}
+
+.progress-ring-fill {
+  stroke: var(--olive);
+  transition: stroke-dashoffset 650ms var(--ease-out);
+}
+
+.progress-ring.complete .progress-ring-fill {
+  stroke: #4c7a33;
+}
+
+.progress-ring-text {
+  font-size: 15px;
+  font-weight: var(--weight-bold);
+  fill: var(--accent-strong);
 }
 
 .plan-hero {
@@ -2258,7 +2285,33 @@ textarea::placeholder {
   height: 100%;
   border-radius: var(--radius-pill);
   background: var(--accent);
-  transition: width 0.2s ease;
+  transition:
+    width 0.6s var(--ease-out),
+    background 0.3s var(--ease-standard);
+}
+
+/* Cleared list: the bar fills green and gives a single celebratory pulse. */
+.shop-hero-progress.complete > span {
+  background: #4c7a33;
+  animation: shop-complete-pulse 0.7s var(--ease-spring);
+}
+
+@keyframes shop-complete-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 122, 51, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 8px rgba(76, 122, 51, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 122, 51, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-hero-progress.complete > span {
+    animation: none;
+  }
 }
 
 .shopping-section-header span {
