@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 
 import TonightCard from "./TonightCard";
 import MealGroups from "./MealGroups";
@@ -24,6 +24,8 @@ export default function HomeScreen({
   getMealSummary,
   openHomeDayInPlan,
   homeShopStatus,
+  nextWeekPlannedCount,
+  openNextWeekPlan,
 }) {
   const gapDays = days.filter(
     (day) => !getMealSummary(day, meals[day], meals).hasMeal
@@ -96,6 +98,26 @@ export default function HomeScreen({
         </div>
       )}
 
+      <div className={`home-topup ${homeShopStatus.tone}`}>
+        <div className="home-topup-body">
+          <p className="section-kicker">Shopping</p>
+          <strong>{homeShopStatus.title}</strong>
+          <span>{homeShopStatus.sub}</span>
+        </div>
+
+        {homeShopStatus.actionLabel && (
+          <button
+            type="button"
+            className={
+              homeShopStatus.tone === "needs" ? "primary-button" : "secondary"
+            }
+            onClick={homeShopStatus.onAction}
+          >
+            {homeShopStatus.actionLabel}
+          </button>
+        )}
+      </div>
+
       <div className="home-week">
         <div className="home-section-head">
           <div className="home-week-heading">
@@ -128,26 +150,19 @@ export default function HomeScreen({
             onOpenDay={openHomeDayInPlan}
           />
         </div>
-      </div>
 
-      <div className={`home-topup ${homeShopStatus.tone}`}>
-        <div className="home-topup-body">
-          <p className="section-kicker">Shopping</p>
-          <strong>{homeShopStatus.title}</strong>
-          <span>{homeShopStatus.sub}</span>
-        </div>
-
-        {homeShopStatus.actionLabel && (
-          <button
-            type="button"
-            className={
-              homeShopStatus.tone === "needs" ? "primary-button" : "secondary"
-            }
-            onClick={homeShopStatus.onAction}
-          >
-            {homeShopStatus.actionLabel}
-          </button>
-        )}
+        <button
+          type="button"
+          className="home-nextweek"
+          onClick={openNextWeekPlan}
+        >
+          <span>
+            {nextWeekPlannedCount === days.length
+              ? "Next week's all planned"
+              : `Next week — ${nextWeekPlannedCount} of ${days.length} planned`}
+          </span>
+          <ChevronRight size={16} aria-hidden="true" />
+        </button>
       </div>
     </section>
   );

@@ -48,6 +48,12 @@ export function buildPlannerView({
 
   // "Tonight" on Home: today's meal, drawn from the current week's plan.
   const currentWeekMeals = mealsByWeek[currentWeekKey] || createEmptyMeals();
+
+  // How far along next week's plan is, for the Home nudge.
+  const nextWeekMeals = mealsByWeek[nextWeekKey] || createEmptyMeals();
+  const nextWeekPlannedCount = days.filter(
+    (day) => getMealSummary(day, nextWeekMeals[day], nextWeekMeals).hasMeal
+  ).length;
   const tonightSummary = getMealSummary(
     todayDayName,
     currentWeekMeals[todayDayName],
@@ -231,5 +237,6 @@ export function buildPlannerView({
     showWelcome,
     comingUpDays,
     currentWeekMeals,
+    nextWeekPlannedCount,
   };
 }
