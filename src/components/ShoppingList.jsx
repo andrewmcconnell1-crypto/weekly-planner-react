@@ -8,6 +8,7 @@ import {
 } from "../utils/priorityShoppingList";
 import { aisleTone } from "../utils/categoryColour";
 import { useCountUp } from "../hooks/useCountUp";
+import { useCelebrate } from "../hooks/useCelebrate";
 import AddItemRow from "./AddItemRow";
 
 const PRIORITY_OPTIONS = PRIORITY_TIERS.map((tier) => ({
@@ -48,6 +49,9 @@ function ShoppingList({
   const donePct = total > 0 ? Math.round((doneItems.length / total) * 100) : 0;
   const allDone = total > 0 && doneItems.length === total;
   const animatedPending = useCountUp(unifiedPending);
+
+  // Confetti the moment the last item gets checked off.
+  useCelebrate(allDone);
 
   const pendingSections = priorityLayout
     ? groupByTier(pendingItems)
