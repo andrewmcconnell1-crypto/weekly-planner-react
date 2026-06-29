@@ -540,6 +540,53 @@ textarea:focus-visible {
   padding: 0;
 }
 
+/* Cross-fade each screen on tab change (the wrapper is keyed by tab, so it
+   remounts and replays this). The content rises and settles in. */
+.screen-swap {
+  animation: screen-enter 320ms var(--ease-out) both;
+}
+
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Stagger the meal-grid day cards in as the Meals screen arrives. */
+.screen-swap .meal-card {
+  animation: card-rise 380ms var(--ease-out) both;
+}
+
+.screen-swap .meal-card:nth-child(1) { animation-delay: 30ms; }
+.screen-swap .meal-card:nth-child(2) { animation-delay: 70ms; }
+.screen-swap .meal-card:nth-child(3) { animation-delay: 110ms; }
+.screen-swap .meal-card:nth-child(4) { animation-delay: 150ms; }
+.screen-swap .meal-card:nth-child(5) { animation-delay: 190ms; }
+.screen-swap .meal-card:nth-child(n + 6) { animation-delay: 220ms; }
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-swap,
+  .screen-swap .meal-card {
+    animation: none;
+  }
+}
+
 .screen-header {
   display: grid;
   gap: var(--space-10);
