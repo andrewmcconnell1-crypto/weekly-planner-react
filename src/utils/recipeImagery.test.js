@@ -9,11 +9,25 @@ describe("recipeImagery", () => {
     expect(result.url).toBe("https://x/y.jpg");
   });
 
-  it("falls back to a gradient + emoji placeholder with no image", () => {
-    const result = recipeImagery({ name: "Roast", category: "Chicken" });
-    expect(result.type).toBe("placeholder");
+  it("uses a generated AI image (and keeps the emoji fallback) with no photo", () => {
+    const result = recipeImagery({ name: "Roast Chicken", category: "Chicken" });
+    expect(result.type).toBe("ai");
+    expect(result.aiUrl).toContain("image.pollinations.ai");
+    expect(result.aiUrl).toContain(encodeURIComponent("Roast Chicken"));
     expect(result.gradient).toMatch(/^linear-gradient/);
     expect(result.emoji).toBeTruthy();
+  });
+
+  it("falls back to the plain placeholder when there is no name", () => {
+    const result = recipeImagery({ category: "Chicken" });
+    expect(result.type).toBe("placeholder");
+    expect(result.emoji).toBeTruthy();
+  });
+
+  it("gives a recipe's image a stable (cacheable) seed", () => {
+    const a = recipeImagery({ name: "Beef Tacos" }).aiUrl;
+    const b = recipeImagery({ name: "Beef Tacos" }).aiUrl;
+    expect(a).toBe(b);
   });
 
   it("picks a dish emoji from the name when recognisable", () => {

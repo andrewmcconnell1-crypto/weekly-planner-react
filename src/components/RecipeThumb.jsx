@@ -1,32 +1,37 @@
 import { useState } from "react";
 
-// Recipe imagery tile: a real photo when one is set, otherwise a generated
-// gradient + dish emoji. A photo that fails to load falls back to the
-// placeholder. `size` is "sm" (card thumbnail) or "lg" (detail hero).
+// Recipe imagery tile. The gradient + dish emoji is always the base layer; a
+// real photo (when set) or a generated AI image (from the recipe name) loads
+// over it. While the image loads, or if it fails, the emoji tile shows through.
+// `size` is "sm" (card thumbnail) or "lg" (detail hero).
 function RecipeThumb({ imagery, name = "", size = "sm" }) {
   const [failed, setFailed] = useState(false);
-  const showPhoto = imagery.type === "photo" && !failed;
 
-  if (showPhoto) {
-    return (
-      <span className={`recipe-thumb recipe-thumb-${size}`}>
-        <img
-          src={imagery.url}
-          alt={name ? `${name}` : ""}
-          loading="lazy"
-          onError={() => setFailed(true)}
-        />
-      </span>
-    );
-  }
+  const src =
+    imagery.type === "photo"
+      ? imagery.url
+      : imagery.type === "ai"
+        ? imagery.aiUrl
+        : "";
+  const showImage = src && !failed;
 
   return (
     <span
       className={`recipe-thumb recipe-thumb-${size} recipe-thumb-placeholder`}
       style={{ background: imagery.gradient }}
-      aria-hidden="true"
     >
-      <span className="recipe-thumb-emoji">{imagery.emoji}</span>
+      <span className="recipe-thumb-emoji" aria-hidden="true">
+        {imagery.emoji}
+      </span>
+
+      {showImage && (
+        <img
+          src={src}
+          alt={name}
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
+      )}
     </span>
   );
 }
