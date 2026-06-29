@@ -5,6 +5,8 @@ import {
   recipeSourceKind,
   recipeSourceLabel,
 } from "../utils/recipeUtils";
+import { recipeImagery } from "../utils/recipeImagery";
+import RecipeThumb from "./RecipeThumb";
 
 // One recipe row, shared by the Recipes manager and the meal editor's picker so
 // they look identical. `active` highlights the currently-selected recipe.
@@ -17,6 +19,8 @@ function RecipeCard({ recipe, active = false, onClick }) {
       onClick={onClick}
     >
       <span className="recipe-row-inner">
+        <RecipeThumb imagery={recipeImagery(recipe)} name={recipe.name} size="sm" />
+
         <span className="recipe-row-main">
           <strong>{recipe.name}</strong>
           <span className="recipe-row-meta">

@@ -2917,9 +2917,56 @@ textarea::placeholder {
 
 .recipe-row-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--space-10);
+}
+
+/* Recipe imagery tile: a photo or a generated gradient + dish emoji. */
+.recipe-thumb {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--soft);
+}
+
+.recipe-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.recipe-thumb-sm {
+  width: 46px;
+  height: 46px;
+}
+
+.recipe-thumb-lg {
+  width: 100%;
+  height: 150px;
+  border-radius: var(--radius-md);
+}
+
+.recipe-thumb-emoji {
+  line-height: 1;
+  /* Soft shadow lifts the emoji off the gradient. */
+  filter: drop-shadow(0 1px 2px rgba(43, 33, 24, 0.22));
+}
+
+.recipe-thumb-sm .recipe-thumb-emoji {
+  font-size: 24px;
+}
+
+.recipe-thumb-lg .recipe-thumb-emoji {
+  font-size: 58px;
+}
+
+/* The thumbnail now carries the category tone, so drop the leading accent bar. */
+.recipe-row::before {
+  content: none;
 }
 
 .recipe-row:hover {
