@@ -26,6 +26,7 @@ export default function HomeScreen({
   homeShopStatus,
   nextWeekPlannedCount,
   openNextWeekPlan,
+  setMoreSection,
 }) {
   const gapDays = days.filter(
     (day) => !getMealSummary(day, meals[day], meals).hasMeal
@@ -148,6 +149,7 @@ export default function HomeScreen({
             meals={meals}
             getMealSummary={getMealSummary}
             onOpenDay={openHomeDayInPlan}
+            todayDayName={todayDayName}
           />
         </div>
 
@@ -164,6 +166,18 @@ export default function HomeScreen({
           <ChevronRight size={16} aria-hidden="true" />
         </button>
       </div>
+
+      <button
+        type="button"
+        className="home-link home-recipes-link"
+        onClick={() => {
+          setMoreSection("recipes");
+          setActiveTab("more");
+        }}
+      >
+        Browse all recipes
+        <ChevronRight size={15} aria-hidden="true" />
+      </button>
     </section>
   );
 }

@@ -1146,6 +1146,32 @@ textarea:focus-visible {
   background: var(--soft);
 }
 
+/* Quiet "Browse all recipes" link at the foot of Home. */
+.home-recipes-link {
+  justify-self: center;
+  margin-top: var(--space-4);
+}
+
+/* "Today" marker on the current day's meal card. */
+.meal-today-pill {
+  display: inline-block;
+  margin-left: var(--space-6);
+  padding: 1px var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--olive);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.meal-card-today {
+  outline: 2px solid var(--olive);
+  outline-offset: 1px;
+}
+
 .home-section-head {
   display: flex;
   align-items: baseline;

@@ -17,22 +17,41 @@ const TYPE_META = {
 };
 
 // The tappable summary card for one day. Tapping it opens the meal editor.
-function MealCard({ day, meal, displayName, mealLabel, mealTone, hasMeal, onOpen }) {
+function MealCard({
+  day,
+  meal,
+  displayName,
+  mealLabel,
+  mealTone,
+  hasMeal,
+  isToday = false,
+  onOpen,
+}) {
   const mealType = meal.mealType || "cook";
   const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
   const mealName = displayName || (meal.name || "").trim();
 
+  const dayLabel = (
+    <span className="meal-row-day">
+      {day}
+      {isToday && <span className="meal-today-pill">Today</span>}
+    </span>
+  );
+
   // Unplanned day: an inviting "add" tile, not a faded version of a meal card.
   if (!hasMeal) {
     return (
-      <article className="meal-card meal-card-empty" data-tone={mealTone}>
+      <article
+        className={`meal-card meal-card-empty ${isToday ? "meal-card-today" : ""}`}
+        data-tone={mealTone}
+      >
         <button className="meal-row-button" type="button" onClick={onOpen}>
           <span className="meal-type-badge">
             <Plus size={20} aria-hidden="true" />
           </span>
 
           <span className="meal-row-main">
-            <span className="meal-row-day">{day}</span>
+            {dayLabel}
             <strong className="meal-row-add">Add a meal</strong>
           </span>
         </button>
@@ -55,7 +74,9 @@ function MealCard({ day, meal, displayName, mealLabel, mealTone, hasMeal, onOpen
 
   return (
     <article
-      className={`card meal-card meal-card-${typeKey}`}
+      className={`card meal-card meal-card-${typeKey} ${
+        isToday ? "meal-card-today" : ""
+      }`}
       data-tone={mealTone}
     >
       <button className="meal-row-button" type="button" onClick={onOpen}>
@@ -64,7 +85,7 @@ function MealCard({ day, meal, displayName, mealLabel, mealTone, hasMeal, onOpen
         </span>
 
         <span className="meal-row-main">
-          <span className="meal-row-day">{day}</span>
+          {dayLabel}
           <strong>{mealName}</strong>
           <span className="meal-row-sub">{subText}</span>
         </span>

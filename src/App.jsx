@@ -549,6 +549,7 @@ function App() {
           homeShopStatus={homeShopStatus}
           nextWeekPlannedCount={nextWeekPlannedCount}
           openNextWeekPlan={openNextWeekPlan}
+          setMoreSection={setMoreSection}
         />
       )}
 
