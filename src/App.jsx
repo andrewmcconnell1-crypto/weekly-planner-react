@@ -278,7 +278,6 @@ function App() {
 
   // Everything the screens render from is derived here, in one pure pass.
   const {
-    homeWeekMode,
     mealWeekMode,
     tonightSummary,
     tonightCovers,
@@ -304,7 +303,6 @@ function App() {
     pendingRemovalCount,
     welcomeSessionKey,
     showWelcome,
-    comingUpDays,
   } = buildPlannerView({
     mealWeekStart,
     mealWeekKey,
@@ -351,11 +349,6 @@ function App() {
 
   function goToNextMealWeekDefault() {
     setActiveWeekStart(getNextSunday());
-  }
-
-  function showHomeWeek(weekStart) {
-    setActiveWeekStart(new Date(weekStart));
-    setExpandedMealDay(null);
   }
 
   function openTonightInPlan() {
@@ -538,25 +531,16 @@ function App() {
           tonightCovers={tonightCovers}
           tonightLeftoverLabel={tonightLeftoverLabel}
           openTonightInPlan={openTonightInPlan}
-          homeWeekMode={homeWeekMode}
-          showHomeWeek={showHomeWeek}
-          currentWeekStart={currentWeekStart}
-          nextWeekStart={nextWeekStart}
           mealWeekStart={mealWeekStart}
           mealWeekEnd={mealWeekEnd}
           showWelcome={showWelcome}
           dismissWelcome={dismissWelcome}
           setActiveTab={setActiveTab}
-          comingUpDays={comingUpDays}
           meals={meals}
           getMealSummary={getMealSummary}
           openHomeDayInPlan={openHomeDayInPlan}
           homeShopStatus={homeShopStatus}
-          openHousehold={openHousehold}
-          activeInventoryCount={activeInventoryCount}
-          inventoryCount={inventory.length}
-          unifiedPending={unifiedPending}
-          setMoreSection={setMoreSection}
+          mealsPlannedCount={mealsPlannedCount}
         />
       )}
 
