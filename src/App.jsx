@@ -528,6 +528,7 @@ function App() {
         </div>
       )}
 
+      <div className="screen-swap" key={activeTab}>
       {activeTab === "home" && (
         <HomeScreen
           todayDayName={todayDayName}
@@ -684,6 +685,7 @@ function App() {
           }}
         />
       )}
+      </div>
 
       {updateReady && (
         <UpdateBanner onReload={() => window.location.reload()} />
