@@ -2976,6 +2976,12 @@ textarea::placeholder {
 }
 
 .recipe-filter-chips {
+  /* flex:1 + min-width:0 lets this shrink to the row and scroll its chips
+     internally; without min-width:0 the nowrap chips force the whole page
+     wider than the screen on mobile (which zooms the viewport out and pushes
+     the fixed bottom nav off-screen). */
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: nowrap;
   gap: var(--space-6);
@@ -3490,6 +3496,10 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   gap: var(--space-10);
+  /* As a grid item this defaults to min-width:auto and would stretch to the
+     chips' full (nowrap) width, overflowing the page on mobile. Let it shrink
+     so the chips scroll within the row instead. */
+  min-width: 0;
 }
 
 .recipe-filter-label {
