@@ -315,7 +315,7 @@ function StaplesList({
       </datalist>
 
       {staples.length === 0 ? (
-        <p className="empty-state">No recurring buys yet.</p>
+        <p className="empty-state">🧺 No recurring buys yet — add the staples you grab every week.</p>
       ) : filteredStaples.length === 0 ? (
         <p className="empty-state">No matching recurring buys.</p>
       ) : (

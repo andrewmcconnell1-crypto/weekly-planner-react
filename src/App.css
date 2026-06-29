@@ -659,6 +659,9 @@ textarea:focus-visible {
 
 /* "Tonight" hero — deliberately inverted/dark so it's the first thing seen */
 .tonight-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: grid;
   gap: var(--space-8);
   border-radius: var(--radius-lg);
@@ -673,6 +676,39 @@ textarea:focus-visible {
   padding: var(--space-16);
   box-shadow: var(--shadow-lg);
   margin-bottom: var(--space-14);
+}
+
+/* A soft light slowly drifting across the hero, kept behind the text. */
+.tonight-card::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  background: radial-gradient(
+    38% 32% at 50% 50%,
+    rgba(255, 255, 255, 0.08),
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: tonight-sheen 16s ease-in-out infinite;
+}
+
+@keyframes tonight-sheen {
+  0% {
+    transform: translate(-18%, -12%);
+  }
+  50% {
+    transform: translate(18%, 12%);
+  }
+  100% {
+    transform: translate(-18%, -12%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tonight-card::after {
+    animation: none;
+  }
 }
 
 .tonight-kicker {

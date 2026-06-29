@@ -235,7 +235,7 @@ function InventoryList({
       {filteredInventory.length === 0 ? (
         <p className="empty-state">
           {inventory.length === 0
-            ? "No stock items yet."
+            ? "🧂 No stock items yet — add what's in your cupboards and we'll keep them off your list."
             : "No matching stock items."}
         </p>
       ) : (

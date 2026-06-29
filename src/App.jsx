@@ -31,6 +31,7 @@ const StockCatalogSheet = lazy(() => import("./components/StockCatalogSheet"));
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 import { getSunday, getNextSunday, getWeekKey } from "./utils/dateUtils";
+import { greeting } from "./utils/greeting";
 import { createMealHelpers } from "./utils/mealPlanning";
 import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
 import { buildPlannerView } from "./utils/plannerView";
@@ -453,7 +454,7 @@ function App() {
 
           <h1>
             {activeTab === "home"
-              ? "Home"
+              ? greeting()
               : activeTab === "shop"
               ? "Shopping list"
               : activeTab === "more"
