@@ -230,5 +230,6 @@ export function buildPlannerView({
     welcomeSessionKey,
     showWelcome,
     comingUpDays,
+    currentWeekMeals,
   };
 }

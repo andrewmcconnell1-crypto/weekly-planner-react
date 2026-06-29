@@ -303,6 +303,7 @@ function App() {
     pendingRemovalCount,
     welcomeSessionKey,
     showWelcome,
+    currentWeekMeals,
   } = buildPlannerView({
     mealWeekStart,
     mealWeekKey,
@@ -531,16 +532,14 @@ function App() {
           tonightCovers={tonightCovers}
           tonightLeftoverLabel={tonightLeftoverLabel}
           openTonightInPlan={openTonightInPlan}
-          mealWeekStart={mealWeekStart}
-          mealWeekEnd={mealWeekEnd}
+          currentWeekStart={currentWeekStart}
           showWelcome={showWelcome}
           dismissWelcome={dismissWelcome}
           setActiveTab={setActiveTab}
-          meals={meals}
+          meals={currentWeekMeals}
           getMealSummary={getMealSummary}
           openHomeDayInPlan={openHomeDayInPlan}
           homeShopStatus={homeShopStatus}
-          mealsPlannedCount={mealsPlannedCount}
         />
       )}
 

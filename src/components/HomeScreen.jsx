@@ -16,8 +16,7 @@ export default function HomeScreen({
   tonightCovers,
   tonightLeftoverLabel,
   openTonightInPlan,
-  mealWeekStart,
-  mealWeekEnd,
+  currentWeekStart,
   showWelcome,
   dismissWelcome,
   setActiveTab,
@@ -25,12 +24,15 @@ export default function HomeScreen({
   getMealSummary,
   openHomeDayInPlan,
   homeShopStatus,
-  mealsPlannedCount,
 }) {
   const gapDays = days.filter(
     (day) => !getMealSummary(day, meals[day], meals).hasMeal
   );
   const gapCount = gapDays.length;
+  const plannedCount = days.length - gapCount;
+
+  const weekEnd = new Date(currentWeekStart);
+  weekEnd.setDate(currentWeekStart.getDate() + 6);
 
   return (
     <section className="screen home-screen">
@@ -99,11 +101,11 @@ export default function HomeScreen({
           <div className="home-week-heading">
             <p className="section-kicker">This week</p>
             <h2>
-              {formatDate(mealWeekStart)} – {formatDate(mealWeekEnd)}
+              {formatDate(currentWeekStart)} – {formatDate(weekEnd)}
             </h2>
           </div>
 
-          <ProgressRing value={mealsPlannedCount} max={days.length} size={52} />
+          <ProgressRing value={plannedCount} max={days.length} size={52} />
         </div>
 
         {gapCount > 0 ? (
