@@ -37,10 +37,12 @@ describe("RecipesList", () => {
     expect(screen.queryByText("Chicken Curry")).not.toBeInTheDocument();
   });
 
-  it("narrows by category chip", async () => {
+  it("narrows by category chip from the filters sheet", async () => {
     const user = userEvent.setup();
     setup();
 
+    // Filters now live behind a button, in a sheet.
+    await user.click(screen.getByRole("button", { name: /Filters/i }));
     await user.click(screen.getByRole("button", { name: "Chicken" }));
     expect(screen.getByText("Chicken Curry")).toBeInTheDocument();
     expect(screen.queryByText("Beef Tacos")).not.toBeInTheDocument();

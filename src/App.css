@@ -541,9 +541,13 @@ textarea:focus-visible {
 }
 
 /* Cross-fade each screen on tab change (the wrapper is keyed by tab, so it
-   remounts and replays this). The content rises and settles in. */
+   remounts and replays this). The content rises and settles in.
+   Fill mode is `backwards` (not `both`) so no transform lingers after the
+   animation — a retained identity transform would create a stacking context /
+   containing block on this wrapper and trap fixed-position sheets behind the
+   bottom nav. */
 .screen-swap {
-  animation: screen-enter 320ms var(--ease-out) both;
+  animation: screen-enter 320ms var(--ease-out) backwards;
 }
 
 @keyframes screen-enter {
@@ -559,7 +563,7 @@ textarea:focus-visible {
 
 /* Stagger the meal-grid day cards in as the Meals screen arrives. */
 .screen-swap .meal-card {
-  animation: card-rise 380ms var(--ease-out) both;
+  animation: card-rise 380ms var(--ease-out) backwards;
 }
 
 .screen-swap .meal-card:nth-child(1) { animation-delay: 30ms; }
@@ -3011,6 +3015,71 @@ textarea::placeholder {
   border-color: var(--tab-accent);
   background: var(--tab-accent);
   color: #fff;
+}
+
+/* Search + Filters button row on the Recipes tab. */
+.recipe-search-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-8);
+}
+
+.recipe-search-row .recipe-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.recipe-filter-button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 0 var(--space-14);
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+}
+
+.recipe-filter-button.active {
+  border-color: var(--tab-accent);
+  color: var(--tab-accent-strong);
+}
+
+.recipe-filter-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--tab-accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: var(--weight-heavy);
+}
+
+.recipe-result-count {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Inside the filter sheet: stack label over wrapped chips (nothing hidden). */
+.recipe-filter-sheet-body {
+  display: grid;
+  gap: var(--space-16);
+}
+
+.recipe-filter-group.recipe-filter-group-wrap {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.recipe-filter-chips.recipe-filter-chips-wrap {
+  flex-wrap: wrap;
+  overflow-x: visible;
 }
 
 .recipe-list {
