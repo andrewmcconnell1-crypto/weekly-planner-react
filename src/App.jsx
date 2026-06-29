@@ -552,12 +552,10 @@ function App() {
           getMealSummary={getMealSummary}
           openHomeDayInPlan={openHomeDayInPlan}
           homeShopStatus={homeShopStatus}
-          mealsPlannedCount={mealsPlannedCount}
           openHousehold={openHousehold}
           activeInventoryCount={activeInventoryCount}
-          activeStaplesCount={activeStaplesCount}
+          inventoryCount={inventory.length}
           unifiedPending={unifiedPending}
-          unifiedItems={unifiedItems}
           setMoreSection={setMoreSection}
         />
       )}

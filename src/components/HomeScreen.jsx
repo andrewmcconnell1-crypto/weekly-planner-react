@@ -3,7 +3,6 @@ import { ChevronRight, X } from "lucide-react";
 import TonightCard from "./TonightCard";
 import MealGroups from "./MealGroups";
 import { formatDate } from "../utils/dateUtils";
-import { days } from "../utils/mealUtils";
 
 export default function HomeScreen({
   todayDayName,
@@ -26,12 +25,10 @@ export default function HomeScreen({
   getMealSummary,
   openHomeDayInPlan,
   homeShopStatus,
-  mealsPlannedCount,
   openHousehold,
   activeInventoryCount,
-  activeStaplesCount,
+  inventoryCount,
   unifiedPending,
-  unifiedItems,
   setMoreSection,
 }) {
   return (
@@ -175,32 +172,16 @@ export default function HomeScreen({
           <button
             className="home-step"
             type="button"
-            onClick={() => setActiveTab("plan")}
+            onClick={() => openHousehold("stock")}
           >
             <span className="home-step-num">1</span>
 
             <span className="home-step-body">
-              <strong>Plan meals</strong>
+              <strong>Stock</strong>
               <span>
-                {mealsPlannedCount} of {days.length} dinners planned
-              </span>
-            </span>
-
-            <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-          </button>
-
-          <button
-            className="home-step"
-            type="button"
-            onClick={() => openHousehold("stock")}
-          >
-            <span className="home-step-num">2</span>
-
-            <span className="home-step-body">
-              <strong>Check stock &amp; recurring buys</strong>
-              <span>
-                {activeInventoryCount} in stock · {activeStaplesCount}{" "}
-                recurring
+                {inventoryCount} stock item{inventoryCount === 1 ? "" : "s"} ·{" "}
+                {activeInventoryCount} in · {inventoryCount - activeInventoryCount}{" "}
+                out
               </span>
             </span>
 
@@ -212,13 +193,12 @@ export default function HomeScreen({
             type="button"
             onClick={() => setActiveTab("shop")}
           >
-            <span className="home-step-num">3</span>
+            <span className="home-step-num">2</span>
 
             <span className="home-step-body">
               <strong>Shop</strong>
               <span>
-                {unifiedPending} to buy · {unifiedItems.length - unifiedPending}{" "}
-                done
+                {unifiedPending} item{unifiedPending === 1 ? "" : "s"} to buy
               </span>
             </span>
 
