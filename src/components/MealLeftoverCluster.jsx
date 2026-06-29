@@ -3,14 +3,22 @@ import { ChevronRight, CookingPot, CornerDownRight } from "lucide-react";
 // A cook day plus the leftover (repeat) days that follow it, rendered as one
 // merged card: the cook day is emphasised on top, the leftover nights hang
 // beneath it as recessed, tappable sub-rows.
-function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
+function MealLeftoverCluster({
+  leadDay,
+  leadSummary,
+  repeatDays,
+  onOpenDay,
+  todayDayName,
+}) {
   const coversNights = repeatDays.length + 1;
   const leadName = leadSummary.name || "No meal planned";
   const batches = Math.max(1, Math.round(Number(leadSummary.meal?.batches) || 1));
 
   return (
     <article
-      className="card meal-card meal-card-cook meal-cluster"
+      className={`card meal-card meal-card-cook meal-cluster ${
+        leadDay === todayDayName ? "meal-card-today" : ""
+      }`}
       data-tone={leadSummary.tone}
     >
       <button
@@ -23,7 +31,12 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
         </span>
 
         <span className="meal-row-main">
-          <span className="meal-row-day">{leadDay}</span>
+          <span className="meal-row-day">
+            {leadDay}
+            {leadDay === todayDayName && (
+              <span className="meal-today-pill">Today</span>
+            )}
+          </span>
           <strong>{leadName}</strong>
           <span className="meal-row-sub">
             Cook once · eat {coversNights} nights
@@ -42,7 +55,12 @@ function MealLeftoverCluster({ leadDay, leadSummary, repeatDays, onOpenDay }) {
             type="button"
             onClick={() => onOpenDay(repeatDay)}
           >
-            <span className="meal-cluster-repeat-day">{repeatDay}</span>
+            <span className="meal-cluster-repeat-day">
+              {repeatDay}
+              {repeatDay === todayDayName && (
+                <span className="meal-today-pill">Today</span>
+              )}
+            </span>
 
             <span className="meal-cluster-repeat-label">
               <CornerDownRight size={14} aria-hidden="true" />

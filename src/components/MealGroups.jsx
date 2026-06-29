@@ -33,7 +33,13 @@ function buildMealGroups(dayList, mealsObj, getSummary) {
 
 // Render a list of days as MealCards / leftover clusters (shared by the Meals
 // tab and the Home "coming up" list so the styling matches).
-export default function MealGroups({ dayList, meals, getMealSummary, onOpenDay }) {
+export default function MealGroups({
+  dayList,
+  meals,
+  getMealSummary,
+  onOpenDay,
+  todayDayName,
+}) {
   return buildMealGroups(dayList, meals, getMealSummary).map((group) =>
     group.repeatDays.length === 0 ? (
       <MealCard
@@ -44,6 +50,7 @@ export default function MealGroups({ dayList, meals, getMealSummary, onOpenDay }
         mealLabel={group.leadSummary.label}
         mealTone={group.leadSummary.tone}
         hasMeal={group.leadSummary.hasMeal}
+        isToday={group.leadDay === todayDayName}
         onOpen={() => onOpenDay(group.leadDay)}
       />
     ) : (
@@ -53,6 +60,7 @@ export default function MealGroups({ dayList, meals, getMealSummary, onOpenDay }
         leadSummary={group.leadSummary}
         repeatDays={group.repeatDays}
         onOpenDay={onOpenDay}
+        todayDayName={todayDayName}
       />
     )
   );
