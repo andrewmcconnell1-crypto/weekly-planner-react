@@ -90,7 +90,14 @@ export function useRecipeFilters(recipes) {
     setActiveTags(new Set());
   }
 
+  // Active filters (excluding the search box), for the "Filters (N)" badge.
+  const activeFilterCount =
+    (activeCategory !== "All" ? 1 : 0) +
+    (activeSource !== "All" ? 1 : 0) +
+    activeTags.size;
+
   return {
+    activeFilterCount,
     searchText,
     setSearchText,
     activeCategory,

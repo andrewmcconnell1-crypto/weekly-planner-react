@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { BookOpen, Plus, Search, SearchX } from "lucide-react";
+import { BookOpen, Plus, Search, SearchX, SlidersHorizontal } from "lucide-react";
 
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
-import RecipeFilters from "./RecipeFilters";
+import RecipeFilterSheet from "./RecipeFilterSheet";
 
 function RecipesList({
   recipes,
@@ -22,6 +22,7 @@ function RecipesList({
   const [openRecipeId, setOpenRecipeId] = useState(null);
   // Adding a recipe is a rare action, so it stays tucked behind a quiet toggle.
   const [showAddRecipe, setShowAddRecipe] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const filters = useRecipeFilters(recipes);
   const { searchText, setSearchText, visibleRecipes, clearFilters } = filters;
@@ -87,21 +88,43 @@ function RecipesList({
         </div>
       ) : (
         <>
-          <div className="recipe-search">
-            <Search
-              className="recipe-search-icon"
-              size={16}
-              aria-hidden="true"
-            />
-            <input
-              type="search"
-              placeholder="Search recipes..."
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value)}
-            />
+          <div className="recipe-search-row">
+            <div className="recipe-search">
+              <Search
+                className="recipe-search-icon"
+                size={16}
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                placeholder="Search recipes..."
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+              />
+            </div>
+
+            <button
+              type="button"
+              className={`recipe-filter-button ${
+                filters.activeFilterCount > 0 ? "active" : ""
+              }`}
+              onClick={() => setFiltersOpen(true)}
+            >
+              <SlidersHorizontal size={16} aria-hidden="true" />
+              Filters
+              {filters.activeFilterCount > 0 && (
+                <span className="recipe-filter-count">
+                  {filters.activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
-          <RecipeFilters filters={filters} />
+          {(filters.activeFilterCount > 0 || searchText) && (
+            <p className="recipe-result-count small-text">
+              {visibleRecipes.length} of {recipes.length} recipes
+            </p>
+          )}
 
           {visibleRecipes.length === 0 ? (
             <div className="recipes-empty">
@@ -126,6 +149,13 @@ function RecipesList({
             </div>
           )}
         </>
+      )}
+
+      {filtersOpen && (
+        <RecipeFilterSheet
+          filters={filters}
+          onClose={() => setFiltersOpen(false)}
+        />
       )}
 
       {openRecipe && (

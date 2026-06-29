@@ -4,7 +4,14 @@
 // several at once (active is a Set, "All" lights up when nothing is selected).
 // Renders nothing when there's only one real option to filter by ("All" + one),
 // since the pills couldn't do anything useful then.
-function RecipeFilter({ label, options, active, onSelect, multiple = false }) {
+function RecipeFilter({
+  label,
+  options,
+  active,
+  onSelect,
+  multiple = false,
+  wrap = false,
+}) {
   if (options.length <= 2) return null;
 
   const isActive = (option) => {
@@ -14,11 +21,11 @@ function RecipeFilter({ label, options, active, onSelect, multiple = false }) {
   };
 
   return (
-    <div className="recipe-filter-group">
+    <div className={`recipe-filter-group ${wrap ? "recipe-filter-group-wrap" : ""}`}>
       <p className="recipe-filter-label">{label}</p>
 
       <div
-        className="recipe-filter-chips"
+        className={`recipe-filter-chips ${wrap ? "recipe-filter-chips-wrap" : ""}`}
         aria-label={`Filter by ${label.toLowerCase()}`}
       >
         {options.map((option) => (
