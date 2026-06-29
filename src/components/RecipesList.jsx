@@ -178,27 +178,29 @@ function RecipesList({
             />
           </div>
 
-          <RecipeFilter
-            label="Category"
-            options={categories}
-            active={activeCategory}
-            onSelect={setActiveCategory}
-          />
+          <div className="recipe-filters">
+            <RecipeFilter
+              label="Category"
+              options={categories}
+              active={activeCategory}
+              onSelect={setActiveCategory}
+            />
 
-          <RecipeFilter
-            label="Tags"
-            options={tags}
-            active={activeTags}
-            onSelect={toggleTag}
-            multiple
-          />
+            <RecipeFilter
+              label="Tags"
+              options={tags}
+              active={activeTags}
+              onSelect={toggleTag}
+              multiple
+            />
 
-          <RecipeFilter
-            label="Source"
-            options={sources}
-            active={activeSource}
-            onSelect={setActiveSource}
-          />
+            <RecipeFilter
+              label="Source"
+              options={sources}
+              active={activeSource}
+              onSelect={setActiveSource}
+            />
+          </div>
 
           {visibleRecipes.length === 0 ? (
             <div className="recipes-empty">
