@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { BookOpen, Plus, Search, SearchX } from "lucide-react";
 
-import { groupRecipesByCategory, recipeSourceLabel, recipeTags } from "../utils/recipeUtils";
+import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
-import RecipeFilter from "./RecipeFilter";
-
-const SOURCE_ORDER = ["RecipeTin Eats", "Original recipes", "Custom"];
+import RecipeFilters from "./RecipeFilters";
 
 function RecipesList({
   recipes,
@@ -21,91 +19,16 @@ function RecipesList({
   availableGroups,
   updateIngredientGroup,
 }) {
-  const [searchText, setSearchText] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [activeSource, setActiveSource] = useState("All");
-  // Tags are multi-select (AND): an empty Set means "All".
-  const [activeTags, setActiveTags] = useState(() => new Set());
   const [openRecipeId, setOpenRecipeId] = useState(null);
   // Adding a recipe is a rare action, so it stays tucked behind a quiet toggle.
   const [showAddRecipe, setShowAddRecipe] = useState(false);
 
-  // Grouped only to get a sensible category order + name sort; we render flat.
-  const recipeGroups = groupRecipesByCategory(recipes);
-  const categories = ["All", ...recipeGroups.map((group) => group.category)];
-  const allRecipes = recipeGroups.flatMap((group) => group.recipes);
-
-  const distinctSources = [
-    ...new Set(recipes.map(recipeSourceLabel)),
-  ].sort((a, b) => {
-    const aIndex = SOURCE_ORDER.indexOf(a);
-    const bIndex = SOURCE_ORDER.indexOf(b);
-
-    if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-    return aIndex - bIndex;
-  });
-  const sources = ["All", ...distinctSources];
-
-  // Style / cuisine / attribute tags actually present, in the master tag order.
-  // (Vegetarian is omitted — it's already a category.)
-  const presentTags = new Set(recipes.flatMap((recipe) => recipe.tags || []));
-  const distinctTags = recipeTags.filter(
-    (tag) => tag !== "Vegetarian" && presentTags.has(tag)
-  );
-  const tags = ["All", ...distinctTags];
-
-  const cleanedSearch = searchText.trim().toLowerCase();
-  const categoryIsAvailable =
-    activeCategory === "All" || categories.includes(activeCategory);
-  const sourceIsAvailable =
-    activeSource === "All" || sources.includes(activeSource);
-  const selectedTags = [...activeTags];
-  const visibleRecipes = allRecipes.filter((recipe) => {
-    const inCategory =
-      !categoryIsAvailable ||
-      activeCategory === "All" ||
-      (recipe.category || "Other") === activeCategory;
-    const inSource =
-      !sourceIsAvailable ||
-      activeSource === "All" ||
-      recipeSourceLabel(recipe) === activeSource;
-    const recipeTagList = recipe.tags || [];
-    const inTag = selectedTags.every((tag) => recipeTagList.includes(tag));
-
-    if (!inCategory || !inSource || !inTag) return false;
-    if (!cleanedSearch) return true;
-
-    return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
-      .toLowerCase()
-      .includes(cleanedSearch);
-  });
+  const filters = useRecipeFilters(recipes);
+  const { searchText, setSearchText, visibleRecipes, clearFilters } = filters;
 
   const openRecipe = openRecipeId
     ? recipes.find((recipe) => recipe.id === openRecipeId)
     : null;
-
-  // "All" clears the selection; any other chip toggles in/out of the Set.
-  function toggleTag(option) {
-    if (option === "All") {
-      setActiveTags(new Set());
-      return;
-    }
-    setActiveTags((prev) => {
-      const next = new Set(prev);
-      if (next.has(option)) next.delete(option);
-      else next.add(option);
-      return next;
-    });
-  }
-
-  function clearFilters() {
-    setSearchText("");
-    setActiveCategory("All");
-    setActiveSource("All");
-    setActiveTags(new Set());
-  }
 
   return (
     <div className="recipes-panel">
@@ -178,29 +101,7 @@ function RecipesList({
             />
           </div>
 
-          <div className="recipe-filters">
-            <RecipeFilter
-              label="Category"
-              options={categories}
-              active={activeCategory}
-              onSelect={setActiveCategory}
-            />
-
-            <RecipeFilter
-              label="Tags"
-              options={tags}
-              active={activeTags}
-              onSelect={toggleTag}
-              multiple
-            />
-
-            <RecipeFilter
-              label="Source"
-              options={sources}
-              active={activeSource}
-              onSelect={setActiveSource}
-            />
-          </div>
+          <RecipeFilters filters={filters} />
 
           {visibleRecipes.length === 0 ? (
             <div className="recipes-empty">

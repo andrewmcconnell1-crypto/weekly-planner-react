@@ -15,10 +15,10 @@ import {
   X,
 } from "lucide-react";
 
-import { groupRecipesByCategory } from "../utils/recipeUtils";
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
-import RecipeFilter from "./RecipeFilter";
+import RecipeFilters from "./RecipeFilters";
+import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 
 // The meal-type choices presented on the chooser step. Each maps to one
@@ -118,8 +118,7 @@ function MealEditorSheet({
   // this reveals the picker to swap to a different recipe.
   const [changingRecipe, setChangingRecipe] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
-  const [recipeSearchText, setRecipeSearchText] = useState("");
-  const [activeRecipeCategory, setActiveRecipeCategory] = useState("All");
+  const recipeFilters = useRecipeFilters(recipes);
   const [closing, setClosing] = useState(false);
   const nameInputRef = useRef(null);
   const closeTimerRef = useRef(null);
@@ -145,24 +144,6 @@ function MealEditorSheet({
     if (summary.day === day) return false;
 
     return (summary.meal?.mealType || "cook") === "cook" && summary.hasMeal;
-  });
-
-  // Flat recipe list, kept in the familiar category order.
-  const cleanedRecipeSearch = recipeSearchText.trim().toLowerCase();
-  const recipeGroups = groupRecipesByCategory(recipes);
-  const recipeCategories = ["All", ...recipeGroups.map((group) => group.category)];
-  const sortedRecipes = recipeGroups.flatMap((group) => group.recipes);
-  const filteredRecipes = sortedRecipes.filter((recipe) => {
-    const inCategory =
-      activeRecipeCategory === "All" ||
-      (recipe.category || "Other") === activeRecipeCategory;
-
-    if (!inCategory) return false;
-    if (!cleanedRecipeSearch) return true;
-
-    return `${recipe.name} ${recipe.category} ${recipe.source || ""}`
-      .toLowerCase()
-      .includes(cleanedRecipeSearch);
   });
 
   // "How many nights?" only makes sense for a cooked meal with nights left in
@@ -278,12 +259,12 @@ function MealEditorSheet({
       repeatFromDay: "",
     });
 
-    setRecipeSearchText("");
+    recipeFilters.clearFilters();
     setChangingRecipe(false);
   }
 
   function clearDay() {
-    setRecipeSearchText("");
+    recipeFilters.clearFilters();
     onClearDay();
     setView("chooser");
   }
@@ -578,23 +559,20 @@ function MealEditorSheet({
             <input
               type="search"
               placeholder="Search recipes..."
-              value={recipeSearchText}
-              onChange={(event) => setRecipeSearchText(event.target.value)}
+              value={recipeFilters.searchText}
+              onChange={(event) =>
+                recipeFilters.setSearchText(event.target.value)
+              }
             />
           </div>
 
-          <RecipeFilter
-            label="Category"
-            options={recipeCategories}
-            active={activeRecipeCategory}
-            onSelect={setActiveRecipeCategory}
-          />
+          <RecipeFilters filters={recipeFilters} />
 
           <div className="recipe-picker-results recipe-picker-flat">
-            {filteredRecipes.length === 0 ? (
+            {recipeFilters.visibleRecipes.length === 0 ? (
               <p className="empty-state">No matching recipes.</p>
             ) : (
-              filteredRecipes.map((recipe) => (
+              recipeFilters.visibleRecipes.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}
                   recipe={recipe}
