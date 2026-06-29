@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Image as ImageIcon, Pencil, Trash2, X } from "lucide-react";
+import { ExternalLink, Pencil, Trash2, X } from "lucide-react";
 
 import {
   parseMethodSteps,
@@ -11,7 +11,6 @@ import {
 import { useDialogFocus } from "../hooks/useDialogFocus";
 import { groupLabelFor } from "../utils/ingredientMatch";
 import { recipeImagery } from "../utils/recipeImagery";
-import { fetchSourceImage } from "../utils/fetchSourceImage";
 import RecipeThumb from "./RecipeThumb";
 
 
@@ -32,31 +31,10 @@ function RecipeEditorSheet({
   const [mode, setMode] = useState("view");
   const [closing, setClosing] = useState(false);
   const [groupDrafts, setGroupDrafts] = useState({});
-  const [fetchingImage, setFetchingImage] = useState(false);
-  const [imageFetchError, setImageFetchError] = useState(null);
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
 
   useDialogFocus(dialogRef);
-
-  // Pull the source page's preview photo (og:image) on demand for a linked
-  // recipe, and save it as the recipe's image.
-  async function handleFetchImage() {
-    setFetchingImage(true);
-    setImageFetchError(null);
-    try {
-      const image = await fetchSourceImage(recipe.sourceUrl);
-      if (image) {
-        updateRecipe(recipe.id, { image });
-      } else {
-        setImageFetchError("No photo found on the source page.");
-      }
-    } catch {
-      setImageFetchError("Couldn't fetch a photo — you can paste a URL instead.");
-    } finally {
-      setFetchingImage(false);
-    }
-  }
 
   // The group an ingredient counts as for matching: the in-progress edit if any,
   // else its current resolved group (override or seed). Keyed by the ingredient
@@ -151,11 +129,7 @@ function RecipeEditorSheet({
         <div className="sheet-body">
           {mode === "view" ? (
             <div className="recipe-view">
-              <RecipeThumb
-                imagery={recipeImagery(recipe)}
-                name={recipe.name}
-                size="lg"
-              />
+              <RecipeThumb imagery={recipeImagery(recipe)} size="lg" />
 
               <div className="recipe-view-head">
                 <span
@@ -323,36 +297,6 @@ function RecipeEditorSheet({
                   />
                 </label>
 
-                <label className="recipe-image-field">
-                  <span>Photo URL</span>
-                  <input
-                    type="url"
-                    placeholder="https://… (leave blank for a coloured tile)"
-                    value={recipe.image || ""}
-                    onChange={(event) =>
-                      updateRecipe(recipe.id, { image: event.target.value })
-                    }
-                  />
-                </label>
-
-                {recipe.sourceUrl && (
-                  <div className="recipe-image-fetch">
-                    <button
-                      type="button"
-                      className="secondary"
-                      disabled={fetchingImage}
-                      onClick={handleFetchImage}
-                    >
-                      <ImageIcon size={15} aria-hidden="true" />
-                      {fetchingImage ? "Fetching photo…" : "Get photo from source"}
-                    </button>
-                    {imageFetchError && (
-                      <p className="small-text recipe-image-error">
-                        {imageFetchError}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div className="recipe-tags-field">

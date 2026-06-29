@@ -2922,25 +2922,14 @@ textarea::placeholder {
   gap: var(--space-10);
 }
 
-/* Recipe imagery tile: a gradient + dish emoji base, with a photo or generated
-   AI image layered on top (which shows the emoji through while it loads). */
+/* Recipe tile: a gradient keyed to the category tone with a dish emoji. */
 .recipe-thumb {
-  position: relative;
   flex-shrink: 0;
   display: grid;
   place-items: center;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--soft);
-}
-
-.recipe-thumb img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .recipe-thumb-sm {
@@ -3373,23 +3362,6 @@ textarea::placeholder {
 .recipe-detail-fields {
   display: grid;
   gap: var(--space-10);
-}
-
-.recipe-image-fetch {
-  display: grid;
-  gap: var(--space-6);
-}
-
-.recipe-image-fetch button {
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.recipe-image-error {
-  margin: 0;
-  color: var(--danger);
 }
 
 .recipe-detail-fields label {
