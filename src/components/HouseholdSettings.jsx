@@ -132,8 +132,7 @@ function HouseholdSettings({ household, cloud, pendingJoinCode, onJoined }) {
   }
 
   return (
-    <section className="settings-group household-settings">
-      <strong>Household sharing</strong>
+    <div className="household-settings">
       <p className="small-text">
         Share one planner — the same meals, shopping list and stock — with your
         partner or housemates. Everyone keeps their own login.
@@ -310,7 +309,7 @@ function HouseholdSettings({ household, cloud, pendingJoinCode, onJoined }) {
           )}
         </>
       )}
-    </section>
+    </div>
   );
 }
 
