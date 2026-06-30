@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 import { useDialogFocus } from "../hooks/useDialogFocus";
+import { SceneList } from "./WalkthroughScenes";
 
 // Explains the (non-obvious) shopping model: stock vs recurring buys vs meals,
 // how the generated list is a "top-up" of a standing grocery list, and the
@@ -73,6 +74,10 @@ function ShoppingHelpSheet({ keepStandingList = true, onClose }) {
         </div>
 
         <div className="sheet-body help-body">
+          <div className="help-stage">
+            <SceneList />
+          </div>
+
           <p>
             The app builds your weekly shopping list from three things you set
             up once and keep tweaking:

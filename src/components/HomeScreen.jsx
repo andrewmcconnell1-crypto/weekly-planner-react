@@ -1,4 +1,4 @@
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, PlayCircle, X } from "lucide-react";
 
 import TonightCard from "./TonightCard";
 import MealGroups from "./MealGroups";
@@ -27,6 +27,7 @@ export default function HomeScreen({
   nextWeekPlannedCount,
   openNextWeekPlan,
   setMoreSection,
+  openWalkthrough,
 }) {
   const gapDays = days.filter(
     (day) => !getMealSummary(day, meals[day], meals).hasMeal
@@ -60,42 +61,31 @@ export default function HomeScreen({
           </button>
 
           <p className="section-kicker">Getting started</p>
-          <strong>Here's how it works</strong>
+          <strong>New here? Take the 60-second tour</strong>
+          <p className="welcome-lede">
+            See how planning meals, stocking your kitchen, and an
+            auto-building shopping list fit together — with a quick animated
+            walkthrough.
+          </p>
 
-          <div className="welcome-steps">
-            <div className="welcome-step">
-              <span className="welcome-step-num">1</span>
-              <p>
-                <strong>Plan your week</strong> — pick recipes for each night
-                on Meals; cook once and reuse leftovers.
-              </p>
-            </div>
+          <div className="welcome-actions">
+            <button
+              type="button"
+              className="primary-button welcome-cta with-icon"
+              onClick={openWalkthrough}
+            >
+              <PlayCircle size={16} aria-hidden="true" />
+              Take the tour
+            </button>
 
-            <div className="welcome-step">
-              <span className="welcome-step-num">2</span>
-              <p>
-                <strong>Stock the basics</strong> — add recurring buys in
-                Kitchen and tick what's already in stock.
-              </p>
-            </div>
-
-            <div className="welcome-step">
-              <span className="welcome-step-num">3</span>
-              <p>
-                <strong>Shop the auto-list</strong> — Shop builds your list
-                from your meals, skips what's in stock, and orders it by when
-                you'll need it.
-              </p>
-            </div>
+            <button
+              type="button"
+              className="welcome-skip"
+              onClick={() => setActiveTab("plan")}
+            >
+              Skip — start planning
+            </button>
           </div>
-
-          <button
-            type="button"
-            className="primary-button welcome-cta"
-            onClick={() => setActiveTab("plan")}
-          >
-            Start planning
-          </button>
         </div>
       )}
 

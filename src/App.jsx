@@ -28,6 +28,7 @@ const RecipeDiscoverySheet = lazy(
 );
 const ShoppingHelpSheet = lazy(() => import("./components/ShoppingHelpSheet"));
 const StockCatalogSheet = lazy(() => import("./components/StockCatalogSheet"));
+const WalkthroughSheet = lazy(() => import("./components/WalkthroughSheet"));
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 import { getSunday, getNextSunday, getWeekKey } from "./utils/dateUtils";
@@ -75,6 +76,7 @@ function App() {
   const [shopLayout, setShopLayout] = useState("priority"); // "priority" | "aisle"
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
   const [stockCatalogOpen, setStockCatalogOpen] = useState(false);
+  const [walkthroughOpen, setWalkthroughOpen] = useState(false);
 
   const {
     user,
@@ -131,7 +133,9 @@ function App() {
         ? () => setShoppingHelpOpen(false)
         : stockCatalogOpen
           ? () => setStockCatalogOpen(false)
-          : null;
+          : walkthroughOpen
+            ? () => setWalkthroughOpen(false)
+            : null;
 
   useBackToClose(Boolean(closeOpenOverlay), () => closeOpenOverlay?.());
 
@@ -550,6 +554,7 @@ function App() {
           nextWeekPlannedCount={nextWeekPlannedCount}
           openNextWeekPlan={openNextWeekPlan}
           setMoreSection={setMoreSection}
+          openWalkthrough={() => setWalkthroughOpen(true)}
         />
       )}
 
@@ -736,6 +741,22 @@ function App() {
               inventory={inventory}
               onActivate={activateStockItem}
               onClose={() => setStockCatalogOpen(false)}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      )}
+
+      {walkthroughOpen && (
+        <ErrorBoundary
+          fallback={<SheetError onClose={() => setWalkthroughOpen(false)} />}
+        >
+          <Suspense fallback={null}>
+            <WalkthroughSheet
+              onClose={() => setWalkthroughOpen(false)}
+              onStartPlanning={() => {
+                setWalkthroughOpen(false);
+                setActiveTab("plan");
+              }}
             />
           </Suspense>
         </ErrorBoundary>
