@@ -28,18 +28,22 @@ const SAVE_DEBOUNCE_MS = 800;
 // populated demo held in memory only, never read from or written to storage, so
 // it can't pollute a real account. It exposes the same per-slice setters the
 // app already used, so the rest of the UI is unchanged.
-export function usePlannerStore(user, guest = false) {
+export function usePlannerStore(user, guest = false, dataOwnerId) {
   const cloud = isSupabaseConfigured && Boolean(user);
   const userId = user?.id ?? null;
+  // The row we actually read/write. In a shared household this is the owner's
+  // id; otherwise it's the user's own id. Defaults to the user's id so callers
+  // that don't pass it (and all existing behaviour) are unchanged.
+  const dataKey = dataOwnerId ?? userId;
 
   const [data, setData] = useState(loadLocalData);
-  const [loadedUserId, setLoadedUserId] = useState(null);
+  const [loadedKey, setLoadedKey] = useState(null);
   const [syncError, setSyncError] = useState(false);
 
   // Derived: we're loading whenever we're in cloud mode but the data on screen
-  // isn't yet the current user's. (Derived, so we never setState in an effect
-  // just to flip a loading flag.)
-  const loading = cloud && loadedUserId !== userId;
+  // isn't yet for the current data row. (Derived, so we never setState in an
+  // effect just to flip a loading flag.)
+  const loading = cloud && loadedKey !== dataKey;
 
   // Skip the very next autosave after we *load* data (so loading doesn't
   // immediately write the same data straight back out).
@@ -96,7 +100,7 @@ export function usePlannerStore(user, guest = false) {
     (async () => {
       setSyncError(false);
       try {
-        const remote = await fetchCloudData(userId);
+        const remote = await fetchCloudData(dataKey);
         if (cancelled) return;
 
         if (remote) {
@@ -106,26 +110,26 @@ export function usePlannerStore(user, guest = false) {
           // First sign-in: seed the account from existing local data if there
           // is any on this device, otherwise from the bundled defaults.
           const seed = hasLocalData() ? loadLocalData() : defaultData();
-          const writtenAt = await saveCloudData(userId, seed);
+          const writtenAt = await saveCloudData(dataKey, seed);
           if (cancelled) return;
           lastWrittenAtRef.current = writtenAt;
           skipNextSaveRef.current = true;
           setData(normaliseData(seed));
         }
 
-        setLoadedUserId(userId);
+        setLoadedKey(dataKey);
       } catch {
         if (cancelled) return;
         // Surface the error but stop blocking on the loading screen.
         setSyncError(true);
-        setLoadedUserId(userId);
+        setLoadedKey(dataKey);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [cloud, userId]);
+  }, [cloud, dataKey]);
 
   // On sign-out, discard the account's in-memory data so guest / local mode
   // starts fresh from defaults instead of showing (or writing locally) the
@@ -138,7 +142,7 @@ export function usePlannerStore(user, guest = false) {
     if (prevUserId && !userId) {
       skipNextSaveRef.current = true;
       setData(defaultData());
-      setLoadedUserId(null);
+      setLoadedKey(null);
     }
   }, [userId]);
 
@@ -176,7 +180,7 @@ export function usePlannerStore(user, guest = false) {
     // incoming remote change won't silently overwrite it.
     dirtyRef.current = true;
     saveTimerRef.current = setTimeout(() => {
-      saveCloudData(userId, data)
+      saveCloudData(dataKey, data)
         .then((writtenAt) => {
           lastWrittenAtRef.current = writtenAt;
           dirtyRef.current = false;
@@ -187,21 +191,21 @@ export function usePlannerStore(user, guest = false) {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [data, cloud, loading, userId, guest]);
+  }, [data, cloud, loading, dataKey, guest]);
 
   // When you return to the app, pull the latest (e.g. edited on another device).
   useEffect(() => {
     if (!cloud) return;
 
     function handleFocus() {
-      fetchCloudData(userId)
+      fetchCloudData(dataKey)
         .then((remote) => receiveRemote(remote))
         .catch(() => {});
     }
 
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, [cloud, userId, receiveRemote]);
+  }, [cloud, dataKey, receiveRemote]);
 
   // Live updates: when another device writes our row, reflect it immediately.
   // (Requires the table to be in the supabase_realtime publication; if it's not,
@@ -210,14 +214,14 @@ export function usePlannerStore(user, guest = false) {
     if (!cloud) return;
 
     const channel = supabase
-      .channel(`app_data:${userId}`)
+      .channel(`app_data:${dataKey}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "app_data",
-          filter: `user_id=eq.${userId}`,
+          filter: `user_id=eq.${dataKey}`,
         },
         (payload) => {
           const row = payload.new;
@@ -234,7 +238,7 @@ export function usePlannerStore(user, guest = false) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [cloud, userId, receiveRemote]);
+  }, [cloud, dataKey, receiveRemote]);
 
   // Auto-capture a recovery point when the app is in a settled state, throttled
   // so edits don't pile up snapshots. Reads `data` and writes localStorage only
