@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, UserPlus, LogIn } from "lucide-react";
+import { Copy, Check, UserPlus, LogIn, Share2 } from "lucide-react";
 
 import {
   createInvite,
@@ -8,6 +8,9 @@ import {
   removeMember,
   disbandHousehold,
   friendlyHouseholdError,
+  inviteLink,
+  inviteMessage,
+  clearPendingJoinCode,
 } from "../lib/household";
 
 // The "Household" section of Settings: invite a partner by code, join with a
@@ -17,9 +20,10 @@ import {
 //
 // `household` is the useHousehold() result: { ownerId, role, isShared,
 // members, available, currentUserId, refresh }.
-function HouseholdSettings({ household, cloud }) {
+function HouseholdSettings({ household, cloud, pendingJoinCode, onJoined }) {
   const [code, setCode] = useState(null); // the invite code we generated
-  const [joinCode, setJoinCode] = useState("");
+  // Prefilled from a ?join= invite link when the recipient opened the app.
+  const [joinCode, setJoinCode] = useState(pendingJoinCode || "");
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null); // { tone, message }
@@ -55,9 +59,36 @@ function HouseholdSettings({ household, cloud }) {
     }
   }
 
+  // One-tap share: the native share sheet (phones) with the link + code, or a
+  // clipboard copy of the same message as a desktop fallback.
+  async function handleShare() {
+    const text = inviteMessage(code);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join my meal planner",
+          text,
+          url: inviteLink(code),
+        });
+        return;
+      } catch {
+        // Cancelled or unsupported payload — fall back to copying.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus({
+        tone: "ok",
+        message: "Invite copied — paste it to your partner.",
+      });
+    } catch {
+      // Clipboard blocked; the link and code are shown to copy by hand.
+    }
+  }
+
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(inviteMessage(code));
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -76,6 +107,8 @@ function HouseholdSettings({ household, cloud }) {
     if (ownerId) {
       setJoinCode("");
       setCode(null);
+      clearPendingJoinCode();
+      onJoined?.();
     }
   }
 
@@ -163,33 +196,47 @@ function HouseholdSettings({ household, cloud }) {
               </div>
 
               {code && (
-                <div className="household-code">
-                  <code>{code}</code>
-                  <button
-                    type="button"
-                    className="secondary with-icon"
-                    onClick={handleCopy}
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={15} aria-hidden="true" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={15} aria-hidden="true" />
-                        Copy
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
+                <>
+                  <div className="household-code">
+                    <code>{code}</code>
+                  </div>
 
-              {code && (
-                <p className="small-text">
-                  Send this code to your partner. In their app, they go to
-                  Settings → Household → Join and enter it. It expires in 7 days.
-                </p>
+                  <div className="settings-actions">
+                    <button
+                      type="button"
+                      className="primary-button with-icon"
+                      onClick={handleShare}
+                    >
+                      <Share2 size={15} aria-hidden="true" />
+                      Share invite
+                    </button>
+
+                    <button
+                      type="button"
+                      className="secondary with-icon"
+                      onClick={handleCopy}
+                    >
+                      {copied ? (
+                        <>
+                          <Check size={15} aria-hidden="true" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={15} aria-hidden="true" />
+                          Copy link &amp; code
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <p className="small-text">
+                    “Share invite” sends a message with a tap-to-join link and
+                    the code {code}. Your partner signs in with their own
+                    account and the link drops them straight onto the join
+                    screen. The code expires in 7 days.
+                  </p>
+                </>
               )}
             </div>
           )}

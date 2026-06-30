@@ -74,6 +74,67 @@ export async function disbandHousehold() {
   if (error) throw error;
 }
 
+// ---------------------------------------------------------------------------
+// Invite link + share helpers
+// ---------------------------------------------------------------------------
+const JOIN_PARAM = "join";
+const JOIN_STORAGE_KEY = "pendingJoinCode";
+
+// The app's own URL (origin + path, no query/hash), used as the invite link base.
+export function appBaseUrl() {
+  return window.location.origin + window.location.pathname;
+}
+
+// A link that opens the app and prefills the join code for the recipient.
+export function inviteLink(code) {
+  return `${appBaseUrl()}?${JOIN_PARAM}=${encodeURIComponent(code)}`;
+}
+
+// The full message we share: a friendly line, the link (which auto-fills the
+// code), and the code spelled out as a fallback for anyone typing it by hand.
+export function inviteMessage(code) {
+  return [
+    "Join my meal planner so we share the same meals, shopping list and stock 🛒",
+    "",
+    `Open: ${inviteLink(code)}`,
+    `Code: ${code}`,
+    "",
+    "Sign in with your own account, then it'll offer to join.",
+  ].join("\n");
+}
+
+// On load, pull a ?join=CODE off the URL into sessionStorage (so it survives a
+// sign-in redirect) and clean the address bar. Returns the pending code, if any.
+export function captureJoinCodeFromUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get(JOIN_PARAM);
+
+    if (code) {
+      sessionStorage.setItem(JOIN_STORAGE_KEY, code.trim().toUpperCase());
+      params.delete(JOIN_PARAM);
+      const query = params.toString();
+      const newUrl =
+        window.location.pathname +
+        (query ? `?${query}` : "") +
+        window.location.hash;
+      window.history.replaceState({}, "", newUrl);
+    }
+
+    return sessionStorage.getItem(JOIN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function clearPendingJoinCode() {
+  try {
+    sessionStorage.removeItem(JOIN_STORAGE_KEY);
+  } catch {
+    // sessionStorage unavailable — nothing to clear.
+  }
+}
+
 // Turn a raw RPC/Postgres error into a short, friendly message for the UI.
 export function friendlyHouseholdError(error) {
   const message = String(error?.message || "");

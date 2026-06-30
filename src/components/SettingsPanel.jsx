@@ -53,6 +53,8 @@ function SettingsPanel({
   user,
   cloud,
   household,
+  pendingJoinCode,
+  onJoinedHousehold,
   onSignOut,
   keepStandingList = true,
   onSetKeepStandingList,
@@ -190,7 +192,12 @@ function SettingsPanel({
       )}
 
       {cloud && household && (
-        <HouseholdSettings household={household} cloud={cloud} />
+        <HouseholdSettings
+          household={household}
+          cloud={cloud}
+          pendingJoinCode={pendingJoinCode}
+          onJoined={onJoinedHousehold}
+        />
       )}
 
       {onSetKeepStandingList && (

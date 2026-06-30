@@ -14,6 +14,9 @@ vi.mock("../lib/household", () => ({
   removeMember: vi.fn(),
   disbandHousehold: vi.fn(),
   friendlyHouseholdError: () => "Something went wrong.",
+  inviteLink: (code) => `https://app.example/?join=${code}`,
+  inviteMessage: (code) => `Join my planner. Code: ${code}`,
+  clearPendingJoinCode: vi.fn(),
 }));
 
 function makeHousehold(overrides = {}) {
@@ -65,18 +68,45 @@ describe("HouseholdSettings", () => {
     expect(await screen.findByText("4F9A2C")).toBeInTheDocument();
   });
 
+  it("shares the invite via the native share sheet when available", async () => {
+    const user = userEvent.setup();
+    household.createInvite.mockResolvedValue("4F9A2C");
+    const share = vi.fn().mockResolvedValue();
+    vi.stubGlobal("navigator", { ...navigator, share });
+
+    render(<HouseholdSettings household={makeHousehold()} cloud />);
+
+    await user.click(screen.getByRole("button", { name: /Invite someone/i }));
+    await screen.findByText("4F9A2C");
+    await user.click(screen.getByRole("button", { name: /Share invite/i }));
+
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({ url: "https://app.example/?join=4F9A2C" })
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it("prefills the join field from an invite link code", () => {
+    render(
+      <HouseholdSettings household={makeHousehold()} cloud pendingJoinCode="ZZ9Z9Z" />
+    );
+    expect(screen.getByPlaceholderText(/4F9A2C/i)).toHaveValue("ZZ9Z9Z");
+  });
+
   it("joins with a code and refreshes", async () => {
     const user = userEvent.setup();
     household.joinHousehold.mockResolvedValue("owner-1");
     const hh = makeHousehold();
+    const onJoined = vi.fn();
 
-    render(<HouseholdSettings household={hh} cloud />);
+    render(<HouseholdSettings household={hh} cloud onJoined={onJoined} />);
 
     await user.type(screen.getByPlaceholderText(/4F9A2C/i), "abc123");
     await user.click(screen.getByRole("button", { name: /^Join/i }));
 
     expect(household.joinHousehold).toHaveBeenCalledWith("abc123");
     await waitFor(() => expect(hh.refresh).toHaveBeenCalled());
+    expect(onJoined).toHaveBeenCalled();
   });
 
   it("lists members and lets the owner remove one", async () => {
