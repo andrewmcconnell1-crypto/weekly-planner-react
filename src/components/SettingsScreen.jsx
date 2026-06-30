@@ -11,6 +11,7 @@ export default function SettingsScreen({
   onImport,
   user,
   cloud,
+  guest,
   household,
   pendingJoinCode,
   onJoinedHousehold,
@@ -37,6 +38,7 @@ export default function SettingsScreen({
             onImport={onImport}
             user={user}
             cloud={cloud}
+            guest={guest}
             household={household}
             pendingJoinCode={pendingJoinCode}
             onJoinedHousehold={onJoinedHousehold}
