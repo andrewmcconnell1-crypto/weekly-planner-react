@@ -10,6 +10,7 @@ import "./App.css";
 
 import ShoppingList from "./components/ShoppingList";
 import SignInScreen from "./components/SignInScreen";
+import UpdatePasswordScreen from "./components/UpdatePasswordScreen";
 import UpdateBanner from "./components/UpdateBanner";
 import InviteBanner from "./components/InviteBanner";
 import UndoSnackbar from "./components/UndoSnackbar";
@@ -88,10 +89,15 @@ function App() {
   const {
     user,
     loading: authLoading,
+    recoveryMode,
     signInWithGoogle,
     signInWithEmail,
     signUpWithEmail,
     signInWithMagicLink,
+    resetPassword,
+    updatePassword,
+    resendConfirmation,
+    cancelRecovery,
     signOut,
   } = useAuth();
   // Which planner row to read/write: a shared household owner's id, or the
@@ -275,6 +281,17 @@ function App() {
     return <LoadingScreen message="Loading…" />;
   }
 
+  // A password-recovery link takes precedence: the link signs the user in, but
+  // we collect a new password before showing their plan.
+  if (isSupabaseConfigured && recoveryMode) {
+    return (
+      <UpdatePasswordScreen
+        onUpdatePassword={updatePassword}
+        onCancel={cancelRecovery}
+      />
+    );
+  }
+
   if (isSupabaseConfigured && !user && !guest) {
     return (
       <SignInScreen
@@ -282,6 +299,8 @@ function App() {
         onEmailSignIn={signInWithEmail}
         onEmailSignUp={signUpWithEmail}
         onMagicLink={signInWithMagicLink}
+        onResetPassword={resetPassword}
+        onResendConfirmation={resendConfirmation}
         onGuest={() => setGuest(true)}
       />
     );

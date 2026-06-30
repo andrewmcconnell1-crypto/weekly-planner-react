@@ -29,14 +29,18 @@ function SignInScreen({
   onEmailSignIn,
   onEmailSignUp,
   onMagicLink,
+  onResetPassword,
+  onResendConfirmation,
   onGuest,
 }) {
-  const [method, setMethod] = useState("password"); // "password" | "link"
+  const [method, setMethod] = useState("password"); // "password" | "link" | "reset"
   const [mode, setMode] = useState("signin"); // password: "signin" | "signup"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null); // { tone, message }
+  // Shown when a sign-in fails because the account's email isn't confirmed yet.
+  const [needsConfirm, setNeedsConfirm] = useState(false);
 
   const cleanedEmail = email.trim();
 
@@ -45,12 +49,19 @@ function SignInScreen({
     if (/rate limit/i.test(message) || error?.status === 429) {
       return "Too many emails were just sent. Wait a few minutes, or sign in with a password instead.";
     }
+    if (/email not confirmed/i.test(message)) {
+      return "Your email isn't confirmed yet. Check your inbox (and spam) for the confirmation link, or resend it below.";
+    }
+    if (/invalid login credentials/i.test(message)) {
+      return "That email and password don't match. Double-check them, or reset your password below.";
+    }
     return message;
   }
 
   function switchMethod(next) {
     setMethod(next);
     setStatus(null);
+    setNeedsConfirm(false);
   }
 
   async function submitPassword(event) {
@@ -64,6 +75,7 @@ function SignInScreen({
 
     setBusy(true);
     setStatus(null);
+    setNeedsConfirm(false);
 
     const action = mode === "signup" ? onEmailSignUp : onEmailSignIn;
     const { data, error } = (await action(cleanedEmail, password)) || {};
@@ -71,6 +83,9 @@ function SignInScreen({
     setBusy(false);
 
     if (error) {
+      if (/email not confirmed/i.test(error?.message || "")) {
+        setNeedsConfirm(true);
+      }
       setStatus({ tone: "error", message: friendlyError(error) });
       return;
     }
@@ -81,6 +96,47 @@ function SignInScreen({
         message: "Almost there — check your email to confirm your account.",
       });
     }
+  }
+
+  async function submitReset(event) {
+    event.preventDefault();
+    if (busy) return;
+
+    if (!cleanedEmail) {
+      setStatus({ tone: "error", message: "Enter your email." });
+      return;
+    }
+
+    setBusy(true);
+    setStatus(null);
+
+    const { error } = (await onResetPassword(cleanedEmail)) || {};
+
+    setBusy(false);
+    setStatus(
+      error
+        ? { tone: "error", message: friendlyError(error) }
+        : {
+            tone: "ok",
+            message: `Password reset link sent to ${cleanedEmail}. Open it to set a new password.`,
+          }
+    );
+  }
+
+  async function handleResend() {
+    if (busy || !cleanedEmail) return;
+    setBusy(true);
+    const { error } = (await onResendConfirmation(cleanedEmail)) || {};
+    setBusy(false);
+    setNeedsConfirm(false);
+    setStatus(
+      error
+        ? { tone: "error", message: friendlyError(error) }
+        : {
+            tone: "ok",
+            message: `Confirmation email re-sent to ${cleanedEmail}.`,
+          }
+    );
   }
 
   async function submitLink(event) {
@@ -124,29 +180,35 @@ function SignInScreen({
           <span>or with email</span>
         </p>
 
-        <div className="auth-methods" role="tablist" aria-label="Email sign-in">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={method === "password"}
-            className={method === "password" ? "active" : ""}
-            onClick={() => switchMethod("password")}
+        {method !== "reset" && (
+          <div
+            className="auth-methods"
+            role="tablist"
+            aria-label="Email sign-in"
           >
-            Password
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={method === "password"}
+              className={method === "password" ? "active" : ""}
+              onClick={() => switchMethod("password")}
+            >
+              Password
+            </button>
 
-          <button
-            type="button"
-            role="tab"
-            aria-selected={method === "link"}
-            className={method === "link" ? "active" : ""}
-            onClick={() => switchMethod("link")}
-          >
-            Email link
-          </button>
-        </div>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={method === "link"}
+              className={method === "link" ? "active" : ""}
+              onClick={() => switchMethod("link")}
+            >
+              Email link
+            </button>
+          </div>
+        )}
 
-        {method === "password" ? (
+        {method === "password" && (
           <form className="auth-form" onSubmit={submitPassword}>
             <label className="auth-field">
               <span>Email</span>
@@ -176,12 +238,34 @@ function SignInScreen({
               {mode === "signup" ? "Create account" : "Sign in"}
             </button>
 
+            {mode === "signin" && (
+              <button
+                type="button"
+                className="auth-link"
+                onClick={() => switchMethod("reset")}
+              >
+                Forgot your password?
+              </button>
+            )}
+
+            {needsConfirm && (
+              <button
+                type="button"
+                className="secondary"
+                disabled={busy}
+                onClick={handleResend}
+              >
+                Resend confirmation email
+              </button>
+            )}
+
             <button
               type="button"
               className="auth-link"
               onClick={() => {
                 setMode(mode === "signup" ? "signin" : "signup");
                 setStatus(null);
+                setNeedsConfirm(false);
               }}
             >
               {mode === "signup"
@@ -189,7 +273,9 @@ function SignInScreen({
                 : "New here? Create an account"}
             </button>
           </form>
-        ) : (
+        )}
+
+        {method === "link" && (
           <form className="auth-form" onSubmit={submitLink}>
             <label className="auth-field">
               <span>Email</span>
@@ -209,6 +295,37 @@ function SignInScreen({
             <p className="auth-hint">
               We'll email you a link to sign in — no password needed.
             </p>
+          </form>
+        )}
+
+        {method === "reset" && (
+          <form className="auth-form" onSubmit={submitReset}>
+            <label className="auth-field">
+              <span>Email</span>
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+
+            <button type="submit" className="primary-button" disabled={busy}>
+              Send password reset link
+            </button>
+
+            <p className="auth-hint">
+              We'll email you a link to set a new password.
+            </p>
+
+            <button
+              type="button"
+              className="auth-link"
+              onClick={() => switchMethod("password")}
+            >
+              Back to sign in
+            </button>
           </form>
         )}
 
