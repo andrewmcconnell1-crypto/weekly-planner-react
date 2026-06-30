@@ -1,7 +1,16 @@
 import { useRef, useState } from "react";
+import {
+  Users,
+  ShoppingBasket,
+  DatabaseBackup,
+  RotateCcw,
+  History,
+  LifeBuoy,
+} from "lucide-react";
 
 import HouseholdSettings from "./HouseholdSettings";
 import ProfileAvatar from "./ProfileAvatar";
+import SettingsSection from "./SettingsSection";
 import { profileIdentity } from "../utils/profile";
 
 // localStorage keys backed up / restored by export & import. Object-shaped keys
@@ -206,18 +215,27 @@ function SettingsPanel({
       </section>
 
       {cloud && household && (
-        <HouseholdSettings
-          household={household}
-          cloud={cloud}
-          pendingJoinCode={pendingJoinCode}
-          onJoined={onJoinedHousehold}
-        />
+        <SettingsSection
+          icon={Users}
+          title="Household sharing"
+          subtitle="Share one plan with your partner"
+          defaultOpen={Boolean(pendingJoinCode)}
+        >
+          <HouseholdSettings
+            household={household}
+            cloud={cloud}
+            pendingJoinCode={pendingJoinCode}
+            onJoined={onJoinedHousehold}
+          />
+        </SettingsSection>
       )}
 
       {onSetKeepStandingList && (
-        <section className="settings-group">
-          <strong>Shopping style</strong>
-
+        <SettingsSection
+          icon={ShoppingBasket}
+          title="Shopping"
+          subtitle="How your list is built"
+        >
           <label className="settings-toggle">
             <input
               type="checkbox"
@@ -253,142 +271,147 @@ function SettingsPanel({
               </button>
             </div>
           )}
-        </section>
+        </SettingsSection>
       )}
 
-      <details className="settings-advanced">
-        <summary>Advanced</summary>
+      <SettingsSection
+        icon={DatabaseBackup}
+        title="Backup & data"
+        subtitle="Export or import a copy"
+      >
+        <p className="small-text">
+          {cloud
+            ? "Your data is backed up to your account and synced across your devices automatically. You can still export a manual snapshot, or import one to restore or move data."
+            : "Export a snapshot of your data to a file, or import one to restore it."}
+        </p>
 
-        <section className="settings-group">
-          <strong>Export &amp; import data</strong>
-          <p className="small-text">
-            {cloud
-              ? "Your data is backed up to your account and synced across your devices automatically. You can still export a manual snapshot, or import one to restore or move data."
-              : "Export a snapshot of your data to a file, or import one to restore it."}
+        <div className="settings-actions">
+          <button type="button" className="secondary" onClick={exportData}>
+            Export data
+          </button>
+
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Import data
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="settings-file-input"
+            onChange={handleFileChange}
+          />
+        </div>
+
+        {status && (
+          <p
+            className={`small-text settings-status ${
+              status.tone === "error" ? "settings-status-error" : ""
+            }`}
+            role="status"
+          >
+            {status.message}
           </p>
+        )}
+      </SettingsSection>
 
-          <div className="settings-actions">
-            <button type="button" className="secondary" onClick={exportData}>
-              Export data
-            </button>
-
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Import data
-            </button>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/json,.json"
-              className="settings-file-input"
-              onChange={handleFileChange}
-            />
-          </div>
-
-          {status && (
-            <p
-              className={`small-text settings-status ${
-                status.tone === "error" ? "settings-status-error" : ""
-              }`}
-              role="status"
-            >
-              {status.message}
-            </p>
+      {(resetStockToStarterList || resetStaplesToStarterList) && (
+        <SettingsSection
+          icon={RotateCcw}
+          title="Restore defaults"
+          subtitle="Reset stock or recurring buys"
+        >
+          {resetStockToStarterList && (
+            <div className="settings-reset-block">
+              <p className="small-text">
+                Replace your stock list with the app's default set. Removes any
+                custom stock items and marks the default items as in stock.
+              </p>
+              <div className="settings-actions">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={resetStockToStarterList}
+                >
+                  Restore default stock list
+                </button>
+              </div>
+            </div>
           )}
-        </section>
 
-        {resetStockToStarterList && (
-          <section className="settings-group">
-            <strong>Restore default stock list</strong>
-            <p className="small-text">
-              Replace your stock list with the app's default set. Removes any
-              custom stock items and marks the default items as in stock.
-            </p>
-
-            <div className="settings-actions">
-              <button
-                type="button"
-                className="secondary"
-                onClick={resetStockToStarterList}
-              >
-                Restore default stock list
-              </button>
+          {resetStaplesToStarterList && (
+            <div className="settings-reset-block">
+              <p className="small-text">
+                Replace your recurring buys with the app's default weekly list.
+                Removes any custom recurring items.
+              </p>
+              <div className="settings-actions">
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={resetStaplesToStarterList}
+                >
+                  Restore default recurring buys
+                </button>
+              </div>
             </div>
-          </section>
-        )}
+          )}
+        </SettingsSection>
+      )}
 
-        {resetStaplesToStarterList && (
-          <section className="settings-group">
-            <strong>Restore default recurring buys</strong>
-            <p className="small-text">
-              Replace your recurring buys with the app's default weekly list.
-              Removes any custom recurring items.
-            </p>
-
-            <div className="settings-actions">
-              <button
-                type="button"
-                className="secondary"
-                onClick={resetStaplesToStarterList}
-              >
-                Restore default recurring buys
-              </button>
-            </div>
-          </section>
-        )}
-
-        {snapshots.length > 0 && (
-          <section className="settings-group">
-            <strong>Recovery points</strong>
-            <p className="small-text">
-              Snapshots saved on this device when you open the app and before any
-              restore or reset. Roll back to one to undo an accidental change.
-            </p>
-
-            <ul className="recovery-list">
-              {snapshots.map((snapshot) => (
-                <li key={snapshot.id} className="recovery-row">
-                  <span className="recovery-row-main">
-                    <strong>{snapshot.label}</strong>
-                    <span className="small-text">
-                      {new Date(snapshot.takenAt).toLocaleString()}
-                    </span>
-                  </span>
-
-                  <button
-                    type="button"
-                    className="secondary"
-                    onClick={() => handleRestoreSnapshot(snapshot)}
-                  >
-                    Restore
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        <section className="settings-group">
-          <strong>Welcome guide</strong>
+      {snapshots.length > 0 && (
+        <SettingsSection
+          icon={History}
+          title="Recovery points"
+          subtitle="Roll back an accidental change"
+        >
           <p className="small-text">
-            Re-show the getting started card on the home screen.
+            Snapshots saved on this device when you open the app and before any
+            restore or reset. Roll back to one to undo an accidental change.
           </p>
 
-          <div className="settings-actions">
-            <button
-              type="button"
-              className="secondary"
-              onClick={onResetWelcome}
-            >
-              Reset welcome card
-            </button>
-          </div>
-        </section>
-      </details>
+          <ul className="recovery-list">
+            {snapshots.map((snapshot) => (
+              <li key={snapshot.id} className="recovery-row">
+                <span className="recovery-row-main">
+                  <strong>{snapshot.label}</strong>
+                  <span className="small-text">
+                    {new Date(snapshot.takenAt).toLocaleString()}
+                  </span>
+                </span>
+
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => handleRestoreSnapshot(snapshot)}
+                >
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        </SettingsSection>
+      )}
+
+      <SettingsSection
+        icon={LifeBuoy}
+        title="Help & guides"
+        subtitle="Replay the getting-started tour"
+      >
+        <p className="small-text">
+          Re-show the getting started card on the home screen.
+        </p>
+
+        <div className="settings-actions">
+          <button type="button" className="secondary" onClick={onResetWelcome}>
+            Reset welcome card
+          </button>
+        </div>
+      </SettingsSection>
     </div>
   );
 }

@@ -5000,45 +5000,103 @@ textarea::placeholder {
 
 .settings-panel {
   display: grid;
-  gap: var(--space-14);
+  gap: var(--space-10);
 }
 
-.settings-advanced > .settings-group {
-  margin-top: var(--space-14);
+/* Collapsible settings cards */
+.settings-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  box-shadow: var(--elev-1);
+  overflow: hidden;
 }
 
-.settings-advanced > summary {
+.settings-section-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-14);
   cursor: pointer;
   list-style: none;
-  padding: var(--space-4) 0;
-  color: var(--muted);
-  font-size: var(--text-md);
-  font-weight: var(--weight-heavy);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.settings-advanced > summary::-webkit-details-marker {
+.settings-section-summary::-webkit-details-marker {
   display: none;
 }
 
-.settings-advanced > summary::after {
-  content: " +";
+.settings-section-summary:hover {
+  background: var(--soft);
 }
 
-.settings-advanced[open] > summary::after {
-  content: " –";
+.settings-section-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--olive-soft);
+  color: var(--accent-strong);
 }
 
-.settings-group {
+.settings-section-titles {
+  flex: 1;
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.settings-section-titles strong {
+  font-size: var(--text-lg);
+}
+
+.settings-section-sub {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-section-chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.settings-section[open] .settings-section-chevron {
+  transform: rotate(180deg);
+}
+
+.settings-section-body {
+  display: grid;
+  gap: var(--space-10);
+  padding: var(--space-12) var(--space-14) var(--space-14);
+  border-top: 1px solid var(--line);
+}
+
+.settings-section-body .small-text {
+  margin: 0;
+}
+
+.settings-reset-block {
   display: grid;
   gap: var(--space-8);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: #ffffff;
-  padding: var(--space-12);
 }
 
-.settings-group .small-text {
-  margin: 0;
+.settings-reset-block + .settings-reset-block {
+  margin-top: var(--space-10);
+  padding-top: var(--space-10);
+  border-top: 1px solid var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-section-chevron {
+    transition: none;
+  }
 }
 
 .settings-actions {
@@ -6143,6 +6201,11 @@ textarea::placeholder {
 }
 
 /* ===== Household sharing (Settings) ===== */
+.household-settings {
+  display: grid;
+  gap: var(--space-10);
+}
+
 .household-members {
   list-style: none;
   margin: 0;
