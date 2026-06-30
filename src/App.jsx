@@ -11,6 +11,7 @@ import "./App.css";
 import ShoppingList from "./components/ShoppingList";
 import SignInScreen from "./components/SignInScreen";
 import UpdateBanner from "./components/UpdateBanner";
+import InviteBanner from "./components/InviteBanner";
 import UndoSnackbar from "./components/UndoSnackbar";
 import LoadingScreen from "./components/LoadingScreen";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -39,6 +40,7 @@ import { buildPlannerView } from "./utils/plannerView";
 import { listKnownGroups } from "./utils/ingredientMatch";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { applyBackup } from "./lib/applyBackup";
+import { captureJoinCodeFromUrl } from "./lib/household";
 
 import { useAuth } from "./hooks/useAuth";
 import { useHousehold } from "./hooks/useHousehold";
@@ -78,6 +80,10 @@ function App() {
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
   const [stockCatalogOpen, setStockCatalogOpen] = useState(false);
   const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  // A ?join=CODE from an invite link, captured (and stripped from the URL) once
+  // on load. Drives the invite banner and prefills the Household join field.
+  const [pendingJoinCode, setPendingJoinCode] = useState(captureJoinCodeFromUrl);
+  const [inviteDismissed, setInviteDismissed] = useState(false);
 
   const {
     user,
@@ -668,6 +674,11 @@ function App() {
           user={user}
           cloud={cloud}
           household={household}
+          pendingJoinCode={pendingJoinCode}
+          onJoinedHousehold={() => {
+            setPendingJoinCode(null);
+            setInviteDismissed(false);
+          }}
           onSignOut={() => {
             // Sign out happens from the Settings screen; reset the tab so the
             // next sign-in lands on Home, not back on Settings.
@@ -693,6 +704,18 @@ function App() {
       {updateReady && (
         <UpdateBanner onReload={() => window.location.reload()} />
       )}
+
+      {pendingJoinCode &&
+        cloud &&
+        !inviteDismissed &&
+        household.available &&
+        !household.isShared &&
+        activeTab !== "settings" && (
+          <InviteBanner
+            onReview={() => setActiveTab("settings")}
+            onDismiss={() => setInviteDismissed(true)}
+          />
+        )}
 
       {undoState && (
         <UndoSnackbar message={undoState.message} onUndo={runUndo} />

@@ -6128,3 +6128,23 @@ textarea::placeholder {
 .household-join-row .primary-button {
   flex: 0 0 auto;
 }
+
+/* Invite banner: reuses .update-banner; adds a dismiss affordance. */
+.invite-banner-dismiss {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  min-height: auto;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0;
+}
+
+.invite-banner-dismiss:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}

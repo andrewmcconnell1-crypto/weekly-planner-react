@@ -12,6 +12,8 @@ export default function SettingsScreen({
   user,
   cloud,
   household,
+  pendingJoinCode,
+  onJoinedHousehold,
   onSignOut,
   keepStandingList,
   onSetKeepStandingList,
@@ -36,6 +38,8 @@ export default function SettingsScreen({
             user={user}
             cloud={cloud}
             household={household}
+            pendingJoinCode={pendingJoinCode}
+            onJoinedHousehold={onJoinedHousehold}
             onSignOut={onSignOut}
             keepStandingList={keepStandingList}
             onSetKeepStandingList={onSetKeepStandingList}
