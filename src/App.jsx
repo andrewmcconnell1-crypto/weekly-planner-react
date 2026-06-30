@@ -4,13 +4,13 @@ import {
   CalendarDays,
   ShoppingBasket,
   CookingPot,
-  Settings,
 } from "lucide-react";
 import "./App.css";
 
 import ShoppingList from "./components/ShoppingList";
 import SignInScreen from "./components/SignInScreen";
 import UpdatePasswordScreen from "./components/UpdatePasswordScreen";
+import ProfileButton from "./components/ProfileButton";
 import UpdateBanner from "./components/UpdateBanner";
 import InviteBanner from "./components/InviteBanner";
 import UndoSnackbar from "./components/UndoSnackbar";
@@ -501,14 +501,7 @@ function App() {
         </div>
 
         {activeTab !== "settings" && (
-          <button
-            type="button"
-            className="header-settings"
-            aria-label="Settings"
-            onClick={openSettings}
-          >
-            <Settings size={20} strokeWidth={2} aria-hidden="true" />
-          </button>
+          <ProfileButton user={user} guest={guest} onClick={openSettings} />
         )}
       </header>
 
@@ -692,6 +685,7 @@ function App() {
           onImport={applyImportedData}
           user={user}
           cloud={cloud}
+          guest={guest}
           household={household}
           pendingJoinCode={pendingJoinCode}
           onJoinedHousehold={() => {

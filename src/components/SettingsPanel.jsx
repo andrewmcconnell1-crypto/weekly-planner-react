@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 
 import HouseholdSettings from "./HouseholdSettings";
+import ProfileAvatar from "./ProfileAvatar";
+import { profileIdentity } from "../utils/profile";
 
 // localStorage keys backed up / restored by export & import. Object-shaped keys
 // hold per-week maps; the rest hold arrays.
@@ -52,6 +54,7 @@ function SettingsPanel({
   onImport,
   user,
   cloud,
+  guest,
   household,
   pendingJoinCode,
   onJoinedHousehold,
@@ -173,23 +176,34 @@ function SettingsPanel({
     reader.readAsText(file);
   }
 
+  const identity = profileIdentity(user, guest);
+  const accountStatus = cloud
+    ? "Synced across your devices"
+    : guest
+      ? "Exploring without an account — changes aren't saved"
+      : "Saved on this device";
+
   return (
     <div className="settings-panel">
-      {cloud && user && (
-        <section className="settings-group">
-          <strong>Account</strong>
-          <p className="small-text">
-            Signed in as {user.email || "your account"}. Your data syncs across
-            your devices automatically.
-          </p>
+      <section className="settings-profile">
+        <ProfileAvatar identity={identity} size="lg" />
 
-          <div className="settings-actions">
-            <button type="button" className="secondary" onClick={onSignOut}>
-              Sign out
-            </button>
-          </div>
-        </section>
-      )}
+        <div className="settings-profile-main">
+          <strong className="settings-profile-name">
+            {identity.displayName || identity.email || identity.name}
+          </strong>
+          {identity.displayName && identity.email && (
+            <span className="settings-profile-email">{identity.email}</span>
+          )}
+          <span className="settings-profile-status">{accountStatus}</span>
+        </div>
+
+        {cloud && (
+          <button type="button" className="secondary" onClick={onSignOut}>
+            Sign out
+          </button>
+        )}
+      </section>
 
       {cloud && household && (
         <HouseholdSettings
