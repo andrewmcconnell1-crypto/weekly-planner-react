@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import HouseholdSettings from "./HouseholdSettings";
+
 // localStorage keys backed up / restored by export & import. Object-shaped keys
 // hold per-week maps; the rest hold arrays.
 const BACKUP_KEYS = [
@@ -50,6 +52,7 @@ function SettingsPanel({
   onImport,
   user,
   cloud,
+  household,
   onSignOut,
   keepStandingList = true,
   onSetKeepStandingList,
@@ -184,6 +187,10 @@ function SettingsPanel({
             </button>
           </div>
         </section>
+      )}
+
+      {cloud && household && (
+        <HouseholdSettings household={household} cloud={cloud} />
       )}
 
       {onSetKeepStandingList && (

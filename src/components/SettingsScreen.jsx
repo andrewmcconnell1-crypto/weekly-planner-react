@@ -11,6 +11,7 @@ export default function SettingsScreen({
   onImport,
   user,
   cloud,
+  household,
   onSignOut,
   keepStandingList,
   onSetKeepStandingList,
@@ -34,6 +35,7 @@ export default function SettingsScreen({
             onImport={onImport}
             user={user}
             cloud={cloud}
+            household={household}
             onSignOut={onSignOut}
             keepStandingList={keepStandingList}
             onSetKeepStandingList={onSetKeepStandingList}

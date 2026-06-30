@@ -41,6 +41,7 @@ import { isSupabaseConfigured } from "./lib/supabase";
 import { applyBackup } from "./lib/applyBackup";
 
 import { useAuth } from "./hooks/useAuth";
+import { useHousehold } from "./hooks/useHousehold";
 import { usePlannerStore } from "./hooks/usePlannerStore";
 import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
 import useBackToClose from "./hooks/useBackToClose";
@@ -87,6 +88,10 @@ function App() {
     signInWithMagicLink,
     signOut,
   } = useAuth();
+  // Which planner row to read/write: a shared household owner's id, or the
+  // user's own id when solo. Resolved before the data load so members land on
+  // the shared plan.
+  const household = useHousehold(user);
   const {
     mealsByWeek,
     setMealsByWeek,
@@ -117,7 +122,7 @@ function App() {
     getRecoverySnapshots,
     captureRecoverySnapshot,
     restoreRecoverySnapshot,
-  } = usePlannerStore(user, guest);
+  } = usePlannerStore(user, guest, household.ownerId);
 
   // Let the device / browser Back button close whichever overlay sheet is open
   // instead of leaving the app. One coordinator (not one per sheet) keeps a
@@ -662,6 +667,7 @@ function App() {
           onImport={applyImportedData}
           user={user}
           cloud={cloud}
+          household={household}
           onSignOut={() => {
             // Sign out happens from the Settings screen; reset the tab so the
             // next sign-in lands on Home, not back on Settings.
