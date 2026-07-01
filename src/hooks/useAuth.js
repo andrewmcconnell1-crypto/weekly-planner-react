@@ -92,6 +92,13 @@ export function useAuth() {
     return result;
   }
 
+  // Update the account's display name (stored in user_metadata). The
+  // USER_UPDATED auth event updates `user`, so the avatar/greeting refresh.
+  function updateDisplayName(name) {
+    if (!supabase) return Promise.resolve({ error: null });
+    return supabase.auth.updateUser({ data: { full_name: name } });
+  }
+
   // Re-send the signup confirmation email (for "Email not confirmed" accounts).
   function resendConfirmation(email) {
     if (!supabase) return Promise.resolve({ error: null });
@@ -123,6 +130,7 @@ export function useAuth() {
     signInWithMagicLink,
     resetPassword,
     updatePassword,
+    updateDisplayName,
     resendConfirmation,
     cancelRecovery,
     signOut,

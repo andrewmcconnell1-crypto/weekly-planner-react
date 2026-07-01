@@ -96,6 +96,7 @@ function App() {
     signInWithMagicLink,
     resetPassword,
     updatePassword,
+    updateDisplayName,
     resendConfirmation,
     cancelRecovery,
     signOut,
@@ -274,7 +275,12 @@ function App() {
     updateRecipe,
     addIngredientToRecipe,
     deleteIngredientFromRecipe,
-  } = useRecipeActions({ recipes, setRecipes, requestUndo });
+  } = useRecipeActions({
+    recipes,
+    setRecipes,
+    requestUndo,
+    defaultServings: settings?.defaultServings ?? 4,
+  });
 
   // ---- Auth / loading gates (after all hooks, before any data-derived work) ----
   if (isSupabaseConfigured && authLoading) {
@@ -489,7 +495,7 @@ function App() {
 
           <h1>
             {activeTab === "home"
-              ? greeting()
+              ? greeting(new Date(), user?.user_metadata?.full_name || "")
               : activeTab === "shop"
               ? "Shopping list"
               : activeTab === "more"
@@ -692,6 +698,8 @@ function App() {
             setPendingJoinCode(null);
             setInviteDismissed(false);
           }}
+          onUpdateName={updateDisplayName}
+          onUpdatePassword={updatePassword}
           onSignOut={() => {
             // Sign out happens from the Settings screen; reset the tab so the
             // next sign-in lands on Home, not back on Settings.
@@ -700,6 +708,13 @@ function App() {
           }}
           keepStandingList={keepStandingList}
           onSetKeepStandingList={setKeepStandingList}
+          defaultServings={settings?.defaultServings ?? 4}
+          onSetDefaultServings={(value) =>
+            setSettings({
+              ...settings,
+              defaultServings: Math.min(99, Math.max(1, value)),
+            })
+          }
           onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
           resetStockToStarterList={resetStockToStarterList}
           resetStaplesToStarterList={resetStaplesToStarterList}
@@ -710,6 +725,7 @@ function App() {
             setWelcomeDismissedFor(null);
             setActiveTab("home");
           }}
+          onReplayTour={() => setWalkthroughOpen(true)}
         />
       )}
       </div>

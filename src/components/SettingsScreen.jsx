@@ -15,15 +15,20 @@ export default function SettingsScreen({
   household,
   pendingJoinCode,
   onJoinedHousehold,
+  onUpdateName,
+  onUpdatePassword,
   onSignOut,
   keepStandingList,
   onSetKeepStandingList,
+  defaultServings,
+  onSetDefaultServings,
   onOpenShoppingHelp,
   resetStockToStarterList,
   resetStaplesToStarterList,
   getRecoverySnapshots,
   onRestoreSnapshot,
   onResetWelcome,
+  onReplayTour,
 }) {
   return (
     <section className="screen settings-screen">
@@ -42,15 +47,20 @@ export default function SettingsScreen({
             household={household}
             pendingJoinCode={pendingJoinCode}
             onJoinedHousehold={onJoinedHousehold}
+            onUpdateName={onUpdateName}
+            onUpdatePassword={onUpdatePassword}
             onSignOut={onSignOut}
             keepStandingList={keepStandingList}
             onSetKeepStandingList={onSetKeepStandingList}
+            defaultServings={defaultServings}
+            onSetDefaultServings={onSetDefaultServings}
             onOpenShoppingHelp={onOpenShoppingHelp}
             resetStockToStarterList={resetStockToStarterList}
             resetStaplesToStarterList={resetStaplesToStarterList}
             getRecoverySnapshots={getRecoverySnapshots}
             onRestoreSnapshot={onRestoreSnapshot}
             onResetWelcome={onResetWelcome}
+            onReplayTour={onReplayTour}
           />
         </Suspense>
       </ErrorBoundary>

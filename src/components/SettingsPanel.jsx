@@ -1,17 +1,26 @@
 import { useRef, useState } from "react";
 import {
+  UserCog,
   Users,
   ShoppingBasket,
+  Utensils,
+  Minus,
+  Plus,
   DatabaseBackup,
   RotateCcw,
   History,
   LifeBuoy,
+  Share2,
 } from "lucide-react";
 
 import HouseholdSettings from "./HouseholdSettings";
+import AccountSettings from "./AccountSettings";
 import ProfileAvatar from "./ProfileAvatar";
 import SettingsSection from "./SettingsSection";
 import { profileIdentity } from "../utils/profile";
+import { appBaseUrl } from "../lib/household";
+
+const APP_VERSION = "1.0.0";
 
 // localStorage keys backed up / restored by export & import. Object-shaped keys
 // hold per-week maps; the rest hold arrays.
@@ -67,8 +76,12 @@ function SettingsPanel({
   household,
   pendingJoinCode,
   onJoinedHousehold,
+  onUpdateName,
+  onUpdatePassword,
   onSignOut,
   keepStandingList = true,
+  defaultServings = 4,
+  onSetDefaultServings,
   onSetKeepStandingList,
   onOpenShoppingHelp,
   resetStockToStarterList,
@@ -76,13 +89,35 @@ function SettingsPanel({
   getRecoverySnapshots,
   onRestoreSnapshot,
   onResetWelcome,
+  onReplayTour,
 }) {
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
+  const [shareStatus, setShareStatus] = useState(null);
   // Read the recovery points once when the panel opens; refresh after a restore.
   const [snapshots, setSnapshots] = useState(
     () => getRecoverySnapshots?.() ?? []
   );
+
+  async function shareApp() {
+    const url = appBaseUrl();
+    const text = "Weekly meal planner — plan meals and build a shopping list.";
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Weekly meal planner", text, url });
+        return;
+      } catch {
+        // Cancelled or unsupported — fall back to copying the link.
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareStatus("Link copied.");
+      window.setTimeout(() => setShareStatus(null), 2000);
+    } catch {
+      // Clipboard blocked; nothing else to do.
+    }
+  }
 
   function handleRestoreSnapshot(snapshot) {
     const when = new Date(snapshot.takenAt).toLocaleString();
@@ -214,6 +249,20 @@ function SettingsPanel({
         )}
       </section>
 
+      {cloud && user && onUpdateName && (
+        <SettingsSection
+          icon={UserCog}
+          title="Account"
+          subtitle="Your name and password"
+        >
+          <AccountSettings
+            user={user}
+            onUpdateName={onUpdateName}
+            onUpdatePassword={onUpdatePassword}
+          />
+        </SettingsSection>
+      )}
+
       {cloud && household && (
         <SettingsSection
           icon={Users}
@@ -271,6 +320,45 @@ function SettingsPanel({
               </button>
             </div>
           )}
+        </SettingsSection>
+      )}
+
+      {onSetDefaultServings && (
+        <SettingsSection
+          icon={Utensils}
+          title="Planner"
+          subtitle="Defaults for new recipes"
+        >
+          <div className="settings-stepper-row">
+            <span className="settings-stepper-label">
+              <span className="settings-toggle-title">Default servings</span>
+              <span className="small-text">
+                How many people a new recipe serves to start with.
+              </span>
+            </span>
+
+            <span className="settings-stepper" role="group" aria-label="Default servings">
+              <button
+                type="button"
+                className="settings-stepper-button"
+                aria-label="Fewer servings"
+                disabled={defaultServings <= 1}
+                onClick={() => onSetDefaultServings(defaultServings - 1)}
+              >
+                <Minus size={16} aria-hidden="true" />
+              </button>
+              <span className="settings-stepper-value">{defaultServings}</span>
+              <button
+                type="button"
+                className="settings-stepper-button"
+                aria-label="More servings"
+                disabled={defaultServings >= 99}
+                onClick={() => onSetDefaultServings(defaultServings + 1)}
+              >
+                <Plus size={16} aria-hidden="true" />
+              </button>
+            </span>
+          </div>
         </SettingsSection>
       )}
 
@@ -399,18 +487,42 @@ function SettingsPanel({
 
       <SettingsSection
         icon={LifeBuoy}
-        title="Help & guides"
-        subtitle="Replay the getting-started tour"
+        title="About & help"
+        subtitle={`Weekly meal planner · v${APP_VERSION}`}
       >
         <p className="small-text">
-          Re-show the getting started card on the home screen.
+          Replay the walkthrough, re-show the getting-started card, or share the
+          app with someone.
         </p>
 
         <div className="settings-actions">
+          {onReplayTour && (
+            <button type="button" className="secondary" onClick={onReplayTour}>
+              Take the tour again
+            </button>
+          )}
+
           <button type="button" className="secondary" onClick={onResetWelcome}>
             Reset welcome card
           </button>
+
+          <button
+            type="button"
+            className="secondary with-icon"
+            onClick={shareApp}
+          >
+            <Share2 size={15} aria-hidden="true" />
+            Share this app
+          </button>
         </div>
+
+        {shareStatus && (
+          <p className="small-text settings-status" role="status">
+            {shareStatus}
+          </p>
+        )}
+
+        <p className="small-text settings-version">Version {APP_VERSION}</p>
       </SettingsSection>
     </div>
   );

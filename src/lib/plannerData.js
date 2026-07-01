@@ -48,7 +48,15 @@ export const defaultSettings = {
   // When false ("shopping fresh", e.g. in store or Coles) recurring buys are
   // folded into the list to buy.
   shopUsingSavedList: true,
+  // How many people a newly created recipe serves by default.
+  defaultServings: 4,
 };
+
+function normaliseServings(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return defaultSettings.defaultServings;
+  return Math.min(99, Math.max(1, Math.round(number)));
+}
 
 function normaliseSettings(raw) {
   const value = raw && typeof raw === "object" ? raw : {};
@@ -56,6 +64,10 @@ function normaliseSettings(raw) {
   return {
     keepStandingList: value.keepStandingList !== false,
     shopUsingSavedList: value.shopUsingSavedList !== false,
+    defaultServings:
+      value.defaultServings == null
+        ? defaultSettings.defaultServings
+        : normaliseServings(value.defaultServings),
   };
 }
 
