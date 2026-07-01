@@ -13,6 +13,7 @@ describe("normaliseData", () => {
     expect(data.settings).toEqual({
       keepStandingList: true,
       shopUsingSavedList: true,
+      defaultServings: 4,
     });
   });
 
@@ -41,7 +42,14 @@ describe("normaliseData", () => {
     expect(data.settings).toEqual({
       keepStandingList: false,
       shopUsingSavedList: false,
+      defaultServings: 4,
     });
+  });
+
+  it("clamps default servings into range", () => {
+    expect(normaliseData({ settings: { defaultServings: 0 } }).settings.defaultServings).toBe(1);
+    expect(normaliseData({ settings: { defaultServings: 250 } }).settings.defaultServings).toBe(99);
+    expect(normaliseData({ settings: { defaultServings: 6 } }).settings.defaultServings).toBe(6);
   });
 
   it("defaults ingredientGroups to an object and coerces non-objects", () => {

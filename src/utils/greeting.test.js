@@ -14,4 +14,11 @@ describe("greeting", () => {
     expect(at(2)).toBe("Good night");
     expect(at(23)).toBe("Good night");
   });
+
+  it("adds the first name when given", () => {
+    const morning = new Date(2026, 0, 1, 8, 0, 0);
+    expect(greeting(morning, "Andrew McConnell")).toBe("Good morning, Andrew");
+    expect(greeting(morning, "  ")).toBe("Good morning");
+    expect(greeting(morning)).toBe("Good morning");
+  });
 });

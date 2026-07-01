@@ -4,7 +4,12 @@ import { createCollectionId } from "../utils/itemUtils";
 
 // Saved-recipe mutators: add/delete a recipe, edit its fields, and add/remove
 // ingredients. Owns the new-recipe-name text input.
-export function useRecipeActions({ recipes, setRecipes, requestUndo }) {
+export function useRecipeActions({
+  recipes,
+  setRecipes,
+  requestUndo,
+  defaultServings = 4,
+}) {
   const [newRecipeName, setNewRecipeName] = useState("");
 
   function addRecipe() {
@@ -22,7 +27,7 @@ export function useRecipeActions({ recipes, setRecipes, requestUndo }) {
         sourceUrl: "",
         ingredients: [],
         method: "",
-        serves: 4,
+        serves: defaultServings,
       },
     ]);
 
