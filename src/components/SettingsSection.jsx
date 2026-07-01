@@ -1,11 +1,23 @@
+import { useId, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 // A collapsible settings card: an icon + title summary row that expands to
-// reveal its content. Native <details> so it's accessible and needs no state.
+// reveal its content with a smooth height transition. Controlled (rather than a
+// native <details>) so the open/close animates via a grid-rows transition,
+// which native disclosure can't do cross-browser.
 function SettingsSection({ icon: Icon, title, subtitle, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const regionId = useId();
+
   return (
-    <details className="settings-section" open={defaultOpen}>
-      <summary className="settings-section-summary">
+    <section className={`settings-section ${open ? "open" : ""}`}>
+      <button
+        type="button"
+        className="settings-section-summary"
+        aria-expanded={open}
+        aria-controls={regionId}
+        onClick={() => setOpen((value) => !value)}
+      >
         {Icon && (
           <span className="settings-section-icon" aria-hidden="true">
             <Icon size={18} />
@@ -22,10 +34,12 @@ function SettingsSection({ icon: Icon, title, subtitle, defaultOpen = false, chi
           size={18}
           aria-hidden="true"
         />
-      </summary>
+      </button>
 
-      <div className="settings-section-body">{children}</div>
-    </details>
+      <div className="settings-section-reveal" id={regionId} role="region">
+        <div className="settings-section-body">{children}</div>
+      </div>
+    </section>
   );
 }
 
