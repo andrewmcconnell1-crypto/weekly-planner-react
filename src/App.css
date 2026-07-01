@@ -5016,18 +5016,25 @@ textarea::placeholder {
   display: flex;
   align-items: center;
   gap: var(--space-12);
+  width: 100%;
   padding: var(--space-12) var(--space-14);
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
-  list-style: none;
   -webkit-tap-highlight-color: transparent;
-}
-
-.settings-section-summary::-webkit-details-marker {
-  display: none;
 }
 
 .settings-section-summary:hover {
   background: var(--soft);
+}
+
+/* The whole row is the tap target; don't shrink it on press (the global
+   button:active scale would look heavy on a full-width row). */
+.settings-section-summary:active:not(:disabled) {
+  transform: none;
 }
 
 .settings-section-icon {
@@ -5039,6 +5046,15 @@ textarea::placeholder {
   border-radius: var(--radius-sm);
   background: var(--olive-soft);
   color: var(--accent-strong);
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+/* Open card: the icon tile fills in, so the expanded section reads as active. */
+.settings-section.open .settings-section-icon {
+  background: var(--accent);
+  color: #fff;
 }
 
 .settings-section-titles {
@@ -5067,8 +5083,25 @@ textarea::placeholder {
   transition: transform var(--dur-fast) var(--ease-standard);
 }
 
-.settings-section[open] .settings-section-chevron {
+.settings-section.open .settings-section-chevron {
   transform: rotate(180deg);
+}
+
+/* Smooth expand/collapse: animate a grid row from 0fr to 1fr, with the inner
+   clipped so the content slides rather than reflows. */
+.settings-section-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-med) var(--ease-out);
+}
+
+.settings-section.open .settings-section-reveal {
+  grid-template-rows: 1fr;
+}
+
+.settings-section-reveal > .settings-section-body {
+  overflow: hidden;
+  min-height: 0;
 }
 
 .settings-section-body {
@@ -5076,6 +5109,12 @@ textarea::placeholder {
   gap: var(--space-10);
   padding: var(--space-12) var(--space-14) var(--space-14);
   border-top: 1px solid var(--line);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-standard);
+}
+
+.settings-section.open .settings-section-body {
+  opacity: 1;
 }
 
 .settings-section-body .small-text {
@@ -5094,7 +5133,10 @@ textarea::placeholder {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .settings-section-chevron {
+  .settings-section-chevron,
+  .settings-section-icon,
+  .settings-section-reveal,
+  .settings-section-body {
     transition: none;
   }
 }
