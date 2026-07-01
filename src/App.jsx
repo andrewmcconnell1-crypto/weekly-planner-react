@@ -44,6 +44,7 @@ import { applyBackup } from "./lib/applyBackup";
 import { captureJoinCodeFromUrl } from "./lib/household";
 
 import { useAuth } from "./hooks/useAuth";
+import { useTheme } from "./hooks/useTheme";
 import { useHousehold } from "./hooks/useHousehold";
 import { usePlannerStore } from "./hooks/usePlannerStore";
 import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
@@ -101,6 +102,7 @@ function App() {
     cancelRecovery,
     signOut,
   } = useAuth();
+  const { theme, setTheme } = useTheme();
   // Which planner row to read/write: a shared household owner's id, or the
   // user's own id when solo. Resolved before the data load so members land on
   // the shared plan.
@@ -715,6 +717,8 @@ function App() {
               defaultServings: Math.min(99, Math.max(1, value)),
             })
           }
+          theme={theme}
+          onSetTheme={setTheme}
           onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
           resetStockToStarterList={resetStockToStarterList}
           resetStaplesToStarterList={resetStaplesToStarterList}
