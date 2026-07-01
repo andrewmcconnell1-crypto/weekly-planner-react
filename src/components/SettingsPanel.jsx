@@ -11,6 +11,10 @@ import {
   History,
   LifeBuoy,
   Share2,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 
 import HouseholdSettings from "./HouseholdSettings";
@@ -82,6 +86,8 @@ function SettingsPanel({
   keepStandingList = true,
   defaultServings = 4,
   onSetDefaultServings,
+  theme = "system",
+  onSetTheme,
   onSetKeepStandingList,
   onOpenShoppingHelp,
   resetStockToStarterList,
@@ -320,6 +326,38 @@ function SettingsPanel({
               </button>
             </div>
           )}
+        </SettingsSection>
+      )}
+
+      {onSetTheme && (
+        <SettingsSection
+          icon={Palette}
+          title="Appearance"
+          subtitle="Light, dark or match your device"
+        >
+          <div
+            className="theme-toggle"
+            role="radiogroup"
+            aria-label="Theme"
+          >
+            {[
+              { value: "light", label: "Light", Icon: Sun },
+              { value: "dark", label: "Dark", Icon: Moon },
+              { value: "system", label: "System", Icon: Monitor },
+            ].map(({ value, label, Icon }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={theme === value}
+                className={`theme-option ${theme === value ? "active" : ""}`}
+                onClick={() => onSetTheme(value)}
+              >
+                <Icon size={18} aria-hidden="true" />
+                {label}
+              </button>
+            ))}
+          </div>
         </SettingsSection>
       )}
 

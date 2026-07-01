@@ -22,6 +22,8 @@ export default function SettingsScreen({
   onSetKeepStandingList,
   defaultServings,
   onSetDefaultServings,
+  theme,
+  onSetTheme,
   onOpenShoppingHelp,
   resetStockToStarterList,
   resetStaplesToStarterList,
@@ -54,6 +56,8 @@ export default function SettingsScreen({
             onSetKeepStandingList={onSetKeepStandingList}
             defaultServings={defaultServings}
             onSetDefaultServings={onSetDefaultServings}
+            theme={theme}
+            onSetTheme={onSetTheme}
             onOpenShoppingHelp={onOpenShoppingHelp}
             resetStockToStarterList={resetStockToStarterList}
             resetStaplesToStarterList={resetStaplesToStarterList}

@@ -74,6 +74,34 @@
   --text-5xl: 2rem;
 }
 
+/* Dark theme: override the semantic colour tokens (everything else keys off
+   these). A warm charcoal keeps the calm, cosy feel rather than a cold grey. */
+html[data-theme="dark"] {
+  --bg: #17150f;
+  --surface: #211e17;
+  --panel: #211e17;
+  --ink: #f1eadc;
+  --muted: #a89e8b;
+  --line: #35312a;
+  --soft: #2b2820;
+  /* Olive for buttons stays a saturated mid-tone (white text reads on it);
+     olive-soft becomes a dark tint for chips/tiles, with a light accent-strong
+     for text/icons sitting on those tiles. */
+  --olive: #7c8a4b;
+  --olive-soft: #2e3421;
+  --accent-strong: #c3cf88;
+  --primary-strong: #c3cf88;
+  --rust: #cf6d54;
+  --rust-strong: #b95c44;
+  --rust-soft: #3a271f;
+  --danger: #e2745f;
+  --meal-tone: #38321f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -10px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.4), 0 24px 48px -16px rgba(0, 0, 0, 0.65);
+  --elev-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
 /* Height-animated disclosure used by collapsible lists (Stock accordions). The
    0fr→1fr grid-rows trick animates auto-height content smoothly. */
 .collapsible {
@@ -2176,7 +2204,7 @@ textarea {
   min-height: 44px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: #fff;
+  background: var(--panel);
   color: var(--ink);
   padding: var(--space-10) var(--space-12);
   font-size: 16px;
@@ -6532,4 +6560,120 @@ textarea::placeholder {
 .settings-version {
   margin-top: var(--space-4);
   color: var(--muted);
+}
+
+/* ===== Appearance (theme) segmented control ===== */
+.theme-toggle {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-8);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.theme-option:hover:not(.active) {
+  background: var(--soft);
+  color: var(--ink);
+}
+
+.theme-option.active {
+  border-color: var(--accent);
+  background: var(--olive-soft);
+  color: var(--accent-strong);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* ===== Dark mode: fix hardcoded light surfaces/tints ===== */
+/* Canvas: replace the cream top-wash with a subtle dark lift; drop the paper
+   grain (its overlay blend greys out on a dark base) and the light halo shadow. */
+html[data-theme="dark"] .app-shell {
+  background-image:
+    radial-gradient(130% 50% at 50% -8%, rgba(124, 138, 75, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 240px);
+  background-repeat: no-repeat, no-repeat;
+  background-blend-mode: normal, normal;
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .bottom-nav {
+  background: rgba(28, 25, 20, 0.96);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Opaque white card/input surfaces → the themed panel colour. */
+html[data-theme="dark"] :is(
+    button.secondary,
+    textarea,
+    .recipe-detail-sheet .recipe-detail-toggle,
+    .recipe-detail-sheet .recipe-detail-body,
+    .meal-current-remove,
+    .nights-buttons button,
+    .recipe-picker-group,
+    .day-choice-grid button,
+    .shop-screen .shopping-row,
+    .checked-row,
+    .shop-screen .removal-row.checked-row,
+    .basics-edit-toggle,
+    .basics-editor .delete-button,
+    .recipe-delete-button,
+    .catalog-add-out
+  ) {
+  background: var(--panel);
+}
+
+/* Warm-cream "attention" tints → a dark warm tint. */
+html[data-theme="dark"] :is(
+    .home-topup.needs,
+    .woolworths-removal-section,
+    .shop-screen .removal-row,
+    .list-status-pill.needs-update
+  ) {
+  background: var(--rust-soft);
+}
+
+/* Empty "add a meal" day: dark olive wash instead of the light one. */
+html[data-theme="dark"] :is(
+    .plan-screen .meal-card-empty,
+    .home-screen .meal-card-empty
+  ) {
+  background: var(--olive-soft);
+  border-color: color-mix(in srgb, var(--olive) 45%, transparent);
+}
+
+/* Recipe-tone tints that mix against light ink/white. */
+html[data-theme="dark"] .meal-current {
+  color: color-mix(in srgb, var(--recipe-tone, var(--accent)) 55%, var(--ink));
+}
+
+html[data-theme="dark"] .recipe-row-tag {
+  color: color-mix(in srgb, var(--recipe-tone, var(--muted)) 55%, var(--ink));
+  background: color-mix(in srgb, var(--recipe-tone, var(--muted)) 26%, var(--panel));
+}
+
+/* Dark hero cards (Meals / Shop) — deep olive instead of the light wash. */
+html[data-theme="dark"] .plan-hero {
+  border-color: color-mix(in srgb, var(--olive) 45%, transparent);
+  background: linear-gradient(152deg, #313b22 0%, #262f19 100%);
+}
+
+html[data-theme="dark"] .shop-hero {
+  border-color: color-mix(in srgb, var(--olive) 40%, transparent);
+  background: linear-gradient(152deg, #2c331f 0%, #24291a 100%);
+}
+
+html[data-theme="dark"] .shop-hero.needs-update {
+  border-color: color-mix(in srgb, var(--rust) 45%, transparent);
+  background: linear-gradient(152deg, #3a2c19 0%, #2c2418 100%);
 }
