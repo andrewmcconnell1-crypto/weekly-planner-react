@@ -39,12 +39,25 @@ export default function MealGroups({
   getMealSummary,
   onOpenDay,
   todayDayName,
+  weekStart,
 }) {
+  // Map a day name to its calendar date for the active week. dayList is anchored
+  // to the same weekday as weekStart, so the index is the day offset.
+  const getDate = (day) => {
+    if (!weekStart) return null;
+    const index = dayList.indexOf(day);
+    if (index < 0) return null;
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + index);
+    return date;
+  };
+
   return buildMealGroups(dayList, meals, getMealSummary).map((group) =>
     group.repeatDays.length === 0 ? (
       <MealCard
         key={group.leadDay}
         day={group.leadDay}
+        date={getDate(group.leadDay)}
         meal={meals[group.leadDay]}
         displayName={group.leadSummary.name}
         mealLabel={group.leadSummary.label}
@@ -61,6 +74,7 @@ export default function MealGroups({
         repeatDays={group.repeatDays}
         onOpenDay={onOpenDay}
         todayDayName={todayDayName}
+        getDate={getDate}
       />
     )
   );

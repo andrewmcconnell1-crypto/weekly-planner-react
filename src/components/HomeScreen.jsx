@@ -140,6 +140,7 @@ export default function HomeScreen({
             getMealSummary={getMealSummary}
             onOpenDay={openHomeDayInPlan}
             todayDayName={todayDayName}
+            weekStart={currentWeekStart}
           />
         </div>
 

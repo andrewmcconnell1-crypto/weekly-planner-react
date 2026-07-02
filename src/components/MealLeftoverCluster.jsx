@@ -1,5 +1,7 @@
 import { ChevronRight, CookingPot, CornerDownRight } from "lucide-react";
 
+import { DayRail } from "./MealCard";
+
 // A cook day plus the leftover (repeat) days that follow it, rendered as one
 // merged card: the cook day is emphasised on top, the leftover nights hang
 // beneath it as recessed, tappable sub-rows.
@@ -9,6 +11,7 @@ function MealLeftoverCluster({
   repeatDays,
   onOpenDay,
   todayDayName,
+  getDate,
 }) {
   const coversNights = repeatDays.length + 1;
   const leadName = leadSummary.name || "No meal planned";
@@ -26,17 +29,17 @@ function MealLeftoverCluster({
         type="button"
         onClick={() => onOpenDay(leadDay)}
       >
+        <DayRail
+          day={leadDay}
+          date={getDate?.(leadDay)}
+          isToday={leadDay === todayDayName}
+        />
+
         <span className="meal-type-badge">
           <CookingPot size={20} aria-hidden="true" />
         </span>
 
         <span className="meal-row-main">
-          <span className="meal-row-day">
-            {leadDay}
-            {leadDay === todayDayName && (
-              <span className="meal-today-pill">Today</span>
-            )}
-          </span>
           <strong>{leadName}</strong>
           <span className="meal-row-sub">
             Cook once · eat {coversNights} nights
@@ -55,12 +58,11 @@ function MealLeftoverCluster({
             type="button"
             onClick={() => onOpenDay(repeatDay)}
           >
-            <span className="meal-cluster-repeat-day">
-              {repeatDay}
-              {repeatDay === todayDayName && (
-                <span className="meal-today-pill">Today</span>
-              )}
-            </span>
+            <DayRail
+              day={repeatDay}
+              date={getDate?.(repeatDay)}
+              isToday={repeatDay === todayDayName}
+            />
 
             <span className="meal-cluster-repeat-label">
               <CornerDownRight size={14} aria-hidden="true" />
