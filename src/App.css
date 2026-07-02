@@ -4558,6 +4558,7 @@ textarea::placeholder {
   gap: var(--space-6);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  white-space: nowrap;
 }
 
 .update-banner-button {
@@ -6382,6 +6383,24 @@ textarea::placeholder {
 .invite-banner-dismiss:hover {
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
+}
+
+/* Install banner: the iOS "Add to Home Screen" hint carries no button, so let
+   its longer text wrap comfortably rather than staying on one line. */
+.install-banner .install-banner-hint {
+  flex-wrap: wrap;
+  white-space: normal;
+  text-align: left;
+}
+
+/* "Installed on this device" confirmation in Settings → About. */
+.settings-installed {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin: 0;
+  color: var(--accent-strong);
+  font-weight: var(--weight-semibold);
 }
 
 /* ===== Branded loading splash ===== */
