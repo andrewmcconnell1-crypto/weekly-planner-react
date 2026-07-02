@@ -17,8 +17,27 @@ const TYPE_META = {
 };
 
 // The tappable summary card for one day. Tapping it opens the meal editor.
+// A left "calendar rail" so each row leads with its day (like a calendar),
+// showing the day abbreviation over the date number when a date is available.
+export function DayRail({ day, date, isToday = false }) {
+  return (
+    <span className={`meal-daycol ${isToday ? "meal-daycol-today" : ""}`}>
+      <span className="meal-daycol-dow" aria-hidden="true">
+        {day.slice(0, 3).toUpperCase()}
+      </span>
+      {date && (
+        <span className="meal-daycol-dom" aria-hidden="true">
+          {date.getDate()}
+        </span>
+      )}
+      <span className="visually-hidden">{day}</span>
+    </span>
+  );
+}
+
 function MealCard({
   day,
+  date,
   meal,
   displayName,
   mealLabel,
@@ -31,13 +50,6 @@ function MealCard({
   const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
   const mealName = displayName || (meal.name || "").trim();
 
-  const dayLabel = (
-    <span className="meal-row-day">
-      {day}
-      {isToday && <span className="meal-today-pill">Today</span>}
-    </span>
-  );
-
   // Unplanned day: an inviting "add" tile, not a faded version of a meal card.
   if (!hasMeal) {
     return (
@@ -46,12 +58,13 @@ function MealCard({
         data-tone={mealTone}
       >
         <button className="meal-row-button" type="button" onClick={onOpen}>
+          <DayRail day={day} date={date} isToday={isToday} />
+
           <span className="meal-type-badge">
             <Plus size={20} aria-hidden="true" />
           </span>
 
           <span className="meal-row-main">
-            {dayLabel}
             <strong className="meal-row-add">Add a meal</strong>
           </span>
         </button>
@@ -80,12 +93,13 @@ function MealCard({
       data-tone={mealTone}
     >
       <button className="meal-row-button" type="button" onClick={onOpen}>
+        <DayRail day={day} date={date} isToday={isToday} />
+
         <span className="meal-type-badge">
           <TypeIcon size={20} aria-hidden="true" />
         </span>
 
         <span className="meal-row-main">
-          {dayLabel}
           <strong>{mealName}</strong>
           <span className="meal-row-sub">{subText}</span>
         </span>

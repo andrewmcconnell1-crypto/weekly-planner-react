@@ -102,6 +102,7 @@ export default function PlanScreen({
           meals={meals}
           getMealSummary={getMealSummary}
           onOpenDay={setExpandedMealDay}
+          weekStart={mealWeekStart}
         />
       </div>
 
