@@ -7,6 +7,9 @@
   --line: #ece6d9;
   --line-strong: #ded6c4;
   --soft: #f1eadd;
+  /* Form-control fill. Matches --panel in light; recessed below the surface in
+     dark so inputs read as tappable fields, not flat panels. */
+  --field: #fffdf7;
   /* Olive is the calm UI primary; rust is reserved as a rare warm accent
      (the dark Tonight hero + its CTA), not the everything-colour it had become. */
   --accent: var(--olive);
@@ -89,6 +92,7 @@ html[data-theme="dark"] {
   --line: #4a4336;
   --line-strong: #5f5747;
   --soft: #2b2820;
+  --field: #181510;
   /* Olive for buttons stays a saturated mid-tone (white text reads on it);
      olive-soft becomes a dark tint for chips/tiles, with a light accent-strong
      for text/icons sitting on those tiles. */
@@ -2209,7 +2213,7 @@ textarea {
   min-height: 44px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--panel);
+  background: var(--field);
   color: var(--ink);
   padding: var(--space-10) var(--space-12);
   font-size: 16px;
@@ -2228,7 +2232,7 @@ input[type="password"]:hover,
 input[type="tel"]:hover,
 select:hover,
 textarea:hover {
-  border-color: #ddd2bf;
+  border-color: var(--line-strong);
 }
 
 input[type="text"]:focus,
@@ -6664,10 +6668,11 @@ html[data-theme="dark"] :is(
   border-color: var(--line-strong);
 }
 
-/* Opaque white card/input surfaces → the themed panel colour. */
+/* Opaque white card/input surfaces → the themed panel colour. (Text inputs,
+   selects and textareas are handled separately via --field so they read as
+   recessed fields, not flat panels.) */
 html[data-theme="dark"] :is(
     button.secondary,
-    textarea,
     .recipe-detail-sheet .recipe-detail-toggle,
     .recipe-detail-sheet .recipe-detail-body,
     .meal-current-remove,
