@@ -6617,6 +6617,17 @@ html[data-theme="dark"] .bottom-nav {
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Sticky Stock / Recurring category headers and the Shop aisle labels use a
+   frosted page-coloured fill so rows blur behind them. The light default (warm
+   cream) turns into a glaring pale bar in dark mode, so match the dark page. */
+html[data-theme="dark"] .priority-aisle,
+html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle,
+html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle[aria-expanded="true"],
+html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle:hover,
+html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle:focus-visible {
+  background: rgba(23, 21, 15, 0.82);
+}
+
 /* Structural containers get the stronger hairline so cards, accordions and
    category/group headers stay clearly defined against the dark surface. */
 html[data-theme="dark"] :is(
