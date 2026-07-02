@@ -37,7 +37,9 @@ function SettingsSection({ icon: Icon, title, subtitle, defaultOpen = false, chi
       </button>
 
       <div className="settings-section-reveal" id={regionId} role="region">
-        <div className="settings-section-body">{children}</div>
+        <div className="settings-section-body">
+          <div className="settings-section-inner">{children}</div>
+        </div>
       </div>
     </section>
   );

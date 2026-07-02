@@ -5132,12 +5132,15 @@ textarea::placeholder {
   grid-template-rows: 1fr;
 }
 
+/* The body is the grid item: keep it a bare clip wrapper so the whole reveal
+   (padding and border included) collapses to zero height when closed. The
+   visual padding/border live on the inner element. */
 .settings-section-reveal > .settings-section-body {
   overflow: hidden;
   min-height: 0;
 }
 
-.settings-section-body {
+.settings-section-inner {
   display: grid;
   gap: var(--space-10);
   padding: var(--space-12) var(--space-14) var(--space-14);
@@ -5146,11 +5149,11 @@ textarea::placeholder {
   transition: opacity var(--dur-fast) var(--ease-standard);
 }
 
-.settings-section.open .settings-section-body {
+.settings-section.open .settings-section-inner {
   opacity: 1;
 }
 
-.settings-section-body .small-text {
+.settings-section-inner .small-text {
   margin: 0;
 }
 
@@ -5169,7 +5172,7 @@ textarea::placeholder {
   .settings-section-chevron,
   .settings-section-icon,
   .settings-section-reveal,
-  .settings-section-body {
+  .settings-section-inner {
     transition: none;
   }
 }
