@@ -13,6 +13,7 @@ import UpdatePasswordScreen from "./components/UpdatePasswordScreen";
 import ProfileButton from "./components/ProfileButton";
 import UpdateBanner from "./components/UpdateBanner";
 import InviteBanner from "./components/InviteBanner";
+import InstallBanner from "./components/InstallBanner";
 import UndoSnackbar from "./components/UndoSnackbar";
 import LoadingScreen from "./components/LoadingScreen";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -48,6 +49,7 @@ import { useTheme } from "./hooks/useTheme";
 import { useHousehold } from "./hooks/useHousehold";
 import { usePlannerStore } from "./hooks/usePlannerStore";
 import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
+import { useInstallPrompt } from "./hooks/useInstallPrompt";
 import useBackToClose from "./hooks/useBackToClose";
 import { useUndo } from "./hooks/useUndo";
 import { useMealPlanActions } from "./hooks/useMealPlanActions";
@@ -63,6 +65,15 @@ function App() {
   const [discoverOpen, setDiscoverOpen] = useState(false);
   const [discoverDay, setDiscoverDay] = useState(null);
   const updateReady = useUpdatePrompt();
+  const install = useInstallPrompt();
+  // Remember a dismissed install prompt so it doesn't nag on every visit.
+  const [installDismissed, setInstallDismissed] = useState(() => {
+    try {
+      return localStorage.getItem("installBannerDismissed") === "1";
+    } catch {
+      return false;
+    }
+  });
   // The session the welcome was dismissed for (a user id, "guest", or "local"),
   // so dismissal is per-account and auto-resets when the account changes.
   const [welcomeDismissedFor, setWelcomeDismissedFor] = useState(null);
@@ -719,6 +730,7 @@ function App() {
           }
           theme={theme}
           onSetTheme={setTheme}
+          install={install}
           onOpenShoppingHelp={() => setShoppingHelpOpen(true)}
           resetStockToStarterList={resetStockToStarterList}
           resetStaplesToStarterList={resetStaplesToStarterList}
@@ -747,6 +759,25 @@ function App() {
           <InviteBanner
             onReview={() => setActiveTab("settings")}
             onDismiss={() => setInviteDismissed(true)}
+          />
+        )}
+
+      {!install.isStandalone &&
+        !installDismissed &&
+        !updateReady &&
+        activeTab !== "settings" &&
+        (install.canPromptInstall || install.isIOSSafari) && (
+          <InstallBanner
+            mode={install.canPromptInstall ? "prompt" : "ios"}
+            onInstall={install.promptInstall}
+            onDismiss={() => {
+              setInstallDismissed(true);
+              try {
+                localStorage.setItem("installBannerDismissed", "1");
+              } catch {
+                // ignore storage failures (private mode); banner just returns next load
+              }
+            }}
           />
         )}
 

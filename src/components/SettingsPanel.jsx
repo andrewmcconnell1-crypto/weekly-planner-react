@@ -15,6 +15,8 @@ import {
   Sun,
   Moon,
   Monitor,
+  Download,
+  Check,
 } from "lucide-react";
 
 import HouseholdSettings from "./HouseholdSettings";
@@ -88,6 +90,7 @@ function SettingsPanel({
   onSetDefaultServings,
   theme = "system",
   onSetTheme,
+  install,
   onSetKeepStandingList,
   onOpenShoppingHelp,
   resetStockToStarterList,
@@ -100,6 +103,7 @@ function SettingsPanel({
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
   const [shareStatus, setShareStatus] = useState(null);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
   // Read the recovery points once when the panel opens; refresh after a restore.
   const [snapshots, setSnapshots] = useState(
     () => getRecoverySnapshots?.() ?? []
@@ -552,7 +556,42 @@ function SettingsPanel({
             <Share2 size={15} aria-hidden="true" />
             Share this app
           </button>
+
+          {install && !install.isStandalone && (
+            <button
+              type="button"
+              className="secondary with-icon"
+              aria-expanded={
+                install.canPromptInstall ? undefined : showInstallHelp
+              }
+              onClick={() => {
+                if (install.canPromptInstall) {
+                  install.promptInstall();
+                } else {
+                  setShowInstallHelp((value) => !value);
+                }
+              }}
+            >
+              <Download size={15} aria-hidden="true" />
+              Install app
+            </button>
+          )}
         </div>
+
+        {install?.isStandalone && (
+          <p className="small-text settings-installed">
+            <Check size={15} aria-hidden="true" />
+            Installed on this device
+          </p>
+        )}
+
+        {showInstallHelp && install && !install.isStandalone && (
+          <p className="small-text settings-status">
+            {install.isIOS
+              ? "In Safari, tap the Share button, then choose “Add to Home Screen.”"
+              : "Open your browser menu and choose “Install app” (or “Add to Home screen”)."}
+          </p>
+        )}
 
         {shareStatus && (
           <p className="small-text settings-status" role="status">
