@@ -111,7 +111,10 @@ function SettingsPanel({
 
   async function shareApp() {
     const url = appBaseUrl();
-    const text = "Weekly meal planner — plan meals and build a shopping list.";
+    const text =
+      "Weekly meal planner — plan meals and build a shopping list. " +
+      "Open the link, then add it to your home screen to use it like an app " +
+      "(on iPhone: tap Share, then Add to Home Screen).";
     if (navigator.share) {
       try {
         await navigator.share({ title: "Weekly meal planner", text, url });
@@ -121,8 +124,9 @@ function SettingsPanel({
       }
     }
     try {
-      await navigator.clipboard.writeText(url);
-      setShareStatus("Link copied.");
+      // Copy the note with the link so the install tip travels too.
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      setShareStatus("Message copied.");
       window.setTimeout(() => setShareStatus(null), 2000);
     } catch {
       // Clipboard blocked; nothing else to do.
