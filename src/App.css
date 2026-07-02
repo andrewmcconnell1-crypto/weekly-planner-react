@@ -5,6 +5,7 @@
   --ink: #2a2420;
   --muted: #6d6456;
   --line: #ece6d9;
+  --line-strong: #ded6c4;
   --soft: #f1eadd;
   /* Olive is the calm UI primary; rust is reserved as a rare warm accent
      (the dark Tonight hero + its CTA), not the everything-colour it had become. */
@@ -82,7 +83,11 @@ html[data-theme="dark"] {
   --panel: #211e17;
   --ink: #f1eadc;
   --muted: #a89e8b;
-  --line: #35312a;
+  /* Hairlines need to sit clearly above the surface in dark mode, or cards and
+     dividers dissolve into the background. --line is the everyday hairline;
+     --line-strong outlines structural containers (cards, accordions, headers). */
+  --line: #4a4336;
+  --line-strong: #5f5747;
   --soft: #2b2820;
   /* Olive for buttons stays a saturated mid-tone (white text reads on it);
      olive-soft becomes a dark tint for chips/tiles, with a light accent-strong
@@ -6610,6 +6615,20 @@ html[data-theme="dark"] .app-shell {
 html[data-theme="dark"] .bottom-nav {
   background: rgba(28, 25, 20, 0.96);
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Structural containers get the stronger hairline so cards, accordions and
+   category/group headers stay clearly defined against the dark surface. */
+html[data-theme="dark"] :is(
+    .card,
+    .settings-section,
+    .plan-screen .meal-card,
+    .home-screen .meal-card,
+    .category-toggle,
+    .group-heading,
+    .shop-screen .group-heading
+  ) {
+  border-color: var(--line-strong);
 }
 
 /* Opaque white card/input surfaces → the themed panel colour. */
