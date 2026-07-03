@@ -3424,7 +3424,7 @@ textarea::placeholder {
 
 .recipe-row-inner {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-10);
 }
@@ -3488,18 +3488,21 @@ textarea::placeholder {
   min-width: 0;
 }
 
-/* Let the name wrap rather than truncate, since the source badge narrows the
-   column; the card grows to fit. The subtitle stays a single ellipsised line. */
+/* The name gets the full row width now, so it rarely needs to wrap; allow it
+   anyway for very long titles. */
 .recipe-row-main strong {
   min-width: 0;
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
 
+/* Category tag, serves and source share one line and wrap together if a narrow
+   screen can't fit them, so nothing gets truncated. */
 .recipe-row-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-4) var(--space-8);
   min-width: 0;
 }
 
