@@ -2997,6 +2997,44 @@ textarea::placeholder {
   transition: color var(--dur-med) var(--ease-standard);
 }
 
+/* Ticking a pending item: it stays put a beat (checkbox pops, name strikes
+   through) so the check registers, then the row collapses up out of the list
+   before it lands in Done. Duration is mirrored by LEAVE_MS in ShoppingList. */
+.shopping-rows > .shopping-row.row-leaving {
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: top;
+  animation: shopping-leave 640ms var(--ease-standard) forwards;
+}
+
+@keyframes shopping-leave {
+  0% {
+    opacity: 1;
+    max-height: 5rem;
+  }
+  45% {
+    opacity: 1;
+    max-height: 5rem;
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shopping-rows > .shopping-row.row-leaving {
+    animation: none;
+    opacity: 0.58;
+  }
+}
+
 .removal-hint {
   margin: 0;
   padding: 0 var(--space-2);
