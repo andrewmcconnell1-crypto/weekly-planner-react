@@ -28,6 +28,7 @@ export function useMealDrag(onSwap) {
     window.removeEventListener("pointerup", s.onUp);
     window.removeEventListener("pointerup", s.onPreUp);
     window.removeEventListener("pointercancel", s.onCancel);
+    window.removeEventListener("touchmove", s.onTouchMove);
     if (s.clone && s.clone.parentNode) s.clone.parentNode.removeChild(s.clone);
     if (s.sourceEl) s.sourceEl.classList.remove("meal-drag-source");
     document.body.classList.remove("meal-dragging");
@@ -107,6 +108,17 @@ export function useMealDrag(onSwap) {
     s.dragging = true;
     setDrag({ sourceDay: s.sourceDay, overDay: s.sourceDay });
     s.raf = requestAnimationFrame(autoScroll);
+
+    // Once lifted, swallow native touch scrolling for the rest of the gesture.
+    // Without this the browser claims the touch as a scroll on the first move
+    // and fires pointercancel, killing the drag before it can do anything. A
+    // non-passive touchmove listener (preventDefault) is the only reliable way
+    // to keep the pointer stream alive on touch — toggling touch-action
+    // mid-gesture is ignored once the browser has started scrolling.
+    s.onTouchMove = (touchEvent) => {
+      if (touchEvent.cancelable) touchEvent.preventDefault();
+    };
+    window.addEventListener("touchmove", s.onTouchMove, { passive: false });
 
     s.onMove = (moveEvent) => {
       moveEvent.preventDefault();
