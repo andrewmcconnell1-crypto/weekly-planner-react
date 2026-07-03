@@ -17,6 +17,10 @@ const frequencyLabels = {
   "ad-hoc": "Ad hoc",
 };
 
+// Sort rows by name (case-insensitive) so each category reads alphabetically.
+const byName = (a, b) =>
+  a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+
 // Order items into category sections following the canonical category order,
 // with any unknown categories sorted alphabetically at the end.
 function groupByCategory(items) {
@@ -350,7 +354,7 @@ function StaplesList({
               <div className={`collapsible ${isOpen ? "open" : ""}`}>
                 <div className="collapsible-inner" inert={!isOpen ? true : undefined}>
                   <div className="subcategory-list">
-                    {groupBySubcategory(category, items).map((group) => {
+                    {groupBySubcategory(category, [...items].sort(byName)).map((group) => {
                       if (!group.label) {
                         return (
                           <ul className="clean-list" key={group.key}>

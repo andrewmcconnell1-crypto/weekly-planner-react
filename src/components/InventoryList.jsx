@@ -12,6 +12,10 @@ import EmptyState from "./EmptyState";
 
 const catalogNames = ingredientCatalog.map((item) => item.name);
 
+// Sort rows by name (case-insensitive) so each category reads alphabetically.
+const byName = (a, b) =>
+  a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+
 // Stock items, grouped into collapsible category sections. Each row is a
 // compact tick + name; the category dropdown and Delete live behind the
 // chevron so the list stays scannable.
@@ -273,7 +277,7 @@ function InventoryList({
                   inert={!isOpen ? true : undefined}
                 >
                   <div className="subcategory-list">
-                    {groupBySubcategory(category, items).map((group) => {
+                    {groupBySubcategory(category, [...items].sort(byName)).map((group) => {
                       if (!group.label) {
                         return (
                           <ul className="clean-list" key={group.key}>
