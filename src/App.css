@@ -668,6 +668,16 @@ textarea:focus-visible {
   letter-spacing: 0.01em;
 }
 
+/* The selected tab's icon gives a gentle spring-pop so switching tabs has a
+   little life. (Reduced-motion collapses this via the global rule.) */
+.bottom-nav button svg {
+  transition: transform var(--dur-med) var(--ease-spring);
+}
+
+.bottom-nav button.active svg {
+  transform: scale(1.15) translateY(-1px);
+}
+
 .bottom-nav button::before {
   display: none;
 }
@@ -2860,9 +2870,15 @@ textarea::placeholder {
   opacity: 0.58;
 }
 
+/* Ticking an item settles into its done state rather than snapping. */
+.shopping-row {
+  transition: opacity var(--dur-med) var(--ease-standard);
+}
+
 .checked-item {
   color: var(--muted);
   text-decoration: line-through;
+  transition: color var(--dur-med) var(--ease-standard);
 }
 
 .removal-hint {
