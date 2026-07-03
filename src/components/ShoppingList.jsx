@@ -1,4 +1,4 @@
-import { ChevronDown, HelpCircle } from "lucide-react";
+import { ChevronDown, HelpCircle, ShoppingBasket, Check } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
 import {
@@ -86,12 +86,17 @@ function ShoppingList({
     );
   }
 
-  function renderAisle(group) {
+  function renderAisle(group, showLabel = true) {
     return (
       <div className="shopping-group" key={group.category}>
-        <div className="priority-aisle" data-aisle-tone={aisleTone(group.category)}>
-          {group.category}
-        </div>
+        {showLabel && (
+          <div
+            className="priority-aisle"
+            data-aisle-tone={aisleTone(group.category)}
+          >
+            {group.category}
+          </div>
+        )}
         <ul className="clean-list shopping-rows">{group.items.map(renderRow)}</ul>
       </div>
     );
@@ -229,13 +234,27 @@ function ShoppingList({
       )}
 
       {total === 0 ? (
-        <p className="empty-state">
-          Nothing to buy — plan some meals or mark stock as out.
-        </p>
+        <div className="shop-empty">
+          <span className="shop-empty-icon" aria-hidden="true">
+            <ShoppingBasket size={26} />
+          </span>
+          <strong className="shop-empty-title">Nothing to buy yet</strong>
+          <p className="shop-empty-text">
+            Plan some meals or mark stock as out, and your list builds itself.
+          </p>
+        </div>
       ) : (
         <>
           {pendingItems.length === 0 ? (
-            <p className="empty-state">Everything is checked off.</p>
+            <div className="shop-empty shop-empty-done">
+              <span className="shop-empty-icon" aria-hidden="true">
+                <Check size={26} />
+              </span>
+              <strong className="shop-empty-title">All checked off 🎉</strong>
+              <p className="shop-empty-text">
+                Everything on your list is in the basket.
+              </p>
+            </div>
           ) : priorityLayout ? (
             pendingSections.map((tier) => (
               <section className="priority-tier" key={tier.key}>
@@ -244,11 +263,15 @@ function ShoppingList({
                   <span>{tier.count}</span>
                 </div>
                 <p className="small-text priority-tier-note">{tier.note}</p>
-                {tier.groups.map(renderAisle)}
+                {tier.groups.map((group) =>
+                  renderAisle(group, tier.groups.length > 1)
+                )}
               </section>
             ))
           ) : (
-            <section className="priority-tier">{pendingAisles.map(renderAisle)}</section>
+            <section className="priority-tier">
+              {pendingAisles.map((group) => renderAisle(group))}
+            </section>
           )}
 
           {doneItems.length > 0 && (
