@@ -859,6 +859,7 @@ function App() {
         <button
           data-tab="home"
           className={activeTab === "home" ? "active" : ""}
+          aria-current={activeTab === "home" ? "page" : undefined}
           onClick={() => setActiveTab("home")}
         >
           <House size={21} strokeWidth={2} aria-hidden="true" />
@@ -868,6 +869,7 @@ function App() {
         <button
           data-tab="plan"
           className={activeTab === "plan" ? "active" : ""}
+          aria-current={activeTab === "plan" ? "page" : undefined}
           onClick={() => setActiveTab("plan")}
         >
           <CalendarDays size={21} strokeWidth={2} aria-hidden="true" />
@@ -877,6 +879,7 @@ function App() {
         <button
           data-tab="shop"
           className={activeTab === "shop" ? "active" : ""}
+          aria-current={activeTab === "shop" ? "page" : undefined}
           onClick={() => setActiveTab("shop")}
         >
           <ShoppingBasket size={21} strokeWidth={2} aria-hidden="true" />
@@ -886,6 +889,7 @@ function App() {
         <button
           data-tab="more"
           className={activeTab === "more" ? "active" : ""}
+          aria-current={activeTab === "more" ? "page" : undefined}
           onClick={() => {
             setMoreSection("overview");
             setActiveTab("more");

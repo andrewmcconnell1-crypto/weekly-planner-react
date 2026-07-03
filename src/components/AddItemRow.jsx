@@ -64,6 +64,7 @@ function AddItemRow({
       <input
         type="text"
         className="add-panel-name"
+        aria-label={label || placeholder}
         placeholder={placeholder}
         value={value}
         list={suggestions ? suggestionsId : undefined}

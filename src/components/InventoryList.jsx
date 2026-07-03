@@ -218,6 +218,7 @@ function InventoryList({
     <section className="inventory-panel">
       <input
         type="text"
+        aria-label="Search stock"
         placeholder="Search stock..."
         value={searchText}
         onChange={(event) => setSearchText(event.target.value)}
