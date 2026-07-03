@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
@@ -59,7 +59,10 @@ describe("ShoppingList rows", () => {
     await user.click(screen.getByRole("checkbox"));
 
     // Ticking deletes it (by its real manual id), rather than checking it off.
-    expect(onDeleteManual).toHaveBeenCalledWith("manual-milk");
+    // The change commits after the tick-off animation, so wait for it.
+    await waitFor(() =>
+      expect(onDeleteManual).toHaveBeenCalledWith("manual-milk")
+    );
     expect(onToggleChecked).not.toHaveBeenCalled();
   });
 
@@ -78,7 +81,10 @@ describe("ShoppingList rows", () => {
 
     await user.click(screen.getByRole("checkbox"));
 
-    expect(onToggleChecked).toHaveBeenCalledWith("beef mince");
+    // The toggle to Done commits after the tick-off animation, so wait for it.
+    await waitFor(() =>
+      expect(onToggleChecked).toHaveBeenCalledWith("beef mince")
+    );
     expect(onDeleteManual).not.toHaveBeenCalled();
   });
 });

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, HelpCircle, ShoppingBasket, Check } from "lucide-react";
 
 import EmptyState from "./EmptyState";
@@ -15,6 +16,11 @@ const PRIORITY_OPTIONS = PRIORITY_TIERS.map((tier) => ({
   value: tier.key,
   label: tier.title,
 }));
+
+// How long a ticked row lingers (checked, striking through, then collapsing)
+// before it commits and moves to Done. Kept in sync with the `shopping-leave`
+// animation in App.css so the state change lands exactly as the row finishes.
+const LEAVE_MS = 640;
 
 // One shopping list spanning this week + next. Two layouts: "priority" (urgency
 // tiers, aisle within each) and "aisle" (one flat by-aisle list for a big shop).
@@ -43,6 +49,45 @@ function ShoppingList({
 }) {
   const priorityLayout = shopLayout !== "aisle";
 
+  // Rows mid-way through their tick-off animation. They stay rendered in the
+  // pending list (shown checked) until their timer fires and commits the change.
+  const [leavingIds, setLeavingIds] = useState(() => new Set());
+  const leaveTimers = useRef(new Map());
+
+  useEffect(() => {
+    const timers = leaveTimers.current;
+    return () => {
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
+
+  function commitToggle(item) {
+    if (item.source === "Manual") onDeleteManual(item.manualId);
+    else onToggleChecked(item.id);
+  }
+
+  function handleToggle(item) {
+    // Un-ticking a Done item (or one already animating) commits immediately.
+    if (item.checked || leavingIds.has(item.id)) {
+      if (item.checked) commitToggle(item);
+      return;
+    }
+    // Optimistically show the tick, hold so the check is felt, then let the row
+    // slide out and commit the real change as the animation lands.
+    setLeavingIds((prev) => new Set(prev).add(item.id));
+    const timer = window.setTimeout(() => {
+      leaveTimers.current.delete(item.id);
+      setLeavingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(item.id);
+        return next;
+      });
+      commitToggle(item);
+    }, LEAVE_MS);
+    leaveTimers.current.set(item.id, timer);
+  }
+
   const pendingItems = unifiedItems.filter((item) => !item.checked);
   const doneItems = unifiedItems.filter((item) => item.checked);
   const total = unifiedItems.length;
@@ -56,24 +101,24 @@ function ShoppingList({
   const pendingAisles = priorityLayout ? null : groupByAisle(pendingItems);
 
   function renderRow(item) {
-    const isManual = item.source === "Manual";
-
     // Manual items are ad-hoc, so ticking one removes it for good (with undo)
     // rather than parking it in Done. Meal / recurring items toggle to Done.
+    // While `leaving`, the row shows checked and plays its exit before commit.
+    const leaving = leavingIds.has(item.id);
+    const showChecked = item.checked || leaving;
+
     return (
       <li
-        className={`shopping-row ${item.checked ? "checked-row" : ""}`}
+        className={`shopping-row ${item.checked ? "checked-row" : ""} ${
+          leaving ? "row-leaving" : ""
+        }`}
         key={item.id}
       >
-        <label className={item.checked ? "checked-item" : ""}>
+        <label className={showChecked ? "checked-item" : ""}>
           <input
             type="checkbox"
-            checked={item.checked}
-            onChange={() =>
-              isManual
-                ? onDeleteManual(item.manualId)
-                : onToggleChecked(item.id)
-            }
+            checked={showChecked}
+            onChange={() => handleToggle(item)}
           />
           <span className="shopping-item-content">
             <span className="shopping-item-name">{item.name}</span>
