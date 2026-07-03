@@ -2783,6 +2783,42 @@ textarea::placeholder {
   text-align: center;
 }
 
+/* Friendlier empty state: an icon tile above a short heading + line of copy. */
+.shop-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-6);
+  padding: var(--space-28) var(--space-16);
+  text-align: center;
+}
+
+.shop-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--olive-soft);
+  color: var(--accent-strong);
+}
+
+.shop-empty-done .shop-empty-icon {
+  background: var(--olive);
+  color: #fff;
+}
+
+.shop-empty-title {
+  font-size: var(--text-lg);
+}
+
+.shop-empty-text {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--muted);
+  font-weight: var(--weight-semibold);
+}
+
 .shopping-group {
   display: grid;
   gap: var(--space-8);
