@@ -40,6 +40,7 @@ export default function MealGroups({
   onOpenDay,
   todayDayName,
   weekStart,
+  dragOverDay = null,
 }) {
   // Map a day name to its calendar date for the active week. dayList is anchored
   // to the same weekday as weekStart, so the index is the day offset.
@@ -64,6 +65,7 @@ export default function MealGroups({
         mealTone={group.leadSummary.tone}
         hasMeal={group.leadSummary.hasMeal}
         isToday={group.leadDay === todayDayName}
+        isDragOver={dragOverDay === group.leadDay}
         onOpen={() => onOpenDay(group.leadDay)}
       />
     ) : (
@@ -75,6 +77,7 @@ export default function MealGroups({
         onOpenDay={onOpenDay}
         todayDayName={todayDayName}
         getDate={getDate}
+        dragOverDay={dragOverDay}
       />
     )
   );

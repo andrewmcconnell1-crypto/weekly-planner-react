@@ -8,6 +8,7 @@ import ProgressRing from "./ProgressRing";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 import { useCountUp } from "../hooks/useCountUp";
+import { useMealDrag } from "../hooks/useMealDrag";
 
 const MealEditorSheet = lazy(() => import("./MealEditorSheet"));
 
@@ -38,8 +39,10 @@ export default function PlanScreen({
   setLeftoverNights,
   clearMealDay,
   updateMeal,
+  swapMealDays,
 }) {
   const animatedPlanned = useCountUp(mealsPlannedCount);
+  const { onPointerDown, drag } = useMealDrag(swapMealDays);
 
   return (
     <section className="screen plan-screen">
@@ -92,15 +95,22 @@ export default function PlanScreen({
         onNextWeek={goToNextMealWeek}
       />
 
-      <div className="meal-grid">
+      <div className="meal-grid" onPointerDown={onPointerDown}>
         <MealGroups
           dayList={days}
           meals={meals}
           getMealSummary={getMealSummary}
           onOpenDay={setExpandedMealDay}
           weekStart={mealWeekStart}
+          dragOverDay={drag?.overDay}
         />
       </div>
+
+      {drag && (
+        <p className="meal-drag-hint" role="status">
+          Drop on another day to swap
+        </p>
+      )}
 
       {expandedMealDay && (
         <ErrorBoundary

@@ -44,6 +44,7 @@ function MealCard({
   mealTone,
   hasMeal,
   isToday = false,
+  isDragOver = false,
   onOpen,
 }) {
   const mealType = meal.mealType || "cook";
@@ -54,8 +55,11 @@ function MealCard({
   if (!hasMeal) {
     return (
       <article
-        className={`meal-card meal-card-empty ${isToday ? "meal-card-today" : ""}`}
+        className={`meal-card meal-card-empty ${isToday ? "meal-card-today" : ""} ${
+          isDragOver ? "meal-drag-over" : ""
+        }`}
         data-tone={mealTone}
+        data-drag-day={day}
       >
         <button className="meal-row-button" type="button" onClick={onOpen}>
           <DayRail day={day} date={date} isToday={isToday} />
@@ -89,8 +93,9 @@ function MealCard({
     <article
       className={`card meal-card meal-card-${typeKey} ${
         isToday ? "meal-card-today" : ""
-      }`}
+      } ${isDragOver ? "meal-drag-over" : ""}`}
       data-tone={mealTone}
+      data-drag-day={day}
     >
       <button className="meal-row-button" type="button" onClick={onOpen}>
         <DayRail day={day} date={date} isToday={isToday} />

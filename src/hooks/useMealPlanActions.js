@@ -157,5 +157,40 @@ export function useMealPlanActions({
     });
   }
 
-  return { setLeftoverNights, clearMealDay, assignRecipeToDay, updateMeal };
+  // Swap the meals on two days (drag-to-rearrange). The whole meal objects
+  // trade places, and any leftover pointers are remapped so a repeat that ate
+  // dayA's cook now points to dayB (where that cook moved) and vice versa —
+  // keeping "Leftovers from X" linkage correct after the move.
+  function swapMealDays(dayA, dayB) {
+    if (dayA === dayB || !days.includes(dayA) || !days.includes(dayB)) return;
+
+    const snapshot = meals;
+    const remap = (day) => (day === dayA ? dayB : day === dayB ? dayA : day);
+
+    const nextMeals = { ...meals, [dayA]: meals[dayB], [dayB]: meals[dayA] };
+
+    for (const day of days) {
+      const meal = nextMeals[day];
+      if (meal?.mealType === "repeat" && meal.repeatFromDay) {
+        const remapped = remap(meal.repeatFromDay);
+        if (remapped !== meal.repeatFromDay) {
+          nextMeals[day] = { ...meal, repeatFromDay: remapped };
+        }
+      }
+    }
+
+    setMealsByWeek({ ...mealsByWeek, [mealWeekKey]: nextMeals });
+
+    requestUndo(`Swapped ${dayA} and ${dayB}`, () =>
+      setMealsByWeek((prev) => ({ ...prev, [mealWeekKey]: snapshot }))
+    );
+  }
+
+  return {
+    setLeftoverNights,
+    clearMealDay,
+    assignRecipeToDay,
+    updateMeal,
+    swapMealDays,
+  };
 }
