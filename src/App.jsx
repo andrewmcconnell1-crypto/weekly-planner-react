@@ -213,14 +213,19 @@ function App() {
   const removalIds = new Set(recurringRemovals.map((item) => item.id));
 
   // ---- Domain action hooks (each owns its slice's mutators + input state) ----
-  const { setLeftoverNights, clearMealDay, assignRecipeToDay, updateMeal } =
-    useMealPlanActions({
-      meals,
-      mealsByWeek,
-      setMealsByWeek,
-      mealWeekKey,
-      requestUndo,
-    });
+  const {
+    setLeftoverNights,
+    clearMealDay,
+    assignRecipeToDay,
+    updateMeal,
+    swapMealDays,
+  } = useMealPlanActions({
+    meals,
+    mealsByWeek,
+    setMealsByWeek,
+    mealWeekKey,
+    requestUndo,
+  });
 
   const {
     newItem,
@@ -628,6 +633,7 @@ function App() {
           setLeftoverNights={setLeftoverNights}
           clearMealDay={clearMealDay}
           updateMeal={updateMeal}
+          swapMealDays={swapMealDays}
         />
       )}
 

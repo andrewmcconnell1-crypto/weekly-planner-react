@@ -12,6 +12,7 @@ function MealLeftoverCluster({
   onOpenDay,
   todayDayName,
   getDate,
+  dragOverDay = null,
 }) {
   const coversNights = repeatDays.length + 1;
   const leadName = leadSummary.name || "No meal planned";
@@ -21,8 +22,9 @@ function MealLeftoverCluster({
     <article
       className={`card meal-card meal-card-cook meal-cluster ${
         leadDay === todayDayName ? "meal-card-today" : ""
-      }`}
+      } ${dragOverDay === leadDay ? "meal-drag-over" : ""}`}
       data-tone={leadSummary.tone}
+      data-drag-day={leadDay}
     >
       <button
         className="meal-row-button"
@@ -54,8 +56,11 @@ function MealLeftoverCluster({
         {repeatDays.map((repeatDay) => (
           <button
             key={repeatDay}
-            className="meal-cluster-repeat"
+            className={`meal-cluster-repeat ${
+              dragOverDay === repeatDay ? "meal-drag-over" : ""
+            }`}
             type="button"
+            data-drag-day={repeatDay}
             onClick={() => onOpenDay(repeatDay)}
           >
             <DayRail
