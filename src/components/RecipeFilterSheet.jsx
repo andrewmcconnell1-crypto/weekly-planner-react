@@ -83,8 +83,9 @@ function RecipeFilterSheet({ filters, onClose }) {
           <RecipeFilter
             label="Category"
             options={filters.categories}
-            active={filters.activeCategory}
-            onSelect={filters.setActiveCategory}
+            active={filters.activeCategories}
+            onSelect={filters.toggleCategory}
+            multiple
             wrap
           />
 
@@ -100,8 +101,9 @@ function RecipeFilterSheet({ filters, onClose }) {
           <RecipeFilter
             label="Source"
             options={filters.sources}
-            active={filters.activeSource}
-            onSelect={filters.setActiveSource}
+            active={filters.activeSources}
+            onSelect={filters.toggleSource}
+            multiple
             wrap
           />
         </div>

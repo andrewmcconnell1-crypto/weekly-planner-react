@@ -11,11 +11,30 @@ const SOURCE_ORDER = ["RecipeTin Eats", "Original recipes", "Custom"];
 // Shared recipe search + filter state (category / tags / source) so the Recipes
 // tab and the meal editor's picker narrow their lists identically. Returns the
 // already-filtered, category-ordered list plus the option lists and setters.
+// Toggle an option in/out of a Set-backed filter. "All" clears the selection;
+// an empty Set means "All". Shared by category / source / tags so every pill
+// menu is multi-select.
+function makeToggle(setter) {
+  return (option) => {
+    if (option === "All") {
+      setter(new Set());
+      return;
+    }
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(option)) next.delete(option);
+      else next.add(option);
+      return next;
+    });
+  };
+}
+
 export function useRecipeFilters(recipes) {
   const [searchText, setSearchText] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [activeSource, setActiveSource] = useState("All");
-  // Tags are multi-select (AND): an empty Set means "All".
+  // Every pill menu is multi-select: an empty Set means "All". Category and
+  // source match by OR (any selected); tags by AND (must have all selected).
+  const [activeCategories, setActiveCategories] = useState(() => new Set());
+  const [activeSources, setActiveSources] = useState(() => new Set());
   const [activeTags, setActiveTags] = useState(() => new Set());
 
   // Grouped only to get a sensible category order + name sort; rendered flat.
@@ -43,21 +62,15 @@ export function useRecipeFilters(recipes) {
   const tags = ["All", ...distinctTags];
 
   const cleanedSearch = searchText.trim().toLowerCase();
-  const categoryIsAvailable =
-    activeCategory === "All" || categories.includes(activeCategory);
-  const sourceIsAvailable =
-    activeSource === "All" || sources.includes(activeSource);
   const selectedTags = [...activeTags];
 
   const visibleRecipes = allRecipes.filter((recipe) => {
     const inCategory =
-      !categoryIsAvailable ||
-      activeCategory === "All" ||
-      (recipe.category || "Other") === activeCategory;
+      activeCategories.size === 0 ||
+      activeCategories.has(recipe.category || "Other");
     const inSource =
-      !sourceIsAvailable ||
-      activeSource === "All" ||
-      recipeSourceLabel(recipe) === activeSource;
+      activeSources.size === 0 ||
+      activeSources.has(recipeSourceLabel(recipe));
     const recipeTagList = recipe.tags || [];
     const inTag = selectedTags.every((tag) => recipeTagList.includes(tag));
 
@@ -69,41 +82,29 @@ export function useRecipeFilters(recipes) {
       .includes(cleanedSearch);
   });
 
-  // "All" clears the selection; any other chip toggles in/out of the Set.
-  function toggleTag(option) {
-    if (option === "All") {
-      setActiveTags(new Set());
-      return;
-    }
-    setActiveTags((prev) => {
-      const next = new Set(prev);
-      if (next.has(option)) next.delete(option);
-      else next.add(option);
-      return next;
-    });
-  }
+  const toggleCategory = makeToggle(setActiveCategories);
+  const toggleSource = makeToggle(setActiveSources);
+  const toggleTag = makeToggle(setActiveTags);
 
   function clearFilters() {
     setSearchText("");
-    setActiveCategory("All");
-    setActiveSource("All");
+    setActiveCategories(new Set());
+    setActiveSources(new Set());
     setActiveTags(new Set());
   }
 
   // Active filters (excluding the search box), for the "Filters (N)" badge.
   const activeFilterCount =
-    (activeCategory !== "All" ? 1 : 0) +
-    (activeSource !== "All" ? 1 : 0) +
-    activeTags.size;
+    activeCategories.size + activeSources.size + activeTags.size;
 
   return {
     activeFilterCount,
     searchText,
     setSearchText,
-    activeCategory,
-    setActiveCategory,
-    activeSource,
-    setActiveSource,
+    activeCategories,
+    toggleCategory,
+    activeSources,
+    toggleSource,
     activeTags,
     toggleTag,
     categories,
