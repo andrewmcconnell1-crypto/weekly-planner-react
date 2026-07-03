@@ -1,5 +1,6 @@
 import { ChevronDown, HelpCircle, ShoppingBasket, Check } from "lucide-react";
 
+import EmptyState from "./EmptyState";
 import { normaliseItemName } from "../utils/itemUtils";
 import {
   groupByTier,
@@ -234,27 +235,15 @@ function ShoppingList({
       )}
 
       {total === 0 ? (
-        <div className="shop-empty">
-          <span className="shop-empty-icon" aria-hidden="true">
-            <ShoppingBasket size={26} />
-          </span>
-          <strong className="shop-empty-title">Nothing to buy yet</strong>
-          <p className="shop-empty-text">
-            Plan some meals or mark stock as out, and your list builds itself.
-          </p>
-        </div>
+        <EmptyState icon={ShoppingBasket} title="Nothing to buy yet">
+          Plan some meals or mark stock as out, and your list builds itself.
+        </EmptyState>
       ) : (
         <>
           {pendingItems.length === 0 ? (
-            <div className="shop-empty shop-empty-done">
-              <span className="shop-empty-icon" aria-hidden="true">
-                <Check size={26} />
-              </span>
-              <strong className="shop-empty-title">All checked off 🎉</strong>
-              <p className="shop-empty-text">
-                Everything on your list is in the basket.
-              </p>
-            </div>
+            <EmptyState icon={Check} tone="done" title="All checked off 🎉">
+              Everything on your list is in the basket.
+            </EmptyState>
           ) : priorityLayout ? (
             pendingSections.map((tier) => (
               <section className="priority-tier" key={tier.key}>
