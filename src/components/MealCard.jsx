@@ -19,7 +19,7 @@ const TYPE_META = {
 // The tappable summary card for one day. Tapping it opens the meal editor.
 // A left "calendar rail" so each row leads with its day (like a calendar),
 // showing the day abbreviation over the date number when a date is available.
-function DayRail({ day, date, isToday = false }) {
+export function DayRail({ day, date, isToday = false }) {
   return (
     <span className={`meal-daycol ${isToday ? "meal-daycol-today" : ""}`}>
       <span className="meal-daycol-dow" aria-hidden="true">

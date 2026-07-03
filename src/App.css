@@ -1266,6 +1266,21 @@ textarea:focus-visible {
   margin-top: var(--space-4);
 }
 
+/* "Today" marker on the current day's meal card. */
+.meal-today-pill {
+  display: inline-block;
+  margin-left: var(--space-6);
+  padding: 1px var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--olive);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
 .meal-card-today {
   outline: 2px solid var(--olive);
   outline-offset: 1px;
@@ -1751,6 +1766,14 @@ textarea:focus-visible {
   min-width: 0;
 }
 
+.meal-row-day {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .meal-row-main strong,
 .meal-row-add,
 .meal-row-sub {
@@ -1779,6 +1802,60 @@ textarea:focus-visible {
 .meal-row-chevron {
   flex-shrink: 0;
   color: var(--muted);
+}
+
+/* Merged leftovers: cook day on top, leftover nights recessed beneath it — but
+   the same row height and spacing as a normal day card, so the whole week reads
+   as one consistent grid. */
+.meal-cluster-repeat {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12);
+  width: 100%;
+  min-height: 70px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--soft);
+  color: var(--muted);
+  padding: var(--space-12) var(--space-14);
+  text-align: left;
+}
+
+.meal-cluster-repeat:hover {
+  background: #e9dfca;
+}
+
+/* The leftover sub-rows stay recessed/muted (the "same colour" cue), but their
+   rail matches a normal day so every row lines up. */
+.meal-cluster-repeat .meal-daycol {
+  min-width: 40px;
+}
+
+.meal-cluster-repeat .meal-daycol-dom {
+  color: var(--muted);
+}
+
+.meal-cluster-repeat .meal-daycol-today .meal-daycol-dow,
+.meal-cluster-repeat .meal-daycol-today .meal-daycol-dom {
+  color: var(--accent-strong);
+}
+
+.meal-cluster-repeat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.meal-cluster-repeat-label svg {
+  flex-shrink: 0;
+  color: var(--olive);
+  opacity: 0.8;
 }
 
 .muted-title {
