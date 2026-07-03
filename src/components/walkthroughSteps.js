@@ -34,7 +34,7 @@ export const WALKTHROUGH_STEPS = [
     id: "shop",
     kicker: "Step 4",
     title: "Shop and tick off",
-    body: "Walk the shop by aisle or by priority, ticking things off as you go. Watch the list empty out — and yes, there's confetti when you finish.",
+    body: "Walk the shop by aisle or by priority, ticking things off as you go, and watch the list empty out.",
     Scene: SceneShop,
   },
 ];
