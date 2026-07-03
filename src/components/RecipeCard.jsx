@@ -30,11 +30,13 @@ function RecipeCard({ recipe, active = false, onClick }) {
             {recipe.serves ? (
               <span className="recipe-row-serves">Serves {recipe.serves}</span>
             ) : null}
+            <span
+              className="recipe-source"
+              data-source={recipeSourceKind(recipe)}
+            >
+              {recipeSourceLabel(recipe)}
+            </span>
           </span>
-        </span>
-
-        <span className="recipe-source" data-source={recipeSourceKind(recipe)}>
-          {recipeSourceLabel(recipe)}
         </span>
 
         <ChevronRight
