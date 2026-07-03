@@ -4795,6 +4795,16 @@ textarea::placeholder {
   }
 }
 
+/* In dark mode --ink is a light cream, so the default `background: var(--ink)`
+   would put the snackbar's cream text on a cream bar. Give it an elevated dark
+   surface with light text instead; the Undo button's light-on-dark styling then
+   reads correctly again. */
+html[data-theme="dark"] .undo-snackbar {
+  background: var(--soft);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+}
+
 .update-banner {
   position: fixed;
   left: 50%;
