@@ -6,13 +6,6 @@ export function celebrate(options = {}) {
   if (typeof window === "undefined" || typeof document === "undefined") return;
   if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
-  // A short haptic buzz on devices that support it.
-  try {
-    navigator.vibrate?.(30);
-  } catch {
-    /* ignore */
-  }
-
   const width = window.innerWidth;
   const height = window.innerHeight;
   const dpr = window.devicePixelRatio || 1;
