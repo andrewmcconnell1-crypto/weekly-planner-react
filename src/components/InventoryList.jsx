@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Package } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupLabelFor } from "../utils/ingredientMatch";
@@ -8,6 +8,7 @@ import { aisleTone } from "../utils/categoryColour";
 import { ingredientCatalog } from "../data/ingredientCatalog";
 import AddItemRow from "./AddItemRow";
 import SwipeRow from "./SwipeRow";
+import EmptyState from "./EmptyState";
 
 const catalogNames = ingredientCatalog.map((item) => item.name);
 
@@ -233,11 +234,14 @@ function InventoryList({
       </datalist>
 
       {filteredInventory.length === 0 ? (
-        <p className="empty-state">
-          {inventory.length === 0
-            ? "🧂 No stock items yet — add what's in your cupboards and we'll keep them off your list."
-            : "No matching stock items."}
-        </p>
+        inventory.length === 0 ? (
+          <EmptyState icon={Package} title="No stock yet">
+            Add what's in your cupboards and we'll keep it off your shopping
+            list.
+          </EmptyState>
+        ) : (
+          <p className="empty-state">No matching stock items.</p>
+        )
       ) : (
         Object.entries(groupedInventory).map(([category, items]) => {
           const isOpen = searchText ? true : openCategories[category] ?? false;

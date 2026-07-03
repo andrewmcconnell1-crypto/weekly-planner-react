@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, Repeat2 } from "lucide-react";
 
 import { categories } from "../data/categories";
 import { normaliseItemName } from "../utils/itemUtils";
@@ -8,6 +8,7 @@ import { groupBySubcategory } from "../utils/pantrySubcategory";
 import { aisleTone } from "../utils/categoryColour";
 import AddItemRow from "./AddItemRow";
 import SwipeRow from "./SwipeRow";
+import EmptyState from "./EmptyState";
 
 const frequencyLabels = {
   weekly: "Weekly",
@@ -315,7 +316,10 @@ function StaplesList({
       </datalist>
 
       {staples.length === 0 ? (
-        <p className="empty-state">🧺 No recurring buys yet — add the staples you grab every week.</p>
+        <EmptyState icon={Repeat2} title="No recurring buys yet">
+          Add the staples you grab every week and they'll fill in your list
+          automatically.
+        </EmptyState>
       ) : filteredStaples.length === 0 ? (
         <p className="empty-state">No matching recurring buys.</p>
       ) : (

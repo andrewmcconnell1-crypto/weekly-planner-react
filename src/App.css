@@ -2793,8 +2793,9 @@ textarea::placeholder {
   text-align: center;
 }
 
-/* Friendlier empty state: an icon tile above a short heading + line of copy. */
-.shop-empty {
+/* Friendlier empty state: an icon tile above a short heading + line of copy.
+   Shared by the shopping list, stock and recurring-buys screens. */
+.empty-block {
   display: grid;
   justify-items: center;
   gap: var(--space-6);
@@ -2802,7 +2803,7 @@ textarea::placeholder {
   text-align: center;
 }
 
-.shop-empty-icon {
+.empty-block-icon {
   display: grid;
   place-items: center;
   width: 56px;
@@ -2813,18 +2814,18 @@ textarea::placeholder {
   color: var(--accent-strong);
 }
 
-.shop-empty-done .shop-empty-icon {
+.empty-block-done .empty-block-icon {
   background: var(--olive);
   color: #fff;
 }
 
-.shop-empty-title {
+.empty-block-title {
   font-size: var(--text-lg);
 }
 
-.shop-empty-text {
+.empty-block-text {
   margin: 0;
-  max-width: 30ch;
+  max-width: 32ch;
   color: var(--muted);
   font-weight: var(--weight-semibold);
 }
