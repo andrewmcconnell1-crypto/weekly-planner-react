@@ -135,6 +135,7 @@ function StockCatalogSheet({ inventory = [], onActivate, onClose }) {
           <input
             type="text"
             className="catalog-search"
+            aria-label="Search common items"
             placeholder="Search common items..."
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}

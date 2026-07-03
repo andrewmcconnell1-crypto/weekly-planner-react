@@ -299,6 +299,7 @@ function StaplesList({
     <div className="staples-panel">
       <input
         type="text"
+        aria-label="Search recurring buys"
         placeholder="Search recurring buys..."
         value={searchText}
         onChange={(event) => setSearchText(event.target.value)}

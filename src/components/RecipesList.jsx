@@ -97,6 +97,7 @@ function RecipesList({
               />
               <input
                 type="search"
+                aria-label="Search recipes"
                 placeholder="Search recipes..."
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
