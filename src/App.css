@@ -4857,6 +4857,26 @@ html[data-theme="dark"] .undo-snackbar {
   background: var(--soft);
 }
 
+/* Dark mode: --ink flips to a light cream, so the default ink banner with a
+   white button would be near-white text on a near-white bar, and the button
+   would be cream-on-white. Give the bar an elevated dark surface with light
+   text, and make the button a light chip with dark text — mirroring the
+   light-mode look. Shared by the Update / Install / Invite banners. */
+html[data-theme="dark"] .update-banner {
+  background: var(--soft);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+}
+
+html[data-theme="dark"] .update-banner-button {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+html[data-theme="dark"] .update-banner-button:hover {
+  background: var(--accent-strong);
+}
+
 .staple-off-note {
   color: var(--accent-strong);
   font-weight: var(--weight-semibold);
