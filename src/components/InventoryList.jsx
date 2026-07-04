@@ -21,6 +21,7 @@ const byName = (a, b) =>
 // chevron so the list stays scannable.
 function InventoryList({
   inventory,
+  statusFilter = null,
   availableCategories = [],
   newInventoryItem,
   setNewInventoryItem,
@@ -64,9 +65,12 @@ function InventoryList({
     closeEditor();
   }
 
-  const filteredInventory = inventory.filter((item) =>
-    normaliseItemName(item.name).includes(normaliseItemName(searchText))
-  );
+  const filteredInventory = inventory.filter((item) => {
+    const isOut = item.active === false;
+    if (statusFilter === "active" && isOut) return false;
+    if (statusFilter === "inactive" && !isOut) return false;
+    return normaliseItemName(item.name).includes(normaliseItemName(searchText));
+  });
 
   const groupedInventory = filteredInventory.reduce((groups, item) => {
     const category = item.category || "Other";
@@ -249,7 +253,10 @@ function InventoryList({
         )
       ) : (
         Object.entries(groupedInventory).map(([category, items]) => {
-          const isOpen = searchText ? true : openCategories[category] ?? false;
+          const isOpen =
+            searchText || statusFilter
+              ? true
+              : openCategories[category] ?? false;
 
           return (
             <div className="shopping-group" key={category}>
@@ -287,9 +294,10 @@ function InventoryList({
                       }
 
                       const subKey = `${category}:${group.key}`;
-                      const subOpen = searchText
-                        ? true
-                        : openSubcategories[subKey] ?? false;
+                      const subOpen =
+                        searchText || statusFilter
+                          ? true
+                          : openSubcategories[subKey] ?? false;
 
                       return (
                         <div className="subcategory-group" key={group.key}>

@@ -5862,14 +5862,66 @@ html[data-theme="dark"] .update-banner-button:hover {
   gap: var(--space-8);
 }
 
-.section-summary div {
+.section-summary-card {
   display: grid;
   gap: var(--space-6);
+  justify-items: start;
+  text-align: left;
+  width: 100%;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--panel);
   padding: var(--space-12);
   box-shadow: var(--shadow);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.section-summary-card:active {
+  transform: scale(0.985);
+}
+
+/* The card whose filter is applied. */
+.section-summary-card.is-selected {
+  border-color: var(--olive);
+  background: var(--olive-soft);
+  box-shadow: 0 0 0 1px var(--olive);
+}
+
+.section-summary-card:disabled {
+  cursor: default;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+.section-summary-card:disabled:active {
+  transform: none;
+}
+
+/* Inline "showing X — show all" clear line under the summary. */
+.section-filter-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  margin-top: calc(var(--space-8) * -1 + var(--space-4));
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--muted);
+}
+
+.section-filter-clear {
+  min-height: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  padding: var(--space-4) var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
 }
 
 .section-summary span {

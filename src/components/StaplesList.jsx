@@ -48,6 +48,7 @@ function groupByCategory(items) {
 // category, delete) behind the per-row chevron.
 function StaplesList({
   staples,
+  statusFilter = null,
   availableCategories = [],
   newStaple,
   setNewStaple,
@@ -101,9 +102,12 @@ function StaplesList({
     closeEditor();
   }
 
-  const filteredStaples = staples.filter((staple) =>
-    normaliseItemName(staple.name).includes(normaliseItemName(searchText))
-  );
+  const filteredStaples = staples.filter((staple) => {
+    const isOff = staple.active === false;
+    if (statusFilter === "active" && isOff) return false;
+    if (statusFilter === "inactive" && !isOff) return false;
+    return normaliseItemName(staple.name).includes(normaliseItemName(searchText));
+  });
   const groupedStaples = groupByCategory(filteredStaples);
 
   function toggleCategory(category) {
@@ -329,7 +333,10 @@ function StaplesList({
         <p className="empty-state">No matching recurring buys.</p>
       ) : (
         groupedStaples.map(([category, items]) => {
-          const isOpen = searchText ? true : openCategories[category] ?? false;
+          const isOpen =
+            searchText || statusFilter
+              ? true
+              : openCategories[category] ?? false;
 
           return (
             <div className="shopping-group" key={category}>
@@ -364,9 +371,10 @@ function StaplesList({
                       }
 
                       const subKey = `${category}:${group.key}`;
-                      const subOpen = searchText
-                        ? true
-                        : openSubcategories[subKey] ?? false;
+                      const subOpen =
+                        searchText || statusFilter
+                          ? true
+                          : openSubcategories[subKey] ?? false;
 
                       return (
                         <div className="subcategory-group" key={group.key}>

@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import InventoryList from "./InventoryList";
 import StaplesList from "./StaplesList";
 
@@ -37,41 +39,117 @@ function HouseholdBasics({
     (item) => item.active !== false
   ).length;
 
+  // Tap a summary card to filter the list to just those items. "active" =
+  // in-stock / on-list; "inactive" = missing / flagged off. null = show all.
+  const [statusFilter, setStatusFilter] = useState(null);
+
+  // Each section has its own active/inactive meaning, so clear the filter when
+  // switching between Stock and Recurring — reset during render (React's
+  // recommended pattern) rather than in an effect.
+  const [prevSection, setPrevSection] = useState(activeSection);
+  if (activeSection !== prevSection) {
+    setPrevSection(activeSection);
+    setStatusFilter(null);
+  }
+
+  const toggleFilter = (value) =>
+    setStatusFilter((current) => (current === value ? null : value));
+
+  const filterNote =
+    statusFilter === null
+      ? null
+      : activeSection === "recurring"
+        ? statusFilter === "inactive"
+          ? "Showing items flagged to remove"
+          : "Showing items on your list"
+        : statusFilter === "inactive"
+          ? "Showing missing items"
+          : "Showing in-stock items";
+
+  const inactiveInventory = inventory.length - activeInventoryCount;
+  const inactiveStaples = staples.length - activeStaplesCount;
+
   return (
     <div className="household-basics">
       {activeSection === "recurring" ? (
         <div className="section-summary">
-          <div>
+          <button
+            type="button"
+            className={`section-summary-card ${
+              statusFilter === "active" ? "is-selected" : ""
+            }`}
+            aria-pressed={statusFilter === "active"}
+            disabled={activeStaplesCount === 0}
+            onClick={() => toggleFilter("active")}
+          >
             <span>On list</span>
             <strong>{activeStaplesCount}</strong>
             <small>of {staples.length} recurring</small>
-          </div>
+          </button>
 
-          <div>
+          <button
+            type="button"
+            className={`section-summary-card ${
+              statusFilter === "inactive" ? "is-selected" : ""
+            }`}
+            aria-pressed={statusFilter === "inactive"}
+            disabled={inactiveStaples === 0}
+            onClick={() => toggleFilter("inactive")}
+          >
             <span>Off</span>
-            <strong>{staples.length - activeStaplesCount}</strong>
+            <strong>{inactiveStaples}</strong>
             <small>flagged to remove</small>
-          </div>
+          </button>
         </div>
       ) : (
         <div className="section-summary">
-          <div>
+          <button
+            type="button"
+            className={`section-summary-card ${
+              statusFilter === "active" ? "is-selected" : ""
+            }`}
+            aria-pressed={statusFilter === "active"}
+            disabled={activeInventoryCount === 0}
+            onClick={() => toggleFilter("active")}
+          >
             <span>In stock</span>
             <strong>{activeInventoryCount}</strong>
             <small>of {inventory.length} items</small>
-          </div>
+          </button>
 
-          <div>
+          <button
+            type="button"
+            className={`section-summary-card ${
+              statusFilter === "inactive" ? "is-selected" : ""
+            }`}
+            aria-pressed={statusFilter === "inactive"}
+            disabled={inactiveInventory === 0}
+            onClick={() => toggleFilter("inactive")}
+          >
             <span>Missing</span>
-            <strong>{inventory.length - activeInventoryCount}</strong>
+            <strong>{inactiveInventory}</strong>
             <small>to restock</small>
-          </div>
+          </button>
         </div>
+      )}
+
+      {filterNote && (
+        <p className="section-filter-note">
+          <span>{filterNote}</span>
+          <button
+            type="button"
+            className="section-filter-clear"
+            onClick={() => setStatusFilter(null)}
+          >
+            Show all
+          </button>
+        </p>
       )}
 
       {activeSection === "recurring" ? (
         <StaplesList
           staples={staples}
+          statusFilter={statusFilter}
           availableCategories={availableCategories}
           newStaple={newStaple}
           setNewStaple={setNewStaple}
@@ -89,6 +167,7 @@ function HouseholdBasics({
       ) : (
         <InventoryList
           inventory={inventory}
+          statusFilter={statusFilter}
           availableCategories={availableCategories}
           newInventoryItem={newInventoryItem}
           setNewInventoryItem={setNewInventoryItem}
