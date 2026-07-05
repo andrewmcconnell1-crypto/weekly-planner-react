@@ -97,7 +97,9 @@ function normaliseRecipe(recipe, index) {
 // timings, doneness cues) and added total-time estimates (timeMins), plus
 // serving sizes for the newer originals. Refreshes built-ins so existing
 // accounts pick up the richer methods.
-export const RECIPES_VERSION = 5;
+// v6: added the "Restaurant quality" collection (chefRecipes.js) — bistro-level
+// original recipes with their own source badge and filter entry.
+export const RECIPES_VERSION = 6;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
