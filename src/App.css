@@ -3919,6 +3919,11 @@ textarea::placeholder {
   color: var(--olive);
 }
 
+.recipe-source[data-source="chef"] {
+  background: var(--rust-soft);
+  color: var(--rust-strong);
+}
+
 .recipe-source[data-source="custom"] {
   background: var(--accent-soft);
   color: var(--accent-strong);

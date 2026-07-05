@@ -6,7 +6,12 @@ import {
   recipeTags,
 } from "../utils/recipeUtils";
 
-const SOURCE_ORDER = ["RecipeTin Eats", "Original recipes", "Custom"];
+const SOURCE_ORDER = [
+  "RecipeTin Eats",
+  "Original recipes",
+  "Restaurant quality",
+  "Custom",
+];
 
 // Shared recipe search + filter state (category / tags / source) so the Recipes
 // tab and the meal editor's picker narrow their lists identically. Returns the

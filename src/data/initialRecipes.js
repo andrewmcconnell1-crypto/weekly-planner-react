@@ -1,4 +1,5 @@
 import { aiRecipes } from "./aiRecipes";
+import { chefRecipes } from "./chefRecipes";
 import { webRecipes } from "./webRecipes";
 import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 
@@ -828,6 +829,10 @@ const baseRecipes = [
   // Original recipes — own full method, no source link. See aiRecipes.js.
   ...aiRecipes,
 
+  // Restaurant-quality originals — bistro-level dishes with their own full
+  // method. See chefRecipes.js.
+  ...chefRecipes,
+
   // Recipes from other websites — curated ingredients, method via source link.
   // See webRecipes.js.
   ...webRecipes,
@@ -930,6 +935,9 @@ const SERVES_BY_ID = {
   "sausage-bean-cassoulet": 5,
   "lamb-rogan-josh": 5,
   "greek-lamb-orzo": 6,
+  // Restaurant quality — as with the originals, only the non-4 exceptions.
+  "crispy-pork-belly-apple": 5,
+  "slow-lamb-shoulder-anchovy": 6,
   // Recipes from other websites
   "bb-coconut-curry-lentils": 4,
   "ck-vegetarian-chili": 6,
