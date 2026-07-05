@@ -921,6 +921,15 @@ const SERVES_BY_ID = {
   "teriyaki-salmon-bowls": 4,
   "margherita-pizza": 4,
   "black-bean-quesadillas": 4,
+  // Later original recipes mostly serve 4 (the default) — only the exceptions
+  // are listed here.
+  "tuna-pasta-bake-original": 5,
+  "beef-ragu-pappardelle": 6,
+  "beef-guinness-stew": 6,
+  "maple-mustard-pork": 5,
+  "sausage-bean-cassoulet": 5,
+  "lamb-rogan-josh": 5,
+  "greek-lamb-orzo": 6,
   // Recipes from other websites
   "bb-coconut-curry-lentils": 4,
   "ck-vegetarian-chili": 6,
