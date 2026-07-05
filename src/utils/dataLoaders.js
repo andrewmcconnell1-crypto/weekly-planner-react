@@ -93,7 +93,11 @@ function normaliseRecipe(recipe, index) {
 // v4: corrected ingredient lists across the RecipeTin and web recipes (verified
 // against sources), and added best-guess tags to the web recipes. Refreshes
 // built-ins so existing accounts pick up the fixes.
-export const RECIPES_VERSION = 4;
+// v5: rewrote every Original recipe's method with detailed steps (heat levels,
+// timings, doneness cues) and added total-time estimates (timeMins), plus
+// serving sizes for the newer originals. Refreshes built-ins so existing
+// accounts pick up the richer methods.
+export const RECIPES_VERSION = 5;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
