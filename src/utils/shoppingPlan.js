@@ -1,7 +1,7 @@
 import { normaliseItemName, slugifyIdPart } from "./itemUtils";
 import { days } from "./mealUtils";
 import { isStapleDueThisWeek } from "./stapleUtils";
-import { buildCoverageIndex, findCoverage } from "./ingredientMatch";
+import { buildCoverageIndex, canonicalKey, findCoverage } from "./ingredientMatch";
 import { scaleIngredient } from "./quantityUtils";
 
 // Sources that the generator owns. Rows with these sources are regenerated each
@@ -199,6 +199,14 @@ export function buildShoppingPlan({
   const skippedItems = [];
   const skippedSeen = new Set();
 
+  // Things that never belong on a shopping list, by core food words — imported
+  // recipes often list tap water as an ingredient.
+  const NEVER_BUY_KEYS = new Set(["water"]);
+  // Same food wanted by two different meals ("1/2 cup water" Monday, "1 cup
+  // warm water" Wednesday) slips past the exact-name dedup below because the
+  // quantities differ — track meal ingredients by core food words too.
+  const seenMealKeys = new Set();
+
   const newItems = allNewItems
     .filter((item) => {
       const normalisedName = normaliseItemName(item.name);
@@ -206,6 +214,18 @@ export function buildShoppingPlan({
       // Fuzzy coverage applies to meal ingredients only — restock rows are the
       // stock you're deliberately rebuying, so they must never be suppressed.
       if (item.source === "Meal") {
+        const coreKey = canonicalKey(item.name);
+
+        if (NEVER_BUY_KEYS.has(coreKey)) {
+          summary.skippedDuplicates += 1;
+          return false;
+        }
+        if (coreKey && seenMealKeys.has(coreKey)) {
+          summary.skippedDuplicates += 1;
+          return false;
+        }
+        if (coreKey) seenMealKeys.add(coreKey);
+
         const coveredBy = findCoverage(item.name, coverageIndex, ingredientGroups);
 
         if (coveredBy) {

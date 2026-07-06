@@ -49,9 +49,21 @@ const PREP_WORDS = [
 export function tidyIngredient(raw) {
   let text = String(raw ?? "")
     .replace(/[¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/g, (f) => ` ${FRACTIONS[f]} `)
-    .replace(/\([^)]*\)/g, " ") // sizes, prices, unit conversions
+    .replace(/[（【]/g, "(")
+    .replace(/[）】]/g, ")")
     .replace(/\*+/g, " ") // footnote markers
     .replace(/^\s*[-•]\s*/, "");
+
+  // Drop parentheticals (sizes, prices, unit conversions) innermost-first so
+  // nested ones like "(about 1/2 cup (packed))" go cleanly, then sweep any
+  // orphaned brackets a site's malformed markup leaves behind.
+  let before;
+  do {
+    before = text;
+    text = text.replace(/\([^()]*\)/g, " ");
+  } while (text !== before);
+  text = text.replace(/\([^()]*$/, " "); // unclosed note runs to the end
+  text = text.replace(/[()[\]]/g, " ");
 
   text = text
     .split(",")

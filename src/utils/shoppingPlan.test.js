@@ -155,3 +155,64 @@ describe("buildShoppingPlan — manual overrides are preserved", () => {
     expect(names).toContain("Birthday candles");
   });
 });
+
+describe("buildShoppingPlan — meal ingredient hygiene", () => {
+  const twoMealWeek = { Sunday: { type: "meal" }, Monday: { type: "meal" } };
+  const summaries = {
+    Sunday: {
+      hasMeal: true,
+      name: "Dragon Noodles",
+      ingredients: ["1/2 cup water", "2 tbsp cornstarch"],
+    },
+    Monday: {
+      hasMeal: true,
+      name: "Dahl",
+      ingredients: ["1 cup warm water", "1 onion"],
+    },
+  };
+  const planTwoMeals = ({ inventory = [] }) =>
+    buildShoppingPlan({
+      staples: [],
+      inventory,
+      shoppingItems: [],
+      weekMeals: twoMealWeek,
+      weekKey: "2026-06-14",
+      getMealSummary: (day) =>
+        summaries[day] || { hasMeal: false, name: day, ingredients: [] },
+    });
+
+  it("never puts water on the list, from any meal", () => {
+    const names = renderedList(planTwoMeals({})).map((i) => i.name.toLowerCase());
+    expect(names.some((n) => n.includes("water"))).toBe(false);
+  });
+
+  it("suppresses US-named ingredients covered by the local stock name", () => {
+    const result = planTwoMeals({
+      inventory: [{ id: "i1", name: "Cornflour", active: true, category: "Pantry" }],
+    });
+    const names = renderedList(result).map((i) => i.name.toLowerCase());
+    expect(names.some((n) => n.includes("cornstarch"))).toBe(false);
+    expect(result.skippedItems.some((i) => i.coveredBy === "Cornflour")).toBe(true);
+  });
+
+  it("lists the same food wanted by two meals only once", () => {
+    const dayMeals = { Sunday: { type: "meal" }, Monday: { type: "meal" } };
+    const soySummaries = {
+      Sunday: { hasMeal: true, name: "Stir fry", ingredients: ["2 tbsp soy sauce"] },
+      Monday: { hasMeal: true, name: "Bowls", ingredients: ["1/4 cup soy sauce"] },
+    };
+    const result = buildShoppingPlan({
+      staples: [],
+      inventory: [],
+      shoppingItems: [],
+      weekMeals: dayMeals,
+      weekKey: "2026-06-14",
+      getMealSummary: (day) =>
+        soySummaries[day] || { hasMeal: false, name: day, ingredients: [] },
+    });
+    const soyRows = renderedList(result).filter((i) =>
+      i.name.toLowerCase().includes("soy")
+    );
+    expect(soyRows).toHaveLength(1);
+  });
+});

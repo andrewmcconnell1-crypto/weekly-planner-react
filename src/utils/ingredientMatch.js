@@ -47,7 +47,7 @@ const QUALIFIER_WORDS = new Set([
   "wild", "long", "grain", "short", "australian", "grown", "homogenised",
   "full", "cream", "reduced", "fat", "skim", "thinly", "good", "quality",
   "unsalted", "salted", "caster", "icing", "soft", "firm", "mixed", "assorted",
-  "shredded",
+  "shredded", "boiling", "lukewarm", "heavy", "thickened", "neutral", "cooking",
 ]);
 
 const FILLER_WORDS = new Set([
@@ -66,6 +66,11 @@ const BRAND_WORDS = new Set([
 // optional trailing "s") before tokenising, so multi-word variants work. Easy
 // to extend — order doesn't matter as the canonical forms don't overlap.
 const SYNONYM_RULES = [
+  ["cornstarch", "cornflour"],
+  ["corn starch", "cornflour"],
+  ["yogurt", "yoghurt"],
+  ["chili", "chilli"],
+  ["chile", "chilli"],
   ["cilantro", "coriander"],
   ["scallion", "spring onion"],
   ["green onion", "spring onion"],

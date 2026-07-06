@@ -39,6 +39,12 @@ describe("ingredientMatch — exact core-token coverage", () => {
     ).toBe(true);
   });
 
+  it("canonicalises US pantry names to local ones", () => {
+    expect(canonicalKey("2 tbsp cornstarch")).toBe(canonicalKey("Cornflour"));
+    expect(canonicalKey("1 cup Greek yogurt")).toBe(canonicalKey("greek yoghurt"));
+    expect(canonicalKey("1 red chili")).toBe(canonicalKey("red chilli"));
+  });
+
   it("canonicalises common regional synonyms", () => {
     expect(covered("cilantro", ["Coriander"])).toBe(true);
     expect(covered("scallions", ["Spring onion"])).toBe(true);
