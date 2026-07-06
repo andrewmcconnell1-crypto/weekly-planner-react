@@ -56,6 +56,7 @@ import { useMealPlanActions } from "./hooks/useMealPlanActions";
 import { useShoppingActions } from "./hooks/useShoppingActions";
 import { useHouseholdActions } from "./hooks/useHouseholdActions";
 import { useRecipeActions } from "./hooks/useRecipeActions";
+import BrandMark from "./components/BrandMark";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -509,7 +510,7 @@ function App() {
     <main className={`app-shell tab-${activeTab}`}>
       <header className="app-header">
         <div>
-          <p className="eyebrow">Family meals</p>
+          <p className="eyebrow"><BrandMark /></p>
 
           <h1>
             {activeTab === "home"

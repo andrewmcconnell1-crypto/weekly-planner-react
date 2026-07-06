@@ -1,6 +1,8 @@
 // A branded splash shown while auth + the plan load. Keeps the calm look of the
 // rest of the app: the app icon, the name, and a slim indeterminate progress
 // bar. Motion is decorative and disabled under prefers-reduced-motion.
+import BrandMark from "./BrandMark";
+
 export default function LoadingScreen({ message = "Loading…" }) {
   return (
     <main className="loading-screen">
@@ -15,7 +17,7 @@ export default function LoadingScreen({ message = "Loading…" }) {
         </div>
 
         <div className="loading-brand">
-          <p className="eyebrow">Family meals</p>
+          <p className="eyebrow"><BrandMark /></p>
           <h1>Weekly meal planner</h1>
         </div>
 
