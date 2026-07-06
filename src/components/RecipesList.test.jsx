@@ -5,6 +5,14 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
 import RecipesList from "./RecipesList";
+import { importRecipeFromUrl } from "../lib/recipeImportClient";
+
+// Force the import UI on (it normally hides without Supabase configured) and
+// stub the network call so the flow is testable.
+vi.mock("../lib/recipeImportClient", () => ({
+  isRecipeImportAvailable: true,
+  importRecipeFromUrl: vi.fn(),
+}));
 
 const recipes = [
   { id: "r1", name: "Beef Tacos", category: "Beef", ingredients: [], serves: 4, source: "" },
@@ -66,5 +74,49 @@ describe("RecipesList", () => {
     expect(
       screen.getByRole("button", { name: /Add your first recipe/i })
     ).toBeInTheDocument();
+  });
+
+  it("imports a recipe from a pasted link", async () => {
+    const user = userEvent.setup();
+    const parsed = {
+      name: "Imported Curry",
+      ingredients: ["1 onion"],
+      method: "1. Cook.",
+      serves: 4,
+      source: "Some Blog",
+      sourceUrl: "https://example.com/curry",
+    };
+    importRecipeFromUrl.mockResolvedValueOnce(parsed);
+    const addImportedRecipe = vi.fn(() => "imported-1");
+    setup({ addImportedRecipe });
+
+    await user.click(screen.getByRole("button", { name: /New recipe/i }));
+    await user.type(
+      screen.getByLabelText("Recipe link to import"),
+      "https://example.com/curry"
+    );
+    await user.click(screen.getByRole("button", { name: "Import" }));
+
+    expect(importRecipeFromUrl).toHaveBeenCalledWith("https://example.com/curry");
+    expect(addImportedRecipe).toHaveBeenCalledWith(parsed);
+  });
+
+  it("surfaces a friendly error when the import fails", async () => {
+    const user = userEvent.setup();
+    importRecipeFromUrl.mockRejectedValueOnce(
+      new Error("No recipe found on that page — you can still add it manually.")
+    );
+    setup({ addImportedRecipe: vi.fn() });
+
+    await user.click(screen.getByRole("button", { name: /New recipe/i }));
+    await user.type(
+      screen.getByLabelText("Recipe link to import"),
+      "https://example.com/not-a-recipe"
+    );
+    await user.click(screen.getByRole("button", { name: "Import" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /No recipe found on that page/
+    );
   });
 });

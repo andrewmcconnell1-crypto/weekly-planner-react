@@ -290,6 +290,7 @@ function App() {
     newRecipeName,
     setNewRecipeName,
     addRecipe,
+    addImportedRecipe,
     deleteRecipe,
     updateRecipe,
     addIngredientToRecipe,
@@ -698,6 +699,7 @@ function App() {
           newRecipeName={newRecipeName}
           setNewRecipeName={setNewRecipeName}
           addRecipe={addRecipe}
+          addImportedRecipe={addImportedRecipe}
           deleteRecipe={deleteRecipe}
           addIngredientToRecipe={addIngredientToRecipe}
           deleteIngredientFromRecipe={deleteIngredientFromRecipe}

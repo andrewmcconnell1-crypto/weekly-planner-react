@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { createCollectionId } from "../utils/itemUtils";
+import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 
 // Saved-recipe mutators: add/delete a recipe, edit its fields, and add/remove
 // ingredients. Owns the new-recipe-name text input.
@@ -32,6 +33,31 @@ export function useRecipeActions({
     ]);
 
     setNewRecipeName("");
+  }
+
+  // Save a recipe parsed from a web page (see utils/recipeImport). Category
+  // and tags are derived the same way the bundled recipes get theirs. Returns
+  // the new id so the caller can open it in the editor for review.
+  function addImportedRecipe(parsed) {
+    const id = createCollectionId("recipe", recipes, parsed.name);
+
+    setRecipes([
+      ...recipes,
+      {
+        id,
+        name: parsed.name,
+        category: deriveMainCategory(parsed),
+        source: parsed.source || "",
+        sourceUrl: parsed.sourceUrl || "",
+        ingredients: parsed.ingredients,
+        method: parsed.method || "",
+        serves: parsed.serves ?? defaultServings,
+        tags: deriveRecipeTags(parsed),
+        timeMins: parsed.timeMins ?? null,
+      },
+    ]);
+
+    return id;
   }
 
   function deleteRecipe(id) {
@@ -92,6 +118,7 @@ export function useRecipeActions({
     newRecipeName,
     setNewRecipeName,
     addRecipe,
+    addImportedRecipe,
     deleteRecipe,
     updateRecipe,
     addIngredientToRecipe,
