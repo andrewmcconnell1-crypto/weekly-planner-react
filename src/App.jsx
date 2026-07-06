@@ -1,10 +1,4 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import {
-  House,
-  CalendarDays,
-  ShoppingBasket,
-  CookingPot,
-} from "lucide-react";
 import "./App.css";
 
 import ShoppingList from "./components/ShoppingList";
@@ -57,6 +51,7 @@ import { useShoppingActions } from "./hooks/useShoppingActions";
 import { useHouseholdActions } from "./hooks/useHouseholdActions";
 import { useRecipeActions } from "./hooks/useRecipeActions";
 import BrandMark from "./components/BrandMark";
+import TabIcon from "./components/TabIcon";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -871,7 +866,7 @@ function App() {
           aria-current={activeTab === "home" ? "page" : undefined}
           onClick={() => setActiveTab("home")}
         >
-          <House size={21} strokeWidth={2} aria-hidden="true" />
+          <TabIcon tab="home" />
           <span>Home</span>
         </button>
 
@@ -881,7 +876,7 @@ function App() {
           aria-current={activeTab === "plan" ? "page" : undefined}
           onClick={() => setActiveTab("plan")}
         >
-          <CalendarDays size={21} strokeWidth={2} aria-hidden="true" />
+          <TabIcon tab="plan" />
           <span>Meals</span>
         </button>
 
@@ -891,7 +886,7 @@ function App() {
           aria-current={activeTab === "shop" ? "page" : undefined}
           onClick={() => setActiveTab("shop")}
         >
-          <ShoppingBasket size={21} strokeWidth={2} aria-hidden="true" />
+          <TabIcon tab="shop" />
           <span>Shop</span>
         </button>
 
@@ -904,7 +899,7 @@ function App() {
             setActiveTab("more");
           }}
         >
-          <CookingPot size={21} strokeWidth={2} aria-hidden="true" />
+          <TabIcon tab="kitchen" />
           <span>Kitchen</span>
         </button>
       </nav>
