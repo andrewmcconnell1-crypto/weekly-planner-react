@@ -47,6 +47,7 @@ export default function MoreScreen({
   newRecipeName,
   setNewRecipeName,
   addRecipe,
+  addImportedRecipe,
   deleteRecipe,
   addIngredientToRecipe,
   deleteIngredientFromRecipe,
@@ -174,6 +175,7 @@ export default function MoreScreen({
                 newRecipeName={newRecipeName}
                 setNewRecipeName={setNewRecipeName}
                 addRecipe={addRecipe}
+                addImportedRecipe={addImportedRecipe}
                 deleteRecipe={deleteRecipe}
                 addIngredientToRecipe={addIngredientToRecipe}
                 deleteIngredientFromRecipe={deleteIngredientFromRecipe}

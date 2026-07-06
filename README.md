@@ -71,6 +71,23 @@ New accounts are seeded with the bundled starter recipes/staples; signing in for
 the first time on a device with existing local data migrates that data into the
 account.
 
+### Recipe import from a link (edge function)
+
+"New recipe → paste a link" imports a recipe straight from a website: recipe
+pages embed schema.org/Recipe JSON-LD, and the app maps it to its own recipe
+fields (`src/utils/recipeImport.js`). The page fetch has to happen server-side
+(browsers block cross-origin fetches), which is what
+`supabase/functions/import-recipe` does. Deploy it once with the
+[Supabase CLI](https://supabase.com/docs/guides/functions/deploy):
+
+```bash
+supabase functions deploy import-recipe --project-ref <project-ref>
+```
+
+The function keeps JWT verification on (the default), so only callers holding
+this project's anon key can use it. Without Supabase configured (local-only
+mode) the import UI stays hidden and everything else works as before.
+
 ## How it works
 
 The app has four tabs:

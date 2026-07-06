@@ -1,6 +1,18 @@
 import { useState } from "react";
-import { BookOpen, Plus, Search, SearchX, SlidersHorizontal } from "lucide-react";
+import {
+  BookOpen,
+  Link2,
+  Loader2,
+  Plus,
+  Search,
+  SearchX,
+  SlidersHorizontal,
+} from "lucide-react";
 
+import {
+  importRecipeFromUrl,
+  isRecipeImportAvailable,
+} from "../lib/recipeImportClient";
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import RecipeCard from "./RecipeCard";
 import RecipeEditorSheet from "./RecipeEditorSheet";
@@ -11,6 +23,7 @@ function RecipesList({
   newRecipeName,
   setNewRecipeName,
   addRecipe,
+  addImportedRecipe,
   deleteRecipe,
   addIngredientToRecipe,
   deleteIngredientFromRecipe,
@@ -23,6 +36,28 @@ function RecipesList({
   // Adding a recipe is a rare action, so it stays tucked behind a quiet toggle.
   const [showAddRecipe, setShowAddRecipe] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+
+  // Paste a link → the edge function fetches the page → its structured data
+  // becomes a saved recipe, opened in the editor for review.
+  async function importFromUrl() {
+    if (importing || !importUrl.trim()) return;
+    setImporting(true);
+    setImportError("");
+    try {
+      const parsed = await importRecipeFromUrl(importUrl);
+      const id = addImportedRecipe(parsed);
+      setImportUrl("");
+      setShowAddRecipe(false);
+      setOpenRecipeId(id);
+    } catch (error) {
+      setImportError(error.message || "Import failed — try again.");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   const filters = useRecipeFilters(recipes);
   const { searchText, setSearchText, visibleRecipes, clearFilters } = filters;
@@ -53,22 +88,70 @@ function RecipesList({
       </div>
 
       {showAddRecipe && (
-        <div className="add-item-row">
-          <input
-            type="text"
-            placeholder="Add recipe..."
-            value={newRecipeName}
-            autoFocus
-            onChange={(event) => setNewRecipeName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") addRecipe();
-            }}
-          />
+        <>
+          <div className="add-item-row">
+            <input
+              type="text"
+              placeholder="Add recipe..."
+              value={newRecipeName}
+              autoFocus
+              onChange={(event) => setNewRecipeName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") addRecipe();
+              }}
+            />
 
-          <button type="button" onClick={addRecipe}>
-            Add
-          </button>
-        </div>
+            <button type="button" onClick={addRecipe}>
+              Add
+            </button>
+          </div>
+
+          {isRecipeImportAvailable && addImportedRecipe && (
+            <div className="recipe-import">
+              <p className="recipe-import-label small-text">
+                …or paste a link and the ingredients and method import
+                themselves:
+              </p>
+              <div className="add-item-row">
+                <input
+                  type="url"
+                  aria-label="Recipe link to import"
+                  placeholder="https://www.recipetineats.com/..."
+                  value={importUrl}
+                  disabled={importing}
+                  onChange={(event) => {
+                    setImportUrl(event.target.value);
+                    setImportError("");
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") importFromUrl();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={importFromUrl}
+                  disabled={importing || !importUrl.trim()}
+                >
+                  {importing ? (
+                    <Loader2
+                      size={15}
+                      className="recipe-import-spinner"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Link2 size={15} aria-hidden="true" />
+                  )}
+                  {importing ? "Importing…" : "Import"}
+                </button>
+              </div>
+              {importError && (
+                <p className="recipe-import-error small-text" role="alert">
+                  {importError}
+                </p>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {recipes.length === 0 ? (

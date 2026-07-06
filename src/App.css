@@ -2485,6 +2485,35 @@ textarea::placeholder {
   width: 100%;
 }
 
+/* "…or paste a recipe link" block under the new-recipe input. */
+.recipe-import {
+  display: grid;
+  gap: var(--space-6);
+  border-top: 1px dashed var(--line);
+  margin-top: var(--space-4);
+  padding-top: var(--space-8);
+}
+
+.recipe-import-label {
+  margin: 0;
+  color: var(--muted);
+}
+
+.recipe-import-error {
+  margin: 0;
+  color: var(--danger);
+}
+
+.recipe-import-spinner {
+  animation: recipe-import-spin 0.9s linear infinite;
+}
+
+@keyframes recipe-import-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .linked-recipe-panel {
   display: grid;
   gap: var(--space-10);
