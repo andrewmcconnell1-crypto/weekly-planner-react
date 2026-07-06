@@ -53,6 +53,14 @@ describe("tidyIngredient", () => {
     );
   });
 
+  it("cleans nested and orphaned brackets", () => {
+    expect(tidyIngredient("1/2 bunch cilantro (about 1/2 cup (packed))")).toBe(
+      "1/2 bunch cilantro"
+    );
+    expect(tidyIngredient("2 cups flour (250g")).toBe("2 cups flour");
+    expect(tidyIngredient("1 carrot )")).toBe("1 carrot");
+  });
+
   it("drops prep clauses but keeps meaningful ones", () => {
     expect(tidyIngredient("500 g chicken breast, cut into strips")).toBe(
       "500 g chicken breast"
