@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import BrandMark from "./BrandMark";
+
 // Shown after the user follows a password-reset link (recoveryMode). The
 // recovery link already established a session, so we just collect a new password
 // and call updateUser. On success the app drops them straight into their plan.
@@ -46,7 +48,7 @@ function UpdatePasswordScreen({ onUpdatePassword, onCancel }) {
   return (
     <main className="app-shell tab-home auth-shell">
       <section className="auth-card">
-        <p className="eyebrow">Family meals</p>
+        <p className="eyebrow"><BrandMark /></p>
         <h1>Set a new password</h1>
         <p className="auth-intro">
           Choose a new password for your account. You'll be signed in once it's

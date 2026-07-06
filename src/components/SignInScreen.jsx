@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import BrandMark from "./BrandMark";
 
 function GoogleMark() {
   return (
@@ -164,7 +165,7 @@ function SignInScreen({
   return (
     <main className="app-shell tab-home auth-shell">
       <section className="auth-card">
-        <p className="eyebrow">Family meals</p>
+        <p className="eyebrow"><BrandMark /></p>
         <h1>Weekly meal planner</h1>
         <p className="auth-intro">
           Sign in to plan meals, build your shopping list, and keep everything in

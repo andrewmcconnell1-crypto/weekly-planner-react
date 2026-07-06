@@ -1,5 +1,7 @@
-// Recipe tile: a gradient keyed to the category tone with a dish emoji. `size`
-// is "sm" (card thumbnail) or "lg" (detail hero).
+import DishGlyph from "./DishGlyph";
+
+// Recipe tile: a gradient keyed to the category tone with a hand-drawn dish
+// glyph. `size` is "sm" (card thumbnail) or "lg" (detail hero).
 function RecipeThumb({ imagery, size = "sm" }) {
   return (
     <span
@@ -7,7 +9,7 @@ function RecipeThumb({ imagery, size = "sm" }) {
       style={{ background: imagery.gradient }}
       aria-hidden="true"
     >
-      <span className="recipe-thumb-emoji">{imagery.emoji}</span>
+      <DishGlyph glyph={imagery.glyph} className="recipe-thumb-glyph" />
     </span>
   );
 }

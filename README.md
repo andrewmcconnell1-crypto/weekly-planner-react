@@ -1,4 +1,4 @@
-# Meal Planner
+# Ladle
 
 A mobile-first weekly meal planner and shopping-list generator for a household.
 Plan meals for a week, keep a list of recurring buys and pantry stock, then

@@ -569,6 +569,29 @@ textarea:focus-visible {
   text-transform: uppercase;
 }
 
+/* The logotype: a wee ladle plus the wordmark in the display serif. It sits in
+   eyebrow slots, so it opts back out of the uppercase label treatment. */
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--rust);
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.brand-mark-glyph {
+  width: 15px;
+  height: 15px;
+  margin-top: -1px;
+}
+
+.brand-mark-word {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
 .app-header h1,
 .screen h2 {
   margin: 0;
@@ -607,10 +630,20 @@ textarea:focus-visible {
   border: none;
   border-top: 1px solid var(--line);
   border-radius: 0;
-  background: rgba(255, 254, 250, 0.96);
+  /* Near-opaque by default so content never ghosts through; browsers with
+     backdrop-filter support get the nicer frosted treatment below. */
+  background: rgba(255, 254, 250, 0.985);
   box-shadow: 0 -10px 30px rgba(34, 42, 38, 0.14);
   padding: 6px max(14px, calc((100vw - 960px) / 2 + 14px));
   padding-bottom: calc(6px + env(safe-area-inset-bottom));
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bottom-nav {
+    background: rgba(255, 254, 250, 0.86);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    backdrop-filter: blur(14px) saturate(1.15);
+  }
 }
 
 .more-tabs {
@@ -3604,18 +3637,20 @@ textarea::placeholder {
   border-radius: var(--radius-md);
 }
 
-.recipe-thumb-emoji {
-  line-height: 1;
-  /* Soft shadow lifts the emoji off the gradient. */
-  filter: drop-shadow(0 1px 2px rgba(43, 33, 24, 0.22));
+.recipe-thumb-glyph {
+  /* Cream line-work on the tone gradient; the shadow lifts it slightly. */
+  color: rgba(255, 250, 240, 0.95);
+  filter: drop-shadow(0 1px 2px rgba(43, 33, 24, 0.28));
 }
 
-.recipe-thumb-sm .recipe-thumb-emoji {
-  font-size: 24px;
+.recipe-thumb-sm .recipe-thumb-glyph {
+  width: 27px;
+  height: 27px;
 }
 
-.recipe-thumb-lg .recipe-thumb-emoji {
-  font-size: 58px;
+.recipe-thumb-lg .recipe-thumb-glyph {
+  width: 64px;
+  height: 64px;
 }
 
 /* The thumbnail now carries the category tone, so drop the leading accent bar. */
@@ -6994,8 +7029,14 @@ html[data-theme="dark"] .app-shell {
 }
 
 html[data-theme="dark"] .bottom-nav {
-  background: rgba(28, 25, 20, 0.96);
+  background: rgba(28, 25, 20, 0.985);
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-theme="dark"] .bottom-nav {
+    background: rgba(28, 25, 20, 0.82);
+  }
 }
 
 /* Sticky Stock / Recurring category headers and the Shop aisle labels use a
