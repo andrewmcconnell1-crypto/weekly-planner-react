@@ -20,6 +20,57 @@ function cleanText(value) {
     .trim();
 }
 
+// Unicode vulgar fractions → ascii, so "½ cup" reads and matches like the
+// rest of the app's ingredients ("1½" becomes "1 1/2").
+const FRACTIONS = {
+  "¼": "1/4", "½": "1/2", "¾": "3/4", "⅓": "1/3", "⅔": "2/3",
+  "⅕": "1/5", "⅖": "2/5", "⅗": "3/5", "⅘": "4/5", "⅙": "1/6",
+  "⅚": "5/6", "⅛": "1/8", "⅜": "3/8", "⅝": "5/8", "⅞": "7/8",
+};
+
+// Words that mark an after-comma segment as prep instruction rather than part
+// of the item (", rinsed and drained", ", finely chopped", ", to taste") —
+// noise for a shopping list. Segments without any of these are kept, so
+// "chicken thighs, skin on" survives.
+const PREP_WORDS = [
+  "chopped", "diced", "sliced", "minced", "grated", "crushed", "peeled",
+  "rinsed", "drained", "divided", "melted", "softened", "beaten", "cubed",
+  "halved", "quartered", "shredded", "trimmed", "torn", "picked", "seeded",
+  "deseeded", "cored", "julienned", "thinly", "finely", "roughly", "coarsely",
+  "optional", "taste", "serve", "serving", "garnish", "needed", "cut into",
+  "cut in", "plus more", "plus extra", "more for", "room temperature",
+  "zested", "juiced", "stemmed", "sifted", "packed", "at room", "separated",
+  "removed", "patted dry", "lightly",
+];
+
+// Tidy one imported ingredient line into this app's ingredient style: ascii
+// fractions, no parentheticals (sizes, prices, conversions), no footnote
+// marks, no prep-instruction clauses, compact tbsp/tsp units.
+export function tidyIngredient(raw) {
+  let text = String(raw ?? "")
+    .replace(/[¼½¾⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/g, (f) => ` ${FRACTIONS[f]} `)
+    .replace(/\([^)]*\)/g, " ") // sizes, prices, unit conversions
+    .replace(/\*+/g, " ") // footnote markers
+    .replace(/^\s*[-•]\s*/, "");
+
+  text = text
+    .split(",")
+    .filter((segment, index) => {
+      if (index === 0) return true;
+      const lowered = segment.toLowerCase();
+      return segment.trim() && !PREP_WORDS.some((word) => lowered.includes(word));
+    })
+    .join(",");
+
+  return text
+    .replace(/\b(tablespoons?|tbsps?)\b\.?/gi, "tbsp")
+    .replace(/\b(teaspoons?|tsps?)\b\.?/gi, "tsp")
+    .replace(/\s+,/g, ",")
+    .replace(/\s+/g, " ")
+    .replace(/[,;\s]+$/, "")
+    .trim();
+}
+
 function isRecipeNode(node) {
   if (!node || typeof node !== "object") return false;
   const type = node["@type"];
@@ -114,7 +165,7 @@ export function normaliseImportedRecipe(node, { url = "", siteName = "" } = {}) 
 
   const name = cleanText(node.name);
   const ingredients = (node.recipeIngredient || node.ingredients || [])
-    .map(cleanText)
+    .map((entry) => tidyIngredient(cleanText(entry)))
     .filter(Boolean);
   if (!name || ingredients.length === 0) return null;
 

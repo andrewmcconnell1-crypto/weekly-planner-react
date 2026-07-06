@@ -5,6 +5,7 @@ import {
   normaliseImportedRecipe,
   parseImportedRecipe,
   parseIsoDurationMins,
+  tidyIngredient,
 } from "./recipeImport";
 
 // A WordPress-style block: everything nested under @graph, HowToStep
@@ -31,6 +32,36 @@ const graphBlock = JSON.stringify({
       publisher: { "@type": "Organization", name: "Some Blog" },
     },
   ],
+});
+
+describe("tidyIngredient", () => {
+  it("strips prices, parentheticals and footnote marks", () => {
+    expect(tidyIngredient("1 yellow onion, diced ($0.32)")).toBe("1 yellow onion");
+    expect(tidyIngredient("1 (15 oz.) can black beans, rinsed and drained")).toBe(
+      "1 can black beans"
+    );
+    expect(tidyIngredient("3 cloves garlic, minced*")).toBe("3 cloves garlic");
+  });
+
+  it("converts unicode fractions and compacts spoon units", () => {
+    expect(tidyIngredient("½ cup shredded mozzarella, plus more for serving")).toBe(
+      "1/2 cup shredded mozzarella"
+    );
+    expect(tidyIngredient("1½ Tablespoons soy sauce")).toBe("1 1/2 tbsp soy sauce");
+    expect(tidyIngredient("2 Teaspoons sesame oil, divided")).toBe(
+      "2 tsp sesame oil"
+    );
+  });
+
+  it("drops prep clauses but keeps meaningful ones", () => {
+    expect(tidyIngredient("500 g chicken breast, cut into strips")).toBe(
+      "500 g chicken breast"
+    );
+    expect(tidyIngredient("4 chicken thighs, skin on")).toBe(
+      "4 chicken thighs, skin on"
+    );
+    expect(tidyIngredient("salt and pepper, to taste")).toBe("salt and pepper");
+  });
 });
 
 describe("parseIsoDurationMins", () => {
