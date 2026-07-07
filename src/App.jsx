@@ -129,6 +129,8 @@ function App() {
     setStaples,
     inventory,
     setInventory,
+    baskets,
+    setBaskets,
     recipes,
     setRecipes,
     settings,
@@ -695,6 +697,8 @@ function App() {
           setNewRecipeName={setNewRecipeName}
           addRecipe={addRecipe}
           addImportedRecipe={addImportedRecipe}
+          baskets={baskets}
+          setBaskets={setBaskets}
           deleteRecipe={deleteRecipe}
           addIngredientToRecipe={addIngredientToRecipe}
           deleteIngredientFromRecipe={deleteIngredientFromRecipe}

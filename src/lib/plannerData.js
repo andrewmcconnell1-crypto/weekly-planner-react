@@ -29,6 +29,7 @@ export const DATA_KEYS = [
   "manualShoppingItems",
   "staples",
   "inventory",
+  "baskets",
   "recipes",
   "recipesVersion",
   "settings",
@@ -82,6 +83,8 @@ export function defaultData() {
     manualShoppingItems: [],
     staples: [],
     inventory: [],
+    // Standing weekly shopping baskets (Phase 1 of basket-driven planning).
+    baskets: [],
     recipes: initialRecipes,
     recipesVersion: RECIPES_VERSION,
     settings: { ...defaultSettings },
@@ -118,6 +121,7 @@ export function normaliseData(raw) {
     inventory: normaliseInventoryItems(
       Array.isArray(data.inventory) ? data.inventory : []
     ),
+    baskets: Array.isArray(data.baskets) ? data.baskets : base.baskets,
     // Refresh built-in recipes from the bundle only when the account hasn't yet
     // seen this recipe version — a one-time migration that then leaves edits be.
     recipes: mergeSavedRecipes(
