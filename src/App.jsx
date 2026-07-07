@@ -730,6 +730,9 @@ function App() {
           addImportedRecipe={addImportedRecipe}
           baskets={baskets}
           setBaskets={setBaskets}
+          planWeekMeals={meals}
+          onPlanRecipeOnDay={assignRecipeToDay}
+          planWeekStart={mealWeekStart}
           deleteRecipe={deleteRecipe}
           addIngredientToRecipe={addIngredientToRecipe}
           deleteIngredientFromRecipe={deleteIngredientFromRecipe}

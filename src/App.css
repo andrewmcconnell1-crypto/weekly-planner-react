@@ -7342,3 +7342,50 @@ html[data-theme="dark"] .shop-hero.needs-update {
   font: inherit;
   font-size: var(--text-sm);
 }
+
+.cookable-intro,
+.cookable-weekstatus {
+  margin: 0;
+  color: var(--muted);
+}
+
+.cookable-weekstatus {
+  font-weight: var(--weight-semibold);
+}
+
+.cookable-plan {
+  width: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  border: 1px solid var(--olive);
+  border-radius: var(--radius-pill);
+  background: var(--olive-soft);
+  color: var(--accent-strong);
+  padding: var(--space-4) var(--space-10);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+}
+
+.cookable-plan:disabled {
+  opacity: 0.4;
+}
+
+.cookable-planned {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--olive);
+  font-weight: var(--weight-heavy);
+}
+
+.cookable-row {
+  row-gap: var(--space-4);
+}
+
+.cookable-name {
+  flex: 1;
+  min-width: 0;
+}
