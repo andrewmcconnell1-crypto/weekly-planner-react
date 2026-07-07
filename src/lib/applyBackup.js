@@ -17,6 +17,7 @@ export function applyBackup(backup, ctx) {
     manualShoppingItems,
     settings,
     staples,
+    baskets,
     inventory,
     recipes,
     setMealsByWeek,
@@ -26,6 +27,7 @@ export function applyBackup(backup, ctx) {
     setManualShoppingItems,
     setSettings,
     setStaples,
+    setBaskets,
     setInventory,
     setRecipes,
     captureRecoverySnapshot,
@@ -68,6 +70,7 @@ export function applyBackup(backup, ctx) {
   });
   apply("settings", settings, setSettings);
   apply("staples", staples, setStaples, { label: "recurring buys" });
+  apply("baskets", baskets, setBaskets, { label: "weekly baskets" });
   // Run imported inventory / recipes through the same migration helpers the
   // app uses when loading from localStorage, so they normalise consistently.
   apply("inventory", inventory, setInventory, {
