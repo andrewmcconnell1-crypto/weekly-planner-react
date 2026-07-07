@@ -1,20 +1,62 @@
 import { useMemo, useState } from "react";
-import { Plus, ShoppingBasket, Trash2, X } from "lucide-react";
+import { CalendarPlus, Check, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
 
 import { rankRecipesByCoverage } from "../utils/recipeCoverage";
 import { slugifyIdPart } from "../utils/itemUtils";
+import { days } from "../utils/mealUtils";
+import { formatDate } from "../utils/dateUtils";
+
+// A night is free if nothing's cooked there and it isn't a leftover repeat.
+function isFreeNight(meal) {
+  if (!meal) return true;
+  if (meal.mealType === "repeat") return false;
+  return !meal.recipeId && !meal.name;
+}
 
 // Weekly baskets: standing Woolworths-style lists. Pick one and the panel
 // shows which recipes the house can cook from basket + recurring buys + stock
-// — planning in reverse. Items are bulk-pasted (one per line) so an existing
-// supermarket list drops straight in.
-function BasketsPanel({ baskets, setBaskets, recipes, staples, inventory, ingredientGroups }) {
+// — planning in reverse — and lets you drop those straight onto a night.
+// Items are bulk-pasted (one per line) so an existing supermarket list drops
+// straight in.
+function BasketsPanel({
+  baskets,
+  setBaskets,
+  recipes,
+  staples,
+  inventory,
+  ingredientGroups,
+  planWeekMeals = {},
+  onPlanRecipeOnDay,
+  planWeekStart,
+}) {
   const [newName, setNewName] = useState("");
   const [openBasketId, setOpenBasketId] = useState(null);
   const [draftItems, setDraftItems] = useState("");
   // Which basket the cookable list is ranked against ("" = stock + recurring only).
   const [cookFromId, setCookFromId] = useState("");
   const [showAllCookable, setShowAllCookable] = useState(false);
+  // Transient "Planned for Tuesday" confirmation, keyed by recipe id.
+  const [justPlanned, setJustPlanned] = useState({});
+
+  const freeNights = days.filter((day) => isFreeNight(planWeekMeals[day]));
+  const plannedCount = days.length - freeNights.length;
+  const canPlan = Boolean(onPlanRecipeOnDay);
+
+  function planNextNight(recipe) {
+    const day = freeNights[0];
+    if (!day) return;
+    onPlanRecipeOnDay(day, recipe);
+    setJustPlanned((prev) => ({ ...prev, [recipe.id]: day }));
+    window.setTimeout(
+      () =>
+        setJustPlanned((prev) => {
+          const next = { ...prev };
+          delete next[recipe.id];
+          return next;
+        }),
+      2500
+    );
+  }
 
   const openBasket = baskets.find((basket) => basket.id === openBasketId);
 
@@ -144,7 +186,11 @@ function BasketsPanel({ baskets, setBaskets, recipes, staples, inventory, ingred
       ))}
 
       <div className="cookable-section">
-        <p className="section-kicker">What can we cook?</p>
+        <p className="section-kicker">Cook from your kitchen</p>
+        <p className="cookable-intro small-text">
+          Recipes you can make from what you have. Pick a basket to add its
+          ingredients in, then drop meals straight onto a night.
+        </p>
         <div className="cookable-chips">
           <button
             type="button"
@@ -165,6 +211,15 @@ function BasketsPanel({ baskets, setBaskets, recipes, staples, inventory, ingred
           ))}
         </div>
 
+        {canPlan && planWeekStart && (
+          <p className="cookable-weekstatus small-text">
+            Planning into the week of {formatDate(planWeekStart)} —{" "}
+            {freeNights.length === 0
+              ? "all 7 nights full"
+              : `${plannedCount}/7 planned, ${freeNights.length} free`}
+          </p>
+        )}
+
         {cookable.length === 0 ? (
           <p className="small-text cookable-empty">
             Nothing's within reach yet — add items to a basket, or mark more of
@@ -184,6 +239,23 @@ function BasketsPanel({ baskets, setBaskets, recipes, staples, inventory, ingred
                       needs {missing.join(", ")}
                     </span>
                   )}
+                  {canPlan &&
+                    (justPlanned[recipe.id] ? (
+                      <span className="cookable-planned small-text">
+                        <Check size={14} aria-hidden="true" />
+                        {justPlanned[recipe.id]}
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        className="cookable-plan"
+                        disabled={freeNights.length === 0}
+                        onClick={() => planNextNight(recipe)}
+                      >
+                        <CalendarPlus size={14} aria-hidden="true" />
+                        Add to a night
+                      </button>
+                    ))}
                 </li>
               ))}
             </ul>
