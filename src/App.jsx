@@ -131,6 +131,8 @@ function App() {
     setInventory,
     baskets,
     setBaskets,
+    basketByWeek,
+    setBasketByWeek,
     recipes,
     setRecipes,
     settings,
@@ -207,6 +209,8 @@ function App() {
     manualItems: manualShoppingItems,
     checkedMap: shoppingChecked,
     ingredientGroups,
+    baskets,
+    basketByWeek,
   });
   const removalIds = new Set(recurringRemovals.map((item) => item.id));
 
@@ -638,6 +642,11 @@ function App() {
 
       {activeTab === "shop" && (
         <ShoppingList
+          baskets={baskets}
+          weekBasketId={basketByWeek?.[shoppingWeekKey] || ""}
+          onSelectBasket={(basketId) =>
+            setBasketByWeek({ ...basketByWeek, [shoppingWeekKey]: basketId })
+          }
           newItem={newItem}
           setNewItem={setNewItem}
           addShoppingItem={addShoppingItem}

@@ -7325,3 +7325,20 @@ html[data-theme="dark"] .shop-hero.needs-update {
 .cookable-empty {
   color: var(--muted);
 }
+
+/* Week basket picker on the Shop screen. */
+.shop-basket-picker {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.shop-basket-picker select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--field);
+  color: var(--ink);
+  padding: var(--space-8) var(--space-10);
+  font: inherit;
+  font-size: var(--text-sm);
+}

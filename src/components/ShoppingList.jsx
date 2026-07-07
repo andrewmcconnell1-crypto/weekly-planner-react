@@ -46,6 +46,9 @@ function ShoppingList({
   shopLayout,
   setShopLayout,
   onOpenHelp,
+  baskets = [],
+  weekBasketId = "",
+  onSelectBasket,
 }) {
   const priorityLayout = shopLayout !== "aisle";
 
@@ -202,6 +205,23 @@ function ShoppingList({
           How shopping works
         </button>
       </div>
+
+      {baskets.length > 0 && onSelectBasket && (
+        <label className="shop-basket-picker">
+          <span className="small-text">Shop a basket this week</span>
+          <select
+            value={weekBasketId}
+            onChange={(event) => onSelectBasket(event.target.value)}
+          >
+            <option value="">None — build from meals</option>
+            {baskets.map((basket) => (
+              <option key={basket.id} value={basket.id}>
+                {basket.name} ({basket.items.length} items)
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       {keepStandingList && (
         <div className="shop-mode">
