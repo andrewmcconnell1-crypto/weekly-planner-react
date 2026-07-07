@@ -39,6 +39,11 @@ describe("ingredientMatch — exact core-token coverage", () => {
     ).toBe(true);
   });
 
+  it("treats produce varieties as the base vegetable", () => {
+    expect(canonicalKey("Lebanese cucumber")).toBe(canonicalKey("1 cucumber"));
+    expect(canonicalKey("Truss tomatoes")).toBe(canonicalKey("2 tomatoes"));
+  });
+
   it("canonicalises US pantry names to local ones", () => {
     expect(canonicalKey("2 tbsp cornstarch")).toBe(canonicalKey("Cornflour"));
     expect(canonicalKey("1 cup Greek yogurt")).toBe(canonicalKey("greek yoghurt"));
