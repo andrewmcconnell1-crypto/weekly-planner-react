@@ -34,6 +34,7 @@ import { createMealHelpers } from "./utils/mealPlanning";
 import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
 import { buildPlannerView } from "./utils/plannerView";
 import { listKnownGroups } from "./utils/ingredientMatch";
+import { rankRecipesByCoverage } from "./utils/recipeCoverage";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { applyBackup } from "./lib/applyBackup";
 import { captureJoinCodeFromUrl } from "./lib/household";
@@ -181,6 +182,26 @@ function App() {
   const currentWeekKey = getWeekKey(currentWeekStart);
   const nextWeekKey = getWeekKey(nextWeekStart);
   const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
+
+  // What the kitchen can already cook this meal week — the week's basket (if
+  // assigned) plus recurring buys and stock — keyed by recipe id so the meal
+  // picker can badge and sort by it.
+  const mealWeekBasket = baskets.find(
+    (basket) => basket.id === basketByWeek?.[mealWeekKey]
+  );
+  const recipeCoverageById = useMemo(
+    () =>
+      new Map(
+        rankRecipesByCoverage({
+          recipes,
+          basketItems: mealWeekBasket?.items || [],
+          staples,
+          inventory,
+          ingredientGroups,
+        }).map((entry) => [entry.recipe.id, entry])
+      ),
+    [recipes, mealWeekBasket, staples, inventory, ingredientGroups]
+  );
 
   const today = new Date();
   const todayDayName = days[today.getDay()];
@@ -610,6 +631,7 @@ function App() {
 
       {activeTab === "plan" && (
         <PlanScreen
+          recipeCoverageById={recipeCoverageById}
           mealWeekStart={mealWeekStart}
           mealWeekEnd={mealWeekEnd}
           mealsPlannedCount={mealsPlannedCount}

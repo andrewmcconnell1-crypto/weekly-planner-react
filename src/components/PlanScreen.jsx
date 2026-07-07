@@ -29,6 +29,7 @@ export default function PlanScreen({
   meals,
   getMealSummary,
   recipes,
+  recipeCoverageById,
   expandedMealDay,
   expandedDayLabel,
   expandedMeal,
@@ -124,6 +125,7 @@ export default function PlanScreen({
             meal={expandedMeal}
             days={days}
             recipes={recipes}
+            recipeCoverageById={recipeCoverageById}
             linkedRecipe={expandedDaySummary?.linkedRecipe}
             weekDaySummaries={planningDaySummaries}
             leftoverNights={expandedLeftoverNights}
