@@ -8,6 +8,7 @@ import { scaleIngredient } from "./quantityUtils";
 // time the list is built; any other source (e.g. "Manual") is preserved.
 export const generatedShoppingSources = [
   "Meal",
+  "Basket",
   "Staple",
   "Recurring buy",
   "Restock",
@@ -46,6 +47,10 @@ export function buildShoppingPlan({
   weekKey,
   getMealSummary,
   ingredientGroups = {},
+  // A basket assigned to this week: its items are the shop, so they're listed
+  // as rows and count as "already covered" for meal-ingredient suppression.
+  basketItems = [],
+  basketName = "",
 }) {
   const recurringBuys = staples
     .filter(
@@ -104,6 +109,7 @@ export function buildShoppingPlan({
   // regardless of whether they're due this week — you have them either way).
   const coverageIndex = buildCoverageIndex(
     [
+      ...basketItems,
       ...activeStockItems.map((item) => item.name),
       ...staples
         .filter((staple) => staple.active !== false)
@@ -160,7 +166,28 @@ export function buildShoppingPlan({
 
   const removeFromRecurring = [...inStockRecurring, ...pausedRecurring];
 
-  const allNewItems = [...restockInventory, ...mealIngredients];
+  // The basket's own rows: everything in it that isn't already in stock (the
+  // stock check is fuzzy; deduped within the basket by core food words).
+  const stockOnlyIndex = buildCoverageIndex(
+    activeStockItems.map((item) => item.name),
+    ingredientGroups
+  );
+  const seenBasketKeys = new Set();
+  const basketRows = basketItems
+    .filter((name) => {
+      const key = canonicalKey(name);
+      if (!key || seenBasketKeys.has(key)) return false;
+      seenBasketKeys.add(key);
+      return !findCoverage(name, stockOnlyIndex, ingredientGroups);
+    })
+    .map((name) => ({
+      name,
+      category: "Basket",
+      source: "Basket",
+      sourceDetail: basketName,
+    }));
+
+  const allNewItems = [...basketRows, ...restockInventory, ...mealIngredients];
 
   const existingGeneratedItems = shoppingItems.filter((item) =>
     generatedShoppingSources.includes(item.source)

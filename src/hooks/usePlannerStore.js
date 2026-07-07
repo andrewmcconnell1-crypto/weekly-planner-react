@@ -308,6 +308,7 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
       setManualShoppingItems: makeSetter("manualShoppingItems"),
       setStaples: makeSetter("staples"),
       setBaskets: makeSetter("baskets"),
+      setBasketByWeek: makeSetter("basketByWeek"),
       setInventory: makeSetter("inventory"),
       setRecipes: makeSetter("recipes"),
       setSettings: makeSetter("settings"),

@@ -40,8 +40,15 @@ export function buildUnifiedShoppingList({
   manualItems = [],
   checkedMap = {},
   ingredientGroups = {},
+  baskets = [],
+  basketByWeek = {},
 }) {
   const todayIndex = days.indexOf(todayDayName);
+
+  const basketFor = (weekKey) =>
+    baskets.find((basket) => basket.id === basketByWeek?.[weekKey]);
+  const currentBasket = basketFor(currentWeekKey);
+  const nextBasket = basketFor(nextWeekKey);
 
   const currentPlan = buildShoppingPlan({
     staples,
@@ -51,6 +58,8 @@ export function buildUnifiedShoppingList({
     weekKey: currentWeekKey,
     getMealSummary,
     ingredientGroups,
+    basketItems: currentBasket?.items || [],
+    basketName: currentBasket?.name || "",
   });
   const nextPlan = buildShoppingPlan({
     staples,
@@ -60,6 +69,8 @@ export function buildUnifiedShoppingList({
     weekKey: nextWeekKey,
     getMealSummary,
     ingredientGroups,
+    basketItems: nextBasket?.items || [],
+    basketName: nextBasket?.name || "",
   });
 
   const collected = [];
@@ -92,6 +103,8 @@ export function buildUnifiedShoppingList({
       if (tier) add(item.name, categoriseIngredient(item.name), tier, "Meal");
     } else if (item.source === "Restock") {
       add(item.name, item.category, "soon", "Restock", null, item.sourceId);
+    } else if (item.source === "Basket") {
+      add(item.name, categoriseIngredient(item.name), "week", "Basket");
     } else {
       add(item.name, item.category, "week", item.source);
     }
@@ -101,6 +114,8 @@ export function buildUnifiedShoppingList({
     if (item.source === "Meal") {
       const tier = mealTier(item.day, 1) || "next";
       add(item.name, categoriseIngredient(item.name), tier, "Meal");
+    } else if (item.source === "Basket") {
+      add(item.name, categoriseIngredient(item.name), "next", "Basket");
     }
   }
 

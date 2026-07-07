@@ -216,3 +216,41 @@ describe("buildShoppingPlan — meal ingredient hygiene", () => {
     expect(soyRows).toHaveLength(1);
   });
 });
+
+describe("buildShoppingPlan — basket-driven week", () => {
+  it("lists basket items and suppresses meal ingredients the basket covers", () => {
+    const result = buildShoppingPlan({
+      staples: [],
+      inventory: [{ id: "i1", name: "Paprika", active: true, category: "Pantry" }],
+      shoppingItems: [],
+      weekMeals,
+      weekKey: "2026-06-14",
+      getMealSummary,
+      basketItems: ["Beef mince 500g", "Taco shells"],
+      basketName: "Cheap week",
+    });
+    const rows = renderedList(result);
+    const basketRows = rows.filter((item) => item.source === "Basket");
+    expect(basketRows.map((item) => item.name)).toEqual([
+      "Beef mince 500g",
+      "Taco shells",
+    ]);
+    // The meal's "500g beef mince" is covered by the basket, so no Meal row.
+    expect(rows.some((item) => item.source === "Meal" && /beef/i.test(item.name))).toBe(false);
+  });
+
+  it("skips basket items already in stock", () => {
+    const result = buildShoppingPlan({
+      staples: [],
+      inventory: [{ id: "i1", name: "Taco shells", active: true, category: "Pantry" }],
+      shoppingItems: [],
+      weekMeals: {},
+      weekKey: "2026-06-14",
+      getMealSummary: (day) => ({ hasMeal: false, name: day, ingredients: [] }),
+      basketItems: ["Taco shells", "Beef mince"],
+      basketName: "Cheap week",
+    });
+    const names = renderedList(result).map((item) => item.name);
+    expect(names).toEqual(["Beef mince"]);
+  });
+});
