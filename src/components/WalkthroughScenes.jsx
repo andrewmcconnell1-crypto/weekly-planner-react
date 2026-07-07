@@ -7,13 +7,15 @@
 // Motion is decorative: every animated element lands on a sensible static state,
 // and App.css disables the keyframes under prefers-reduced-motion.
 
+import DishGlyph from "./DishGlyph";
+
 // 1 — Plan your week: recipe cards drop into the week's nights, one per night.
 export function SceneMeals() {
   const nights = [
-    { day: "Mon", meal: "🍝 Pasta bake" },
-    { day: "Tue", meal: "🌮 Beef tacos" },
-    { day: "Wed", meal: "🍛 Thai curry" },
-    { day: "Thu", meal: "🐟 Miso cod" },
+    { day: "Mon", meal: "Pasta bake", glyph: "pastaFork" },
+    { day: "Tue", meal: "Beef tacos", glyph: "taco" },
+    { day: "Wed", meal: "Thai curry", glyph: "pot" },
+    { day: "Thu", meal: "Miso cod", glyph: "fish" },
   ];
 
   return (
@@ -22,7 +24,10 @@ export function SceneMeals() {
         {nights.map((night, index) => (
           <div className="wt-night" key={night.day} style={{ "--i": index }}>
             <span className="wt-day">{night.day}</span>
-            <span className="wt-meal">{night.meal}</span>
+            <span className="wt-meal">
+              <DishGlyph glyph={night.glyph} className="wt-glyph" />
+              {night.meal}
+            </span>
           </div>
         ))}
       </div>
@@ -33,12 +38,12 @@ export function SceneMeals() {
 // 2 — Stock your kitchen: pantry staples, a check badge popping onto each.
 export function SceneStock() {
   const items = [
-    { emoji: "🫒", name: "Olive oil" },
-    { emoji: "🧂", name: "Salt" },
-    { emoji: "🧅", name: "Onions" },
-    { emoji: "🍚", name: "Rice" },
-    { emoji: "🧄", name: "Garlic" },
-    { emoji: "🥫", name: "Tinned tomatoes" },
+    { glyph: "bottle", name: "Olive oil" },
+    { glyph: "salt", name: "Salt" },
+    { glyph: "onion", name: "Onions" },
+    { glyph: "rice", name: "Rice" },
+    { glyph: "garlic", name: "Garlic" },
+    { glyph: "tin", name: "Tinned tomatoes" },
   ];
 
   return (
@@ -46,7 +51,7 @@ export function SceneStock() {
       <div className="wt-chips">
         {items.map((item, index) => (
           <span className="wt-chip" key={item.name} style={{ "--i": index }}>
-            <span className="wt-chip-emoji">{item.emoji}</span>
+            <DishGlyph glyph={item.glyph} className="wt-glyph" />
             {item.name}
             <span className="wt-chip-check">✓</span>
           </span>
@@ -120,7 +125,10 @@ export function SceneShop() {
         <div className="wt-progress">
           <span className="wt-progress-fill" />
         </div>
-        <div className="wt-done-pop">All done 🎉</div>
+        <div className="wt-done-pop">
+          All done
+          <DishGlyph glyph="sparkle" className="wt-glyph" />
+        </div>
       </div>
     </div>
   );

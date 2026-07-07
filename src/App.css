@@ -6412,8 +6412,24 @@ html[data-theme="dark"] .update-banner-button:hover {
   animation-delay: calc(var(--i) * 110ms);
 }
 
-.wt-chip-emoji {
-  font-size: 1rem;
+/* The walkthrough's little glyphs (meal rows, pantry chips, the done pop) —
+   the same drawn family as the recipe tiles, sized to sit in a text line. */
+.wt-glyph {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--olive);
+}
+
+.wt-meal,
+.wt-done-pop {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.wt-done-pop .wt-glyph {
+  color: currentColor;
 }
 
 .wt-chip-check {
