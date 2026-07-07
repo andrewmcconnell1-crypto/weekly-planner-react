@@ -77,6 +77,7 @@ function MealEditorSheet({
   meal,
   days,
   recipes,
+  recipeCoverageById,
   linkedRecipe,
   weekDaySummaries = [],
   leftoverNights = 1,
@@ -594,14 +595,30 @@ function MealEditorSheet({
             {recipeFilters.visibleRecipes.length === 0 ? (
               <p className="empty-state">No matching recipes.</p>
             ) : (
-              recipeFilters.visibleRecipes.map((recipe) => (
-                <RecipeCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  active={selectedRecipeId === recipe.id}
-                  onClick={() => selectRecipe(recipe.id)}
-                />
-              ))
+              // Ready-to-cook first (this week's basket + recurring + stock),
+              // then near-misses, then the rest in their usual order.
+              [...recipeFilters.visibleRecipes]
+                .sort((a, b) => {
+                  const rank = (recipe) => {
+                    const coverage = recipeCoverageById?.get(recipe.id);
+                    if (!coverage) return 3;
+                    return coverage.tier === "ready"
+                      ? 0
+                      : coverage.tier === "almost"
+                        ? 1
+                        : 2;
+                  };
+                  return rank(a) - rank(b);
+                })
+                .map((recipe) => (
+                  <RecipeCard
+                    key={recipe.id}
+                    recipe={recipe}
+                    active={selectedRecipeId === recipe.id}
+                    onClick={() => selectRecipe(recipe.id)}
+                    coverage={recipeCoverageById?.get(recipe.id)}
+                  />
+                ))
             )}
           </div>
         </div>

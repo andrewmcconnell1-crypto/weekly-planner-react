@@ -10,7 +10,9 @@ import RecipeThumb from "./RecipeThumb";
 
 // One recipe row, shared by the Recipes manager and the meal editor's picker so
 // they look identical. `active` highlights the currently-selected recipe.
-function RecipeCard({ recipe, active = false, onClick }) {
+// `coverage` (optional, from rankRecipesByCoverage) adds a Ready / "N short"
+// badge so the picker can sort by what the kitchen can already cook.
+function RecipeCard({ recipe, active = false, onClick, coverage }) {
   return (
     <button
       type="button"
@@ -36,6 +38,13 @@ function RecipeCard({ recipe, active = false, onClick }) {
             >
               {recipeSourceLabel(recipe)}
             </span>
+            {coverage && coverage.tier !== "more" && (
+              <span className={`cookable-badge cookable-${coverage.tier}`}>
+                {coverage.tier === "ready"
+                  ? "Ready"
+                  : `${coverage.missing.length} short`}
+              </span>
+            )}
           </span>
         </span>
 
