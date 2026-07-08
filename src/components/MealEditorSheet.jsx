@@ -603,16 +603,24 @@ function MealEditorSheet({
           </div>
 
           {hasCoverage && (
-            <button
-              type="button"
-              className={`ready-filter-toggle ${readyOnly ? "active" : ""}`}
-              aria-pressed={readyOnly}
-              onClick={() => setReadyOnly((on) => !on)}
-            >
-              <ChefHat size={15} aria-hidden="true" />
-              Ready to cook
-              <span className="ready-filter-count">{cookableCount}</span>
-            </button>
+            <label className="ready-filter">
+              <span className="ready-filter-label">
+                <ChefHat size={15} aria-hidden="true" />
+                <span>
+                  Only show ready to cook
+                  <span className="ready-filter-sub">
+                    {cookableCount} you can make from what you have
+                  </span>
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                className="shop-switch-input"
+                checked={readyOnly}
+                onChange={(event) => setReadyOnly(event.target.checked)}
+              />
+            </label>
           )}
 
           <div className="recipe-picker-results recipe-picker-flat">

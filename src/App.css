@@ -7392,33 +7392,35 @@ html[data-theme="dark"] .shop-hero.needs-update {
   min-width: 0;
 }
 
-/* "Ready to cook" toggle in the meal picker. */
-.ready-filter-toggle {
-  width: auto;
-  align-self: flex-start;
-  display: inline-flex;
+/* "Only show ready to cook" toggle in the meal picker — a labelled switch
+   (reusing .shop-switch-input) so its on/off state and meaning are obvious. */
+.ready-filter {
+  display: flex;
   align-items: center;
-  gap: var(--space-6);
+  justify-content: space-between;
+  gap: var(--space-12);
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--surface);
+  padding: var(--space-8) var(--space-12);
+  cursor: pointer;
+}
+
+.ready-filter-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--ink);
+  font-weight: var(--weight-bold);
+}
+
+.ready-filter-label > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.ready-filter-sub {
   color: var(--muted);
-  padding: var(--space-4) var(--space-10);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.ready-filter-toggle.active {
-  border-color: var(--olive);
-  background: var(--olive-soft);
-  color: var(--accent-strong);
-}
-
-.ready-filter-count {
-  border-radius: var(--radius-pill);
-  background: var(--olive);
-  color: #fff;
-  padding: 0 var(--space-6);
   font-size: var(--text-xs);
-  font-weight: var(--weight-heavy);
+  font-weight: var(--weight-semibold);
 }
