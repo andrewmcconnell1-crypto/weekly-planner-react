@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Check, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
 
 import { rankRecipesByCoverage } from "../utils/recipeCoverage";
+import { parseBasketQuantity } from "../utils/basketQuantity";
 import { slugifyIdPart } from "../utils/itemUtils";
 import { days } from "../utils/mealUtils";
 import { formatDate } from "../utils/dateUtils";
@@ -65,6 +66,13 @@ function BasketsPanel({
 
   const openBasket = baskets.find((basket) => basket.id === openBasketId);
 
+  // Live preview of any counts in the basket being edited, so it's clear the
+  // "x2" shorthand was understood.
+  const draftCounted = draftItems
+    .split("\n")
+    .map((line) => parseBasketQuantity(line))
+    .filter((item) => item.name && item.quantity != null);
+
   function addBasket() {
     const name = newName.trim();
     if (!name) return;
@@ -95,6 +103,33 @@ function BasketsPanel({
   }
 
   const cookFrom = baskets.find((basket) => basket.id === cookFromId);
+
+  // Recipes already cooked on a night this week or next. Leftover repeats reuse
+  // the same cook, so they don't claim ingredients again. A basket line with a
+  // count ("Beef mince x2") gives that many units for these to claim before it
+  // runs out; a line with no count never depletes.
+  const recipeById = useMemo(
+    () => new Map(recipes.map((recipe) => [recipe.id, recipe])),
+    [recipes]
+  );
+  const plannedCooks = useMemo(() => {
+    const cooks = [];
+    planWeeks.forEach((week) => {
+      days.forEach((day) => {
+        const meal = week.meals[day];
+        if (!meal || meal.mealType === "repeat") return;
+        if (meal.recipeId && recipeById.has(meal.recipeId)) {
+          cooks.push(recipeById.get(meal.recipeId));
+        }
+      });
+    });
+    return cooks;
+  }, [planWeeks, recipeById]);
+  const plannedIds = useMemo(
+    () => new Set(plannedCooks.map((recipe) => recipe.id)),
+    [plannedCooks]
+  );
+
   const ranked = useMemo(
     () =>
       rankRecipesByCoverage({
@@ -103,10 +138,17 @@ function BasketsPanel({
         staples,
         inventory,
         ingredientGroups,
+        plannedRecipes: plannedCooks,
       }),
-    [recipes, cookFrom, staples, inventory, ingredientGroups]
+    [recipes, cookFrom, staples, inventory, ingredientGroups, plannedCooks]
   );
-  const cookable = ranked.filter((entry) => entry.tier !== "more");
+  // Drop recipes already planned, except while their just-planned confirmation
+  // is still showing so it can fade out gracefully.
+  const cookable = ranked.filter(
+    (entry) =>
+      entry.tier !== "more" &&
+      (!plannedIds.has(entry.recipe.id) || justPlanned[entry.recipe.id])
+  );
   const visibleCookable = showAllCookable ? cookable : cookable.slice(0, 12);
 
   return (
@@ -183,8 +225,23 @@ function BasketsPanel({
                 rows={8}
                 value={draftItems}
                 onChange={(event) => setDraftItems(event.target.value)}
-                placeholder={"Chicken thighs\nBasmati rice\nCoconut milk"}
+                placeholder={"Chicken thighs\nBeef mince x2\nCoconut milk"}
               />
+              <p className="small-text basket-qty-hint">
+                Buy more than one? Add{" "}
+                <code>x2</code> after an item and it can cover that many meals
+                before it runs out. No number means it&apos;s always on hand.
+              </p>
+              {draftCounted.length > 0 && (
+                <div className="basket-qty-preview">
+                  {draftCounted.map((item, index) => (
+                    <span className="basket-qty-chip" key={`${item.name}-${index}`}>
+                      {item.name}
+                      <span className="basket-qty-mult">×{item.quantity}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
               <button type="button" onClick={() => saveItems(basket.id)}>
                 Save items
               </button>
@@ -235,25 +292,35 @@ function BasketsPanel({
         ) : (
           <>
             <ul className="cookable-list">
-              {visibleCookable.map(({ recipe, missing, tier }) => (
+              {visibleCookable.map(({ recipe, missing, tier }) => {
+                const planned = justPlanned[recipe.id];
+                return (
                 <li className="cookable-row" key={recipe.id}>
                   <span className="cookable-headline">
-                    <span className={`cookable-badge cookable-${tier}`}>
-                      {tier === "ready" ? "Ready" : `${missing.length} short`}
+                    <span
+                      className={`cookable-badge ${planned ? "cookable-planned-badge" : `cookable-${tier}`}`}
+                    >
+                      {planned
+                        ? "Planned"
+                        : tier === "ready"
+                          ? "Ready"
+                          : `${missing.length} short`}
                     </span>
                     <span className="cookable-name">{recipe.name}</span>
                   </span>
 
                   <div className="cookable-footer">
                     <span className="cookable-missing small-text">
-                      {missing.length > 0 ? `needs ${missing.join(", ")}` : ""}
+                      {!planned && missing.length > 0
+                        ? `needs ${missing.join(", ")}`
+                        : ""}
                     </span>
 
                     {canPlan &&
-                      (justPlanned[recipe.id] ? (
+                      (planned ? (
                         <span className="cookable-planned small-text">
                           <Check size={14} aria-hidden="true" />
-                          {justPlanned[recipe.id]}
+                          {planned}
                         </span>
                       ) : (
                         <select
@@ -293,7 +360,8 @@ function BasketsPanel({
                       ))}
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
             {cookable.length > visibleCookable.length && (
               <button

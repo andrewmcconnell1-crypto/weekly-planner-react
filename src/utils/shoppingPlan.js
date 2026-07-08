@@ -3,6 +3,7 @@ import { days } from "./mealUtils";
 import { isStapleDueThisWeek } from "./stapleUtils";
 import { buildCoverageIndex, canonicalKey, findCoverage } from "./ingredientMatch";
 import { scaleIngredient } from "./quantityUtils";
+import { basketItemName } from "./basketQuantity";
 
 // Sources that the generator owns. Rows with these sources are regenerated each
 // time the list is built; any other source (e.g. "Manual") is preserved.
@@ -52,6 +53,11 @@ export function buildShoppingPlan({
   basketItems = [],
   basketName = "",
 }) {
+  // Basket lines can carry a count ("Beef mince x2"); the shopping list only
+  // cares about the item, so strip counts to clean names here.
+  const basketNames = basketItems
+    .map((item) => basketItemName(item))
+    .filter(Boolean);
   const recurringBuys = staples
     .filter(
       (staple) => staple.active !== false && isStapleDueThisWeek(staple, weekKey)
@@ -109,7 +115,7 @@ export function buildShoppingPlan({
   // regardless of whether they're due this week — you have them either way).
   const coverageIndex = buildCoverageIndex(
     [
-      ...basketItems,
+      ...basketNames,
       ...activeStockItems.map((item) => item.name),
       ...staples
         .filter((staple) => staple.active !== false)
@@ -173,7 +179,7 @@ export function buildShoppingPlan({
     ingredientGroups
   );
   const seenBasketKeys = new Set();
-  const basketRows = basketItems
+  const basketRows = basketNames
     .filter((name) => {
       const key = canonicalKey(name);
       if (!key || seenBasketKeys.has(key)) return false;
