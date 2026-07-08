@@ -232,6 +232,7 @@ function App() {
     ingredientGroups,
     baskets,
     basketByWeek,
+    shoppingWeekKey,
   });
   const removalIds = new Set(recurringRemovals.map((item) => item.id));
 
