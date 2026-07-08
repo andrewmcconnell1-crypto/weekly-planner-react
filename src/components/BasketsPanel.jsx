@@ -142,9 +142,12 @@ function BasketsPanel({
             <span className="basket-card-icon" aria-hidden="true">
               <ShoppingBasket size={17} strokeWidth={1.9} />
             </span>
-            <strong>{basket.name}</strong>
-            <span className="basket-count small-text">
-              {basket.items.length} items
+            <span className="basket-card-title">
+              <strong>{basket.name}</strong>
+              <span className="basket-count small-text">
+                {basket.items.length}{" "}
+                {basket.items.length === 1 ? "item" : "items"}
+              </span>
             </span>
             <button
               type="button"
@@ -193,8 +196,8 @@ function BasketsPanel({
       <div className="cookable-section">
         <p className="section-kicker">Cook from your kitchen</p>
         <p className="cookable-intro small-text">
-          Recipes you can make from what you have. Pick a basket to add its
-          ingredients in, then drop meals straight onto a night.
+          Pick a basket to fold its ingredients in, then drop meals straight
+          onto a night.
         </p>
         <div className="cookable-chips">
           <button
@@ -234,57 +237,61 @@ function BasketsPanel({
             <ul className="cookable-list">
               {visibleCookable.map(({ recipe, missing, tier }) => (
                 <li className="cookable-row" key={recipe.id}>
-                  <span className={`cookable-badge cookable-${tier}`}>
-                    {tier === "ready" ? "Ready" : `${missing.length} short`}
-                  </span>
-                  <span className="cookable-name">{recipe.name}</span>
-                  {missing.length > 0 && (
-                    <span className="cookable-missing small-text">
-                      needs {missing.join(", ")}
+                  <span className="cookable-headline">
+                    <span className={`cookable-badge cookable-${tier}`}>
+                      {tier === "ready" ? "Ready" : `${missing.length} short`}
                     </span>
-                  )}
-                  {canPlan &&
-                    (justPlanned[recipe.id] ? (
-                      <span className="cookable-planned small-text">
-                        <Check size={14} aria-hidden="true" />
-                        {justPlanned[recipe.id]}
-                      </span>
-                    ) : (
-                      <select
-                        className="cookable-plan-select"
-                        aria-label={`Add ${recipe.name} to a night`}
-                        value=""
-                        disabled={totalFree === 0}
-                        onChange={(event) => {
-                          planOnSlot(recipe, event.target.value);
-                          event.target.value = "";
-                        }}
-                      >
-                        <option value="">
-                          {totalFree === 0 ? "Weeks full" : "Add to a night…"}
-                        </option>
-                        {planWeeks.map((week) => (
-                          <optgroup
-                            key={week.key}
-                            label={`${week.label} (${formatDate(week.start)})`}
-                          >
-                            {days.map((day) => {
-                              const taken = isTakenNight(week.meals[day]);
-                              return (
-                                <option
-                                  key={day}
-                                  value={`${week.key}|${day}`}
-                                  disabled={taken}
-                                >
-                                  {day}
-                                  {taken ? " — taken" : ""}
-                                </option>
-                              );
-                            })}
-                          </optgroup>
-                        ))}
-                      </select>
-                    ))}
+                    <span className="cookable-name">{recipe.name}</span>
+                  </span>
+
+                  <div className="cookable-footer">
+                    <span className="cookable-missing small-text">
+                      {missing.length > 0 ? `needs ${missing.join(", ")}` : ""}
+                    </span>
+
+                    {canPlan &&
+                      (justPlanned[recipe.id] ? (
+                        <span className="cookable-planned small-text">
+                          <Check size={14} aria-hidden="true" />
+                          {justPlanned[recipe.id]}
+                        </span>
+                      ) : (
+                        <select
+                          className="cookable-plan-select"
+                          aria-label={`Add ${recipe.name} to a night`}
+                          value=""
+                          disabled={totalFree === 0}
+                          onChange={(event) => {
+                            planOnSlot(recipe, event.target.value);
+                            event.target.value = "";
+                          }}
+                        >
+                          <option value="">
+                            {totalFree === 0 ? "Weeks full" : "Add to a night…"}
+                          </option>
+                          {planWeeks.map((week) => (
+                            <optgroup
+                              key={week.key}
+                              label={`${week.label} (${formatDate(week.start)})`}
+                            >
+                              {days.map((day) => {
+                                const taken = isTakenNight(week.meals[day]);
+                                return (
+                                  <option
+                                    key={day}
+                                    value={`${week.key}|${day}`}
+                                    disabled={taken}
+                                  >
+                                    {day}
+                                    {taken ? " — taken" : ""}
+                                  </option>
+                                );
+                              })}
+                            </optgroup>
+                          ))}
+                        </select>
+                      ))}
+                  </div>
                 </li>
               ))}
             </ul>

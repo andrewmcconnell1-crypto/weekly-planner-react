@@ -7194,20 +7194,29 @@ html[data-theme="dark"] .shop-hero.needs-update {
 .basket-card-head {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-10);
 }
 
-.basket-card-head strong {
+.basket-card-title {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.basket-card-title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .basket-card-icon {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-pill);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
   background: var(--olive-soft);
   color: var(--olive);
   flex-shrink: 0;
@@ -7220,6 +7229,7 @@ html[data-theme="dark"] .shop-hero.needs-update {
 
 .basket-edit {
   width: auto;
+  flex-shrink: 0;
 }
 
 .basket-delete {
@@ -7284,18 +7294,28 @@ html[data-theme="dark"] .shop-hero.needs-update {
   gap: var(--space-6);
 }
 
+/* A cookable recipe as a compact two-line card: badge + name on top, then a
+   footer with any "needs…" note on the left and the plan control on the right
+   — laid out identically whether the recipe is Ready or a few short. */
 .cookable-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  flex-direction: column;
   gap: var(--space-6);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
-  padding: var(--space-8) var(--space-10);
+  padding: var(--space-10);
+}
+
+.cookable-headline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
 }
 
 .cookable-badge {
+  flex-shrink: 0;
   border-radius: var(--radius-pill);
   padding: 2px var(--space-8);
   font-size: var(--text-xs);
@@ -7314,11 +7334,19 @@ html[data-theme="dark"] .shop-hero.needs-update {
 }
 
 .cookable-name {
+  min-width: 0;
   font-weight: var(--weight-semibold);
 }
 
+.cookable-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-10);
+}
+
 .cookable-missing {
-  flex-basis: 100%;
+  min-width: 0;
   color: var(--muted);
 }
 
@@ -7354,42 +7382,36 @@ html[data-theme="dark"] .shop-hero.needs-update {
 }
 
 .cookable-plan-select {
-  flex-basis: 100%;
+  flex-shrink: 0;
+  align-self: center;
   width: auto;
-  max-width: max-content;
+  max-width: 9rem;
   border: 1px solid var(--olive);
   border-radius: var(--radius-pill);
   background: var(--olive-soft);
   color: var(--accent-strong);
-  padding: var(--space-4) var(--space-8);
+  padding: var(--space-6) var(--space-8);
   font: inherit;
   font-size: var(--text-xs);
   font-weight: var(--weight-heavy);
 }
 
 .cookable-plan-select:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   border-color: var(--line);
   background: var(--soft);
   color: var(--muted);
 }
 
 .cookable-planned {
-  flex-basis: 100%;
+  flex-shrink: 0;
+  align-self: center;
   display: inline-flex;
   align-items: center;
   gap: var(--space-4);
   color: var(--olive);
   font-weight: var(--weight-heavy);
-}
-
-.cookable-row {
-  row-gap: var(--space-4);
-}
-
-.cookable-name {
-  flex: 1;
-  min-width: 0;
+  white-space: nowrap;
 }
 
 /* "Only show ready to cook" toggle in the meal picker — a labelled switch
