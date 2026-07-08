@@ -6550,6 +6550,37 @@ html[data-theme="dark"] .update-banner-button:hover {
   font-weight: var(--weight-semibold);
 }
 
+/* Basket walkthrough scene: the "this week's basket" chip and the Ready /
+   "N short" badges on the cookable rows. */
+.wt-basket-chip {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--olive-soft);
+  color: var(--olive);
+  padding: var(--space-6) var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-heavy);
+  animation: wt-pop-in 360ms var(--ease-spring) backwards;
+}
+
+.wt-ready {
+  border-radius: var(--radius-pill);
+  padding: 1px var(--space-8);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  background: var(--olive-soft);
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
+.wt-ready-almost {
+  background: var(--rust-soft);
+  color: var(--rust-strong);
+}
+
 .wt-litem.wt-skip .wt-litem-name {
   color: var(--muted);
   text-decoration: line-through;
