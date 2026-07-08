@@ -109,7 +109,7 @@ export default function PlanScreen({
 
       {drag && (
         <p className="meal-drag-hint" role="status">
-          Drop on another day to swap
+          Drop on another day to move — leftovers come too
         </p>
       )}
 

@@ -48,9 +48,10 @@ describe("useMealPlanActions — swapMealDays", () => {
     expect(next.Thursday.name).toBe("Tacos");
   });
 
-  it("remaps leftover pointers so linkage survives the swap", () => {
-    // Sunday cooks; Monday eats Sunday's leftovers. Swap Sunday <-> Wednesday:
-    // the cook moves to Wednesday, so Monday's leftovers must now point there.
+  it("moves a cook and its leftovers together as a group", () => {
+    // Sunday cooks; Monday eats Sunday's leftovers. Drag the group to Wednesday:
+    // the cook AND its leftover relocate to Wed+Thu (staying contiguous), and
+    // whatever was there swaps back into Sun+Mon.
     const meals = {
       Sunday: cook("Roast"),
       Monday: repeat("Sunday"),
@@ -62,8 +63,29 @@ describe("useMealPlanActions — swapMealDays", () => {
 
     const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
     expect(next.Wednesday.name).toBe("Roast");
+    expect(next.Thursday.mealType).toBe("repeat");
+    expect(next.Thursday.repeatFromDay).toBe("Wednesday");
     expect(next.Sunday.name).toBe("Pasta");
-    expect(next.Monday.repeatFromDay).toBe("Wednesday");
+    // Monday no longer holds a dangling leftover.
+    expect(next.Monday.name).toBe("");
+    expect(next.Monday.mealType).not.toBe("repeat");
+  });
+
+  it("moves the whole group when a leftover day is grabbed", () => {
+    const meals = {
+      Sunday: cook("Roast"),
+      Monday: repeat("Sunday"),
+      Thursday: cook("Pasta"),
+    };
+    const { result, setMealsByWeek, mealWeekKey } = setup(meals);
+
+    // Grab Monday (the leftover) and drop on Thursday — the group still moves.
+    result.current.swapMealDays("Monday", "Thursday");
+
+    const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
+    expect(next.Thursday.name).toBe("Roast");
+    expect(next.Friday.repeatFromDay).toBe("Thursday");
+    expect(next.Sunday.name).toBe("Pasta");
   });
 
   it("ignores a swap of a day with itself", () => {
