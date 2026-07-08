@@ -157,31 +157,131 @@ export function useMealPlanActions({
     });
   }
 
-  // Swap the meals on two days (drag-to-rearrange). The whole meal objects
-  // trade places, and any leftover pointers are remapped so a repeat that ate
-  // dayA's cook now points to dayB (where that cook moved) and vice versa —
-  // keeping "Leftovers from X" linkage correct after the move.
-  function swapMealDays(dayA, dayB) {
-    if (dayA === dayB || !days.includes(dayA) || !days.includes(dayB)) return;
+  function isCookedMeal(meal) {
+    return (
+      (meal?.mealType || "cook") === "cook" &&
+      ((meal?.name || "").trim() !== "" ||
+        meal?.recipeId ||
+        (Array.isArray(meal?.ingredients) && meal.ingredients.length > 0))
+    );
+  }
 
-    const snapshot = meals;
-    const remap = (day) => (day === dayA ? dayB : day === dayB ? dayA : day);
+  // The cook day a given day belongs to: its own day if it's a cook (or empty),
+  // or the day it takes leftovers from if it's a repeat.
+  function groupCookDay(dayMeals, day) {
+    const meal = dayMeals[day];
+    if (meal?.mealType === "repeat" && meal.repeatFromDay) {
+      return meal.repeatFromDay;
+    }
+    return day;
+  }
 
-    const nextMeals = { ...meals, [dayA]: meals[dayB], [dayB]: meals[dayA] };
-
-    for (const day of days) {
-      const meal = nextMeals[day];
-      if (meal?.mealType === "repeat" && meal.repeatFromDay) {
-        const remapped = remap(meal.repeatFromDay);
-        if (remapped !== meal.repeatFromDay) {
-          nextMeals[day] = { ...meal, repeatFromDay: remapped };
-        }
+  // How many consecutive days a cook occupies: itself plus the trailing days
+  // that are leftovers of it.
+  function groupLength(dayMeals, cookDay) {
+    const start = days.indexOf(cookDay);
+    let length = 1;
+    for (let index = start + 1; index < days.length; index += 1) {
+      const meal = dayMeals[days[index]];
+      if (meal?.mealType === "repeat" && meal.repeatFromDay === cookDay) {
+        length += 1;
+      } else {
+        break;
       }
     }
+    return length;
+  }
+
+  // Clear any leftover day that isn't contiguously backed by its cook (its
+  // source is a real cook, sits earlier in the week, and every day between is a
+  // leftover of that same cook) — so a move can never leave a dangling or
+  // backwards "Leftovers from X".
+  function normaliseLeftovers(dayMeals) {
+    days.forEach((day, index) => {
+      const meal = dayMeals[day];
+      if (meal?.mealType !== "repeat" || !meal.repeatFromDay) return;
+
+      const fromIndex = days.indexOf(meal.repeatFromDay);
+      let valid =
+        fromIndex >= 0 &&
+        fromIndex < index &&
+        isCookedMeal(dayMeals[meal.repeatFromDay]);
+      for (let between = fromIndex + 1; valid && between < index; between += 1) {
+        const inner = dayMeals[days[between]];
+        if (
+          inner?.mealType !== "repeat" ||
+          inner.repeatFromDay !== meal.repeatFromDay
+        ) {
+          valid = false;
+        }
+      }
+      if (!valid) dayMeals[day] = createEmptyMeal();
+    });
+  }
+
+  // Drag-to-rearrange. A cooked meal and its leftover days move together as one
+  // block: grabbing any day of a group relocates the whole group, swapping it
+  // with the equal-length window of days at the drop point and remapping
+  // leftover pointers so linkage survives. `sourceDay`/`targetDay` are the
+  // grabbed and dropped days.
+  function swapMealDays(sourceDay, targetDay) {
+    if (
+      sourceDay === targetDay ||
+      !days.includes(sourceDay) ||
+      !days.includes(targetDay)
+    ) {
+      return;
+    }
+
+    const snapshot = meals;
+    const cookDay = groupCookDay(meals, sourceDay);
+    const srcStart = days.indexOf(cookDay);
+    const length = groupLength(meals, cookDay);
+    let tgtStart = days.indexOf(targetDay);
+
+    // Dropped somewhere inside the group's own span — nothing to do.
+    if (tgtStart >= srcStart && tgtStart < srcStart + length) return;
+
+    // Keep the moved window inside the week, and flush it clear of the source
+    // window if the drop point would make the two overlap.
+    tgtStart = Math.max(0, Math.min(tgtStart, days.length - length));
+    if (Math.abs(tgtStart - srcStart) < length) {
+      tgtStart =
+        tgtStart > srcStart
+          ? Math.min(srcStart + length, days.length - length)
+          : Math.max(srcStart - length, 0);
+      if (tgtStart === srcStart) return;
+    }
+
+    // Swap the two equal-length day windows, tracking where each day moved so
+    // leftover pointers can be remapped to follow their cook.
+    const arr = days.map((day) => meals[day] || createEmptyMeal());
+    const dayMap = Object.fromEntries(days.map((day) => [day, day]));
+    for (let offset = 0; offset < length; offset += 1) {
+      const a = srcStart + offset;
+      const b = tgtStart + offset;
+      [arr[a], arr[b]] = [arr[b], arr[a]];
+      dayMap[days[a]] = days[b];
+      dayMap[days[b]] = days[a];
+    }
+
+    const nextMeals = {};
+    days.forEach((day, index) => {
+      const meal = arr[index];
+      if (meal?.mealType === "repeat" && meal.repeatFromDay) {
+        nextMeals[day] = {
+          ...meal,
+          repeatFromDay: dayMap[meal.repeatFromDay] ?? meal.repeatFromDay,
+        };
+      } else {
+        nextMeals[day] = meal;
+      }
+    });
+    normaliseLeftovers(nextMeals);
 
     setMealsByWeek({ ...mealsByWeek, [mealWeekKey]: nextMeals });
 
-    requestUndo(`Swapped ${dayA} and ${dayB}`, () =>
+    requestUndo("Moved meal", () =>
       setMealsByWeek((prev) => ({ ...prev, [mealWeekKey]: snapshot }))
     );
   }
