@@ -53,4 +53,41 @@ describe("rankRecipesByCoverage", () => {
     });
     expect(top.missing).toHaveLength(3);
   });
+
+  const minceRecipes = [
+    { id: "a", name: "Mince A", ingredients: ["500 g beef mince"] },
+    { id: "b", name: "Mince B", ingredients: ["500 g beef mince"] },
+  ];
+
+  it("keeps a countless basket item available no matter what's planned", () => {
+    // No count = standing weekly buy: it never depletes.
+    const ranked = rankRecipesByCoverage({
+      recipes: minceRecipes,
+      basketItems: ["Beef mince"],
+      plannedRecipes: [minceRecipes[0]],
+    });
+    expect(ranked.every((entry) => entry.tier === "ready")).toBe(true);
+  });
+
+  it("depletes a counted basket item as planned recipes claim it", () => {
+    // "Beef mince x2": two units. One planned mince meal leaves one unit, so a
+    // second mince recipe is still ready.
+    const twoLeftOne = rankRecipesByCoverage({
+      recipes: minceRecipes,
+      basketItems: ["Beef mince x2"],
+      plannedRecipes: [minceRecipes[0]],
+    });
+    expect(twoLeftOne.find((e) => e.recipe.id === "b").tier).toBe("ready");
+
+    // "Beef mince x1": the one unit is claimed by the planned meal, so the
+    // other mince recipe is now short.
+    const oneClaimed = rankRecipesByCoverage({
+      recipes: minceRecipes,
+      basketItems: ["Beef mince x1"],
+      plannedRecipes: [minceRecipes[0]],
+    });
+    const b = oneClaimed.find((e) => e.recipe.id === "b");
+    expect(b.tier).not.toBe("ready");
+    expect(b.missing).toEqual(["500 g beef mince"]);
+  });
 });
