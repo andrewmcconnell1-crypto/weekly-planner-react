@@ -35,9 +35,16 @@ const repeat = (from) => ({
   repeatFromDay: from,
   ingredients: [],
 });
+const takeaway = (name) => ({
+  name,
+  recipeId: "",
+  mealType: "takeaway",
+  repeatFromDay: "",
+  ingredients: [],
+});
 
 describe("useMealPlanActions — swapMealDays", () => {
-  it("swaps two days' meals", () => {
+  it("swaps two single meals, leaving the day between untouched", () => {
     const meals = { Tuesday: cook("Tacos"), Thursday: cook("Curry") };
     const { result, setMealsByWeek, mealWeekKey } = setup(meals);
 
@@ -46,29 +53,44 @@ describe("useMealPlanActions — swapMealDays", () => {
     const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
     expect(next.Tuesday.name).toBe("Curry");
     expect(next.Thursday.name).toBe("Tacos");
+    expect(next.Wednesday?.name || "").toBe("");
   });
 
-  it("moves a cook and its leftovers together as a group", () => {
-    // Sunday cooks; Monday eats Sunday's leftovers. Drag the group to Wednesday:
-    // the cook AND its leftover relocate to Wed+Thu (staying contiguous), and
-    // whatever was there swaps back into Sun+Mon.
+  it("shifts a leftover group as a whole when swapping with a single day", () => {
+    // The reported case: Mon cook, Tue its leftovers, Wed takeaway. Swap Wed
+    // with Mon → takeaway on Mon, the cook shifts to Tue, its leftovers to Wed.
     const meals = {
-      Sunday: cook("Roast"),
-      Monday: repeat("Sunday"),
-      Wednesday: cook("Pasta"),
+      Monday: cook("Roast"),
+      Tuesday: repeat("Monday"),
+      Wednesday: takeaway("Thai"),
     };
     const { result, setMealsByWeek, mealWeekKey } = setup(meals);
 
-    result.current.swapMealDays("Sunday", "Wednesday");
+    result.current.swapMealDays("Wednesday", "Monday");
 
     const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
-    expect(next.Wednesday.name).toBe("Roast");
-    expect(next.Thursday.mealType).toBe("repeat");
-    expect(next.Thursday.repeatFromDay).toBe("Wednesday");
-    expect(next.Sunday.name).toBe("Pasta");
-    // Monday no longer holds a dangling leftover.
-    expect(next.Monday.name).toBe("");
-    expect(next.Monday.mealType).not.toBe("repeat");
+    expect(next.Monday.name).toBe("Thai");
+    expect(next.Monday.mealType).toBe("takeaway");
+    expect(next.Tuesday.name).toBe("Roast");
+    expect(next.Tuesday.mealType).toBe("cook");
+    expect(next.Wednesday.mealType).toBe("repeat");
+    expect(next.Wednesday.repeatFromDay).toBe("Tuesday");
+  });
+
+  it("gives the same result whichever of the two blocks is grabbed", () => {
+    const meals = {
+      Monday: cook("Roast"),
+      Tuesday: repeat("Monday"),
+      Wednesday: takeaway("Thai"),
+    };
+    const { result, setMealsByWeek, mealWeekKey } = setup(meals);
+
+    result.current.swapMealDays("Monday", "Wednesday"); // grab the group instead
+
+    const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
+    expect(next.Monday.name).toBe("Thai");
+    expect(next.Tuesday.name).toBe("Roast");
+    expect(next.Wednesday.repeatFromDay).toBe("Tuesday");
   });
 
   it("moves the whole group when a leftover day is grabbed", () => {
@@ -79,13 +101,16 @@ describe("useMealPlanActions — swapMealDays", () => {
     };
     const { result, setMealsByWeek, mealWeekKey } = setup(meals);
 
-    // Grab Monday (the leftover) and drop on Thursday — the group still moves.
+    // Grab Monday (the leftover) and drop on Thursday. The group swaps with the
+    // Thursday cook across the Sun–Thu span: Pasta lands first (Sunday), the
+    // group ends where Thursday was (Wed cook, Thu leftovers).
     result.current.swapMealDays("Monday", "Thursday");
 
     const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
-    expect(next.Thursday.name).toBe("Roast");
-    expect(next.Friday.repeatFromDay).toBe("Thursday");
     expect(next.Sunday.name).toBe("Pasta");
+    expect(next.Wednesday.name).toBe("Roast");
+    expect(next.Thursday.mealType).toBe("repeat");
+    expect(next.Thursday.repeatFromDay).toBe("Wednesday");
   });
 
   it("ignores a swap of a day with itself", () => {
