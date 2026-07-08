@@ -7370,12 +7370,6 @@ html[data-theme="dark"] .shop-hero.needs-update {
   color: var(--rust-strong);
 }
 
-/* A row that's just been planned onto a night, before it fades from the list. */
-.cookable-planned-badge {
-  background: var(--olive);
-  color: var(--surface);
-}
-
 .cookable-name {
   min-width: 0;
   font-weight: var(--weight-semibold);
