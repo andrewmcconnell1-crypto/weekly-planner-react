@@ -171,7 +171,9 @@ button:disabled {
   background-color: var(--primary);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
   background-size: 15px 15px;
-  animation: tick-pop var(--dur-med) var(--ease-spring);
+  animation:
+    tick-pop var(--dur-med) var(--ease-spring),
+    tick-ring 520ms var(--ease-standard);
 }
 
 @keyframes tick-pop {
@@ -183,6 +185,17 @@ button:disabled {
   }
   100% {
     transform: scale(1);
+  }
+}
+
+/* A soft ring blooms out of the box the moment it's ticked, then fades — the
+   little burst that makes checking something off feel good. */
+@keyframes tick-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 40%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 9px color-mix(in srgb, var(--primary) 0%, transparent);
   }
 }
 
@@ -2895,7 +2908,23 @@ textarea::placeholder {
 
 .shopping-item-name {
   min-width: 0;
+  justify-self: start;
+  max-width: 100%;
   overflow-wrap: anywhere;
+  /* Strike line drawn with a gradient so it can animate across the text
+     (text-decoration can't). Hidden at zero width until the row is ticked. */
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 62%;
+  background-size: 0% 1.5px;
+  transition: background-size 260ms var(--ease-standard);
+}
+
+/* The line sweeps left→right as the item is ticked; the drawn strike replaces
+   the instant text-decoration so they don't double up. */
+.shop-screen .shopping-row.row-leaving .shopping-item-name,
+.shop-screen .shopping-row.checked-row .shopping-item-name {
+  background-size: 100% 1.5px;
 }
 
 .shopping-item-content {
@@ -3046,7 +3075,6 @@ textarea::placeholder {
 
 .checked-item {
   color: var(--muted);
-  text-decoration: line-through;
   transition: color var(--dur-med) var(--ease-standard);
 }
 
@@ -3085,6 +3113,10 @@ textarea::placeholder {
   .shopping-rows > .shopping-row.row-leaving {
     animation: none;
     opacity: 0.58;
+  }
+
+  .shopping-item-name {
+    transition: none;
   }
 }
 
