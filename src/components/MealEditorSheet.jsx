@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChefHat,
-  ChevronRight,
   ExternalLink,
   PencilLine,
   Repeat2,
@@ -516,12 +515,6 @@ function MealEditorSheet({
                   <strong>{type.title}</strong>
                   <span>{type.blurb}</span>
                 </span>
-
-                <ChevronRight
-                  className="meal-type-chevron"
-                  size={18}
-                  aria-hidden="true"
-                />
               </button>
             );
           })}

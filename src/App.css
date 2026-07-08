@@ -2208,59 +2208,50 @@ body.meal-dragging {
 
 .meal-type-list {
   display: grid;
-  gap: var(--space-10);
+  gap: var(--space-6);
 }
 
 .meal-type-tile {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-12);
   width: 100%;
-  min-height: 64px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--panel);
   color: var(--ink);
-  padding: var(--space-12) var(--space-14);
+  padding: var(--space-10) var(--space-12);
   text-align: left;
-  box-shadow: var(--shadow);
 }
 
 .meal-type-tile:hover {
   border-color: var(--olive);
-  background: var(--panel);
+  background: var(--soft);
 }
 
 .meal-type-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-pill);
-  background: var(--olive-soft);
+  width: 30px;
+  height: 30px;
   color: var(--olive);
 }
 
 .meal-type-text {
   display: grid;
-  gap: 2px;
+  gap: 1px;
 }
 
 .meal-type-text strong {
   font-size: var(--text-md);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-semibold);
 }
 
 .meal-type-text span {
   color: var(--muted);
   font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
-
-.meal-type-chevron {
-  color: var(--muted);
 }
 
 /* "Change type" link back to the chooser from any detail view. */
@@ -3714,8 +3705,8 @@ textarea::placeholder {
   overflow-wrap: anywhere;
 }
 
-/* Category tag, serves and source share one line and wrap together if a narrow
-   screen can't fit them, so nothing gets truncated. */
+/* One quiet meta line — "Category · Serves N" — plus an optional cookable
+   badge. No pills: the list stays calm and scannable. */
 .recipe-row-meta {
   display: flex;
   flex-wrap: wrap;
@@ -3724,18 +3715,8 @@ textarea::placeholder {
   min-width: 0;
 }
 
-/* Category tag, tinted from the card's own category tone. */
-.recipe-row-tag {
-  flex-shrink: 0;
-  border-radius: var(--radius-pill);
-  padding: var(--space-2) var(--space-10);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-heavy);
-  color: color-mix(in srgb, var(--recipe-tone, var(--muted)) 72%, #2a2420);
-  background: color-mix(in srgb, var(--recipe-tone, var(--muted)) 15%, #fff);
-}
-
-.recipe-row-serves {
+.recipe-row-metatext {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -7153,11 +7134,6 @@ html[data-theme="dark"] :is(
 /* Recipe-tone tints that mix against light ink/white. */
 html[data-theme="dark"] .meal-current {
   color: color-mix(in srgb, var(--recipe-tone, var(--accent)) 55%, var(--ink));
-}
-
-html[data-theme="dark"] .recipe-row-tag {
-  color: color-mix(in srgb, var(--recipe-tone, var(--muted)) 55%, var(--ink));
-  background: color-mix(in srgb, var(--recipe-tone, var(--muted)) 26%, var(--panel));
 }
 
 /* Dark hero cards (Meals / Shop) — deep olive instead of the light wash. */

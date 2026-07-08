@@ -1,18 +1,20 @@
 import { ChevronRight } from "lucide-react";
 
-import {
-  getRecipeTone,
-  recipeSourceKind,
-  recipeSourceLabel,
-} from "../utils/recipeUtils";
+import { getRecipeTone } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
 import RecipeThumb from "./RecipeThumb";
 
 // One recipe row, shared by the Recipes manager and the meal editor's picker so
 // they look identical. `active` highlights the currently-selected recipe.
 // `coverage` (optional, from rankRecipesByCoverage) adds a Ready / "N short"
-// badge so the picker can sort by what the kitchen can already cook.
+// badge so the picker can sort by what the kitchen can already cook. Metadata
+// is kept to one quiet line — category and serves — with source and tags left
+// to the recipe's own detail view.
 function RecipeCard({ recipe, active = false, onClick, coverage }) {
+  const meta = [recipe.category, recipe.serves ? `Serves ${recipe.serves}` : null]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <button
       type="button"
@@ -26,18 +28,7 @@ function RecipeCard({ recipe, active = false, onClick, coverage }) {
         <span className="recipe-row-main">
           <strong>{recipe.name}</strong>
           <span className="recipe-row-meta">
-            <span className="recipe-row-tag">
-              {recipe.category || "Uncategorised"}
-            </span>
-            {recipe.serves ? (
-              <span className="recipe-row-serves">Serves {recipe.serves}</span>
-            ) : null}
-            <span
-              className="recipe-source"
-              data-source={recipeSourceKind(recipe)}
-            >
-              {recipeSourceLabel(recipe)}
-            </span>
+            <span className="recipe-row-metatext">{meta}</span>
             {coverage && coverage.tier !== "more" && (
               <span className={`cookable-badge cookable-${coverage.tier}`}>
                 {coverage.tier === "ready"
