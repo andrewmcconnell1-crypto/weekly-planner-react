@@ -550,17 +550,6 @@ function MealEditorSheet({
         {renderNightsAndBatch()}
 
         <div className="meal-picker">
-          {onFindMeals && (
-            <button
-              type="button"
-              className="meal-picker-swipe-link"
-              onClick={onFindMeals}
-            >
-              <Sparkles size={14} aria-hidden="true" />
-              Or swipe through ideas instead
-            </button>
-          )}
-
           <div className="recipe-search-row">
             <div className="recipe-search">
               <Search
