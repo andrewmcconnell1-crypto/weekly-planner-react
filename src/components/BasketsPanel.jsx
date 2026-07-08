@@ -95,6 +95,33 @@ function BasketsPanel({
   }
 
   const cookFrom = baskets.find((basket) => basket.id === cookFromId);
+
+  // Recipes already cooked on a night this week or next. Leftover repeats reuse
+  // the same cook, so they don't claim ingredients again. These claim their
+  // basket units in the ranking below so nothing double-counts, and drop out of
+  // the suggestions once planned.
+  const recipeById = useMemo(
+    () => new Map(recipes.map((recipe) => [recipe.id, recipe])),
+    [recipes]
+  );
+  const plannedCooks = useMemo(() => {
+    const cooks = [];
+    planWeeks.forEach((week) => {
+      days.forEach((day) => {
+        const meal = week.meals[day];
+        if (!meal || meal.mealType === "repeat") return;
+        if (meal.recipeId && recipeById.has(meal.recipeId)) {
+          cooks.push(recipeById.get(meal.recipeId));
+        }
+      });
+    });
+    return cooks;
+  }, [planWeeks, recipeById]);
+  const plannedIds = useMemo(
+    () => new Set(plannedCooks.map((recipe) => recipe.id)),
+    [plannedCooks]
+  );
+
   const ranked = useMemo(
     () =>
       rankRecipesByCoverage({
@@ -103,10 +130,17 @@ function BasketsPanel({
         staples,
         inventory,
         ingredientGroups,
+        plannedRecipes: plannedCooks,
       }),
-    [recipes, cookFrom, staples, inventory, ingredientGroups]
+    [recipes, cookFrom, staples, inventory, ingredientGroups, plannedCooks]
   );
-  const cookable = ranked.filter((entry) => entry.tier !== "more");
+  // Drop recipes already planned, except while their just-planned confirmation
+  // is still showing so it can fade out gracefully.
+  const cookable = ranked.filter(
+    (entry) =>
+      entry.tier !== "more" &&
+      (!plannedIds.has(entry.recipe.id) || justPlanned[entry.recipe.id])
+  );
   const visibleCookable = showAllCookable ? cookable : cookable.slice(0, 12);
 
   return (
@@ -235,25 +269,35 @@ function BasketsPanel({
         ) : (
           <>
             <ul className="cookable-list">
-              {visibleCookable.map(({ recipe, missing, tier }) => (
+              {visibleCookable.map(({ recipe, missing, tier }) => {
+                const planned = justPlanned[recipe.id];
+                return (
                 <li className="cookable-row" key={recipe.id}>
                   <span className="cookable-headline">
-                    <span className={`cookable-badge cookable-${tier}`}>
-                      {tier === "ready" ? "Ready" : `${missing.length} short`}
+                    <span
+                      className={`cookable-badge ${planned ? "cookable-planned-badge" : `cookable-${tier}`}`}
+                    >
+                      {planned
+                        ? "Planned"
+                        : tier === "ready"
+                          ? "Ready"
+                          : `${missing.length} short`}
                     </span>
                     <span className="cookable-name">{recipe.name}</span>
                   </span>
 
                   <div className="cookable-footer">
                     <span className="cookable-missing small-text">
-                      {missing.length > 0 ? `needs ${missing.join(", ")}` : ""}
+                      {!planned && missing.length > 0
+                        ? `needs ${missing.join(", ")}`
+                        : ""}
                     </span>
 
                     {canPlan &&
-                      (justPlanned[recipe.id] ? (
+                      (planned ? (
                         <span className="cookable-planned small-text">
                           <Check size={14} aria-hidden="true" />
-                          {justPlanned[recipe.id]}
+                          {planned}
                         </span>
                       ) : (
                         <select
@@ -293,7 +337,8 @@ function BasketsPanel({
                       ))}
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
             {cookable.length > visibleCookable.length && (
               <button
