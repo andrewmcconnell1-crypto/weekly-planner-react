@@ -186,10 +186,33 @@ export function useMealPlanActions({
     );
   }
 
+  // Assign a recipe to a specific week + day (single night), for planning from
+  // outside the active week — e.g. the baskets page, where you choose the slot.
+  // Overwrites whatever's there; leftover-repeat spreading stays a Meals-tab job.
+  function assignRecipeToWeekDay(weekKey, day, recipe) {
+    if (!days.includes(day)) return;
+    setMealsByWeek((prevByWeek) => {
+      const current = prevByWeek[weekKey] || {};
+      return {
+        ...prevByWeek,
+        [weekKey]: {
+          ...current,
+          [day]: {
+            ...createEmptyMeal(),
+            mealType: "cook",
+            name: recipe.name,
+            recipeId: recipe.id,
+          },
+        },
+      };
+    });
+  }
+
   return {
     setLeftoverNights,
     clearMealDay,
     assignRecipeToDay,
+    assignRecipeToWeekDay,
     updateMeal,
     swapMealDays,
   };
