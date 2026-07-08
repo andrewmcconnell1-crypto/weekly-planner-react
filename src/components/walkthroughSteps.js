@@ -3,6 +3,7 @@ import {
   SceneStock,
   SceneList,
   SceneShop,
+  SceneBaskets,
 } from "./WalkthroughScenes";
 
 // The ordered steps for the getting-started walkthrough. Each pairs a scene with
@@ -36,5 +37,12 @@ export const WALKTHROUGH_STEPS = [
     title: "Shop and tick off",
     body: "Walk the shop by aisle or by priority, ticking things off as you go, and watch the list empty out.",
     Scene: SceneShop,
+  },
+  {
+    id: "baskets",
+    kicker: "Or plan in reverse",
+    title: "Cook from your shop",
+    body: "Save your regular shops as baskets in the Kitchen tab. Pick one and Ladle shows which recipes you can already make from it — drop them straight onto a night.",
+    Scene: SceneBaskets,
   },
 ];

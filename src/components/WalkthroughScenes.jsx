@@ -7,6 +7,8 @@
 // Motion is decorative: every animated element lands on a sensible static state,
 // and App.css disables the keyframes under prefers-reduced-motion.
 
+import { ShoppingBasket } from "lucide-react";
+
 import DishGlyph from "./DishGlyph";
 
 // 1 — Plan your week: recipe cards drop into the week's nights, one per night.
@@ -129,6 +131,46 @@ export function SceneShop() {
           All done
           <DishGlyph glyph="sparkle" className="wt-glyph" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+// 5 — Plan from your shop: pick a saved basket and the app shows which recipes
+// it can already cook, ready to drop onto a night.
+export function SceneBaskets() {
+  const rows = [
+    { name: "Honey Soy Salmon", glyph: "fish", tier: "Ready" },
+    { name: "Beef Tacos", glyph: "taco", tier: "Ready" },
+    { name: "Thai Green Curry", glyph: "pot", tier: "1 short" },
+  ];
+
+  return (
+    <div className="wt-scene wt-scene-baskets" aria-hidden="true">
+      <div className="wt-basket-chip">
+        <ShoppingBasket size={15} aria-hidden="true" />
+        This week&apos;s basket
+      </div>
+
+      <div className="wt-flow-arrow">↓</div>
+
+      <div className="wt-listcard">
+        <div className="wt-listcard-head">
+          <span>Cook from your kitchen</span>
+        </div>
+        <ul className="wt-list">
+          {rows.map((row, index) => (
+            <li className="wt-litem" key={row.name} style={{ "--i": index }}>
+              <DishGlyph glyph={row.glyph} className="wt-glyph" />
+              <span className="wt-litem-name">{row.name}</span>
+              <span
+                className={`wt-ready ${row.tier === "Ready" ? "" : "wt-ready-almost"}`}
+              >
+                {row.tier}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
