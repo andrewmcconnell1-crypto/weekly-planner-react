@@ -53,4 +53,56 @@ describe("rankRecipesByCoverage", () => {
     });
     expect(top.missing).toHaveLength(3);
   });
+
+  it("claims basket units so a planned recipe depletes them for others", () => {
+    const minceRecipes = [
+      { id: "a", name: "Mince A", ingredients: ["500 g beef mince"] },
+      { id: "b", name: "Mince B", ingredients: ["500 g beef mince"] },
+    ];
+
+    // One packet of mince — without claiming both would read as ready.
+    const both = rankRecipesByCoverage({
+      recipes: minceRecipes,
+      basketItems: ["Beef mince"],
+    });
+    expect(both.every((entry) => entry.tier === "ready")).toBe(true);
+
+    // Once A is planned it claims the only mince, so B is no longer covered.
+    const afterA = rankRecipesByCoverage({
+      recipes: minceRecipes,
+      basketItems: ["Beef mince"],
+      plannedRecipes: [minceRecipes[0]],
+    });
+    const b = afterA.find((entry) => entry.recipe.id === "b");
+    expect(b.tier).not.toBe("ready");
+    expect(b.missing).toEqual(["500 g beef mince"]);
+  });
+
+  it("does not deplete stock or recurring buys when recipes are planned", () => {
+    const eggRecipes = [
+      { id: "a", name: "Omelette", ingredients: ["3 eggs"] },
+      { id: "b", name: "Frittata", ingredients: ["6 eggs"] },
+    ];
+
+    const ranked = rankRecipesByCoverage({
+      recipes: eggRecipes,
+      inventory: [{ name: "Eggs", active: true }],
+      plannedRecipes: [eggRecipes[0]],
+    });
+    // Stock is always-on-hand, so planning one egg dish leaves the other ready.
+    expect(ranked.every((entry) => entry.tier === "ready")).toBe(true);
+  });
+
+  it("gives two basket units to cover two planned mince recipes", () => {
+    const recipe = { id: "a", name: "Mince A", ingredients: ["beef mince"] };
+    const other = { id: "b", name: "Mince B", ingredients: ["beef mince"] };
+
+    const ranked = rankRecipesByCoverage({
+      recipes: [recipe, other],
+      basketItems: ["Beef mince", "Beef mince"],
+      plannedRecipes: [recipe],
+    });
+    // Two packets: one claimed by A, one still available for B.
+    expect(ranked.find((entry) => entry.recipe.id === "b").tier).toBe("ready");
+  });
 });
