@@ -42,13 +42,20 @@ export function buildUnifiedShoppingList({
   ingredientGroups = {},
   baskets = [],
   basketByWeek = {},
+  shoppingWeekKey = null,
 }) {
   const todayIndex = days.indexOf(todayDayName);
 
-  const basketFor = (weekKey) =>
-    baskets.find((basket) => basket.id === basketByWeek?.[weekKey]);
-  const currentBasket = basketFor(currentWeekKey);
-  const nextBasket = basketFor(nextWeekKey);
+  // The list spans this week + next, but a single Shop-tab picker controls one
+  // basket — the one for the active shopping week. Apply only that basket, so
+  // switching it to "None" always clears its items (a basket left assigned to
+  // the other week must never leak in and become unclearable).
+  const activeBasketWeek = shoppingWeekKey ?? currentWeekKey;
+  const activeBasket = baskets.find(
+    (basket) => basket.id === basketByWeek?.[activeBasketWeek]
+  );
+  const basketForWeek = (weekKey) =>
+    weekKey === activeBasketWeek ? activeBasket : undefined;
 
   const currentPlan = buildShoppingPlan({
     staples,
@@ -58,8 +65,8 @@ export function buildUnifiedShoppingList({
     weekKey: currentWeekKey,
     getMealSummary,
     ingredientGroups,
-    basketItems: currentBasket?.items || [],
-    basketName: currentBasket?.name || "",
+    basketItems: basketForWeek(currentWeekKey)?.items || [],
+    basketName: basketForWeek(currentWeekKey)?.name || "",
   });
   const nextPlan = buildShoppingPlan({
     staples,
@@ -69,8 +76,8 @@ export function buildUnifiedShoppingList({
     weekKey: nextWeekKey,
     getMealSummary,
     ingredientGroups,
-    basketItems: nextBasket?.items || [],
-    basketName: nextBasket?.name || "",
+    basketItems: basketForWeek(nextWeekKey)?.items || [],
+    basketName: basketForWeek(nextWeekKey)?.name || "",
   });
 
   const collected = [];

@@ -115,6 +115,32 @@ describe("buildUnifiedShoppingList", () => {
     expect(items.find((i) => i.name === "Milk").checked).toBe(false);
   });
 
+  it("only applies the active shopping week's basket, and clears when set to none", () => {
+    const withBasket = {
+      ...base,
+      baskets: [{ id: "b1", name: "Big shop", items: ["Bananas", "Bread"] }],
+      basketByWeek: { W2: "b1" },
+      shoppingWeekKey: "W2",
+    };
+    const before = buildUnifiedShoppingList(withBasket);
+    expect(before.items.some((i) => i.name === "Bananas")).toBe(true);
+
+    // Switch that week to "none" — the basket rows must all disappear.
+    const after = buildUnifiedShoppingList({ ...withBasket, basketByWeek: { W2: "" } });
+    expect(after.items.some((i) => i.name === "Bananas")).toBe(false);
+    expect(after.items.some((i) => i.name === "Bread")).toBe(false);
+  });
+
+  it("does not leak a basket assigned to the other (inactive) week", () => {
+    const { items } = buildUnifiedShoppingList({
+      ...base,
+      baskets: [{ id: "b1", name: "Big shop", items: ["Bananas"] }],
+      basketByWeek: { W1: "b1" }, // basket on this week
+      shoppingWeekKey: "W2", // but next week is the active shop
+    });
+    expect(items.some((i) => i.name === "Bananas")).toBe(false);
+  });
+
   it("carries a manual item's id so the row can delete the right one", () => {
     const { items } = buildUnifiedShoppingList({
       ...base,
