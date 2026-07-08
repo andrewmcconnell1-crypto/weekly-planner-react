@@ -4750,9 +4750,8 @@ textarea::placeholder {
   background: #357f4b;
 }
 
-/* Low-key text links inside the meal views: "or swipe instead" in the browse
-   picker, and "choose a different recipe" in the planned-recipe edit view. */
-.meal-picker-swipe-link,
+/* Low-key text link: "choose a different recipe" in the planned-recipe edit
+   view. */
 .meal-change-recipe-link {
   display: inline-flex;
   align-items: center;
@@ -4769,7 +4768,6 @@ textarea::placeholder {
   text-underline-offset: 3px;
 }
 
-.meal-picker-swipe-link:hover,
 .meal-change-recipe-link:hover {
   background: transparent;
   color: var(--ink);

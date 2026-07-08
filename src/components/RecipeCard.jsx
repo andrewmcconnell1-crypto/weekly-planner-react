@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 
-import { getRecipeTone } from "../utils/recipeUtils";
+import { getRecipeTone, recipeSourceLabel } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
 import RecipeThumb from "./RecipeThumb";
 
@@ -8,10 +8,10 @@ import RecipeThumb from "./RecipeThumb";
 // they look identical. `active` highlights the currently-selected recipe.
 // `coverage` (optional, from rankRecipesByCoverage) adds a Ready / "N short"
 // badge so the picker can sort by what the kitchen can already cook. Metadata
-// is kept to one quiet line — category and serves — with source and tags left
+// is kept to one quiet line — category and source — with serves and tags left
 // to the recipe's own detail view.
 function RecipeCard({ recipe, active = false, onClick, coverage }) {
-  const meta = [recipe.category, recipe.serves ? `Serves ${recipe.serves}` : null]
+  const meta = [recipe.category, recipeSourceLabel(recipe)]
     .filter(Boolean)
     .join(" · ");
 
