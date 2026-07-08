@@ -56,9 +56,8 @@ export default function MoreScreen({
   updateRecipe,
   baskets,
   setBaskets,
-  planWeekMeals,
-  onPlanRecipeOnDay,
-  planWeekStart,
+  planWeeks,
+  onPlanRecipeOnWeekDay,
 }) {
   return (
     <section className="screen more-screen">
@@ -205,9 +204,8 @@ export default function MoreScreen({
                 staples={staples}
                 inventory={inventory}
                 ingredientGroups={ingredientGroups}
-                planWeekMeals={planWeekMeals}
-                onPlanRecipeOnDay={onPlanRecipeOnDay}
-                planWeekStart={planWeekStart}
+                planWeeks={planWeeks}
+                onPlanRecipeOnWeekDay={onPlanRecipeOnWeekDay}
               />
             </Suspense>
             </ErrorBoundary>

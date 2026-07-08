@@ -122,7 +122,18 @@ function MealEditorSheet({
   const [newIngredient, setNewIngredient] = useState("");
   const recipeFilters = useRecipeFilters(recipes);
   const [recipeFiltersOpen, setRecipeFiltersOpen] = useState(false);
+  // "Ready to cook" narrows the picker to recipes the kitchen can already make
+  // (this week's basket + recurring + stock), for planning from what you have.
+  const [readyOnly, setReadyOnly] = useState(false);
   const [closing, setClosing] = useState(false);
+
+  const hasCoverage = Boolean(recipeCoverageById && recipeCoverageById.size);
+  const cookableCount = hasCoverage
+    ? recipeFilters.visibleRecipes.filter((recipe) => {
+        const tier = recipeCoverageById.get(recipe.id)?.tier;
+        return tier === "ready" || tier === "almost";
+      }).length
+    : 0;
   const nameInputRef = useRef(null);
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
@@ -591,35 +602,52 @@ function MealEditorSheet({
             </button>
           </div>
 
+          {hasCoverage && (
+            <button
+              type="button"
+              className={`ready-filter-toggle ${readyOnly ? "active" : ""}`}
+              aria-pressed={readyOnly}
+              onClick={() => setReadyOnly((on) => !on)}
+            >
+              <ChefHat size={15} aria-hidden="true" />
+              Ready to cook
+              <span className="ready-filter-count">{cookableCount}</span>
+            </button>
+          )}
+
           <div className="recipe-picker-results recipe-picker-flat">
-            {recipeFilters.visibleRecipes.length === 0 ? (
-              <p className="empty-state">No matching recipes.</p>
-            ) : (
+            {(() => {
               // Ready-to-cook first (this week's basket + recurring + stock),
-              // then near-misses, then the rest in their usual order.
-              [...recipeFilters.visibleRecipes]
-                .sort((a, b) => {
-                  const rank = (recipe) => {
-                    const coverage = recipeCoverageById?.get(recipe.id);
-                    if (!coverage) return 3;
-                    return coverage.tier === "ready"
-                      ? 0
-                      : coverage.tier === "almost"
-                        ? 1
-                        : 2;
-                  };
-                  return rank(a) - rank(b);
-                })
-                .map((recipe) => (
-                  <RecipeCard
-                    key={recipe.id}
-                    recipe={recipe}
-                    active={selectedRecipeId === recipe.id}
-                    onClick={() => selectRecipe(recipe.id)}
-                    coverage={recipeCoverageById?.get(recipe.id)}
-                  />
-                ))
-            )}
+              // then near-misses, then the rest in their usual order; the
+              // toggle narrows to just the cookable ones.
+              const tierRank = (recipe) => {
+                const tier = recipeCoverageById?.get(recipe.id)?.tier;
+                return tier === "ready" ? 0 : tier === "almost" ? 1 : 2;
+              };
+              const list = [...recipeFilters.visibleRecipes]
+                .filter((recipe) => !readyOnly || tierRank(recipe) < 2)
+                .sort((a, b) => tierRank(a) - tierRank(b));
+
+              if (list.length === 0) {
+                return (
+                  <p className="empty-state">
+                    {readyOnly
+                      ? "Nothing's ready to cook from what you have yet."
+                      : "No matching recipes."}
+                  </p>
+                );
+              }
+
+              return list.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  active={selectedRecipeId === recipe.id}
+                  onClick={() => selectRecipe(recipe.id)}
+                  coverage={recipeCoverageById?.get(recipe.id)}
+                />
+              ));
+            })()}
           </div>
         </div>
       </>

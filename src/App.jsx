@@ -240,6 +240,7 @@ function App() {
     setLeftoverNights,
     clearMealDay,
     assignRecipeToDay,
+    assignRecipeToWeekDay,
     updateMeal,
     swapMealDays,
   } = useMealPlanActions({
@@ -730,9 +731,21 @@ function App() {
           addImportedRecipe={addImportedRecipe}
           baskets={baskets}
           setBaskets={setBaskets}
-          planWeekMeals={meals}
-          onPlanRecipeOnDay={assignRecipeToDay}
-          planWeekStart={mealWeekStart}
+          planWeeks={[
+            {
+              key: currentWeekKey,
+              label: "This week",
+              start: currentWeekStart,
+              meals: mealsByWeek[currentWeekKey] || createEmptyMeals(),
+            },
+            {
+              key: nextWeekKey,
+              label: "Next week",
+              start: nextWeekStart,
+              meals: mealsByWeek[nextWeekKey] || createEmptyMeals(),
+            },
+          ]}
+          onPlanRecipeOnWeekDay={assignRecipeToWeekDay}
           deleteRecipe={deleteRecipe}
           addIngredientToRecipe={addIngredientToRecipe}
           deleteIngredientFromRecipe={deleteIngredientFromRecipe}

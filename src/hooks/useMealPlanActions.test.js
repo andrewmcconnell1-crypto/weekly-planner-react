@@ -74,3 +74,29 @@ describe("useMealPlanActions — swapMealDays", () => {
     expect(setMealsByWeek).not.toHaveBeenCalled();
   });
 });
+
+describe("useMealPlanActions — assignRecipeToWeekDay", () => {
+  it("assigns a recipe to a specific week + day", () => {
+    const { result, setMealsByWeek } = setup({});
+    result.current.assignRecipeToWeekDay("2026-07-12", "Wednesday", {
+      id: "r1",
+      name: "Fried Rice",
+    });
+    const updater = setMealsByWeek.mock.calls[0][0];
+    const next = updater({ "2026-07-12": {} });
+    expect(next["2026-07-12"].Wednesday).toMatchObject({
+      recipeId: "r1",
+      name: "Fried Rice",
+      mealType: "cook",
+    });
+  });
+
+  it("ignores an unknown day", () => {
+    const { result, setMealsByWeek } = setup({});
+    result.current.assignRecipeToWeekDay("2026-07-12", "Someday", {
+      id: "r1",
+      name: "X",
+    });
+    expect(setMealsByWeek).not.toHaveBeenCalled();
+  });
+});
