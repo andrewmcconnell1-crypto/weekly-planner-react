@@ -113,7 +113,11 @@ function RecipeEditorSheet({
         <div className="sheet-header">
           <div className="sheet-title">
             <strong>{mode === "view" ? "Recipe" : "Edit recipe"}</strong>
-            <span>{recipe.category || "Uncategorised"}</span>
+            {/* View mode carries category in the richer meta line below, so the
+                subtitle here would just repeat it. */}
+            {mode !== "view" && (
+              <span>{recipe.category || "Uncategorised"}</span>
+            )}
           </div>
 
           <button
