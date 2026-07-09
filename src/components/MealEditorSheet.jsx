@@ -623,7 +623,7 @@ function MealEditorSheet({
                   <p className="empty-state">
                     {readyOnly
                       ? "Nothing's ready to cook from what you have yet."
-                      : "No matching recipes."}
+                      : "No recipes match — try a different search."}
                   </p>
                 );
               }

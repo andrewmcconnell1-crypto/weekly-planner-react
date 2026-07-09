@@ -142,7 +142,9 @@ function StockCatalogSheet({ inventory = [], onActivate, onClose }) {
           />
 
           {groups.length === 0 ? (
-            <p className="empty-state">No matching items.</p>
+            <p className="empty-state">
+              No items match — try a different search.
+            </p>
           ) : (
             groups.map((group) => {
               // Searching forces every matching aisle open so results are

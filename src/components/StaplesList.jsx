@@ -330,7 +330,9 @@ function StaplesList({
           automatically.
         </EmptyState>
       ) : filteredStaples.length === 0 ? (
-        <p className="empty-state">No matching recurring buys.</p>
+        <p className="empty-state">
+          No recurring buys match — try a different search.
+        </p>
       ) : (
         groupedStaples.map(([category, items]) => {
           const isOpen =
