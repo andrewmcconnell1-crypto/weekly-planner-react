@@ -68,6 +68,6 @@ describe("StockCatalogSheet", () => {
       target: { value: "zzzznotreal" },
     });
 
-    expect(screen.getByText(/No matching items/i)).toBeTruthy();
+    expect(screen.getByText(/No items match/i)).toBeTruthy();
   });
 });

@@ -249,7 +249,9 @@ function InventoryList({
             list.
           </EmptyState>
         ) : (
-          <p className="empty-state">No matching stock items.</p>
+          <p className="empty-state">
+            No stock matches — try a different search.
+          </p>
         )
       ) : (
         Object.entries(groupedInventory).map(([category, items]) => {
