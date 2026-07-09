@@ -41,6 +41,7 @@ export default function MealGroups({
   todayDayName,
   weekStart,
   dragOverDay = null,
+  reorder = null,
 }) {
   // Map a day name to its calendar date for the active week. dayList is anchored
   // to the same weekday as weekStart, so the index is the day offset.
@@ -67,6 +68,7 @@ export default function MealGroups({
         isToday={group.leadDay === todayDayName}
         isDragOver={dragOverDay === group.leadDay}
         onOpen={() => onOpenDay(group.leadDay)}
+        reorder={reorder}
       />
     ) : (
       <MealLeftoverCluster
@@ -78,6 +80,7 @@ export default function MealGroups({
         todayDayName={todayDayName}
         getDate={getDate}
         dragOverDay={dragOverDay}
+        reorder={reorder}
       />
     )
   );

@@ -9,6 +9,7 @@ import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 import { useCountUp } from "../hooks/useCountUp";
 import { useMealDrag } from "../hooks/useMealDrag";
+import { useMealReorder } from "../hooks/useMealReorder";
 
 const MealEditorSheet = lazy(() => import("./MealEditorSheet"));
 
@@ -44,6 +45,7 @@ export default function PlanScreen({
 }) {
   const animatedPlanned = useCountUp(mealsPlannedCount);
   const { onPointerDown, drag } = useMealDrag(swapMealDays);
+  const reorder = useMealReorder(meals, swapMealDays);
 
   return (
     <section className="screen plan-screen">
@@ -104,6 +106,7 @@ export default function PlanScreen({
           onOpenDay={setExpandedMealDay}
           weekStart={mealWeekStart}
           dragOverDay={drag?.overDay}
+          reorder={reorder}
         />
       </div>
 
@@ -112,6 +115,11 @@ export default function PlanScreen({
           Drop on another day to move — leftovers come too
         </p>
       )}
+
+      {/* Announces pick-up / move / drop for the keyboard reorder. */}
+      <p className="visually-hidden" role="status" aria-live="polite">
+        {reorder.message}
+      </p>
 
       {expandedMealDay && (
         <ErrorBoundary
