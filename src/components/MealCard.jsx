@@ -7,6 +7,8 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 
+import MealReorderHandle from "./MealReorderHandle";
+
 // Each meal type gets its own icon + label so a cook night reads differently
 // from a takeaway, an eating-out night, or leftovers — at a glance.
 const TYPE_META = {
@@ -46,6 +48,7 @@ function MealCard({
   isToday = false,
   isDragOver = false,
   onOpen,
+  reorder = null,
 }) {
   const mealType = meal.mealType || "cook";
   const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
@@ -93,7 +96,9 @@ function MealCard({
     <article
       className={`card meal-card meal-card-${typeKey} ${
         isToday ? "meal-card-today" : ""
-      } ${isDragOver ? "meal-drag-over" : ""}`}
+      } ${isDragOver ? "meal-drag-over" : ""} ${
+        reorder?.grabbedDay === day ? "meal-reorder-active" : ""
+      }`}
       data-tone={mealTone}
       data-drag-day={day}
     >
@@ -111,6 +116,8 @@ function MealCard({
 
         <ChevronRight className="meal-row-chevron" size={18} aria-hidden="true" />
       </button>
+
+      <MealReorderHandle day={day} name={mealName} reorder={reorder} />
     </article>
   );
 }

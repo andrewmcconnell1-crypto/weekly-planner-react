@@ -1,6 +1,7 @@
 import { ChevronRight, CookingPot, CornerDownRight } from "lucide-react";
 
 import { DayRail } from "./MealCard";
+import MealReorderHandle from "./MealReorderHandle";
 
 // A cook day plus the leftover (repeat) days that follow it, rendered as one
 // merged card: the cook day is emphasised on top, the leftover nights hang
@@ -13,6 +14,7 @@ function MealLeftoverCluster({
   todayDayName,
   getDate,
   dragOverDay = null,
+  reorder = null,
 }) {
   const coversNights = repeatDays.length + 1;
   const leadName = leadSummary.name || "No meal planned";
@@ -22,7 +24,9 @@ function MealLeftoverCluster({
     <article
       className={`card meal-card meal-card-cook meal-cluster ${
         leadDay === todayDayName ? "meal-card-today" : ""
-      } ${dragOverDay === leadDay ? "meal-drag-over" : ""}`}
+      } ${dragOverDay === leadDay ? "meal-drag-over" : ""} ${
+        reorder?.grabbedDay === leadDay ? "meal-reorder-active" : ""
+      }`}
       data-tone={leadSummary.tone}
       data-drag-day={leadDay}
     >
@@ -51,6 +55,8 @@ function MealLeftoverCluster({
 
         <ChevronRight className="meal-row-chevron" size={18} aria-hidden="true" />
       </button>
+
+      <MealReorderHandle day={leadDay} name={leadSummary.name} reorder={reorder} />
 
       <div className="meal-cluster-repeats">
         {repeatDays.map((repeatDay) => (
