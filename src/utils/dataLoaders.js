@@ -109,7 +109,9 @@ function normaliseRecipe(recipe, index) {
 // celery, thyme, bay leaf, smoked paprika, tomato paste and parsley (method too).
 // v10: One Pot Cajun Beef Pasta — added garlic, tomato paste and a spring-onion
 // finish (v10 also added cream, removed in v11 — that recipe isn't creamy).
-export const RECIPES_VERSION = 11;
+// v12: matched One Pot Cajun Beef Pasta to the source list from the user — added
+// carrot and kidney beans, passata -> crushed tomatoes, correct garlic/cheese.
+export const RECIPES_VERSION = 12;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
