@@ -1,23 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <rect width="512" height="512" fill="#bf5840" />
-  <g
-    fill="none"
-    stroke="#fdf3e7"
-    stroke-width="22"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M196 250 q-20 -26 0 -52 q20 -26 0 -52" />
-    <path d="M256 250 q-20 -26 0 -52 q20 -26 0 -52" />
-    <path d="M316 250 q-20 -26 0 -52 q20 -26 0 -52" />
+  <!-- Ladle — the same silhouette as the wordmark glyph: a cupped bowl with a
+       hooked handle, so the app icon and the "Ladle" logotype share one motif.
+       Scaled about the centre for presence while staying in the maskable safe
+       zone. -->
+  <g transform="translate(256 256) scale(1.1) translate(-256 -256)">
+    <path d="M104 307 h200 a100 100 0 0 1 -200 0 Z" fill="#fdf3e7" />
+    <path
+      d="M144 316 q80 40 160 0"
+      fill="none"
+      stroke="#bf5840"
+      stroke-width="14"
+      stroke-linecap="round"
+      opacity="0.3"
+    />
+    <path
+      d="M304 307 V157 a52 52 0 0 1 104 0 v16"
+      fill="none"
+      stroke="#fdf3e7"
+      stroke-width="40"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
   </g>
-  <path d="M112 286 H400 a144 144 0 0 1 -288 0 Z" fill="#fdf3e7" />
-  <path
-    d="M150 300 q106 64 212 0"
-    fill="none"
-    stroke="#bf5840"
-    stroke-width="14"
-    stroke-linecap="round"
-    opacity="0.32"
-  />
 </svg>
