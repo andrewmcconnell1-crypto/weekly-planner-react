@@ -1,8 +1,9 @@
-import { ChevronRight, PlayCircle, X } from "lucide-react";
+import { ArrowRight, ChevronRight, PlayCircle, X } from "lucide-react";
 
 import TonightCard from "./TonightCard";
 import MealGroups from "./MealGroups";
 import ProgressRing from "./ProgressRing";
+import DishGlyph from "./DishGlyph";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 
@@ -34,6 +35,9 @@ export default function HomeScreen({
   );
   const gapCount = gapDays.length;
   const plannedCount = days.length - gapCount;
+  // A brand-new week (or a freshly cleared one): lead with a warm invitation to
+  // plan the first dinner instead of a cold "nothing here" slate.
+  const weekEmpty = plannedCount === 0;
 
   const weekEnd = new Date(currentWeekStart);
   weekEnd.setDate(currentWeekStart.getDate() + 6);
@@ -49,65 +53,105 @@ export default function HomeScreen({
         onOpenPlan={openTonightInPlan}
       />
 
-      {showWelcome && (
-        <div className="welcome-card">
-          <button
-            type="button"
-            className="welcome-dismiss"
-            aria-label="Dismiss"
-            onClick={dismissWelcome}
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
+      {weekEmpty ? (
+        <div className="home-firstrun">
+          <span className="home-firstrun-glyph" aria-hidden="true">
+            <DishGlyph glyph="dish" />
+          </span>
 
-          <p className="section-kicker">Getting started</p>
-          <strong>New here? Take the 60-second tour</strong>
-          <p className="welcome-lede">
-            See how planning meals, stocking your kitchen, and an
-            auto-building shopping list fit together — with a quick animated
-            walkthrough.
+          <p className="section-kicker">Let&apos;s get cooking</p>
+          <strong>Plan your first dinner</strong>
+          <p className="home-firstrun-lede">
+            Pick a recipe for any night. Cook once, reuse the leftovers, and
+            your shopping list builds itself — no more nightly “what&apos;s for
+            dinner?”.
           </p>
 
-          <div className="welcome-actions">
+          <div className="home-firstrun-actions">
             <button
               type="button"
-              className="primary-button welcome-cta with-icon"
-              onClick={openWalkthrough}
+              className="primary-button with-icon"
+              onClick={openTonightInPlan}
             >
-              <PlayCircle size={16} aria-hidden="true" />
-              Take the tour
+              Pick tonight&apos;s dinner
+              <ArrowRight size={16} aria-hidden="true" />
             </button>
 
             <button
               type="button"
-              className="welcome-skip"
-              onClick={() => setActiveTab("plan")}
+              className="welcome-skip with-icon"
+              onClick={openWalkthrough}
             >
-              Skip — start planning
+              <PlayCircle size={15} aria-hidden="true" />
+              Take the 60-second tour
             </button>
           </div>
         </div>
+      ) : (
+        showWelcome && (
+          <div className="welcome-card">
+            <button
+              type="button"
+              className="welcome-dismiss"
+              aria-label="Dismiss"
+              onClick={dismissWelcome}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+
+            <p className="section-kicker">Getting started</p>
+            <strong>New here? Take the 60-second tour</strong>
+            <p className="welcome-lede">
+              See how planning meals, stocking your kitchen, and an
+              auto-building shopping list fit together — with a quick animated
+              walkthrough.
+            </p>
+
+            <div className="welcome-actions">
+              <button
+                type="button"
+                className="primary-button welcome-cta with-icon"
+                onClick={openWalkthrough}
+              >
+                <PlayCircle size={16} aria-hidden="true" />
+                Take the tour
+              </button>
+
+              <button
+                type="button"
+                className="welcome-skip"
+                onClick={() => setActiveTab("plan")}
+              >
+                Skip — start planning
+              </button>
+            </div>
+          </div>
+        )
       )}
 
-      <div className={`home-topup ${homeShopStatus.tone}`}>
-        <div className="home-topup-body">
-          <p className="section-kicker">Shopping</p>
-          <strong>{homeShopStatus.title}</strong>
-          <span>{homeShopStatus.sub}</span>
-        </div>
+      {/* The shopping card is noise before anything's planned — nothing to buy
+          yet. Show it once the week has meals or there's actually a list. */}
+      {(!weekEmpty || homeShopStatus.actionLabel) && (
+        <div className={`home-topup ${homeShopStatus.tone}`}>
+          <div className="home-topup-body">
+            <p className="section-kicker">Shopping</p>
+            <strong>{homeShopStatus.title}</strong>
+            <span>{homeShopStatus.sub}</span>
+          </div>
 
-        {homeShopStatus.actionLabel && (
-          <button
-            type="button"
-            className={
-              homeShopStatus.tone === "needs" ? "primary-button" : "secondary"
-            }
-            onClick={homeShopStatus.onAction}
-          >
-            {homeShopStatus.actionLabel}
-          </button>
-        )}
-      </div>
+          {homeShopStatus.actionLabel && (
+            <button
+              type="button"
+              className={
+                homeShopStatus.tone === "needs" ? "primary-button" : "secondary"
+              }
+              onClick={homeShopStatus.onAction}
+            >
+              {homeShopStatus.actionLabel}
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="home-week">
         <div className="home-section-head">
@@ -121,7 +165,7 @@ export default function HomeScreen({
           <ProgressRing value={plannedCount} max={days.length} size={52} />
         </div>
 
-        {gapCount > 0 ? (
+        {weekEmpty ? null : gapCount > 0 ? (
           <button
             type="button"
             className="primary-button home-plan-gaps"

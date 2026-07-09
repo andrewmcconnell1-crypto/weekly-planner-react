@@ -1185,6 +1185,62 @@ textarea:focus-visible {
   justify-self: start;
 }
 
+/* First-run hero on Home: a warm invitation to plan the first dinner, shown
+   in place of the cold "nothing planned / nothing to buy" slate. */
+.home-firstrun {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: var(--space-8);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg, var(--radius-md));
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: var(--space-28) var(--space-20);
+}
+
+.home-firstrun-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--olive-soft);
+  color: var(--olive);
+}
+
+.home-firstrun-glyph svg {
+  width: 30px;
+  height: 30px;
+}
+
+.home-firstrun > strong {
+  font-size: var(--text-2xl, var(--text-xl));
+  font-family: var(--font-display, inherit);
+}
+
+.home-firstrun-lede {
+  max-width: 34ch;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.home-firstrun-actions {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-10);
+  margin-top: var(--space-8);
+  width: 100%;
+}
+
+.home-firstrun-actions .primary-button {
+  width: 100%;
+  max-width: 20rem;
+  justify-content: center;
+}
+
 .home-steps {
   display: grid;
   gap: var(--space-10);
