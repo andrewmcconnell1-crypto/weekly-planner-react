@@ -99,7 +99,10 @@ function normaliseRecipe(recipe, index) {
 // accounts pick up the richer methods.
 // v6: added the "Restaurant quality" collection (chefRecipes.js) — bistro-level
 // original recipes with their own source badge and filter entry.
-export const RECIPES_VERSION = 6;
+// v7: reviewed the website-sourced recipes (webRecipes.js) and filled in missing
+// or corrected core ingredients (e.g. Kung Pao's Sichuan peppercorns & black
+// vinegar, curry finishes, Hainanese dipping-sauce elements).
+export const RECIPES_VERSION = 7;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
