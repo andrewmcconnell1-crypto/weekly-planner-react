@@ -107,7 +107,9 @@ function normaliseRecipe(recipe, index) {
 // wine/stock in bolognese & beef stew, curry powder in beef chow mein, etc.).
 // v9: rounded out the Cajun Chicken & Rice one-pot — added the holy-trinity
 // celery, thyme, bay leaf, smoked paprika, tomato paste and parsley (method too).
-export const RECIPES_VERSION = 9;
+// v10: One Pot Cajun Beef Pasta — added the garlic, tomato paste and cream that
+// make it a creamy Cajun pasta, plus a spring-onion finish.
+export const RECIPES_VERSION = 10;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
