@@ -457,7 +457,6 @@ const baseRecipes = [
       "2 tbsp tomato paste",
       "700 g passata",
       "2 cups beef stock",
-      "3/4 cup cream",
       "1 cup shredded cheese",
       "2 spring onions",
     ],
