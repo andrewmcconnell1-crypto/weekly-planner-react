@@ -105,7 +105,9 @@ function normaliseRecipe(recipe, index) {
 // v8: same review for the RecipeTin Eats recipes (initialRecipes.js) — added
 // defining core ingredients they were missing (butter in butter chicken, red
 // wine/stock in bolognese & beef stew, curry powder in beef chow mein, etc.).
-export const RECIPES_VERSION = 8;
+// v9: rounded out the Cajun Chicken & Rice one-pot — added the holy-trinity
+// celery, thyme, bay leaf, smoked paprika, tomato paste and parsley (method too).
+export const RECIPES_VERSION = 9;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
