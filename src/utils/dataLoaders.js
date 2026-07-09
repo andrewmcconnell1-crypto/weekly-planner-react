@@ -102,7 +102,10 @@ function normaliseRecipe(recipe, index) {
 // v7: reviewed the website-sourced recipes (webRecipes.js) and filled in missing
 // or corrected core ingredients (e.g. Kung Pao's Sichuan peppercorns & black
 // vinegar, curry finishes, Hainanese dipping-sauce elements).
-export const RECIPES_VERSION = 7;
+// v8: same review for the RecipeTin Eats recipes (initialRecipes.js) — added
+// defining core ingredients they were missing (butter in butter chicken, red
+// wine/stock in bolognese & beef stew, curry powder in beef chow mein, etc.).
+export const RECIPES_VERSION = 8;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
