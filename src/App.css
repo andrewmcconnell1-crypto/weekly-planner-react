@@ -1858,14 +1858,18 @@ body.meal-dragging {
 }
 
 .meal-card {
-  position: relative;
   display: grid;
   padding: 0;
   overflow: hidden;
 }
 
+/* position: relative is scoped to in-screen cards (not the bare .meal-card) so
+   it can't override .meal-drag-clone's `position: fixed` — the drag clone is
+   appended to <body>, outside these screens, and must stay pointer-following.
+   In-screen cards still get a positioning context for the reorder handle. */
 .plan-screen .meal-card,
 .home-screen .meal-card {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
