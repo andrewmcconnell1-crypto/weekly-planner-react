@@ -136,6 +136,7 @@ function App() {
     setBasketByWeek,
     recipes,
     setRecipes,
+    setDeletedRecipeIds,
     settings,
     setSettings,
     ingredientGroups,
@@ -322,6 +323,7 @@ function App() {
   } = useRecipeActions({
     recipes,
     setRecipes,
+    setDeletedRecipeIds,
     requestUndo,
     defaultServings: settings?.defaultServings ?? 4,
   });
@@ -499,6 +501,7 @@ function App() {
       setStaples,
       setInventory,
       setRecipes,
+      setDeletedRecipeIds,
       captureRecoverySnapshot,
     });
   }

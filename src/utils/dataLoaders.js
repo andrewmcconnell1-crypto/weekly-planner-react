@@ -138,12 +138,19 @@ function normaliseRecipe(recipe, index) {
 // powder), Beef in Black Bean (no ginger; +dark soy/cooking wine/sesame oil),
 // Creamy Tomato Beef Pasta (chicken stock + Italian herbs), Salisbury Steak
 // (+garlic/ketchup/Dijon/butter).
-export const RECIPES_VERSION = 20;
+// v21: Carnitas (2 oranges + jalapeno, no lime), Chilli Con Carne (+beef stock
+// cubes), Beef Stew (2 cups red wine, baby potatoes, +Worcestershire/bay/thyme).
+export const RECIPES_VERSION = 21;
 
-export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
+export function mergeSavedRecipes(
+  parsedRecipes,
+  refreshBuiltIns = false,
+  deletedRecipeIds = []
+) {
   const bundledById = new Map(
     initialRecipes.map((recipe) => [recipe.id, recipe])
   );
+  const tombstonedIds = new Set(deletedRecipeIds);
   const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
   const savedRecipeIds = new Set(normalisedRecipes.map((recipe) => recipe.id));
 
@@ -162,8 +169,14 @@ export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
     return { ...recipe, serves: recipe.serves ?? bundled.serves ?? 4 };
   });
 
+  // Append any bundled recipe the saved data doesn't already have — except ones
+  // the user has deliberately deleted, which the tombstone list keeps out so
+  // they don't resurrect on the next load, sync or version refresh.
   const missingStarterRecipes = initialRecipes
-    .filter((recipe) => !savedRecipeIds.has(recipe.id))
+    .filter(
+      (recipe) =>
+        !savedRecipeIds.has(recipe.id) && !tombstonedIds.has(recipe.id)
+    )
     .map((recipe) => ({ ...recipe, serves: recipe.serves ?? 4 }));
 
   // Guard against duplicate ids (e.g. a legacy collision in saved data): keep

@@ -68,4 +68,19 @@ describe("mergeSavedRecipes", () => {
     const refreshed = mergeSavedRecipes(edited, true);
     expect(refreshed.find((r) => r.id === bundled.id).name).toBe(bundled.name);
   });
+
+  it("does not re-add a deleted built-in listed in the tombstones", () => {
+    const deletedId = initialRecipes[0].id;
+
+    const merged = mergeSavedRecipes([], false, [deletedId]);
+    expect(merged.some((r) => r.id === deletedId)).toBe(false);
+    expect(merged).toHaveLength(initialRecipes.length - 1);
+  });
+
+  it("keeps a deleted built-in out even on a version refresh", () => {
+    const deletedId = initialRecipes[0].id;
+
+    const merged = mergeSavedRecipes([], true, [deletedId]);
+    expect(merged.some((r) => r.id === deletedId)).toBe(false);
+  });
 });

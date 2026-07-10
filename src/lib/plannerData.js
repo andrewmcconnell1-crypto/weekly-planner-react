@@ -33,6 +33,7 @@ export const DATA_KEYS = [
   "basketByWeek",
   "recipes",
   "recipesVersion",
+  "deletedRecipeIds",
   "settings",
   "ingredientGroups",
 ];
@@ -90,6 +91,9 @@ export function defaultData() {
     basketByWeek: {},
     recipes: initialRecipes,
     recipesVersion: RECIPES_VERSION,
+    // Ids of built-in recipes the user has deleted, so they stay deleted rather
+    // than being re-appended from the bundle on every load/sync.
+    deletedRecipeIds: [],
     settings: { ...defaultSettings },
     // User overrides for ingredient groups (canonicalKey -> overarching name),
     // layered over the seed catalog by the matcher.
@@ -134,9 +138,13 @@ export function normaliseData(raw) {
     recipes: mergeSavedRecipes(
       Array.isArray(data.recipes) ? data.recipes : base.recipes,
       (typeof data.recipesVersion === "number" ? data.recipesVersion : 0) <
-        RECIPES_VERSION
+        RECIPES_VERSION,
+      Array.isArray(data.deletedRecipeIds) ? data.deletedRecipeIds : []
     ),
     recipesVersion: RECIPES_VERSION,
+    deletedRecipeIds: Array.isArray(data.deletedRecipeIds)
+      ? data.deletedRecipeIds.filter((id) => typeof id === "string")
+      : base.deletedRecipeIds,
     settings: normaliseSettings(data.settings),
     ingredientGroups:
       data.ingredientGroups && typeof data.ingredientGroups === "object"
