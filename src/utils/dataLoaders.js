@@ -119,7 +119,11 @@ function normaliseRecipe(recipe, index) {
 // v15: Crumbed Drumsticks (real seasoning blend, 3 eggs), Hokkien Noodles
 // (+capsicum, cooking wine), Golden Coconut Curry (turmeric/garam masala not
 // curry powder, broccoli not spinach, +chicken stock, coriander, whole spices).
-export const RECIPES_VERSION = 15;
+// v16: Mexican Red Rice (drop peas/carrots, +coriander), Chicken Risoni (drop
+// lemon, +tomato paste/chickpeas/sun-dried tomato, breast), Mexican Chicken &
+// Rice (+onion/garlic/passata/lime), Butter Chicken (+ginger/garlic/lemon/
+// coriander).
+export const RECIPES_VERSION = 16;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
