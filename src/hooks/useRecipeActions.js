@@ -2,16 +2,34 @@ import { useState } from "react";
 
 import { createCollectionId } from "../utils/itemUtils";
 import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
+import { initialRecipes } from "../data/initialRecipes";
+
+// Ids of the bundled built-in recipes. Deleting one of these has to be recorded
+// in a tombstone list, otherwise the bundle re-appends it on the next load.
+const builtInRecipeIds = new Set(initialRecipes.map((recipe) => recipe.id));
 
 // Saved-recipe mutators: add/delete a recipe, edit its fields, and add/remove
 // ingredients. Owns the new-recipe-name text input.
 export function useRecipeActions({
   recipes,
   setRecipes,
+  setDeletedRecipeIds,
   requestUndo,
   defaultServings = 4,
 }) {
   const [newRecipeName, setNewRecipeName] = useState("");
+
+  // Keep a built-in id out of / back into the tombstone list. No-op for
+  // user-created recipes (they're never re-added from the bundle).
+  function tombstoneBuiltIn(id) {
+    if (!builtInRecipeIds.has(id) || !setDeletedRecipeIds) return;
+    setDeletedRecipeIds((ids = []) => (ids.includes(id) ? ids : [...ids, id]));
+  }
+
+  function untombstoneBuiltIn(id) {
+    if (!builtInRecipeIds.has(id) || !setDeletedRecipeIds) return;
+    setDeletedRecipeIds((ids = []) => ids.filter((tombstoned) => tombstoned !== id));
+  }
 
   function addRecipe() {
     const cleanedName = newRecipeName.trim();
@@ -64,9 +82,14 @@ export function useRecipeActions({
     const recipe = recipes.find((item) => item.id === id);
     const snapshot = recipes;
     setRecipes(recipes.filter((item) => item.id !== id));
+    // Record built-in deletions so they don't resurrect from the bundle.
+    tombstoneBuiltIn(id);
     requestUndo(
       recipe?.name ? `Deleted “${recipe.name}”` : "Deleted recipe",
-      () => setRecipes(snapshot)
+      () => {
+        setRecipes(snapshot);
+        untombstoneBuiltIn(id);
+      }
     );
     return true;
   }

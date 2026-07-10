@@ -311,6 +311,7 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
       setBasketByWeek: makeSetter("basketByWeek"),
       setInventory: makeSetter("inventory"),
       setRecipes: makeSetter("recipes"),
+      setDeletedRecipeIds: makeSetter("deletedRecipeIds"),
       setSettings: makeSetter("settings"),
       setIngredientGroups: makeSetter("ingredientGroups"),
     };

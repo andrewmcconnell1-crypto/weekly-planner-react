@@ -20,6 +20,7 @@ export function applyBackup(backup, ctx) {
     baskets,
     inventory,
     recipes,
+    deletedRecipeIds,
     setMealsByWeek,
     setShoppingItemsByWeek,
     setShoppingListMetaByWeek,
@@ -30,6 +31,7 @@ export function applyBackup(backup, ctx) {
     setBaskets,
     setInventory,
     setRecipes,
+    setDeletedRecipeIds,
     captureRecoverySnapshot,
   } = ctx;
 
@@ -77,7 +79,19 @@ export function applyBackup(backup, ctx) {
     label: "stock",
     transform: normaliseInventoryItems,
   });
-  apply("recipes", recipes, setRecipes, { transform: mergeSavedRecipes });
+  // Restore the deleted-built-in tombstones first (if present) so the recipe
+  // merge below keeps those recipes out instead of re-adding them.
+  const backupTombstones = Array.isArray(backup.deletedRecipeIds)
+    ? backup.deletedRecipeIds.filter((id) => typeof id === "string")
+    : Array.isArray(deletedRecipeIds)
+      ? deletedRecipeIds
+      : [];
+  if (setDeletedRecipeIds && Array.isArray(backup.deletedRecipeIds)) {
+    setDeletedRecipeIds(backupTombstones);
+  }
+  apply("recipes", recipes, setRecipes, {
+    transform: (value) => mergeSavedRecipes(value, false, backupTombstones),
+  });
 
   return { kept };
 }
