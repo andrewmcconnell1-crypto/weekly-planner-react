@@ -113,7 +113,10 @@ function normaliseRecipe(recipe, index) {
 // carrot and kidney beans, passata -> crushed tomatoes, correct garlic/cheese.
 // v13: matched Chicken Cacciatore to the source — red wine (not white), +
 // chicken stock, tomato paste, bay leaves, anchovy, oregano; crushed tomatoes.
-export const RECIPES_VERSION = 13;
+// v14: matched three more to source — Chicken Shawarma (+garlic), Chop Suey
+// (+onion, cornflour, cooking wine, sesame oil), Crispy Lemon Chicken (batter
+// is soda water + baking powder, not egg; +ginger, cooking wine).
+export const RECIPES_VERSION = 14;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
