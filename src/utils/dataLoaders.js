@@ -116,7 +116,10 @@ function normaliseRecipe(recipe, index) {
 // v14: matched three more to source — Chicken Shawarma (+garlic), Chop Suey
 // (+onion, cornflour, cooking wine, sesame oil), Crispy Lemon Chicken (batter
 // is soda water + baking powder, not egg; +ginger, cooking wine).
-export const RECIPES_VERSION = 14;
+// v15: Crumbed Drumsticks (real seasoning blend, 3 eggs), Hokkien Noodles
+// (+capsicum, cooking wine), Golden Coconut Curry (turmeric/garam masala not
+// curry powder, broccoli not spinach, +chicken stock, coriander, whole spices).
+export const RECIPES_VERSION = 15;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
