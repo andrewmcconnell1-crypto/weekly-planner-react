@@ -156,7 +156,13 @@ function normaliseRecipe(recipe, index) {
 // scratch sauce, no pineapple), Beef Tacos (+garlic/red onion), BBQ Pulled Pork
 // (4 kg pork, full rub), Big Juicy Hamburgers (+onions/relish), Eggplant Pasta
 // (+white wine).
-export const RECIPES_VERSION = 23;
+// v24: matched nine more to source — Shredded Beef Chili (+garlic/tomato paste),
+// Beef Stroganoff Stew (+garlic/flour/butter, 1.75 kg beef, 700 g mushrooms),
+// Mexican Shredded Beef (+orange/lime/crushed tomatoes), Beef Steak Fried Rice
+// (+garlic), Smoked Sausage & Rice (2 onions/capsicums, +parsley), Baked Fried
+// Rice (+cooking wine), Sausage Meatballs (700 g, +chilli), Baked Mac & Cheese
+// (+garlic powder, 100 g butter), Spinach Ricotta Bake (350 g spinach, +garlic).
+export const RECIPES_VERSION = 24;
 
 export function mergeSavedRecipes(
   parsedRecipes,
