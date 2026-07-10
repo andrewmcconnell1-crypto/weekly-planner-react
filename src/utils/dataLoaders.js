@@ -162,7 +162,10 @@ function normaliseRecipe(recipe, index) {
 // (+garlic), Smoked Sausage & Rice (2 onions/capsicums, +parsley), Baked Fried
 // Rice (+cooking wine), Sausage Meatballs (700 g, +chilli), Baked Mac & Cheese
 // (+garlic powder, 100 g butter), Spinach Ricotta Bake (350 g spinach, +garlic).
-export const RECIPES_VERSION = 24;
+// v25: matched the last two — Thai Sweet Chilli Beef Bowls (+onion/garlic/rice
+// vinegar/oyster/dark soy/lime), Pad See Ew (chicken thigh, 1 egg, +white
+// vinegar, source quantities). Every RecipeTin recipe is now source-verified.
+export const RECIPES_VERSION = 25;
 
 export function mergeSavedRecipes(
   parsedRecipes,
