@@ -131,7 +131,10 @@ function normaliseRecipe(recipe, index) {
 // Worcestershire, bay, Swiss cheese), Beef Burritos (+seasoning/aromatics,
 // fresh pico instead of salsa), Beef Chow Mein (no curry powder/sesame oil;
 // +egg, bean sprouts, dark soy, cooking wine, spring onions).
-export const RECIPES_VERSION = 18;
+// v19: Spaghetti Bolognese (no carrot, stock cubes, +bay/thyme), Beef
+// Stroganoff (no garlic), Sausage Ragu (+carrot/celery/tomato paste/red wine/
+// thyme/bay, crushed tomatoes not passata, no basil).
+export const RECIPES_VERSION = 19;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
