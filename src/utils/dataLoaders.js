@@ -165,7 +165,12 @@ function normaliseRecipe(recipe, index) {
 // v25: matched the last two — Thai Sweet Chilli Beef Bowls (+onion/garlic/rice
 // vinegar/oyster/dark soy/lime), Pad See Ew (chicken thigh, 1 egg, +white
 // vinegar, source quantities). Every RecipeTin recipe is now source-verified.
-export const RECIPES_VERSION = 25;
+// v26: began verifying the website recipes against source screenshots — Kung Pao
+// Chicken (rice wine vinegar not black, 1 cup peanuts, 2 chillies), Mongolian
+// Beef (+Shaoxing/dried chillies), Chicken Chow Mein (+snap peas/cornflour/
+// Shaoxing), Hainanese Chicken Rice (3 chillies, 3 cups rice, +rock sugar/rice
+// vinegar). Shrimp & Broccoli already matched.
+export const RECIPES_VERSION = 26;
 
 export function mergeSavedRecipes(
   parsedRecipes,
