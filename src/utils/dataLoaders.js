@@ -123,7 +123,11 @@ function normaliseRecipe(recipe, index) {
 // lemon, +tomato paste/chickpeas/sun-dried tomato, breast), Mexican Chicken &
 // Rice (+onion/garlic/passata/lime), Butter Chicken (+ginger/garlic/lemon/
 // coriander).
-export const RECIPES_VERSION = 16;
+// v17: Pad Thai (+onion/garlic/tofu), Portuguese Chicken & Rice (+turmeric/
+// chilli/lemon), Thai Peanut Noodles (dark soy + cider vinegar, not fish sauce/
+// lime; +garlic/curry powder), Vietnamese Ginger Chicken (1/3 cup ginger),
+// Whipped Ricotta Pasta (+onion/garlic/tomato paste/milk).
+export const RECIPES_VERSION = 17;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
