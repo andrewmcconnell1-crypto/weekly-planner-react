@@ -151,7 +151,12 @@ function normaliseRecipe(recipe, index) {
 // cubes), Beef Stew (2 cups red wine, baby potatoes, +Worcestershire/bay/thyme).
 // v22: retired two recipes for everyone — Teriyaki Beef Bowls and Magic Baked
 // Chicken Fried Rice (removed from the bundle and stripped from saved data).
-export const RECIPES_VERSION = 22;
+// v23: matched six more to source — Fried Rice (+onion/garlic/cooking wine),
+// Homemade Frozen Pizzas (salami not ham, +olives/red onion/second cheese/
+// scratch sauce, no pineapple), Beef Tacos (+garlic/red onion), BBQ Pulled Pork
+// (4 kg pork, full rub), Big Juicy Hamburgers (+onions/relish), Eggplant Pasta
+// (+white wine).
+export const RECIPES_VERSION = 23;
 
 export function mergeSavedRecipes(
   parsedRecipes,
