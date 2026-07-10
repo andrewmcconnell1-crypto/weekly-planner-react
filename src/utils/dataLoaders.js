@@ -127,7 +127,11 @@ function normaliseRecipe(recipe, index) {
 // chilli/lemon), Thai Peanut Noodles (dark soy + cider vinegar, not fish sauce/
 // lime; +garlic/curry powder), Vietnamese Ginger Chicken (1/3 cup ginger),
 // Whipped Ricotta Pasta (+onion/garlic/tomato paste/milk).
-export const RECIPES_VERSION = 17;
+// v18: Baked Spaghetti (full bolognese: red wine, stock, tomato paste,
+// Worcestershire, bay, Swiss cheese), Beef Burritos (+seasoning/aromatics,
+// fresh pico instead of salsa), Beef Chow Mein (no curry powder/sesame oil;
+// +egg, bean sprouts, dark soy, cooking wine, spring onions).
+export const RECIPES_VERSION = 18;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
