@@ -111,7 +111,9 @@ function normaliseRecipe(recipe, index) {
 // finish (v10 also added cream, removed in v11 — that recipe isn't creamy).
 // v12: matched One Pot Cajun Beef Pasta to the source list from the user — added
 // carrot and kidney beans, passata -> crushed tomatoes, correct garlic/cheese.
-export const RECIPES_VERSION = 12;
+// v13: matched Chicken Cacciatore to the source — red wine (not white), +
+// chicken stock, tomato paste, bay leaves, anchovy, oregano; crushed tomatoes.
+export const RECIPES_VERSION = 13;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
