@@ -10,6 +10,15 @@ const recipeIdAliases = {
   "mexican-rice-and-beans": "mexican-red-rice",
 };
 
+// Built-in recipes that were removed from the bundle for everyone. Simply
+// dropping them from initialRecipes isn't enough — existing accounts have them
+// saved and mergeSavedRecipes would keep those copies as if user-created. Their
+// ids live here so the merge strips them out of saved data too.
+const retiredRecipeIds = new Set([
+  "teriyaki-beef-bowls",
+  "magic-baked-chicken-fried-rice",
+]);
+
 const durableInventoryItemsByName = new Map(
   commonInventoryItems.map((item) => [normaliseItemName(item.name), item])
 );
@@ -140,7 +149,9 @@ function normaliseRecipe(recipe, index) {
 // (+garlic/ketchup/Dijon/butter).
 // v21: Carnitas (2 oranges + jalapeno, no lime), Chilli Con Carne (+beef stock
 // cubes), Beef Stew (2 cups red wine, baby potatoes, +Worcestershire/bay/thyme).
-export const RECIPES_VERSION = 21;
+// v22: retired two recipes for everyone — Teriyaki Beef Bowls and Magic Baked
+// Chicken Fried Rice (removed from the bundle and stripped from saved data).
+export const RECIPES_VERSION = 22;
 
 export function mergeSavedRecipes(
   parsedRecipes,
@@ -151,7 +162,11 @@ export function mergeSavedRecipes(
     initialRecipes.map((recipe) => [recipe.id, recipe])
   );
   const tombstonedIds = new Set(deletedRecipeIds);
-  const normalisedRecipes = parsedRecipes.map(normaliseRecipe);
+  // Drop any retired built-ins from saved data so removing them from the bundle
+  // actually removes them from existing accounts, not just new ones.
+  const normalisedRecipes = parsedRecipes
+    .map(normaliseRecipe)
+    .filter((recipe) => !retiredRecipeIds.has(recipe.id));
   const savedRecipeIds = new Set(normalisedRecipes.map((recipe) => recipe.id));
 
   const merged = normalisedRecipes.map((recipe) => {

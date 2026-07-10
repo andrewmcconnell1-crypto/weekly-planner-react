@@ -83,4 +83,18 @@ describe("mergeSavedRecipes", () => {
     const merged = mergeSavedRecipes([], true, [deletedId]);
     expect(merged.some((r) => r.id === deletedId)).toBe(false);
   });
+
+  it("strips retired built-ins out of saved data", () => {
+    const retiredId = "teriyaki-beef-bowls";
+    // The retired recipe is no longer in the bundle at all.
+    expect(initialRecipes.some((r) => r.id === retiredId)).toBe(false);
+
+    // An existing account that still has it saved loses it on merge.
+    const merged = mergeSavedRecipes([
+      { id: retiredId, name: "Teriyaki Beef Bowls", ingredients: [] },
+      { id: "mine-1", name: "My Dinner", ingredients: [] },
+    ]);
+    expect(merged.some((r) => r.id === retiredId)).toBe(false);
+    expect(merged.some((r) => r.id === "mine-1")).toBe(true);
+  });
 });
