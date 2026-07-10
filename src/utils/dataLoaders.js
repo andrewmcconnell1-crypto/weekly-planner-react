@@ -134,7 +134,11 @@ function normaliseRecipe(recipe, index) {
 // v19: Spaghetti Bolognese (no carrot, stock cubes, +bay/thyme), Beef
 // Stroganoff (no garlic), Sausage Ragu (+carrot/celery/tomato paste/red wine/
 // thyme/bay, crushed tomatoes not passata, no basil).
-export const RECIPES_VERSION = 19;
+// v20: Tuna Mornay (corn + parmesan, no peas/onion; +garlic/mustard/stock
+// powder), Beef in Black Bean (no ginger; +dark soy/cooking wine/sesame oil),
+// Creamy Tomato Beef Pasta (chicken stock + Italian herbs), Salisbury Steak
+// (+garlic/ketchup/Dijon/butter).
+export const RECIPES_VERSION = 20;
 
 export function mergeSavedRecipes(parsedRecipes, refreshBuiltIns = false) {
   const bundledById = new Map(
