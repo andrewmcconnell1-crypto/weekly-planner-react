@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, HelpCircle, ShoppingBasket } from "lucide-react";
 
 import EmptyState from "./EmptyState";
-import LadleGlyph from "./LadleGlyph";
+import BistroMark from "./BistroMark";
 import { normaliseItemName } from "../utils/itemUtils";
 import {
   groupByTier,
@@ -303,7 +303,7 @@ function ShoppingList({
       ) : (
         <>
           {pendingItems.length === 0 ? (
-            <EmptyState icon={LadleGlyph} tone="done" title="Kitchen's sorted">
+            <EmptyState icon={BistroMark} tone="done" title="Kitchen's sorted">
               Every last thing is in the basket — go put your feet up.
             </EmptyState>
           ) : priorityLayout ? (

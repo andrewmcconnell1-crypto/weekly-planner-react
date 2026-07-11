@@ -1,4 +1,4 @@
-// Ladle's hand-drawn glyph family — one consistent line-icon style (1.7
+// Bistro's hand-drawn glyph family — one consistent line-icon style (1.7
 // stroke, round caps) instead of platform emoji, so every tile and chip looks
 // like it belongs to this app. The dish glyphs' keys match what recipeImagery
 // resolves; the pantry glyphs (bottle, salt, onion, garlic, tin) and the

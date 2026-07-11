@@ -1,26 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <rect width="512" height="512" fill="#bf5840" />
-  <!-- Ladle — the same silhouette as the wordmark glyph: a cupped bowl with a
-       hooked handle, so the app icon and the "Ladle" logotype share one motif.
-       Scaled about the centre for presence while staying in the maskable safe
-       zone. -->
-  <g transform="translate(256 256) scale(1.1) translate(-256 -256)">
-    <path d="M104 307 h200 a100 100 0 0 1 -200 0 Z" fill="#fdf3e7" />
-    <path
-      d="M144 316 q80 40 160 0"
-      fill="none"
-      stroke="#bf5840"
-      stroke-width="14"
-      stroke-linecap="round"
-      opacity="0.3"
-    />
-    <path
-      d="M304 307 V157 a52 52 0 0 1 104 0 v16"
-      fill="none"
-      stroke="#fdf3e7"
-      stroke-width="40"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </g>
+  <!-- Bistro monogram: a serif B in an oval plaque, cream on terracotta — the
+       app icon and the "Bistro" wordmark share this mark. -->
+  <ellipse cx="256" cy="256" rx="150" ry="172" fill="none" stroke="#fdf3e7" stroke-width="24" />
+  <text x="256" y="256" text-anchor="middle" dominant-baseline="central"
+    font-family="Georgia, 'Times New Roman', serif" font-weight="600" font-size="215"
+    fill="#fdf3e7">B</text>
 </svg>

@@ -42,7 +42,7 @@ export const WALKTHROUGH_STEPS = [
     id: "baskets",
     kicker: "Or plan in reverse",
     title: "Cook from your shop",
-    body: "Save your regular shops as baskets in the Kitchen tab. Pick one and Ladle shows which recipes you can already make from it — drop them straight onto a night.",
+    body: "Save your regular shops as baskets in the Kitchen tab. Pick one and Bistro shows which recipes you can already make from it — drop them straight onto a night.",
     Scene: SceneBaskets,
   },
 ];
