@@ -170,7 +170,13 @@ function normaliseRecipe(recipe, index) {
 // Beef (+Shaoxing/dried chillies), Chicken Chow Mein (+snap peas/cornflour/
 // Shaoxing), Hainanese Chicken Rice (3 chillies, 3 cups rice, +rock sugar/rice
 // vinegar). Shrimp & Broccoli already matched.
-export const RECIPES_VERSION = 26;
+// v27: five more web recipes — Classic Chicken Fried Rice (bean sprouts not
+// peas/carrots, +dark soy/Shaoxing/cornflour), Coconut Red Curry (+dried chilli/
+// bamboo shoots), Mapo Tofu (+dried chillies, no black beans/Shaoxing per
+// source), General Tso's Tofu (honey + hot sauce not hoisin, +broccoli/capsicum/
+// sesame seeds/Shaoxing, 7 chillies), Kung Pao Tofu (rice vinegar not black,
+// 1 cup peanuts, +carrots/cornflour/five spice).
+export const RECIPES_VERSION = 27;
 
 export function mergeSavedRecipes(
   parsedRecipes,
