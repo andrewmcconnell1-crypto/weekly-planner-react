@@ -174,7 +174,7 @@ export default function HomeScreen({
             Plan {gapCount} {gapCount === 1 ? "gap" : "gaps"}
           </button>
         ) : (
-          <p className="home-week-done">🎉 Every night's planned.</p>
+          <p className="home-week-done">Every night's planned.</p>
         )}
 
         <div className="meal-grid">
