@@ -94,7 +94,7 @@ export function inviteLink(code) {
 // code), and the code spelled out as a fallback for anyone typing it by hand.
 export function inviteMessage(code) {
   return [
-    "Join my meal planner so we share the same meals, shopping list and stock 🛒",
+    "Join my meal planner so we share the same meals, shopping list and stock.",
     "",
     `Open: ${inviteLink(code)}`,
     `Code: ${code}`,
