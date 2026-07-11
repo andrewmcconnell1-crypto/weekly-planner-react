@@ -182,7 +182,13 @@ function normaliseRecipe(recipe, index) {
 // Lentil Soup (4 carrots, 3/4 cup lentils, white wine vinegar), Pasta Primavera
 // (4 garlic), Shakshuka (6 eggs, drop harissa/spinach/avocado, pita), Massaman
 // Curry (source quantities), Veggie Black Bean Enchiladas already matched.
-export const RECIPES_VERSION = 29;
+// v30: eight more web recipes — Creamy Coconut Curry Lentils (no tomato paste,
+// source amounts), Pasta with Sausage & Peppers (2 sausages, drop yellow
+// capsicum/garlic, dried basil), Slow Cooker Beef Stew (baby potatoes, no peas),
+// Baked Chicken Parmesan (no egg — butter coat), Honey Garlic Pork Chops (4
+// chops, no chilli), Lamb Meatballs (4 onions, +cardamom), Garlic Butter Shrimp
+// Pasta (no lemon), Shrimp & Mushroom Pasta (parmesan not parsley).
+export const RECIPES_VERSION = 30;
 
 export function mergeSavedRecipes(
   parsedRecipes,
