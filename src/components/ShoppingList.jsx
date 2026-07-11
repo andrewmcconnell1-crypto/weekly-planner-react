@@ -153,7 +153,7 @@ function ShoppingList({
         <p className="page-hero-kicker">Shopping list · this week + next</p>
 
         <strong className="page-hero-count">
-          {allDone ? "All done 🎉" : `${animatedPending} to buy`}
+          {allDone ? "All done" : `${animatedPending} to buy`}
         </strong>
 
         <p className="page-hero-sub">
@@ -302,7 +302,7 @@ function ShoppingList({
       ) : (
         <>
           {pendingItems.length === 0 ? (
-            <EmptyState icon={Check} tone="done" title="All checked off 🎉">
+            <EmptyState icon={Check} tone="done" title="All checked off">
               Everything on your list is in the basket.
             </EmptyState>
           ) : priorityLayout ? (
