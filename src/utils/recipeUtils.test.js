@@ -27,6 +27,19 @@ describe("deriveRecipeTags", () => {
     expect(tags).toContain("Vegetarian");
   });
 
+  it("does not tag a fish dish vegetarian, even for less common fish", () => {
+    for (const name of [
+      "Miso Butter Cod",
+      "Crispy-Skin Barramundi",
+      "Seared Scallops",
+      "Salt & Pepper Squid",
+    ]) {
+      expect(
+        deriveRecipeTags({ name, category: "Seafood", ingredients: [] })
+      ).not.toContain("Vegetarian");
+    }
+  });
+
   it("tags stir-fries and noodle dishes as quick", () => {
     expect(
       deriveRecipeTags({

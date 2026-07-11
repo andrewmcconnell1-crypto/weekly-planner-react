@@ -193,7 +193,10 @@ function normaliseRecipe(recipe, index) {
 // source-verified.
 // v32: added total-time estimates (timeMins) to every RecipeTin and website
 // recipe, so the whole library carries a cook time like the Originals do.
-export const RECIPES_VERSION = 32;
+// v33: tag fix — seafood dishes with less-common fish (cod, barramundi,
+// scallops…) were being mislabelled Vegetarian; MEAT_HINTS now covers them so
+// built-ins re-derive correct tags.
+export const RECIPES_VERSION = 33;
 
 export function mergeSavedRecipes(
   parsedRecipes,

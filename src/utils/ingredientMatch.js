@@ -33,7 +33,8 @@ const UNIT_WORDS = new Set([
   "rasher", "rashers", "sheet", "sheets", "cube", "cubes", "head", "heads",
   "bottle", "bottles", "carton", "cartons", "loaf", "loaves", "bag", "bags",
   "box", "boxes", "punnet", "punnets", "each", "tub", "tubs", "drizzle",
-  "splash", "glass",
+  "splash", "glass", "block", "blocks", "thumb", "thumbs", "wedge", "wedges",
+  "rack", "racks",
 ]);
 
 const QUALIFIER_WORDS = new Set([
@@ -48,6 +49,7 @@ const QUALIFIER_WORDS = new Set([
   "full", "cream", "reduced", "fat", "skim", "thinly", "good", "quality",
   "unsalted", "salted", "caster", "icing", "soft", "firm", "mixed", "assorted",
   "shredded", "boiling", "lukewarm", "heavy", "thickened", "neutral", "cooking",
+  "strip", "strips",
   // Produce variety words ("Lebanese cucumber" is still a cucumber).
   "lebanese", "continental", "telegraph", "truss", "roma",
 ]);

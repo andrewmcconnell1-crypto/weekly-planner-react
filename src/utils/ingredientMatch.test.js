@@ -39,6 +39,15 @@ describe("ingredientMatch — exact core-token coverage", () => {
     ).toBe(true);
   });
 
+  it("strips informal units (block, thumb, wedge, rack) and cut words", () => {
+    expect(covered("1 block parmesan", ["Parmesan"])).toBe(true);
+    expect(covered("1 block parmesan", ["1/2 cup grated parmesan"])).toBe(true);
+    expect(covered("1 thumb ginger", ["Ginger"])).toBe(true);
+    expect(covered("1 cabbage wedge", ["Cabbage"])).toBe(true);
+    expect(covered("1 rack lamb", ["Lamb"])).toBe(true);
+    expect(covered("600 g beef strips", ["Beef"])).toBe(true);
+  });
+
   it("treats produce varieties as the base vegetable", () => {
     expect(canonicalKey("Lebanese cucumber")).toBe(canonicalKey("1 cucumber"));
     expect(canonicalKey("Truss tomatoes")).toBe(canonicalKey("2 tomatoes"));
