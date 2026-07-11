@@ -178,7 +178,11 @@ function normaliseRecipe(recipe, index) {
 // 1 cup peanuts, +carrots/cornflour/five spice).
 // v28: Rich Red Curry with Roasted Vegetables — red cabbage, +garlic/curry
 // powder, more curry paste/ginger/shallot to match source.
-export const RECIPES_VERSION = 28;
+// v29: six more web recipes — Vegetarian Chili (red onion, +bay leaf/vinegar),
+// Lentil Soup (4 carrots, 3/4 cup lentils, white wine vinegar), Pasta Primavera
+// (4 garlic), Shakshuka (6 eggs, drop harissa/spinach/avocado, pita), Massaman
+// Curry (source quantities), Veggie Black Bean Enchiladas already matched.
+export const RECIPES_VERSION = 29;
 
 export function mergeSavedRecipes(
   parsedRecipes,
