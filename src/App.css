@@ -1336,9 +1336,19 @@ textarea:focus-visible {
 }
 
 .home-week-done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
   margin: 0;
   color: var(--muted);
   font-weight: var(--weight-semibold);
+}
+
+/* The ladle signs off the "week's planned" line — tinted to the accent so it
+   reads as the app's mark, not a bullet. */
+.home-week-done-glyph {
+  flex: none;
+  color: var(--accent-strong);
 }
 
 /* Quiet next-week status / jump link at the foot of the week glance. */

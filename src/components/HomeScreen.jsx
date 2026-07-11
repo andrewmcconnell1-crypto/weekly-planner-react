@@ -4,6 +4,7 @@ import TonightCard from "./TonightCard";
 import MealGroups from "./MealGroups";
 import ProgressRing from "./ProgressRing";
 import DishGlyph from "./DishGlyph";
+import LadleGlyph from "./LadleGlyph";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 
@@ -174,7 +175,10 @@ export default function HomeScreen({
             Plan {gapCount} {gapCount === 1 ? "gap" : "gaps"}
           </button>
         ) : (
-          <p className="home-week-done">Every night's planned.</p>
+          <p className="home-week-done">
+            <LadleGlyph size={16} className="home-week-done-glyph" />
+            Every night's planned — nice work.
+          </p>
         )}
 
         <div className="meal-grid">

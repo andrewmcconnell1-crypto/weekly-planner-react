@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, HelpCircle, ShoppingBasket, Check } from "lucide-react";
+import { ChevronDown, HelpCircle, ShoppingBasket } from "lucide-react";
 
 import EmptyState from "./EmptyState";
+import LadleGlyph from "./LadleGlyph";
 import { normaliseItemName } from "../utils/itemUtils";
 import {
   groupByTier,
@@ -302,8 +303,8 @@ function ShoppingList({
       ) : (
         <>
           {pendingItems.length === 0 ? (
-            <EmptyState icon={Check} tone="done" title="All checked off">
-              Everything on your list is in the basket.
+            <EmptyState icon={LadleGlyph} tone="done" title="Kitchen's sorted">
+              Every last thing is in the basket — go put your feet up.
             </EmptyState>
           ) : priorityLayout ? (
             pendingSections.map((tier) => (
