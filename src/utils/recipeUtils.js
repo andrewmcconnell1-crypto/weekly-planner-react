@@ -34,10 +34,16 @@ export const recipeTags = [
 // the explicit tag.
 export const QUICK_MAX_MINS = 30;
 
+// Any word that means a dish contains meat or seafood — used to decide whether
+// a recipe is Vegetarian. Must stay a superset of the seafood/pork/beef hint
+// lists below, or a fish dish with no "common" fish word (cod, barramundi,
+// scallops…) gets mislabelled Vegetarian.
 const MEAT_HINTS = [
   "chicken", "beef", "mince", "pork", "lamb", "bacon", "ham", "sausage",
   "chorizo", "prawn", "shrimp", "fish", "salmon", "tuna", "anchovy", "turkey",
-  "prosciutto", "pancetta", "steak", "kofta", "veal", "duck",
+  "prosciutto", "pancetta", "steak", "kofta", "veal", "duck", "brisket",
+  "bratwurst", "cod", "seafood", "calamari", "squid", "mussel", "scallop",
+  "barramundi", "snapper", "crab",
 ];
 const KID_HINTS = [
   "nugget", "sausage", "meatball", "mac and cheese", "macaroni", "pizza",
