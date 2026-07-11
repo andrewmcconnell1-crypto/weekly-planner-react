@@ -188,7 +188,10 @@ function normaliseRecipe(recipe, index) {
 // Baked Chicken Parmesan (no egg — butter coat), Honey Garlic Pork Chops (4
 // chops, no chilli), Lamb Meatballs (4 onions, +cardamom), Garlic Butter Shrimp
 // Pasta (no lemon), Shrimp & Mushroom Pasta (parmesan not parsley).
-export const RECIPES_VERSION = 30;
+// v31: Black Bean & Sweet Potato Enchiladas — +diced green chillies/sour cream,
+// salsa verde (not enchilada sauce), 2 cups cheese. Every website recipe is now
+// source-verified.
+export const RECIPES_VERSION = 31;
 
 export function mergeSavedRecipes(
   parsedRecipes,
