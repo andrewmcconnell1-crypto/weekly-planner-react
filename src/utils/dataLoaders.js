@@ -191,7 +191,9 @@ function normaliseRecipe(recipe, index) {
 // v31: Black Bean & Sweet Potato Enchiladas — +diced green chillies/sour cream,
 // salsa verde (not enchilada sauce), 2 cups cheese. Every website recipe is now
 // source-verified.
-export const RECIPES_VERSION = 31;
+// v32: added total-time estimates (timeMins) to every RecipeTin and website
+// recipe, so the whole library carries a cook time like the Originals do.
+export const RECIPES_VERSION = 32;
 
 export function mergeSavedRecipes(
   parsedRecipes,
