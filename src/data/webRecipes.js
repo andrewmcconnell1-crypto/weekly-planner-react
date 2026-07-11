@@ -67,7 +67,38 @@ function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
   };
 }
 
-export const webRecipes = [
+// Total hands-on + cooking time (minutes) per recipe, matching the estimates the
+// Original recipes carry. The slow-cooker stew reflects its unattended time.
+const TIME_BY_ID = {
+  "bb-coconut-curry-lentils": 40,
+  "ck-vegetarian-chili": 45,
+  "wol-kung-pao-chicken": 30,
+  "mb-coconut-red-curry-chickpeas": 40,
+  "ll-lentil-soup": 45,
+  "wol-mongolian-beef": 30,
+  "ll-pasta-primavera": 35,
+  "wol-shrimp-broccoli": 25,
+  "bb-sausage-peppers-pasta": 40,
+  "dd-slow-cooker-beef-stew": 480,
+  "st-baked-chicken-parmesan": 40,
+  "sl-honey-garlic-pork-chops": 25,
+  "md-lamb-meatballs": 50,
+  "dd-garlic-butter-shrimp-pasta": 25,
+  "sl-shrimp-mushroom-pasta": 30,
+  "wol-chicken-chow-mein": 30,
+  "ll-shakshuka": 40,
+  "ck-veggie-black-bean-enchiladas": 55,
+  "ck-black-bean-sweet-potato-enchiladas": 55,
+  "mb-red-curry-roasted-veg": 50,
+  "mb-massaman-curry": 45,
+  "wol-hainanese-chicken-rice": 75,
+  "wol-chicken-fried-rice": 25,
+  "wol-mapo-tofu": 30,
+  "wol-general-tso-tofu": 40,
+  "wol-kung-pao-tofu": 40,
+};
+
+const baseWebRecipes = [
   webRecipe({
     id: "bb-coconut-curry-lentils",
     name: "Creamy Coconut Curry Lentils",
@@ -662,3 +693,8 @@ export const webRecipes = [
     ],
   }),
 ];
+
+export const webRecipes = baseWebRecipes.map((recipe) => ({
+  ...recipe,
+  timeMins: TIME_BY_ID[recipe.id] ?? recipe.timeMins,
+}));
