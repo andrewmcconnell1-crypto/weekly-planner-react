@@ -176,7 +176,9 @@ function normaliseRecipe(recipe, index) {
 // source), General Tso's Tofu (honey + hot sauce not hoisin, +broccoli/capsicum/
 // sesame seeds/Shaoxing, 7 chillies), Kung Pao Tofu (rice vinegar not black,
 // 1 cup peanuts, +carrots/cornflour/five spice).
-export const RECIPES_VERSION = 27;
+// v28: Rich Red Curry with Roasted Vegetables — red cabbage, +garlic/curry
+// powder, more curry paste/ginger/shallot to match source.
+export const RECIPES_VERSION = 28;
 
 export function mergeSavedRecipes(
   parsedRecipes,
