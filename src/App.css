@@ -2639,6 +2639,21 @@ textarea::placeholder {
   opacity: 1;
 }
 
+/* Drop the native number-field spinners (Serves / Time / Qty) — the little
+   browser up/down arrows sat jammed at the field's right edge and clashed with
+   the app's clean, chrome-free fields. inputMode still shows a numeric keypad. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .add-item-row {
   display: grid;
   gap: var(--space-8);
@@ -5765,11 +5780,30 @@ html[data-theme="dark"] .update-banner-button:hover {
   cursor: pointer;
 }
 
+/* Match the app's custom tick everywhere else — a bare native checkbox here
+   looked out of place against the styled list/switch controls. */
 .settings-toggle input {
+  appearance: none;
+  -webkit-appearance: none;
   margin-top: var(--space-4);
   width: 18px;
   height: 18px;
   flex: 0 0 auto;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel) no-repeat center;
+  background-size: 0 0;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+
+.settings-toggle input:checked {
+  border-color: var(--primary);
+  background-color: var(--primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
+  background-size: 13px 13px;
 }
 
 .settings-toggle > span {
