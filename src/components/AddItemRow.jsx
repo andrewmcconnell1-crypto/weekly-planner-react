@@ -6,7 +6,9 @@ const NEW_CATEGORY = "__new__";
 // Add row for stock / recurring / shopping items: a small card with the name, a
 // category picker (with an inline "+ New category…" option), and — when
 // priorityOptions are given — a priority picker. onAdd receives (category,
-// priority); priority is undefined when no priority picker is shown.
+// priority, subcategory); priority is undefined when no priority picker is
+// shown, and subcategory is undefined unless a subgroup is picked. A subgroup
+// picker appears only while the chosen category equals subcategoryCategory.
 function AddItemRow({
   value,
   setValue,
@@ -18,6 +20,8 @@ function AddItemRow({
   priorityOptions = null,
   defaultPriority,
   suggestions = null,
+  subcategoryOptions = null,
+  subcategoryCategory = null,
 }) {
   const suggestionsId = useId();
   const [category, setCategory] = useState(
@@ -27,9 +31,14 @@ function AddItemRow({
   const [priority, setPriority] = useState(
     defaultPriority || priorityOptions?.[0]?.value || ""
   );
+  const [subcategory, setSubcategory] = useState("");
   const [status, setStatus] = useState(null);
 
   const creating = category === NEW_CATEGORY;
+  // Subgroups only apply to the one subdivided aisle (Pantry) — hide the picker
+  // for any other category so the row stays uncluttered.
+  const showSubcategory =
+    subcategoryOptions && category === subcategoryCategory;
 
   function handleAdd() {
     if (value.trim() === "") return;
@@ -37,7 +46,11 @@ function AddItemRow({
     const resolved = creating ? customCategory.trim() : category;
     if (creating && resolved === "") return; // need a name for the new category
 
-    const result = onAdd(resolved, priorityOptions ? priority : undefined);
+    const result = onAdd(
+      resolved,
+      priorityOptions ? priority : undefined,
+      showSubcategory ? subcategory : undefined
+    );
 
     // onAdd may return "updated" when the item was already on the list and got
     // re-prioritised — confirm that so it doesn't feel like nothing happened.
@@ -124,6 +137,33 @@ function AddItemRow({
           />
         )}
       </div>
+
+      {showSubcategory && (
+        <div className="add-field">
+          <span className="add-field-label">Subgroup</span>
+
+          <div className="select-wrap">
+            <select
+              aria-label="Subgroup"
+              value={subcategory}
+              onChange={(event) => setSubcategory(event.target.value)}
+            >
+              <option value="">Auto (by name)</option>
+              {subcategoryOptions.map((option) => (
+                <option key={option.key} value={option.key}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <ChevronDown
+              size={18}
+              className="select-chevron"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      )}
 
       {priorityOptions && (
         <div className="add-field">

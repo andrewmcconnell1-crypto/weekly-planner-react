@@ -25,6 +25,7 @@ function HouseholdBasics({
   addInventoryItem,
   deleteInventoryItem,
   updateInventoryCategory,
+  updateInventorySubcategory,
   toggleInventoryActive,
   loadStarterInventory,
   onOpenStockCatalog,
@@ -174,6 +175,7 @@ function HouseholdBasics({
           addInventoryItem={addInventoryItem}
           deleteInventoryItem={deleteInventoryItem}
           updateInventoryCategory={updateInventoryCategory}
+          updateInventorySubcategory={updateInventorySubcategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
           onOpenStockCatalog={onOpenStockCatalog}
