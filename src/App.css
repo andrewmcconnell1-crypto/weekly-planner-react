@@ -4093,30 +4093,35 @@ input[type="number"] {
   border-color: var(--accent-soft);
 }
 
-/* Favourite heart, tucked over the thumb's top-right. */
+/* Favourite heart, tucked over the thumb's top-right. A dark scrim (same as the
+   time badge) guarantees the heart reads on every tile tone — a pale circle
+   vanished on the light gradients. White outline when off; a solid rust fill
+   when on, so "saved" is unmistakable. */
 .recipe-tile-fav {
   position: absolute;
   top: var(--space-6);
   right: var(--space-6);
   min-height: 0;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 253, 247, 0.85);
-  color: var(--ink);
-  box-shadow: 0 1px 4px rgba(43, 33, 24, 0.2);
+  background: rgba(28, 22, 16, 0.55);
+  color: #fff;
+  box-shadow: 0 1px 5px rgba(28, 22, 16, 0.35);
 }
 
 .recipe-tile-fav:hover {
-  background: rgba(255, 253, 247, 0.95);
+  background: rgba(28, 22, 16, 0.72);
 }
 
 .recipe-tile-fav.is-fav {
-  color: var(--primary);
+  background: #fff;
+  color: var(--rust);
+  box-shadow: 0 1px 6px rgba(28, 22, 16, 0.3);
 }
 
 /* New-recipe affordance sits quietly under the Browse grid. */
