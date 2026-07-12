@@ -70,6 +70,9 @@ function RecipesScreen({
   onToggleFavourite,
   recipeRatings = {},
   onRateRecipe,
+  recipeNotes = {},
+  onSaveRecipeNote,
+  cookCounts = {},
   newRecipeName,
   setNewRecipeName,
   addRecipe,
@@ -453,6 +456,9 @@ function RecipesScreen({
           updateIngredientGroup={updateIngredientGroup}
           rating={recipeRatings[openRecipe.id] || 0}
           onRate={onRateRecipe}
+          note={recipeNotes[openRecipe.id] || ""}
+          onSaveNote={onSaveRecipeNote}
+          cookCount={cookCounts[openRecipe.id] || 0}
           onClose={() => setOpenRecipeId(null)}
         />
       )}

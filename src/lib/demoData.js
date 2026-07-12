@@ -38,6 +38,16 @@ function buildDemoWeek() {
   return meals;
 }
 
+// A couple of finished weeks of history so the "Cooked N times" badge has
+// something to show — these recipes read as already-cooked favourites.
+function buildDemoPastWeek() {
+  const meals = createEmptyMeals();
+  meals.Monday = { ...meals.Monday, recipeId: "tacos" };
+  meals.Wednesday = { ...meals.Wednesday, recipeId: "homemade-pizza" };
+  meals.Saturday = { ...meals.Saturday, recipeId: "slow-cooker-pulled-pork" };
+  return meals;
+}
+
 function buildDemoInventory() {
   return commonInventoryItems.map((item) => ({
     id: `demo-stock-${slugifyIdPart(item.name)}`,
@@ -57,8 +67,14 @@ function buildDemoStaples() {
 export function demoData() {
   const currentWeekKey = getWeekKey(getSunday());
   const nextWeekKey = getWeekKey(getNextSunday());
+  const lastSunday = new Date(getSunday());
+  lastSunday.setDate(lastSunday.getDate() - 7);
+  const twoSundaysAgo = new Date(getSunday());
+  twoSundaysAgo.setDate(twoSundaysAgo.getDate() - 14);
 
   const mealsByWeek = {
+    [getWeekKey(twoSundaysAgo)]: buildDemoPastWeek(),
+    [getWeekKey(lastSunday)]: buildDemoPastWeek(),
     [currentWeekKey]: buildDemoWeek(),
     [nextWeekKey]: buildDemoWeek(),
   };
@@ -109,6 +125,11 @@ export function demoData() {
       "homemade-pizza": 5,
       "chicken-stir-fry": 4,
       "slow-cooker-pulled-pork": 4,
+    },
+    recipeNotes: {
+      tacos: "Double the beef and go heavy on the cumin. Kids' favourite.",
+      "slow-cooker-pulled-pork":
+        "Start it before work — falls apart by dinner. Great in rolls with slaw.",
     },
     settings: { keepStandingList: true, shopUsingSavedList: true },
   };
