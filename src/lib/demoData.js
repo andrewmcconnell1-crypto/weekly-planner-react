@@ -103,6 +103,13 @@ export function demoData() {
     // A few hearted recipes so the Recipes tab's Favourites view has something
     // to show in the sample household.
     favouriteRecipeIds: ["tacos", "chicken-stir-fry", "homemade-pizza"],
+    // A few rated so the star control and "Top rated" sort have something to show.
+    recipeRatings: {
+      tacos: 5,
+      "homemade-pizza": 5,
+      "chicken-stir-fry": 4,
+      "slow-cooker-pulled-pork": 4,
+    },
     settings: { keepStandingList: true, shopUsingSavedList: true },
   };
 }

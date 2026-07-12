@@ -29,11 +29,12 @@ const MODES = [
 
 const SORTS = [
   { key: "recommended", label: "Recommended" },
+  { key: "toprated", label: "Top rated" },
   { key: "az", label: "A–Z" },
   { key: "quick", label: "Quickest" },
 ];
 
-function sortRecipes(list, sort) {
+function sortRecipes(list, sort, ratings = {}) {
   if (sort === "az") {
     return [...list].sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -41,6 +42,12 @@ function sortRecipes(list, sort) {
     const t = (recipe) => recipe.timeMins || Infinity;
     return [...list].sort(
       (a, b) => t(a) - t(b) || a.name.localeCompare(b.name)
+    );
+  }
+  if (sort === "toprated") {
+    const r = (recipe) => ratings[recipe.id] || 0;
+    return [...list].sort(
+      (a, b) => r(b) - r(a) || a.name.localeCompare(b.name)
     );
   }
   return list; // "recommended" keeps the hook's category-ordered list
@@ -55,6 +62,8 @@ function RecipesScreen({
   recipes,
   favouriteRecipeIdSet,
   onToggleFavourite,
+  recipeRatings = {},
+  onRateRecipe,
   newRecipeName,
   setNewRecipeName,
   addRecipe,
@@ -102,6 +111,20 @@ function RecipesScreen({
     return map;
   }, [coverageList]);
 
+  // "For you" stays cookable-first, but your higher-rated recipes rise within
+  // each coverage band — winners you can make now.
+  const forYouList = useMemo(
+    () =>
+      [...coverageList].sort(
+        (a, b) =>
+          a.missing.length - b.missing.length ||
+          (recipeRatings[b.recipe.id] || 0) -
+            (recipeRatings[a.recipe.id] || 0) ||
+          a.recipe.name.localeCompare(b.recipe.name)
+      ),
+    [coverageList, recipeRatings]
+  );
+
   const favouriteRecipes = useMemo(
     () => recipes.filter((recipe) => favouriteRecipeIdSet.has(recipe.id)),
     [recipes, favouriteRecipeIdSet]
@@ -136,6 +159,7 @@ function RecipesScreen({
         key={recipe.id}
         recipe={recipe}
         coverage={coverage}
+        rating={recipeRatings[recipe.id] || 0}
         isFavourite={favouriteRecipeIdSet.has(recipe.id)}
         onToggleFavourite={onToggleFavourite}
         onOpen={() => setOpenRecipeId(recipe.id)}
@@ -144,7 +168,7 @@ function RecipesScreen({
     );
   }
 
-  const browseList = sortRecipes(visibleRecipes, sort);
+  const browseList = sortRecipes(visibleRecipes, sort, recipeRatings);
 
   return (
     <section className="screen recipes-screen">
@@ -335,7 +359,7 @@ function RecipesScreen({
             your recurring buys.
           </p>
           <div className="recipe-grid">
-            {coverageList.map((entry) => renderTile(entry.recipe, entry))}
+            {forYouList.map((entry) => renderTile(entry.recipe, entry))}
           </div>
         </>
       )}
@@ -387,6 +411,8 @@ function RecipesScreen({
           ingredientGroups={ingredientGroups}
           availableGroups={availableGroups}
           updateIngredientGroup={updateIngredientGroup}
+          rating={recipeRatings[openRecipe.id] || 0}
+          onRate={onRateRecipe}
           onClose={() => setOpenRecipeId(null)}
         />
       )}

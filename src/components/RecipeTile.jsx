@@ -3,6 +3,7 @@ import { CalendarPlus, Clock, Heart } from "lucide-react";
 import { getRecipeTone, recipeSourceLabel } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
 import RecipeThumb from "./RecipeThumb";
+import StarRating from "./StarRating";
 
 // A recipe as a grid tile: a tall gradient+glyph thumb with a favourite heart
 // tucked in the corner, then the name and one quiet meta line. Tapping the
@@ -16,6 +17,7 @@ function RecipeTile({
   onOpen,
   onPlan,
   coverage,
+  rating = 0,
 }) {
   const meta = [recipe.category, recipeSourceLabel(recipe)]
     .filter(Boolean)
@@ -51,6 +53,16 @@ function RecipeTile({
         <span className="recipe-tile-body">
           <strong className="recipe-tile-name">{recipe.name}</strong>
           <span className="recipe-tile-meta">{meta}</span>
+          {rating > 0 && (
+            <span className="recipe-tile-rating">
+              <StarRating
+                value={rating}
+                readOnly
+                size={13}
+                label={`You rated this ${rating} out of 5`}
+              />
+            </span>
+          )}
         </span>
       </button>
 

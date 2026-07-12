@@ -4124,6 +4124,66 @@ input[type="number"] {
   box-shadow: 0 1px 6px rgba(28, 22, 16, 0.3);
 }
 
+.recipe-tile-rating {
+  margin-top: 3px;
+  line-height: 0;
+}
+
+/* ---- Star ratings ---- */
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 0;
+}
+
+.star-button {
+  min-height: 0;
+  width: auto;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--line-strong);
+  line-height: 0;
+}
+
+.star-button:hover {
+  background: transparent;
+  color: #e0a422;
+}
+
+.star-rating .star-on {
+  color: #e0a422;
+}
+
+.star-rating .star-off {
+  color: var(--line-strong);
+}
+
+.star-rating-readonly .star-off {
+  color: var(--line);
+}
+
+/* Rating control in the recipe detail sheet. */
+.recipe-view-rating {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.recipe-view-rating-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.recipe-view-rating .star-button {
+  padding: 4px 4px 4px 0;
+}
+
 /* New-recipe affordance sits quietly under the Browse grid. */
 .recipes-add {
   display: grid;
