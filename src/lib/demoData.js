@@ -100,6 +100,9 @@ export function demoData() {
     staples,
     inventory,
     recipes,
+    // A few hearted recipes so the Recipes tab's Favourites view has something
+    // to show in the sample household.
+    favouriteRecipeIds: ["tacos", "chicken-stir-fry", "homemade-pizza"],
     settings: { keepStandingList: true, shopUsingSavedList: true },
   };
 }

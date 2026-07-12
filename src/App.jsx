@@ -14,6 +14,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import SheetError from "./components/SheetError";
 import HomeScreen from "./components/HomeScreen";
 import PlanScreen from "./components/PlanScreen";
+import RecipesScreen from "./components/RecipesScreen";
 import MoreScreen from "./components/MoreScreen";
 import SettingsScreen from "./components/SettingsScreen";
 
@@ -148,6 +149,8 @@ function App() {
     recipes,
     setRecipes,
     setDeletedRecipeIds,
+    favouriteRecipeIds,
+    setFavouriteRecipeIds,
     settings,
     setSettings,
     ingredientGroups,
@@ -162,6 +165,19 @@ function App() {
     captureRecoverySnapshot,
     restoreRecoverySnapshot,
   } = usePlannerStore(user, guest, household.ownerId);
+
+  const favouriteRecipeIdSet = useMemo(
+    () => new Set(favouriteRecipeIds),
+    [favouriteRecipeIds]
+  );
+
+  function toggleFavouriteRecipe(id) {
+    setFavouriteRecipeIds((current = []) =>
+      current.includes(id)
+        ? current.filter((existing) => existing !== id)
+        : [...current, id]
+    );
+  }
 
   // Let the device / browser Back button close whichever overlay sheet is open
   // instead of leaving the app. One coordinator (not one per sheet) keeps a
@@ -546,6 +562,23 @@ function App() {
     };
   }
 
+  // This-week / next-week slots for the reverse planners (Baskets and the
+  // Recipes tab's "Add to a night").
+  const planWeeks = [
+    {
+      key: currentWeekKey,
+      label: "This week",
+      start: currentWeekStart,
+      meals: mealsByWeek[currentWeekKey] || createEmptyMeals(),
+    },
+    {
+      key: nextWeekKey,
+      label: "Next week",
+      start: nextWeekStart,
+      meals: mealsByWeek[nextWeekKey] || createEmptyMeals(),
+    },
+  ];
+
   return (
     <main className={`app-shell tab-${activeTab}`}>
       <header className="app-header">
@@ -557,11 +590,13 @@ function App() {
               ? greeting(new Date(), user?.user_metadata?.full_name || "")
               : activeTab === "shop"
               ? "Shopping list"
-              : activeTab === "more"
-                ? "Kitchen"
-                : activeTab === "settings"
-                  ? "Settings"
-                  : "Meals"}
+              : activeTab === "recipes"
+                ? "Recipes"
+                : activeTab === "more"
+                  ? "Kitchen"
+                  : activeTab === "settings"
+                    ? "Settings"
+                    : "Meals"}
           </h1>
         </div>
 
@@ -641,7 +676,6 @@ function App() {
           homeShopStatus={homeShopStatus}
           nextWeekPlannedCount={nextWeekPlannedCount}
           openNextWeekPlan={openNextWeekPlan}
-          setMoreSection={setMoreSection}
           openWalkthrough={() => setWalkthroughOpen(true)}
         />
       )}
@@ -676,6 +710,29 @@ function App() {
           clearMealDay={clearMealDay}
           updateMeal={updateMeal}
           swapMealDays={swapMealDays}
+        />
+      )}
+
+      {activeTab === "recipes" && (
+        <RecipesScreen
+          recipes={recipes}
+          favouriteRecipeIdSet={favouriteRecipeIdSet}
+          onToggleFavourite={toggleFavouriteRecipe}
+          newRecipeName={newRecipeName}
+          setNewRecipeName={setNewRecipeName}
+          addRecipe={addRecipe}
+          addImportedRecipe={addImportedRecipe}
+          deleteRecipe={deleteRecipe}
+          addIngredientToRecipe={addIngredientToRecipe}
+          deleteIngredientFromRecipe={deleteIngredientFromRecipe}
+          updateRecipe={updateRecipe}
+          ingredientGroups={ingredientGroups}
+          availableGroups={availableGroups}
+          updateIngredientGroup={updateIngredientGroup}
+          staples={staples}
+          inventory={inventory}
+          planWeeks={planWeeks}
+          onPlanRecipeOnWeekDay={assignRecipeToWeekDay}
         />
       )}
 
@@ -747,31 +804,10 @@ function App() {
           ingredientGroups={ingredientGroups}
           availableGroups={availableGroups}
           updateIngredientGroup={updateIngredientGroup}
-          newRecipeName={newRecipeName}
-          setNewRecipeName={setNewRecipeName}
-          addRecipe={addRecipe}
-          addImportedRecipe={addImportedRecipe}
           baskets={baskets}
           setBaskets={setBaskets}
-          planWeeks={[
-            {
-              key: currentWeekKey,
-              label: "This week",
-              start: currentWeekStart,
-              meals: mealsByWeek[currentWeekKey] || createEmptyMeals(),
-            },
-            {
-              key: nextWeekKey,
-              label: "Next week",
-              start: nextWeekStart,
-              meals: mealsByWeek[nextWeekKey] || createEmptyMeals(),
-            },
-          ]}
+          planWeeks={planWeeks}
           onPlanRecipeOnWeekDay={assignRecipeToWeekDay}
-          deleteRecipe={deleteRecipe}
-          addIngredientToRecipe={addIngredientToRecipe}
-          deleteIngredientFromRecipe={deleteIngredientFromRecipe}
-          updateRecipe={updateRecipe}
         />
       )}
 
@@ -951,6 +987,16 @@ function App() {
         >
           <TabIcon tab="plan" />
           <span>Meals</span>
+        </button>
+
+        <button
+          data-tab="recipes"
+          className={activeTab === "recipes" ? "active" : ""}
+          aria-current={activeTab === "recipes" ? "page" : undefined}
+          onClick={() => setActiveTab("recipes")}
+        >
+          <TabIcon tab="recipes" />
+          <span>Recipes</span>
         </button>
 
         <button
