@@ -2910,6 +2910,13 @@ input[type="number"] {
   color: var(--olive);
 }
 
+/* The ring is absolutely placed top-right; reserve room on the two top lines so
+   the date range and count can't run underneath it (58px ring + a gap). */
+.plan-hero .page-hero-kicker,
+.plan-hero .page-hero-count {
+  padding-right: calc(58px + var(--space-10));
+}
+
 .shop-hero .page-hero-kicker {
   color: var(--accent-strong);
 }
@@ -6144,6 +6151,9 @@ html[data-theme="dark"] .update-banner-button:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--panel);
+  /* These are light cards, so keep dark ink text — without this they inherit
+     the global button's white color and the big number vanished on the card. */
+  color: var(--ink);
   padding: var(--space-12);
   box-shadow: var(--shadow);
   cursor: pointer;
@@ -6151,6 +6161,13 @@ html[data-theme="dark"] .update-banner-button:hover {
     border-color var(--dur-fast) var(--ease-out),
     background var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
+}
+
+/* Quiet hover — a light card shouldn't flip to the dark primary-button fill
+   (the global button:hover) and hide its own text. */
+.section-summary-card:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--soft);
 }
 
 .section-summary-card:active {
