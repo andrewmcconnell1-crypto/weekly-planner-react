@@ -3989,6 +3989,58 @@ input[type="number"] {
   gap: var(--space-12);
 }
 
+/* ---- "For you" discovery feed: titled horizontal rows ---- */
+.recipes-feed {
+  display: grid;
+  gap: var(--space-20);
+}
+
+.recipe-row-section {
+  display: grid;
+  gap: var(--space-10);
+}
+
+.recipe-row-head {
+  display: grid;
+  gap: 2px;
+}
+
+.recipe-row-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.recipe-row-sub {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Full-bleed horizontal strip: bleeds to the screen edges, snaps, and hides its
+   scrollbar so it reads as a carousel. */
+.recipe-row-scroller {
+  display: flex;
+  gap: var(--space-12);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(var(--space-16) * -1);
+  padding: var(--space-4) var(--space-16);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.recipe-row-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.recipe-row-scroller .recipe-tile {
+  flex: 0 0 158px;
+  scroll-snap-align: start;
+}
+
 .recipe-tile {
   position: relative;
   display: flex;

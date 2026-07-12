@@ -16,7 +16,13 @@ import {
 } from "../lib/recipeImportClient";
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import { rankRecipesByCoverage } from "../utils/recipeCoverage";
+import { recommendFromRatings } from "../utils/recipeRecommendations";
+import {
+  RECIPE_COLLECTIONS,
+  collectionRecipes,
+} from "../utils/recipeCollections";
 import RecipeTile from "./RecipeTile";
+import RecipeRow from "./RecipeRow";
 import RecipeFilterSheet from "./RecipeFilterSheet";
 import RecipeEditorSheet from "./RecipeEditorSheet";
 import RecipePlanSheet from "./RecipePlanSheet";
@@ -111,18 +117,27 @@ function RecipesScreen({
     return map;
   }, [coverageList]);
 
-  // "For you" stays cookable-first, but your higher-rated recipes rise within
-  // each coverage band — winners you can make now.
-  const forYouList = useMemo(
+  // "Ready from your kitchen": cookable now (nothing or almost nothing missing),
+  // with your higher-rated recipes rising within each coverage band.
+  const readyList = useMemo(
     () =>
-      [...coverageList].sort(
-        (a, b) =>
-          a.missing.length - b.missing.length ||
-          (recipeRatings[b.recipe.id] || 0) -
-            (recipeRatings[a.recipe.id] || 0) ||
-          a.recipe.name.localeCompare(b.recipe.name)
-      ),
+      [...coverageList]
+        .filter((entry) => entry.missing.length <= 2)
+        .sort(
+          (a, b) =>
+            a.missing.length - b.missing.length ||
+            (recipeRatings[b.recipe.id] || 0) -
+              (recipeRatings[a.recipe.id] || 0) ||
+            a.recipe.name.localeCompare(b.recipe.name)
+        )
+        .slice(0, 14),
     [coverageList, recipeRatings]
+  );
+
+  // "More like your top-rated": suggestions built from your 4–5 star recipes.
+  const recommended = useMemo(
+    () => recommendFromRatings(recipes, recipeRatings),
+    [recipes, recipeRatings]
   );
 
   const favouriteRecipes = useMemo(
@@ -353,15 +368,40 @@ function RecipesScreen({
       )}
 
       {mode === "foryou" && (
-        <>
-          <p className="recipes-mode-intro small-text">
-            Ranked by what you can make from your kitchen right now — stock plus
-            your recurring buys.
-          </p>
-          <div className="recipe-grid">
-            {forYouList.map((entry) => renderTile(entry.recipe, entry))}
-          </div>
-        </>
+        <div className="recipes-feed">
+          {readyList.length === 0 && recommended.length === 0 && (
+            <p className="recipes-mode-intro small-text">
+              Stock your kitchen and rate a few recipes to make this feed yours —
+              meanwhile, here are some collections to browse.
+            </p>
+          )}
+
+          <RecipeRow
+            title="Ready from your kitchen"
+            subtitle="Cook these with what you've got — stock plus recurring buys."
+          >
+            {readyList.map((entry) => renderTile(entry.recipe, entry))}
+          </RecipeRow>
+
+          <RecipeRow
+            title="More like your top-rated"
+            subtitle="Suggestions built from the recipes you rated highly."
+          >
+            {recommended.map((recipe) => renderTile(recipe))}
+          </RecipeRow>
+
+          {RECIPE_COLLECTIONS.map((collection) => (
+            <RecipeRow
+              key={collection.key}
+              title={collection.title}
+              subtitle={collection.subtitle}
+            >
+              {collectionRecipes(recipes, collection).map((recipe) =>
+                renderTile(recipe)
+              )}
+            </RecipeRow>
+          ))}
+        </div>
       )}
 
       {mode === "favourites" && (
