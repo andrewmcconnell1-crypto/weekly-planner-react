@@ -314,6 +314,7 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
       setDeletedRecipeIds: makeSetter("deletedRecipeIds"),
       setFavouriteRecipeIds: makeSetter("favouriteRecipeIds"),
       setRecipeRatings: makeSetter("recipeRatings"),
+      setRecipeNotes: makeSetter("recipeNotes"),
       setSettings: makeSetter("settings"),
       setIngredientGroups: makeSetter("ingredientGroups"),
     };

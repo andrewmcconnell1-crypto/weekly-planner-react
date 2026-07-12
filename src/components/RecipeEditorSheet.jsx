@@ -28,10 +28,14 @@ function RecipeEditorSheet({
   updateIngredientGroup,
   rating = 0,
   onRate,
+  note = "",
+  onSaveNote,
+  cookCount = 0,
   onClose,
 }) {
   const [newIngredient, setNewIngredient] = useState("");
   const [mode, setMode] = useState("view");
+  const [noteDraft, setNoteDraft] = useState(note);
   const [closing, setClosing] = useState(false);
   const [groupDrafts, setGroupDrafts] = useState({});
   const closeTimerRef = useRef(null);
@@ -154,6 +158,12 @@ function RecipeEditorSheet({
                   {recipe.timeMins ? ` · ${recipe.timeMins} min` : ""}
                 </span>
 
+                {cookCount > 0 && (
+                  <span className="recipe-view-cooked">
+                    Cooked {cookCount} {cookCount === 1 ? "time" : "times"}
+                  </span>
+                )}
+
                 {recipe.tags?.length > 0 && (
                   <span className="recipe-view-tags">
                     {recipe.tags.map((tag) => (
@@ -175,6 +185,23 @@ function RecipeEditorSheet({
                       size={26}
                     />
                   </div>
+                )}
+
+                {onSaveNote && (
+                  <label className="recipe-view-notes">
+                    <span className="recipe-view-rating-label">Your notes</span>
+                    <textarea
+                      className="recipe-notes-input"
+                      placeholder="Tweaks, who liked it, what to serve it with…"
+                      value={noteDraft}
+                      onChange={(event) => setNoteDraft(event.target.value)}
+                      onBlur={() => {
+                        if (noteDraft.trim() !== note.trim()) {
+                          onSaveNote(recipe.id, noteDraft);
+                        }
+                      }}
+                    />
+                  </label>
                 )}
 
                 {recipe.sourceUrl && (

@@ -30,6 +30,7 @@ const WalkthroughSheet = lazy(() => import("./components/WalkthroughSheet"));
 
 import { createEmptyMeals, days } from "./utils/mealUtils";
 import { getSunday, getNextSunday, getWeekKey } from "./utils/dateUtils";
+import { countRecipeCooks } from "./utils/recipeCookCounts";
 import { greeting } from "./utils/greeting";
 import { createMealHelpers } from "./utils/mealPlanning";
 import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
@@ -153,6 +154,8 @@ function App() {
     setFavouriteRecipeIds,
     recipeRatings,
     setRecipeRatings,
+    recipeNotes,
+    setRecipeNotes,
     settings,
     setSettings,
     ingredientGroups,
@@ -191,6 +194,17 @@ function App() {
       } else {
         next[id] = value;
       }
+      return next;
+    });
+  }
+
+  // Save a recipe's free-text note, or drop the entry when it's cleared.
+  function setRecipeNote(id, text) {
+    const cleaned = (text || "").trim();
+    setRecipeNotes((current = {}) => {
+      const next = { ...current };
+      if (cleaned) next[id] = cleaned;
+      else delete next[id];
       return next;
     });
   }
@@ -249,6 +263,13 @@ function App() {
 
   const today = new Date();
   const todayDayName = days[today.getDay()];
+
+  // How many times each recipe has been cooked, derived from past meal history.
+  const cookCountsById = useMemo(
+    () => countRecipeCooks(mealsByWeek, currentWeekKey, today.getDay()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mealsByWeek, currentWeekKey]
+  );
 
   const keepStandingList = settings?.keepStandingList !== false;
   // Per-trip: are we using the saved list (online order) or shopping fresh?
@@ -736,6 +757,9 @@ function App() {
           onToggleFavourite={toggleFavouriteRecipe}
           recipeRatings={recipeRatings}
           onRateRecipe={setRecipeRating}
+          recipeNotes={recipeNotes}
+          onSaveRecipeNote={setRecipeNote}
+          cookCounts={cookCountsById}
           newRecipeName={newRecipeName}
           setNewRecipeName={setNewRecipeName}
           addRecipe={addRecipe}
