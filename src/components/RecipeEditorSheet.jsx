@@ -12,6 +12,7 @@ import { useDialogFocus } from "../hooks/useDialogFocus";
 import { groupLabelFor } from "../utils/ingredientMatch";
 import { recipeImagery } from "../utils/recipeImagery";
 import RecipeThumb from "./RecipeThumb";
+import StarRating from "./StarRating";
 
 
 // Bottom-sheet for a single recipe. Opens read-only (viewing is the common
@@ -25,6 +26,8 @@ function RecipeEditorSheet({
   ingredientGroups = {},
   availableGroups = [],
   updateIngredientGroup,
+  rating = 0,
+  onRate,
   onClose,
 }) {
   const [newIngredient, setNewIngredient] = useState("");
@@ -159,6 +162,19 @@ function RecipeEditorSheet({
                       </span>
                     ))}
                   </span>
+                )}
+
+                {onRate && (
+                  <div className="recipe-view-rating">
+                    <span className="recipe-view-rating-label">
+                      {rating ? "Your rating" : "Rate this recipe"}
+                    </span>
+                    <StarRating
+                      value={rating}
+                      onRate={(value) => onRate(recipe.id, value)}
+                      size={26}
+                    />
+                  </div>
                 )}
 
                 {recipe.sourceUrl && (

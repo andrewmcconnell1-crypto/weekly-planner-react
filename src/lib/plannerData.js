@@ -35,6 +35,7 @@ export const DATA_KEYS = [
   "recipesVersion",
   "deletedRecipeIds",
   "favouriteRecipeIds",
+  "recipeRatings",
   "settings",
   "ingredientGroups",
 ];
@@ -60,6 +61,19 @@ function normaliseServings(value) {
   const number = Number(value);
   if (!Number.isFinite(number)) return defaultSettings.defaultServings;
   return Math.min(99, Math.max(1, Math.round(number)));
+}
+
+// Keep only clean id -> integer 1..5 entries; drop anything else.
+function normaliseRatings(raw) {
+  if (!raw || typeof raw !== "object") return {};
+  const out = {};
+  for (const [id, value] of Object.entries(raw)) {
+    const n = Math.round(Number(value));
+    if (typeof id === "string" && Number.isFinite(n) && n >= 1 && n <= 5) {
+      out[id] = n;
+    }
+  }
+  return out;
 }
 
 function normaliseSettings(raw) {
@@ -99,6 +113,9 @@ export function defaultData() {
     // view. Kept separate from the recipe objects so it survives the built-in
     // recipe refresh (like deletedRecipeIds).
     favouriteRecipeIds: [],
+    // Your own 1–5 star rating per recipe (id -> number). Kept out of the recipe
+    // objects so it survives the built-in refresh, like favourites.
+    recipeRatings: {},
     settings: { ...defaultSettings },
     // User overrides for ingredient groups (canonicalKey -> overarching name),
     // layered over the seed catalog by the matcher.
@@ -153,6 +170,7 @@ export function normaliseData(raw) {
     favouriteRecipeIds: Array.isArray(data.favouriteRecipeIds)
       ? data.favouriteRecipeIds.filter((id) => typeof id === "string")
       : base.favouriteRecipeIds,
+    recipeRatings: normaliseRatings(data.recipeRatings),
     settings: normaliseSettings(data.settings),
     ingredientGroups:
       data.ingredientGroups && typeof data.ingredientGroups === "object"

@@ -151,6 +151,8 @@ function App() {
     setDeletedRecipeIds,
     favouriteRecipeIds,
     setFavouriteRecipeIds,
+    recipeRatings,
+    setRecipeRatings,
     settings,
     setSettings,
     ingredientGroups,
@@ -177,6 +179,20 @@ function App() {
         ? current.filter((existing) => existing !== id)
         : [...current, id]
     );
+  }
+
+  // Set a recipe's 1–5 rating, or clear it when the same star is tapped again
+  // (value 0 / matching current).
+  function setRecipeRating(id, value) {
+    setRecipeRatings((current = {}) => {
+      const next = { ...current };
+      if (!value || current[id] === value) {
+        delete next[id];
+      } else {
+        next[id] = value;
+      }
+      return next;
+    });
   }
 
   // Let the device / browser Back button close whichever overlay sheet is open
@@ -718,6 +734,8 @@ function App() {
           recipes={recipes}
           favouriteRecipeIdSet={favouriteRecipeIdSet}
           onToggleFavourite={toggleFavouriteRecipe}
+          recipeRatings={recipeRatings}
+          onRateRecipe={setRecipeRating}
           newRecipeName={newRecipeName}
           setNewRecipeName={setNewRecipeName}
           addRecipe={addRecipe}
