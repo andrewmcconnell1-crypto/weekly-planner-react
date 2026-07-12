@@ -50,6 +50,9 @@ function ShoppingList({
   baskets = [],
   weekBasketId = "",
   onSelectBasket,
+  showStaplesNudge = false,
+  onAddStaples,
+  onDismissStaplesNudge,
 }) {
   const priorityLayout = shopLayout !== "aisle";
 
@@ -173,6 +176,34 @@ function ShoppingList({
           </div>
         )}
       </div>
+
+      {/* First-shop nudge: with a list on screen but no stock set up, the app
+          can't yet skip what you own — so the list shows everything. One tap
+          loads the common staples as in-stock and the list visibly shrinks. */}
+      {showStaplesNudge && unifiedItems.length > 0 && (
+        <div className="staples-nudge">
+          <div className="staples-nudge-body">
+            <p className="section-kicker">Make this shorter</p>
+            <strong>Some of these you already have</strong>
+            <span>
+              Tell Bistro what&apos;s in your cupboard — oils, spices, tins —
+              and it leaves them off your list. Add the common staples to start.
+            </span>
+          </div>
+          <div className="staples-nudge-actions">
+            <button type="button" className="primary-button" onClick={onAddStaples}>
+              Add kitchen staples
+            </button>
+            <button
+              type="button"
+              className="welcome-skip"
+              onClick={onDismissStaplesNudge}
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="shop-controls-row">
         <div
