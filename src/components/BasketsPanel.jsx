@@ -1,5 +1,12 @@
 import { useMemo, useState } from "react";
-import { Check, Plus, ShoppingBasket, Trash2, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Plus,
+  ShoppingBasket,
+  Trash2,
+  X,
+} from "lucide-react";
 
 import { rankRecipesByCoverage } from "../utils/recipeCoverage";
 import { parseBasketQuantity } from "../utils/basketQuantity";
@@ -323,40 +330,50 @@ function BasketsPanel({
                           {planned}
                         </span>
                       ) : (
-                        <select
-                          className="cookable-plan-select"
-                          aria-label={`Add ${recipe.name} to a night`}
-                          value=""
-                          disabled={totalFree === 0}
-                          onChange={(event) => {
-                            planOnSlot(recipe, event.target.value);
-                            event.target.value = "";
-                          }}
-                        >
-                          <option value="">
-                            {totalFree === 0 ? "Weeks full" : "Add to a night…"}
-                          </option>
-                          {planWeeks.map((week) => (
-                            <optgroup
-                              key={week.key}
-                              label={`${week.label} (${formatDate(week.start)})`}
-                            >
-                              {days.map((day) => {
-                                const taken = isTakenNight(week.meals[day]);
-                                return (
-                                  <option
-                                    key={day}
-                                    value={`${week.key}|${day}`}
-                                    disabled={taken}
-                                  >
-                                    {day}
-                                    {taken ? " — taken" : ""}
-                                  </option>
-                                );
-                              })}
-                            </optgroup>
-                          ))}
-                        </select>
+                        <span className="select-wrap cookable-plan-wrap">
+                          <select
+                            className="cookable-plan-select"
+                            aria-label={`Add ${recipe.name} to a night`}
+                            value=""
+                            disabled={totalFree === 0}
+                            onChange={(event) => {
+                              planOnSlot(recipe, event.target.value);
+                              event.target.value = "";
+                            }}
+                          >
+                            <option value="">
+                              {totalFree === 0
+                                ? "Weeks full"
+                                : "Add to a night…"}
+                            </option>
+                            {planWeeks.map((week) => (
+                              <optgroup
+                                key={week.key}
+                                label={`${week.label} (${formatDate(week.start)})`}
+                              >
+                                {days.map((day) => {
+                                  const taken = isTakenNight(week.meals[day]);
+                                  return (
+                                    <option
+                                      key={day}
+                                      value={`${week.key}|${day}`}
+                                      disabled={taken}
+                                    >
+                                      {day}
+                                      {taken ? " — taken" : ""}
+                                    </option>
+                                  );
+                                })}
+                              </optgroup>
+                            ))}
+                          </select>
+
+                          <ChevronDown
+                            size={16}
+                            className="select-chevron"
+                            aria-hidden="true"
+                          />
+                        </span>
                       ))}
                   </div>
                 </li>

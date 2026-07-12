@@ -210,36 +210,52 @@ function StaplesList({
             </div>
 
             <div className="staple-controls">
-              <select
-                value={draft.frequency}
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    frequency: event.target.value,
-                  }))
-                }
-              >
-                <option value="weekly">Weekly</option>
-                <option value="fortnightly">Fortnightly</option>
-                <option value="four-weekly">4-weekly</option>
-                <option value="ad-hoc">Ad hoc</option>
-              </select>
+              <div className="select-wrap">
+                <select
+                  value={draft.frequency}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      frequency: event.target.value,
+                    }))
+                  }
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="fortnightly">Fortnightly</option>
+                  <option value="four-weekly">4-weekly</option>
+                  <option value="ad-hoc">Ad hoc</option>
+                </select>
 
-              <select
-                value={draft.category}
-                onChange={(event) =>
-                  setDraft((current) => ({
-                    ...current,
-                    category: event.target.value,
-                  }))
-                }
-              >
-                {availableCategories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
+                <ChevronDown
+                  size={18}
+                  className="select-chevron"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="select-wrap">
+                <select
+                  value={draft.category}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      category: event.target.value,
+                    }))
+                  }
+                >
+                  {availableCategories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+
+                <ChevronDown
+                  size={18}
+                  className="select-chevron"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
 
             {updateIngredientGroup && (

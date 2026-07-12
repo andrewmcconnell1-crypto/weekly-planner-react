@@ -7622,9 +7622,29 @@ html[data-theme="dark"] .shop-hero.needs-update {
   font-weight: var(--weight-semibold);
 }
 
-.cookable-plan-select {
+/* Compact pill picker: keep it inline (the wrapper would otherwise stretch to
+   the row) and give the chevron room without hiding "Add to a night…". */
+.cookable-plan-wrap {
+  display: inline-flex;
   flex-shrink: 0;
   align-self: center;
+}
+
+.cookable-plan-wrap select {
+  padding-right: 28px;
+}
+
+.cookable-plan-wrap .select-chevron {
+  right: 9px;
+  color: var(--accent-strong);
+}
+
+.cookable-plan-wrap select:disabled + .select-chevron {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+.cookable-plan-select {
   width: auto;
   max-width: 9rem;
   border: 1px solid var(--olive);

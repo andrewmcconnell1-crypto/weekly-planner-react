@@ -161,44 +161,60 @@ function InventoryList({
 
         {isExpanded && draft && (
           <div className="basics-editor">
-            <select
-              value={draft.category}
-              aria-label={`${item.name} category`}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  category: event.target.value,
-                }))
-              }
-            >
-              {availableCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            <div className="select-wrap">
+              <select
+                value={draft.category}
+                aria-label={`${item.name} category`}
+                onChange={(event) =>
+                  setDraft((current) => ({
+                    ...current,
+                    category: event.target.value,
+                  }))
+                }
+              >
+                {availableCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDown
+                size={18}
+                className="select-chevron"
+                aria-hidden="true"
+              />
+            </div>
 
             {updateInventorySubcategory && draft.category === "Pantry" && (
               <label className="basics-group">
                 <span className="basics-group-label">Subgroup</span>
-                <select
-                  className="basics-group-input"
-                  aria-label={`${item.name} subgroup`}
-                  value={draft.subcategory}
-                  onChange={(event) =>
-                    setDraft((current) => ({
-                      ...current,
-                      subcategory: event.target.value,
-                    }))
-                  }
-                >
-                  <option value="">Auto (by name)</option>
-                  {PANTRY_SUBCATEGORY_OPTIONS.map((option) => (
-                    <option key={option.key} value={option.key}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="select-wrap">
+                  <select
+                    className="basics-group-input"
+                    aria-label={`${item.name} subgroup`}
+                    value={draft.subcategory}
+                    onChange={(event) =>
+                      setDraft((current) => ({
+                        ...current,
+                        subcategory: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Auto (by name)</option>
+                    {PANTRY_SUBCATEGORY_OPTIONS.map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  <ChevronDown
+                    size={18}
+                    className="select-chevron"
+                    aria-hidden="true"
+                  />
+                </div>
                 <span className="basics-group-hint small-text">
                   Which pantry shelf this shows under in your stock list.
                 </span>

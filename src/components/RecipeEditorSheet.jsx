@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Pencil, Trash2, X } from "lucide-react";
+import { ChevronDown, ExternalLink, Pencil, Trash2, X } from "lucide-react";
 
 import {
   parseMethodSteps,
@@ -223,18 +223,28 @@ function RecipeEditorSheet({
 
                 <label>
                   <span>Category</span>
-                  <select
-                    value={recipe.category || "Other"}
-                    onChange={(event) =>
-                      updateRecipe(recipe.id, { category: event.target.value })
-                    }
-                  >
-                    {categoryOptions.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="select-wrap">
+                    <select
+                      value={recipe.category || "Other"}
+                      onChange={(event) =>
+                        updateRecipe(recipe.id, {
+                          category: event.target.value,
+                        })
+                      }
+                    >
+                      {categoryOptions.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+
+                    <ChevronDown
+                      size={18}
+                      className="select-chevron"
+                      aria-hidden="true"
+                    />
+                  </div>
                 </label>
 
                 <label>
