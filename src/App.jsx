@@ -75,6 +75,9 @@ function App() {
   // so dismissal is per-account and auto-resets when the account changes.
   const [welcomeDismissedFor, setWelcomeDismissedFor] = useState(null);
   const [welcomePreview, setWelcomePreview] = useState(false);
+  // Session-only: whether the "add your kitchen staples" shopping-list nudge has
+  // been waved off. It also stops showing the moment any stock exists.
+  const [staplesNudgeDismissed, setStaplesNudgeDismissed] = useState(false);
   const [guest, setGuest] = useState(false);
   const [settingsReturnTab, setSettingsReturnTab] = useState("home");
 
@@ -694,6 +697,11 @@ function App() {
           shopLayout={shopLayout}
           setShopLayout={setShopLayout}
           onOpenHelp={() => setShoppingHelpOpen(true)}
+          showStaplesNudge={
+            activeInventoryCount === 0 && !staplesNudgeDismissed
+          }
+          onAddStaples={loadStarterInventory}
+          onDismissStaplesNudge={() => setStaplesNudgeDismissed(true)}
         />
       )}
 

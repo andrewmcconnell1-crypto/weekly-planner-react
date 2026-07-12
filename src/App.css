@@ -1593,6 +1593,48 @@ body.meal-dragging {
   margin-top: var(--space-4);
 }
 
+/* First-shop nudge: a soft, positive card offering to load kitchen staples so
+   the list can start skipping what you already own. Mirrors .home-topup. */
+.staples-nudge {
+  display: grid;
+  gap: var(--space-12);
+  border: 1px solid #d6dcbe;
+  border-radius: var(--radius-md);
+  background: var(--olive-soft);
+  box-shadow: var(--shadow);
+  padding: var(--space-14);
+}
+
+.staples-nudge-body {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.staples-nudge-body .section-kicker {
+  margin: 0;
+}
+
+.staples-nudge-body strong {
+  font-size: var(--text-xl);
+}
+
+.staples-nudge-body > span {
+  color: var(--muted);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.staples-nudge-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.staples-nudge-actions .primary-button {
+  flex: 1;
+}
+
 .home-quicklinks .home-actions {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
