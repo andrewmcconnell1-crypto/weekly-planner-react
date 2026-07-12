@@ -34,6 +34,7 @@ export const DATA_KEYS = [
   "recipes",
   "recipesVersion",
   "deletedRecipeIds",
+  "favouriteRecipeIds",
   "settings",
   "ingredientGroups",
 ];
@@ -94,6 +95,10 @@ export function defaultData() {
     // Ids of built-in recipes the user has deleted, so they stay deleted rather
     // than being re-appended from the bundle on every load/sync.
     deletedRecipeIds: [],
+    // Recipe ids the user has hearted, surfaced in the Recipes tab's Favourites
+    // view. Kept separate from the recipe objects so it survives the built-in
+    // recipe refresh (like deletedRecipeIds).
+    favouriteRecipeIds: [],
     settings: { ...defaultSettings },
     // User overrides for ingredient groups (canonicalKey -> overarching name),
     // layered over the seed catalog by the matcher.
@@ -145,6 +150,9 @@ export function normaliseData(raw) {
     deletedRecipeIds: Array.isArray(data.deletedRecipeIds)
       ? data.deletedRecipeIds.filter((id) => typeof id === "string")
       : base.deletedRecipeIds,
+    favouriteRecipeIds: Array.isArray(data.favouriteRecipeIds)
+      ? data.favouriteRecipeIds.filter((id) => typeof id === "string")
+      : base.favouriteRecipeIds,
     settings: normaliseSettings(data.settings),
     ingredientGroups:
       data.ingredientGroups && typeof data.ingredientGroups === "object"

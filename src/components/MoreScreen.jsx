@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import {
-  BookOpen,
   Repeat2,
   Package,
   ShoppingBasket,
@@ -12,7 +11,6 @@ import ErrorBoundary from "./ErrorBoundary";
 import PanelError from "./PanelError";
 
 const HouseholdBasics = lazy(() => import("./HouseholdBasics"));
-const RecipesList = lazy(() => import("./RecipesList"));
 const BasketsPanel = lazy(() => import("./BasketsPanel"));
 
 export default function MoreScreen({
@@ -47,14 +45,6 @@ export default function MoreScreen({
   ingredientGroups,
   availableGroups,
   updateIngredientGroup,
-  newRecipeName,
-  setNewRecipeName,
-  addRecipe,
-  addImportedRecipe,
-  deleteRecipe,
-  addIngredientToRecipe,
-  deleteIngredientFromRecipe,
-  updateRecipe,
   baskets,
   setBaskets,
   planWeeks,
@@ -69,24 +59,6 @@ export default function MoreScreen({
           </p>
 
           <div className="manager-list">
-            <button
-              className="manager-row"
-              type="button"
-              onClick={() => setMoreSection("recipes")}
-            >
-              <span className="manager-icon" aria-hidden="true">
-                <BookOpen size={20} strokeWidth={2} />
-              </span>
-              <span className="manager-main">
-                <strong>Recipes</strong>
-                <span>
-                  {recipes.length} saved recipe
-                  {recipes.length === 1 ? "" : "s"}
-                </span>
-              </span>
-              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-            </button>
-
             <button
               className="manager-row"
               type="button"
@@ -146,9 +118,7 @@ export default function MoreScreen({
                   ? householdSection === "recurring"
                     ? "Recurring buys"
                     : "Stock"
-                  : moreSection === "baskets"
-                    ? "Weekly baskets"
-                    : "Recipes"}
+                  : "Weekly baskets"}
               </h2>
             </div>
           </div>
@@ -208,27 +178,6 @@ export default function MoreScreen({
                 ingredientGroups={ingredientGroups}
                 planWeeks={planWeeks}
                 onPlanRecipeOnWeekDay={onPlanRecipeOnWeekDay}
-              />
-            </Suspense>
-            </ErrorBoundary>
-          )}
-
-          {moreSection === "recipes" && (
-            <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
-            <Suspense fallback={null}>
-              <RecipesList
-                recipes={recipes}
-                newRecipeName={newRecipeName}
-                setNewRecipeName={setNewRecipeName}
-                addRecipe={addRecipe}
-                addImportedRecipe={addImportedRecipe}
-                deleteRecipe={deleteRecipe}
-                addIngredientToRecipe={addIngredientToRecipe}
-                deleteIngredientFromRecipe={deleteIngredientFromRecipe}
-                updateRecipe={updateRecipe}
-                ingredientGroups={ingredientGroups}
-                availableGroups={availableGroups}
-                updateIngredientGroup={updateIngredientGroup}
               />
             </Suspense>
             </ErrorBoundary>

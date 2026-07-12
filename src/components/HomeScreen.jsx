@@ -28,7 +28,6 @@ export default function HomeScreen({
   homeShopStatus,
   nextWeekPlannedCount,
   openNextWeekPlan,
-  setMoreSection,
   openWalkthrough,
 }) {
   const gapDays = days.filter(
@@ -214,10 +213,7 @@ export default function HomeScreen({
       <button
         type="button"
         className="home-link home-recipes-link"
-        onClick={() => {
-          setMoreSection("recipes");
-          setActiveTab("more");
-        }}
+        onClick={() => setActiveTab("recipes")}
       >
         Browse all recipes
         <ChevronRight size={15} aria-hidden="true" />
