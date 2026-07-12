@@ -7603,6 +7603,11 @@ html[data-theme="dark"] .shop-hero.needs-update {
   background: var(--field);
   color: var(--ink);
   padding: var(--space-8) var(--space-10);
+  /* Leave room for the custom chevron and hide the native arrow, so this
+     dropdown matches the others (chevron at a consistent right: 13px). */
+  padding-right: 40px;
+  appearance: none;
+  -webkit-appearance: none;
   font: inherit;
   font-size: var(--text-sm);
 }
