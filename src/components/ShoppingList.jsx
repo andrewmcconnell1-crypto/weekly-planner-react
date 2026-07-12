@@ -224,7 +224,7 @@ function ShoppingList({
         </label>
       )}
 
-      {keepStandingList && (
+      {keepStandingList && (total > 0 || removals.length > 0) && (
         <div className="shop-mode">
           <label className="shop-switch">
             <span className="shop-switch-text">

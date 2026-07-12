@@ -45,14 +45,19 @@ export default function HomeScreen({
 
   return (
     <section className="screen home-screen">
-      <TonightCard
-        dayName={todayDayName}
-        dateLabel={tonightDateLabel}
-        summary={tonightSummary}
-        coversNights={tonightCovers}
-        leftoverDaysLabel={tonightLeftoverLabel}
-        onOpenPlan={openTonightInPlan}
-      />
+      {/* On a fresh week the first-run card below is the single call to action;
+          the Tonight card would just repeat "plan tonight". Bring it back once
+          the week has meals, where it shows what's actually on tonight. */}
+      {!weekEmpty && (
+        <TonightCard
+          dayName={todayDayName}
+          dateLabel={tonightDateLabel}
+          summary={tonightSummary}
+          coversNights={tonightCovers}
+          leftoverDaysLabel={tonightLeftoverLabel}
+          onOpenPlan={openTonightInPlan}
+        />
+      )}
 
       {weekEmpty ? (
         <div className="home-firstrun">
