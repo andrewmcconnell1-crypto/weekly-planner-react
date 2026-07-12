@@ -40,6 +40,7 @@ export default function MoreScreen({
   addInventoryItem,
   deleteInventoryItem,
   updateInventoryCategory,
+  updateInventorySubcategory,
   toggleInventoryActive,
   loadStarterInventory,
   onOpenStockCatalog,
@@ -183,6 +184,7 @@ export default function MoreScreen({
                 addInventoryItem={addInventoryItem}
                 deleteInventoryItem={deleteInventoryItem}
                 updateInventoryCategory={updateInventoryCategory}
+                updateInventorySubcategory={updateInventorySubcategory}
                 toggleInventoryActive={toggleInventoryActive}
                 loadStarterInventory={loadStarterInventory}
                 onOpenStockCatalog={onOpenStockCatalog}

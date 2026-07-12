@@ -57,6 +57,21 @@ const PANTRY_SUBCATEGORIES = [
 const OTHER = { key: "other", label: "Other pantry" };
 const ORDERED = [...PANTRY_SUBCATEGORIES, OTHER];
 
+// The pickable subgroups, in display order, for the add/edit forms. An empty
+// override falls back to deriving the subgroup from the item name.
+export const PANTRY_SUBCATEGORY_OPTIONS = ORDERED.map((sub) => ({
+  key: sub.key,
+  label: sub.label,
+}));
+
+const VALID_KEYS = new Set(ORDERED.map((sub) => sub.key));
+
+// True when `key` names a real pantry subgroup, so callers can validate a
+// stored override before trusting it.
+export function isPantrySubcategory(key) {
+  return VALID_KEYS.has(key);
+}
+
 // Pre-singularise keywords so they match the tokenizer's singular output (e.g.
 // "couscous" -> "couscou"), letting the lists above stay readable.
 const SUBCATEGORY_SETS = PANTRY_SUBCATEGORIES.map((sub) => ({
@@ -64,7 +79,12 @@ const SUBCATEGORY_SETS = PANTRY_SUBCATEGORIES.map((sub) => ({
   keywordSet: new Set(sub.keywords.map(singularise)),
 }));
 
-export function pantrySubcategory(name) {
+// A stored `override` (set when the user picks a subgroup by hand) always wins,
+// as long as it's a real subgroup; otherwise the subgroup is derived from the
+// name so untouched items keep sorting themselves.
+export function pantrySubcategory(name, override) {
+  if (override && VALID_KEYS.has(override)) return override;
+
   const tokens = tokenise(name);
 
   for (const sub of SUBCATEGORY_SETS) {
@@ -86,7 +106,7 @@ export function groupBySubcategory(category, items) {
 
   const byKey = new Map();
   for (const item of items) {
-    const key = pantrySubcategory(item.name);
+    const key = pantrySubcategory(item.name, item.subcategory);
     if (!byKey.has(key)) byKey.set(key, []);
     byKey.get(key).push(item);
   }

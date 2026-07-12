@@ -299,6 +299,7 @@ function App() {
     activateStockItem,
     deleteInventoryItem,
     updateInventoryCategory,
+    updateInventorySubcategory,
     toggleInventoryActive,
     loadStarterInventory,
     resetStockToStarterList,
@@ -731,6 +732,7 @@ function App() {
           addInventoryItem={addInventoryItem}
           deleteInventoryItem={deleteInventoryItem}
           updateInventoryCategory={updateInventoryCategory}
+          updateInventorySubcategory={updateInventorySubcategory}
           toggleInventoryActive={toggleInventoryActive}
           loadStarterInventory={loadStarterInventory}
           onOpenStockCatalog={() => setStockCatalogOpen(true)}

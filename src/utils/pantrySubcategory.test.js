@@ -44,6 +44,16 @@ describe("pantrySubcategory", () => {
   it("falls back to other for unknowns", () => {
     expect(pantrySubcategory("Dashi Sachet")).toBe("other");
   });
+
+  it("honours a valid stored override over the name", () => {
+    // "Olive Oil" would derive to sauces, but a hand-picked subgroup wins.
+    expect(pantrySubcategory("Olive Oil", "baking")).toBe("baking");
+  });
+
+  it("ignores an invalid or blank override and derives from the name", () => {
+    expect(pantrySubcategory("Olive Oil", "nonsense")).toBe("sauces");
+    expect(pantrySubcategory("Olive Oil", "")).toBe("sauces");
+  });
 });
 
 describe("groupBySubcategory", () => {
@@ -68,5 +78,14 @@ describe("groupBySubcategory", () => {
       "Sauces, oils & condiments",
       "Grains, pasta & rice",
     ]);
+  });
+
+  it("routes an item by its stored subcategory override", () => {
+    const groups = groupBySubcategory("Pantry", [
+      { name: "Olive Oil", subcategory: "grains" },
+    ]);
+    // Olive Oil would normally sit under sauces; the override moves it.
+    expect(groups).toHaveLength(1);
+    expect(groups[0].label).toBe("Grains, pasta & rice");
   });
 });

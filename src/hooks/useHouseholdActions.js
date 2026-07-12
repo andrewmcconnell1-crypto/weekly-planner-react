@@ -3,7 +3,17 @@ import { useState } from "react";
 import { normaliseItemName, createCollectionId } from "../utils/itemUtils";
 import { canonicalKey } from "../utils/ingredientMatch";
 import { createStarterInventoryItems } from "../utils/dataLoaders";
+import { isPantrySubcategory } from "../utils/pantrySubcategory";
 import { initialStaples } from "../data/initialStaples";
+
+// Return the item without its pantry-subgroup override (used when the field no
+// longer applies, e.g. the item left the Pantry aisle).
+function stripSubcategory(item) {
+  if (!("subcategory" in item)) return item;
+  const rest = { ...item };
+  delete rest.subcategory;
+  return rest;
+}
 
 // Recurring-buy (staples) and pantry-stock (inventory) mutators, including the
 // "load starters" merges and the "restore defaults" resets. Owns the two
@@ -84,17 +94,24 @@ export function useHouseholdActions({
     );
   }
 
-  function addInventoryItem(category = "Pantry") {
+  function addInventoryItem(category = "Pantry", _priority, subcategory) {
     const cleanedItem = newInventoryItem.trim();
 
     if (cleanedItem === "") return;
+
+    const resolvedCategory = (category || "Pantry").trim() || "Pantry";
+    // Only Pantry is sub-grouped, and only a real subgroup key is worth
+    // storing — everything else falls back to name-derived sorting.
+    const storeSubcategory =
+      resolvedCategory === "Pantry" && isPantrySubcategory(subcategory);
 
     setInventory([
       ...inventory,
       {
         id: createCollectionId("inventory", inventory, cleanedItem),
         name: cleanedItem,
-        category: (category || "Pantry").trim() || "Pantry",
+        category: resolvedCategory,
+        ...(storeSubcategory ? { subcategory } : {}),
         quantity: null,
         unit: "",
         active: true,
@@ -151,8 +168,28 @@ export function useHouseholdActions({
   function updateInventoryCategory(id, category) {
     setInventory(
       inventory.map((item) =>
-        item.id === id ? { ...item, category } : item
+        item.id === id
+          ? // A stored subgroup only means anything for Pantry — drop it when
+            // the item moves to another aisle so it can't resurface later.
+            category === "Pantry"
+            ? { ...item, category }
+            : stripSubcategory({ ...item, category })
+          : item
       )
+    );
+  }
+
+  // Set or clear an item's pantry subgroup override. A blank/invalid key
+  // removes the field so the subgroup falls back to being name-derived.
+  function updateInventorySubcategory(id, subcategory) {
+    setInventory(
+      inventory.map((item) => {
+        if (item.id !== id) return item;
+        if (item.category === "Pantry" && isPantrySubcategory(subcategory)) {
+          return { ...item, subcategory };
+        }
+        return stripSubcategory(item);
+      })
     );
   }
 
@@ -253,6 +290,7 @@ export function useHouseholdActions({
     activateStockItem,
     deleteInventoryItem,
     updateInventoryCategory,
+    updateInventorySubcategory,
     toggleInventoryActive,
     loadStarterInventory,
     resetStockToStarterList,

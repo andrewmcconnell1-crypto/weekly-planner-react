@@ -3,7 +3,10 @@ import { ChevronDown, ChevronUp, Trash2, Package } from "lucide-react";
 
 import { normaliseItemName } from "../utils/itemUtils";
 import { groupLabelFor } from "../utils/ingredientMatch";
-import { groupBySubcategory } from "../utils/pantrySubcategory";
+import {
+  groupBySubcategory,
+  PANTRY_SUBCATEGORY_OPTIONS,
+} from "../utils/pantrySubcategory";
 import { aisleTone } from "../utils/categoryColour";
 import { ingredientCatalog } from "../data/ingredientCatalog";
 import AddItemRow from "./AddItemRow";
@@ -28,6 +31,7 @@ function InventoryList({
   addInventoryItem,
   deleteInventoryItem,
   updateInventoryCategory,
+  updateInventorySubcategory,
   toggleInventoryActive,
   loadStarterInventory,
   onOpenStockCatalog,
@@ -48,6 +52,8 @@ function InventoryList({
     setExpandedItemId(item.id);
     setDraft({
       category: item.category || "Other",
+      // Empty = "Auto", i.e. keep sorting the subgroup by the item's name.
+      subcategory: item.subcategory || "",
       group: groupLabelFor(item.name, ingredientGroups),
     });
   }
@@ -60,6 +66,15 @@ function InventoryList({
   function saveEditor(item) {
     if (draft.category !== (item.category || "Other")) {
       updateInventoryCategory(item.id, draft.category);
+    }
+    // Only Pantry items carry a subgroup; changing the aisle already clears any
+    // stale override in the store, so only push the subgroup for Pantry.
+    if (
+      updateInventorySubcategory &&
+      draft.category === "Pantry" &&
+      draft.subcategory !== (item.subcategory || "")
+    ) {
+      updateInventorySubcategory(item.id, draft.subcategory);
     }
     updateIngredientGroup?.(item.name, draft.group);
     closeEditor();
@@ -162,6 +177,33 @@ function InventoryList({
                 </option>
               ))}
             </select>
+
+            {updateInventorySubcategory && draft.category === "Pantry" && (
+              <label className="basics-group">
+                <span className="basics-group-label">Subgroup</span>
+                <select
+                  className="basics-group-input"
+                  aria-label={`${item.name} subgroup`}
+                  value={draft.subcategory}
+                  onChange={(event) =>
+                    setDraft((current) => ({
+                      ...current,
+                      subcategory: event.target.value,
+                    }))
+                  }
+                >
+                  <option value="">Auto (by name)</option>
+                  {PANTRY_SUBCATEGORY_OPTIONS.map((option) => (
+                    <option key={option.key} value={option.key}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="basics-group-hint small-text">
+                  Which pantry shelf this shows under in your stock list.
+                </span>
+              </label>
+            )}
 
             {updateIngredientGroup && (
               <label className="basics-group">
@@ -363,6 +405,8 @@ function InventoryList({
         availableCategories={availableCategories}
         defaultCategory="Pantry"
         suggestions={catalogNames}
+        subcategoryOptions={PANTRY_SUBCATEGORY_OPTIONS}
+        subcategoryCategory="Pantry"
       />
 
       {inventory.length === 0 && (
