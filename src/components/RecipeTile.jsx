@@ -1,4 +1,4 @@
-import { CalendarPlus, Clock, Heart } from "lucide-react";
+import { CalendarPlus, Clock, CookingPot, Heart } from "lucide-react";
 
 import { getRecipeTone, recipeSourceLabel } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
@@ -18,6 +18,7 @@ function RecipeTile({
   onPlan,
   coverage,
   rating = 0,
+  cookCount = 0,
 }) {
   const meta = [recipe.category, recipeSourceLabel(recipe)]
     .filter(Boolean)
@@ -46,6 +47,16 @@ function RecipeTile({
               {coverage.tier === "ready"
                 ? "Ready"
                 : `${coverage.missing.length} short`}
+            </span>
+          )}
+
+          {cookCount > 0 && (
+            <span
+              className="recipe-tile-cooked"
+              title={`Cooked ${cookCount} ${cookCount === 1 ? "time" : "times"}`}
+            >
+              <CookingPot size={12} aria-hidden="true" />
+              {cookCount}&times;
             </span>
           )}
         </span>

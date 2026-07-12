@@ -178,6 +178,7 @@ function RecipesScreen({
         recipe={recipe}
         coverage={coverage}
         rating={recipeRatings[recipe.id] || 0}
+        cookCount={cookCounts[recipe.id] || 0}
         isFavourite={favouriteRecipeIdSet.has(recipe.id)}
         onToggleFavourite={onToggleFavourite}
         onOpen={() => setOpenRecipeId(recipe.id)}
