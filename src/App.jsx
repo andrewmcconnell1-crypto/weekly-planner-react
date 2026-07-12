@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useLayoutEffect, useMemo, useState } from "react";
 import "./App.css";
 
 import ShoppingList from "./components/ShoppingList";
@@ -58,6 +58,14 @@ function App() {
   const [activeTab, setActiveTab] = useState("home");
   const [moreSection, setMoreSection] = useState("overview");
   const [householdSection, setHouseholdSection] = useState("stock");
+
+  // Land at the top whenever you navigate to a different screen or Kitchen
+  // section. The whole window scrolls and screens share it, so without this the
+  // old scroll offset carries over and you arrive mid-page — or pinned to the
+  // bottom of a shorter screen. Runs before paint so there's no visible jump.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeTab, moreSection, householdSection]);
   const [expandedMealDay, setExpandedMealDay] = useState(null);
   const [discoverOpen, setDiscoverOpen] = useState(false);
   const [discoverDay, setDiscoverDay] = useState(null);
