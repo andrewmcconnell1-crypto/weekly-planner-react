@@ -3904,6 +3904,33 @@ input[type="number"] {
   gap: var(--space-12);
 }
 
+/* The segmented sub-nav pins to the top so you can switch views from anywhere
+   in a long scroll. A full-bleed, frosted bar sits behind the pill so tiles
+   don't ghost through as they pass under it. */
+.recipes-modes-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 calc(var(--space-16) * -1);
+  padding: var(--space-8) var(--space-16) var(--space-10);
+  background: var(--bg);
+}
+
+@supports (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .recipes-modes-bar {
+    background: rgba(250, 246, 238, 0.82);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    backdrop-filter: blur(12px) saturate(1.1);
+  }
+}
+
+/* Keep the frosted bar dark in dark mode instead of the light fallback. */
+html[data-theme="dark"] .recipes-modes-bar {
+  background: rgba(23, 21, 15, 0.86);
+}
+
 /* Segmented sub-nav (Browse / For you / Favourites) — one control, the active
    segment lifts on a panel fill. */
 .recipes-modes {

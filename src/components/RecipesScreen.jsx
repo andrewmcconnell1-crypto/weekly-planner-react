@@ -189,26 +189,35 @@ function RecipesScreen({
 
   const browseList = sortRecipes(visibleRecipes, sort, recipeRatings);
 
+  // Switching mode starts you at the top of the new list — otherwise a deep
+  // scroll in Browse would land you at the bottom of the shorter Favourites.
+  function selectMode(next) {
+    setMode(next);
+    window.scrollTo(0, 0);
+  }
+
   return (
     <section className="screen recipes-screen">
-      <div className="recipes-modes" role="tablist" aria-label="Recipe views">
-        {MODES.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            aria-selected={mode === item.key}
-            className={`recipes-mode ${mode === item.key ? "active" : ""}`}
-            onClick={() => setMode(item.key)}
-          >
-            {item.label}
-            {item.key === "favourites" && favouriteRecipes.length > 0 && (
-              <span className="recipes-mode-count">
-                {favouriteRecipes.length}
-              </span>
-            )}
-          </button>
-        ))}
+      <div className="recipes-modes-bar">
+        <div className="recipes-modes" role="tablist" aria-label="Recipe views">
+          {MODES.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              aria-selected={mode === item.key}
+              className={`recipes-mode ${mode === item.key ? "active" : ""}`}
+              onClick={() => selectMode(item.key)}
+            >
+              {item.label}
+              {item.key === "favourites" && favouriteRecipes.length > 0 && (
+                <span className="recipes-mode-count">
+                  {favouriteRecipes.length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {mode === "browse" && (
