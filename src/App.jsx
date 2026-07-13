@@ -58,8 +58,8 @@ import TabIcon from "./components/TabIcon";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
-  const [moreSection, setMoreSection] = useState("overview");
-  const [householdSection, setHouseholdSection] = useState("stock");
+  // Kitchen's three sections, shown as top tabs: Stock, Recurring, Baskets.
+  const [kitchenSection, setKitchenSection] = useState("stock");
 
   // Land at the top whenever you navigate to a different screen or Kitchen
   // section. The whole window scrolls and screens share it, so without this the
@@ -67,7 +67,7 @@ function App() {
   // bottom of a shorter screen. Runs before paint so there's no visible jump.
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
-  }, [activeTab, moreSection, householdSection]);
+  }, [activeTab, kitchenSection]);
   const [expandedMealDay, setExpandedMealDay] = useState(null);
   const [discoverOpen, setDiscoverOpen] = useState(false);
   const [discoverDay, setDiscoverDay] = useState(null);
@@ -527,12 +527,6 @@ function App() {
     setWelcomeDismissedFor(welcomeSessionKey);
   }
 
-  function openHousehold(section) {
-    setHouseholdSection(section);
-    setMoreSection("household");
-    setActiveTab("more");
-  }
-
   function openSettings() {
     setSettingsReturnTab(activeTab === "settings" ? "home" : activeTab);
     setActiveTab("settings");
@@ -815,10 +809,8 @@ function App() {
 
       {activeTab === "more" && (
         <MoreScreen
-          moreSection={moreSection}
-          setMoreSection={setMoreSection}
-          householdSection={householdSection}
-          openHousehold={openHousehold}
+          kitchenSection={kitchenSection}
+          setKitchenSection={setKitchenSection}
           availableCategories={availableCategories}
           recipes={recipes}
           activeStaplesCount={activeStaplesCount}
@@ -1055,10 +1047,7 @@ function App() {
           data-tab="more"
           className={activeTab === "more" ? "active" : ""}
           aria-current={activeTab === "more" ? "page" : undefined}
-          onClick={() => {
-            setMoreSection("overview");
-            setActiveTab("more");
-          }}
+          onClick={() => setActiveTab("more")}
         >
           <TabIcon tab="kitchen" />
           <span>Kitchen</span>
