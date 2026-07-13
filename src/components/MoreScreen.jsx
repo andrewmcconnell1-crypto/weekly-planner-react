@@ -1,11 +1,4 @@
 import { lazy, Suspense } from "react";
-import {
-  Repeat2,
-  Package,
-  ShoppingBasket,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
 
 import ErrorBoundary from "./ErrorBoundary";
 import PanelError from "./PanelError";
@@ -13,11 +6,12 @@ import PanelError from "./PanelError";
 const HouseholdBasics = lazy(() => import("./HouseholdBasics"));
 const BasketsPanel = lazy(() => import("./BasketsPanel"));
 
+// Kitchen: the household hub, shown as three top tabs — Stock, Recurring buys,
+// Weekly baskets — with a live count on each. Mirrors the Recipes tab's pinned
+// segmented sub-nav so the app has one "section with top tabs" pattern.
 export default function MoreScreen({
-  moreSection,
-  setMoreSection,
-  householdSection,
-  openHousehold,
+  kitchenSection,
+  setKitchenSection,
   availableCategories,
   recipes,
   activeStaplesCount,
@@ -50,139 +44,98 @@ export default function MoreScreen({
   planWeeks,
   onPlanRecipeOnWeekDay,
 }) {
+  const tabs = [
+    { key: "stock", label: "Stock", count: activeInventoryCount },
+    { key: "recurring", label: "Recurring", count: activeStaplesCount },
+    { key: "baskets", label: "Baskets", count: baskets.length },
+  ];
+
+  // Switching sections starts you at the top, like the Recipes sub-nav.
+  function selectSection(next) {
+    setKitchenSection(next);
+    window.scrollTo(0, 0);
+  }
+
+  const isHousehold =
+    kitchenSection === "stock" || kitchenSection === "recurring";
+
   return (
     <section className="screen more-screen">
-      {moreSection === "overview" ? (
-        <>
-          <p className="more-intro">
-            Set up the recipes, groceries and stock behind your plan.
-          </p>
-
-          <div className="manager-list">
+      <div className="recipes-modes-bar">
+        <div
+          className="recipes-modes kitchen-modes"
+          role="tablist"
+          aria-label="Kitchen sections"
+        >
+          {tabs.map((tab) => (
             <button
-              className="manager-row"
+              key={tab.key}
               type="button"
-              onClick={() => openHousehold("recurring")}
+              role="tab"
+              aria-selected={kitchenSection === tab.key}
+              className={`recipes-mode ${
+                kitchenSection === tab.key ? "active" : ""
+              }`}
+              onClick={() => selectSection(tab.key)}
             >
-              <span className="manager-icon" aria-hidden="true">
-                <Repeat2 size={20} strokeWidth={2} />
-              </span>
-              <span className="manager-main">
-                <strong>Recurring buys</strong>
-                <span>{activeStaplesCount} on your list</span>
-              </span>
-              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
+              {tab.label}
+              {tab.count > 0 && (
+                <span className="recipes-mode-count">{tab.count}</span>
+              )}
             </button>
+          ))}
+        </div>
+      </div>
 
-            <button
-              className="manager-row"
-              type="button"
-              onClick={() => openHousehold("stock")}
-            >
-              <span className="manager-icon" aria-hidden="true">
-                <Package size={20} strokeWidth={2} />
-              </span>
-              <span className="manager-main">
-                <strong>Stock</strong>
-                <span>{activeInventoryCount} in stock</span>
-              </span>
-              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-            </button>
+      {isHousehold && (
+        <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
+          <Suspense fallback={null}>
+            <HouseholdBasics
+              activeSection={kitchenSection}
+              availableCategories={availableCategories}
+              staples={staples}
+              inventory={inventory}
+              newStaple={newStaple}
+              setNewStaple={setNewStaple}
+              addStaple={addStaple}
+              deleteStaple={deleteStaple}
+              updateStapleFrequency={updateStapleFrequency}
+              updateStapleCategory={updateStapleCategory}
+              updateStapleDetails={updateStapleDetails}
+              toggleStapleActive={toggleStapleActive}
+              loadStarterStaples={loadStarterStaples}
+              newInventoryItem={newInventoryItem}
+              setNewInventoryItem={setNewInventoryItem}
+              addInventoryItem={addInventoryItem}
+              deleteInventoryItem={deleteInventoryItem}
+              updateInventoryCategory={updateInventoryCategory}
+              updateInventorySubcategory={updateInventorySubcategory}
+              toggleInventoryActive={toggleInventoryActive}
+              loadStarterInventory={loadStarterInventory}
+              onOpenStockCatalog={onOpenStockCatalog}
+              ingredientGroups={ingredientGroups}
+              availableGroups={availableGroups}
+              updateIngredientGroup={updateIngredientGroup}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      )}
 
-            <button
-              className="manager-row"
-              type="button"
-              onClick={() => setMoreSection("baskets")}
-            >
-              <span className="manager-icon" aria-hidden="true">
-                <ShoppingBasket size={20} strokeWidth={2} />
-              </span>
-              <span className="manager-main">
-                <strong>Weekly baskets</strong>
-                <span>
-                  {baskets.length === 0
-                    ? "Standing shop lists — see what they cook"
-                    : `${baskets.length} saved · see what they cook`}
-                </span>
-              </span>
-              <ChevronRight className="home-step-chevron" size={20} aria-hidden="true" />
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="screen-header">
-            <div>
-              <h2>
-                {moreSection === "household"
-                  ? householdSection === "recurring"
-                    ? "Recurring buys"
-                    : "Stock"
-                  : "Weekly baskets"}
-              </h2>
-            </div>
-          </div>
-
-          <button
-            className="back-button"
-            type="button"
-            onClick={() => setMoreSection("overview")}
-          >
-            <ChevronLeft size={18} aria-hidden="true" />
-            Back to Kitchen
-          </button>
-
-          {moreSection === "household" && (
-            <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
-            <Suspense fallback={null}>
-              <HouseholdBasics
-                activeSection={householdSection}
-                availableCategories={availableCategories}
-                staples={staples}
-                inventory={inventory}
-                newStaple={newStaple}
-                setNewStaple={setNewStaple}
-                addStaple={addStaple}
-                deleteStaple={deleteStaple}
-                updateStapleFrequency={updateStapleFrequency}
-                updateStapleCategory={updateStapleCategory}
-                updateStapleDetails={updateStapleDetails}
-                toggleStapleActive={toggleStapleActive}
-                loadStarterStaples={loadStarterStaples}
-                newInventoryItem={newInventoryItem}
-                setNewInventoryItem={setNewInventoryItem}
-                addInventoryItem={addInventoryItem}
-                deleteInventoryItem={deleteInventoryItem}
-                updateInventoryCategory={updateInventoryCategory}
-                updateInventorySubcategory={updateInventorySubcategory}
-                toggleInventoryActive={toggleInventoryActive}
-                loadStarterInventory={loadStarterInventory}
-                onOpenStockCatalog={onOpenStockCatalog}
-                ingredientGroups={ingredientGroups}
-                availableGroups={availableGroups}
-                updateIngredientGroup={updateIngredientGroup}
-              />
-            </Suspense>
-            </ErrorBoundary>
-          )}
-
-          {moreSection === "baskets" && (
-            <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
-            <Suspense fallback={null}>
-              <BasketsPanel
-                baskets={baskets}
-                setBaskets={setBaskets}
-                recipes={recipes}
-                staples={staples}
-                inventory={inventory}
-                ingredientGroups={ingredientGroups}
-                planWeeks={planWeeks}
-                onPlanRecipeOnWeekDay={onPlanRecipeOnWeekDay}
-              />
-            </Suspense>
-            </ErrorBoundary>
-          )}
-        </>
+      {kitchenSection === "baskets" && (
+        <ErrorBoundary fallback={(reset) => <PanelError onRetry={reset} />}>
+          <Suspense fallback={null}>
+            <BasketsPanel
+              baskets={baskets}
+              setBaskets={setBaskets}
+              recipes={recipes}
+              staples={staples}
+              inventory={inventory}
+              ingredientGroups={ingredientGroups}
+              planWeeks={planWeeks}
+              onPlanRecipeOnWeekDay={onPlanRecipeOnWeekDay}
+            />
+          </Suspense>
+        </ErrorBoundary>
       )}
     </section>
   );
