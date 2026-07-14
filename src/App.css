@@ -4143,6 +4143,32 @@ html[data-theme="dark"] .recipes-modes-bar {
   pointer-events: none;
 }
 
+/* Editorial kicker above the title: source for sourced recipes, an accented
+   "Original" (with a mark) for the app's own. */
+.recipe-tile-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 3px rgba(20, 13, 6, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.recipe-tile-kicker.is-original {
+  color: #ffdf9e;
+}
+
+.recipe-tile-kicker svg {
+  flex-shrink: 0;
+}
+
 .recipe-tile-name {
   margin: 0;
   font-family: var(--font-display);

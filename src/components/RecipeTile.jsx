@@ -1,5 +1,6 @@
-import { CalendarPlus, Clock, CookingPot, Heart } from "lucide-react";
+import { CalendarPlus, Clock, CookingPot, Heart, Sparkles } from "lucide-react";
 
+import { recipeProvenance } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
 import DishGlyph from "./DishGlyph";
 import StarRating from "./StarRating";
@@ -20,6 +21,7 @@ function RecipeTile({
   cookCount = 0,
 }) {
   const imagery = recipeImagery(recipe);
+  const provenance = recipeProvenance(recipe);
 
   return (
     <div
@@ -53,6 +55,17 @@ function RecipeTile({
             />
           </span>
         )}
+
+        <span
+          className={`recipe-tile-kicker ${
+            provenance.original ? "is-original" : ""
+          }`}
+        >
+          {provenance.original && (
+            <Sparkles size={11} aria-hidden="true" />
+          )}
+          {provenance.label}
+        </span>
 
         <strong className="recipe-tile-name">{recipe.name}</strong>
 
