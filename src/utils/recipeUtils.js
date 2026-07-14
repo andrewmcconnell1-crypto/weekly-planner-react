@@ -198,6 +198,26 @@ export function recipeSourceKind(recipe) {
   return "custom";
 }
 
+// Provenance for the tile kicker: is this the app's own (or your own) recipe,
+// or one adapted from an external publication? `original` drives the styling
+// (accent + mark vs muted); `label` is the short kicker text. Externally-sourced
+// recipes carry a real source name + link; in-house originals don't.
+export function recipeProvenance(recipe) {
+  const kind = recipeSourceKind(recipe);
+  if (kind === "ai") return { original: true, label: "Original" };
+  if (kind === "chef") return { original: true, label: "Restaurant" };
+  if (kind === "rte") return { original: false, label: "RecipeTin Eats" };
+
+  // "custom": a web-sourced recipe (real source name / link) vs your own.
+  const source = (recipe.source || "").trim();
+  const sourced =
+    Boolean(recipe.sourceUrl) ||
+    (source && source.toLowerCase() !== "custom");
+  return sourced
+    ? { original: false, label: source || "Sourced" }
+    : { original: true, label: "Your recipe" };
+}
+
 export function getRecipeTone(category) {
   const normalisedCategory = normaliseItemName(category || "");
 

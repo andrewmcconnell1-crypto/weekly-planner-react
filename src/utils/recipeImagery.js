@@ -53,16 +53,30 @@ function dishGlyph(name, toneGlyph) {
   return toneGlyph;
 }
 
+// Small stable hash of a string, so the same recipe always gets the same look.
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    hash = (hash * 31 + str.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
 // Resolve a recipe to its display tile: a warm gradient keyed to the category
 // tone plus a dish glyph read from the name. Deliberately illustrative (no
 // photos) so the Recipes and Meals screens look lively with no external images.
+// The gradient angle varies per recipe (a stable hash) so a run of same-category
+// tiles doesn't read as one flat block.
 export function recipeImagery(recipe) {
   const tone = getRecipeTone(recipe?.category);
   const visual = TONE_VISUAL[tone] || TONE_VISUAL.other;
+  const seed = hashString(recipe?.id || recipe?.name || "");
+  const angle = 110 + (seed % 6) * 12; // 110–170° in 12° steps
 
   return {
     tone,
-    gradient: `linear-gradient(135deg, ${visual.from}, ${visual.to})`,
+    seed,
+    gradient: `linear-gradient(${angle}deg, ${visual.from}, ${visual.to})`,
     glyph: dishGlyph(recipe?.name, visual.glyph),
   };
 }

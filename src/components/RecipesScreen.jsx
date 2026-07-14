@@ -34,13 +34,24 @@ const MODES = [
 ];
 
 const SORTS = [
-  { key: "recommended", label: "Recommended" },
+  { key: "mixed", label: "Mixed" },
   { key: "toprated", label: "Top rated" },
   { key: "az", label: "A–Z" },
   { key: "quick", label: "Quickest" },
 ];
 
-function sortRecipes(list, sort, ratings = {}) {
+// A stable pseudo-random key per recipe for the given seed, so "Mixed" mingles
+// categories (colours) instead of grouping them, yet stays put while you browse.
+function seededKey(id, seed) {
+  const str = `${id}:${seed}`;
+  let hash = 0;
+  for (let i = 0; i < str.length; i += 1) {
+    hash = (hash * 31 + str.charCodeAt(i)) | 0;
+  }
+  return hash;
+}
+
+function sortRecipes(list, sort, ratings = {}, seed = 0) {
   if (sort === "az") {
     return [...list].sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -56,7 +67,10 @@ function sortRecipes(list, sort, ratings = {}) {
       (a, b) => r(b) - r(a) || a.name.localeCompare(b.name)
     );
   }
-  return list; // "recommended" keeps the hook's category-ordered list
+  // "mixed" (default): shuffle so the grid isn't a run of one category/colour.
+  return [...list].sort(
+    (a, b) => seededKey(a.id, seed) - seededKey(b.id, seed)
+  );
 }
 
 // The Recipes destination: a visual, browsable home for the whole library.
@@ -90,7 +104,10 @@ function RecipesScreen({
   onPlanRecipeOnWeekDay,
 }) {
   const [mode, setMode] = useState("browse");
-  const [sort, setSort] = useState("recommended");
+  const [sort, setSort] = useState("mixed");
+  // A fresh shuffle seed each time the Recipes tab opens — Mixed feels random
+  // per visit but stays stable while you scroll/filter.
+  const [mixSeed] = useState(() => Math.floor(Math.random() * 1e9));
   const [openRecipeId, setOpenRecipeId] = useState(null);
   const [planRecipe, setPlanRecipe] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -187,7 +204,7 @@ function RecipesScreen({
     );
   }
 
-  const browseList = sortRecipes(visibleRecipes, sort, recipeRatings);
+  const browseList = sortRecipes(visibleRecipes, sort, recipeRatings, mixSeed);
 
   // Switching mode starts you at the top of the new list — otherwise a deep
   // scroll in Browse would land you at the bottom of the shorter Favourites.
