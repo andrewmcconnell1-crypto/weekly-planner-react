@@ -4068,135 +4068,134 @@ html[data-theme="dark"] .recipes-modes-bar {
   scroll-snap-align: start;
 }
 
+/* A recipe tile is a typographic "cover": category-toned gradient, the name as
+   the hero in the display serif, the dish glyph as a faint watermark. */
 .recipe-tile {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--line);
+  aspect-ratio: 3 / 4;
   border-radius: var(--radius-md);
-  background: var(--panel);
   box-shadow: var(--shadow);
   overflow: hidden;
+  isolation: isolate;
+  /* background gradient is set inline, per recipe */
 }
 
+/* Stretched primary action — fills the tile, under the overlaid controls. */
 .recipe-tile-open {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  flex: 1;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
   min-height: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--ink);
-  text-align: left;
 }
 
 .recipe-tile-open:hover {
   background: transparent;
 }
 
-.recipe-tile-thumb {
-  position: relative;
-  display: block;
+/* Big, faint dish glyph bleeding off the top corner: texture, not a logo. */
+.recipe-tile-glyph {
+  position: absolute;
+  top: -14%;
+  right: -12%;
+  width: 62%;
+  z-index: 0;
+  color: #fff8ee;
+  opacity: 0.2;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+.recipe-tile-glyph svg {
   width: 100%;
+  height: auto;
 }
 
-/* Time + cookable badges float over the thumb. */
-.recipe-tile-time {
+/* Bottom scrim so the cream text reads on light gradients too. */
+.recipe-tile-scrim {
   position: absolute;
-  left: var(--space-6);
-  bottom: var(--space-6);
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: var(--radius-pill);
-  background: rgba(28, 22, 16, 0.62);
-  color: #fff;
-  font-size: 11px;
-  font-weight: var(--weight-bold);
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(26, 18, 10, 0.62) 0%,
+    rgba(26, 18, 10, 0.16) 42%,
+    transparent 70%
+  );
 }
 
-.recipe-tile-thumb .cookable-badge {
+.recipe-tile-content {
   position: absolute;
-  top: var(--space-6);
-  left: var(--space-6);
-}
-
-/* "Cooked N times" glance badge, mirroring the time badge in the opposite
-   corner. Only rendered when the count is >= 1. */
-.recipe-tile-cooked {
-  position: absolute;
-  right: var(--space-6);
-  bottom: var(--space-6);
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 7px;
-  border-radius: var(--radius-pill);
-  background: rgba(28, 22, 16, 0.62);
-  color: #fff;
-  font-size: 11px;
-  font-weight: var(--weight-bold);
-}
-
-.recipe-tile-body {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: grid;
-  gap: 2px;
-  padding: var(--space-8) var(--space-10) var(--space-6);
+  gap: var(--space-6);
+  padding: var(--space-10);
+  /* Let taps on the empty cover fall through to the open button; the plan
+     button below re-enables pointer events for itself. */
+  pointer-events: none;
 }
 
 .recipe-tile-name {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  line-height: 1.25;
-  color: var(--ink);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(20, 13, 6, 0.4);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.recipe-tile-meta {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: var(--weight-semibold);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.recipe-tile-rating {
+  line-height: 0;
 }
 
-.recipe-tile-plan {
-  min-height: 0;
+.recipe-tile-rating .star-on {
+  color: #f4ce6a;
+}
+
+.recipe-tile-rating .star-off {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.recipe-tile-actionrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.recipe-tile-facts {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-6);
-  margin: 0 var(--space-8) var(--space-8);
-  padding: var(--space-6);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--soft);
-  color: var(--accent-strong);
+  gap: var(--space-10);
+  color: rgba(255, 255, 255, 0.94);
   font-size: 12px;
   font-weight: var(--weight-bold);
+  text-shadow: 0 1px 4px rgba(20, 13, 6, 0.4);
 }
 
-.recipe-tile-plan:hover {
-  background: var(--accent-soft);
-  border-color: var(--accent-soft);
+.recipe-tile-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 
-/* Favourite heart, tucked over the thumb's top-right. A dark scrim (same as the
-   time badge) guarantees the heart reads on every tile tone — a pale circle
-   vanished on the light gradients. White outline when off; a solid rust fill
-   when on, so "saved" is unmistakable. */
-.recipe-tile-fav {
-  position: absolute;
-  top: var(--space-6);
-  right: var(--space-6);
+/* Icon-only "add to a night" — replaces the wordy button. */
+.recipe-tile-plan {
+  pointer-events: auto;
   min-height: 0;
   width: 34px;
   height: 34px;
@@ -4205,24 +4204,50 @@ html[data-theme="dark"] .recipes-modes-bar {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(28, 22, 16, 0.55);
+  background: rgba(255, 253, 247, 0.92);
+  color: var(--accent-strong);
+  box-shadow: 0 1px 5px rgba(20, 13, 6, 0.3);
+}
+
+.recipe-tile-plan:hover {
+  background: #fff;
+}
+
+.recipe-tile-badge {
+  position: absolute;
+  top: var(--space-8);
+  left: var(--space-8);
+  z-index: 2;
+}
+
+/* Favourite heart, top-right. Dark scrim so it reads on every tone; white
+   outline when off, a solid rust fill on a white disc when on. */
+.recipe-tile-fav {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  z-index: 3;
+  min-height: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(28, 22, 16, 0.5);
   color: #fff;
   box-shadow: 0 1px 5px rgba(28, 22, 16, 0.35);
 }
 
 .recipe-tile-fav:hover {
-  background: rgba(28, 22, 16, 0.72);
+  background: rgba(28, 22, 16, 0.68);
 }
 
 .recipe-tile-fav.is-fav {
   background: #fff;
   color: var(--rust);
   box-shadow: 0 1px 6px rgba(28, 22, 16, 0.3);
-}
-
-.recipe-tile-rating {
-  margin-top: 3px;
-  line-height: 0;
 }
 
 /* ---- Star ratings ---- */
