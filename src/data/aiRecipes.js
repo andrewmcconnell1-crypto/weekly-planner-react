@@ -1031,6 +1031,9 @@ export const aiRecipes = [
       "2 sprigs rosemary",
       "2 tbsp olive oil",
       "2 tbsp flour",
+      "1 kg potatoes",
+      "50 g butter",
+      "1 splash milk",
       "salt and pepper",
     ],
     method: [
@@ -1040,7 +1043,8 @@ export const aiRecipes = [
       "4. Add the stock and rosemary and return the shanks — the liquid should come about two-thirds of the way up; top up with water if it doesn't.",
       "5. Cover and braise in the oven 2.5-3 hours, turning the shanks halfway, until the meat is falling off the bone. (Slow cooker: low, 8 hours.)",
       "6. Lift out the shanks, skim the fat off the sauce, and boil it a few minutes to a gravy consistency if needed; season to taste.",
-      "7. Serve the shanks on mash with plenty of the sauce.",
+      "7. Meanwhile make the mash: boil the peeled, quartered potatoes in well-salted water 15-20 min until tender, drain and steam-dry, then mash with the butter and a splash of milk; season.",
+      "8. Serve the shanks on the mash with plenty of the sauce.",
     ].join("\n"),
     timeMins: 200,
   }),
@@ -1315,6 +1319,7 @@ export const aiRecipes = [
       "1 tbsp cornflour",
       "2 spring onions",
       "1 tsp sesame oil",
+      "salt and pepper",
     ],
     method: [
       "1. Dice the onion and mince the garlic, and simmer them in the stock in a large pot for 5 min.",
@@ -1568,6 +1573,7 @@ export const aiRecipes = [
       "1 bunch coriander",
       "2 cups jasmine rice",
       "1 tbsp vegetable oil",
+      "salt",
     ],
     method: [
       "1. Julienne the carrot and toss with the rice vinegar and a pinch each of sugar and salt; leave to quick-pickle 15 min while everything else cooks.",
@@ -1620,6 +1626,7 @@ export const aiRecipes = [
       "1 tsp dried thyme",
       "1 cup breadcrumbs",
       "2 tbsp olive oil",
+      "salt and pepper",
     ],
     method: [
       "1. Heat the oven to 180C. Heat the olive oil in a wide ovenproof pot over medium-high and brown the sausages all over, 6-8 min (they finish cooking in the oven). Brown the bacon lardons in the same pot and set both aside.",
@@ -1702,6 +1709,7 @@ export const aiRecipes = [
       "3 cups chicken stock",
       "2 tbsp olive oil",
       "2 spring onions",
+      "salt and pepper",
     ],
     method: [
       "1. Slice the sausage into thick coins. Heat the olive oil in a deep skillet (with a lid) over medium-high and brown the sausage 3-4 min; remove.",
