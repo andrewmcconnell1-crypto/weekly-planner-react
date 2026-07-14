@@ -1,4 +1,4 @@
-import { CalendarPlus, Clock, CookingPot, Heart, Sparkles } from "lucide-react";
+import { CalendarPlus, Clock, CookingPot, Heart } from "lucide-react";
 
 import { recipeProvenance } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
@@ -61,9 +61,6 @@ function RecipeTile({
             provenance.original ? "is-original" : ""
           }`}
         >
-          {provenance.original && (
-            <Sparkles size={11} aria-hidden="true" />
-          )}
           {provenance.label}
         </span>
 

@@ -4,8 +4,8 @@ import { ChevronDown, ExternalLink, Pencil, Trash2, X } from "lucide-react";
 import {
   parseMethodSteps,
   recipeCategories,
+  recipeProvenance,
   recipeSourceKind,
-  recipeSourceLabel,
   recipeTags,
 } from "../utils/recipeUtils";
 import { useDialogFocus } from "../hooks/useDialogFocus";
@@ -147,7 +147,7 @@ function RecipeEditorSheet({
                   className="recipe-source"
                   data-source={recipeSourceKind(recipe)}
                 >
-                  {recipeSourceLabel(recipe)}
+                  {recipeProvenance(recipe).label}
                 </span>
 
                 <strong className="recipe-view-name">{recipe.name}</strong>

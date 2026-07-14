@@ -2,16 +2,15 @@ import { useState } from "react";
 
 import {
   groupRecipesByCategory,
-  recipeSourceLabel,
+  recipeProvenance,
   recipeTags,
 } from "../utils/recipeUtils";
 
-const SOURCE_ORDER = [
-  "RecipeTin Eats",
-  "Original recipes",
-  "Restaurant quality",
-  "Custom",
-];
+// Display label used everywhere for a recipe's origin — Bistro / Bistro+ for the
+// app's own, the publication name for sourced ones.
+const sourceLabel = (recipe) => recipeProvenance(recipe).label;
+
+const SOURCE_ORDER = ["Bistro", "Bistro+", "RecipeTin Eats", "Your recipe"];
 
 // Shared recipe search + filter state (category / tags / source) so the Recipes
 // tab and the meal editor's picker narrow their lists identically. Returns the
@@ -47,7 +46,7 @@ export function useRecipeFilters(recipes) {
   const categories = ["All", ...recipeGroups.map((group) => group.category)];
   const allRecipes = recipeGroups.flatMap((group) => group.recipes);
 
-  const distinctSources = [...new Set(recipes.map(recipeSourceLabel))].sort(
+  const distinctSources = [...new Set(recipes.map(sourceLabel))].sort(
     (a, b) => {
       const aIndex = SOURCE_ORDER.indexOf(a);
       const bIndex = SOURCE_ORDER.indexOf(b);
@@ -75,7 +74,7 @@ export function useRecipeFilters(recipes) {
       activeCategories.has(recipe.category || "Other");
     const inSource =
       activeSources.size === 0 ||
-      activeSources.has(recipeSourceLabel(recipe));
+      activeSources.has(sourceLabel(recipe));
     const recipeTagList = recipe.tags || [];
     const inTag = selectedTags.every((tag) => recipeTagList.includes(tag));
 

@@ -1,6 +1,6 @@
 import { ChevronRight } from "lucide-react";
 
-import { getRecipeTone, recipeSourceLabel } from "../utils/recipeUtils";
+import { getRecipeTone, recipeProvenance } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
 import RecipeThumb from "./RecipeThumb";
 
@@ -11,7 +11,7 @@ import RecipeThumb from "./RecipeThumb";
 // is kept to one quiet line — category and source — with serves and tags left
 // to the recipe's own detail view.
 function RecipeCard({ recipe, active = false, onClick, coverage }) {
-  const meta = [recipe.category, recipeSourceLabel(recipe)]
+  const meta = [recipe.category, recipeProvenance(recipe).label]
     .filter(Boolean)
     .join(" · ");
 
