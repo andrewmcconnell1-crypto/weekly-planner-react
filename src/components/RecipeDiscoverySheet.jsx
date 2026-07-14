@@ -13,7 +13,7 @@ import {
 import RecipeDetail from "./RecipeDetail";
 import {
   recipeCategories,
-  recipeSourceLabel,
+  recipeProvenance,
   recipeTags,
 } from "../utils/recipeUtils";
 import { days } from "../utils/mealUtils";
@@ -629,7 +629,7 @@ function DeckCardBody({ recipe }) {
 
   return (
     <div className="discover-card-body">
-      <p className="discover-card-kicker">{recipeSourceLabel(recipe)}</p>
+      <p className="discover-card-kicker">{recipeProvenance(recipe).label}</p>
 
       <strong className="discover-card-name">{recipe.name}</strong>
 

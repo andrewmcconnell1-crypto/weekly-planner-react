@@ -204,8 +204,8 @@ export function recipeSourceKind(recipe) {
 // recipes carry a real source name + link; in-house originals don't.
 export function recipeProvenance(recipe) {
   const kind = recipeSourceKind(recipe);
-  if (kind === "ai") return { original: true, label: "Original" };
-  if (kind === "chef") return { original: true, label: "Restaurant" };
+  if (kind === "ai") return { original: true, label: "Bistro" };
+  if (kind === "chef") return { original: true, label: "Bistro+" };
   if (kind === "rte") return { original: false, label: "RecipeTin Eats" };
 
   // "custom": a web-sourced recipe (real source name / link) vs your own.
