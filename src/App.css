@@ -19,6 +19,10 @@
   --olive-soft: #edefdf;
   --primary: var(--olive);
   --primary-strong: #4c5530;
+  /* Hover fill for the base/primary button (white text sits on it, so it must
+     stay dark in both themes — unlike --primary-strong, which is a light text
+     accent in dark mode). */
+  --primary-hover: #4c5530;
   --rust: #bf5840;
   --rust-strong: #9c4632;
   --rust-soft: #f6e7df;
@@ -100,6 +104,9 @@ html[data-theme="dark"] {
   --olive-soft: #2e3421;
   --accent-strong: #c3cf88;
   --primary-strong: #c3cf88;
+  /* Button hover stays a deep olive (not the light --primary-strong accent), so
+     white button text keeps its contrast on hover. */
+  --primary-hover: #5f6a3a;
   --rust: #cf6d54;
   /* Text/icon rust for the dark rust-soft tiles — lightened so small badge
      text ("N short", chef source, takeaway) clears WCAG AA (was #b95c44 at
@@ -397,7 +404,7 @@ button {
 }
 
 button:hover {
-  background: var(--primary-strong);
+  background: var(--primary-hover);
 }
 
 button.secondary {
@@ -6128,6 +6135,13 @@ html[data-theme="dark"] .update-banner-button:hover {
   font-weight: var(--weight-semibold);
 }
 
+/* The light-cream conflict banner would be near-invisible cream-on-cream in
+   dark mode (its text is the light --ink), so give it a dark amber tint. */
+html[data-theme="dark"] .conflict-banner {
+  background: #362c15;
+  border-color: #574524;
+}
+
 .conflict-actions {
   display: flex;
   flex-shrink: 0;
@@ -7976,6 +7990,12 @@ html[data-theme="dark"] .update-banner-button:hover {
 }
 
 /* ===== Dark mode: fix hardcoded light surfaces/tints ===== */
+/* The page body keeps a hardcoded cream background, which flashes light behind
+   the dark shell on an overscroll bounce — match it to the dark canvas. */
+html[data-theme="dark"] body {
+  background: var(--bg);
+}
+
 /* Canvas: replace the cream top-wash with a subtle dark lift; drop the paper
    grain (its overlay blend greys out on a dark base) and the light halo shadow. */
 html[data-theme="dark"] .app-shell {
