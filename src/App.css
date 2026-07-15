@@ -5923,20 +5923,23 @@ html[data-theme="dark"] .update-banner-button:hover {
   margin: 0;
 }
 
+/* Google's branding keeps this button white in both themes, so its text,
+   border and hover are pinned to fixed values (not theme vars, which would
+   turn the text near-white on the white button in dark mode). */
 .auth-google {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-10);
   width: 100%;
-  border: 1px solid var(--line);
+  border: 1px solid #dadce0;
   background: #fff;
-  color: var(--ink);
+  color: #1f1f1f;
   font-weight: var(--weight-bold);
 }
 
 .auth-google:hover {
-  background: var(--soft);
+  background: #f5f5f5;
 }
 
 .auth-google svg {
