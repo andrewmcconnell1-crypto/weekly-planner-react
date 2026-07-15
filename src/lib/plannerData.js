@@ -37,6 +37,7 @@ export const DATA_KEYS = [
   "favouriteRecipeIds",
   "recipeRatings",
   "recipeNotes",
+  "seenAnnouncements",
   "settings",
   "ingredientGroups",
 ];
@@ -131,6 +132,9 @@ export function defaultData() {
     recipeRatings: {},
     // Your own free-text note per recipe (id -> string): tweaks, who liked it.
     recipeNotes: {},
+    // Ids of one-time "what's new" announcements the user has dismissed, so a
+    // feature nudge (e.g. the Recipes tab) shows once and then stays gone.
+    seenAnnouncements: [],
     settings: { ...defaultSettings },
     // User overrides for ingredient groups (canonicalKey -> overarching name),
     // layered over the seed catalog by the matcher.
@@ -187,6 +191,9 @@ export function normaliseData(raw) {
       : base.favouriteRecipeIds,
     recipeRatings: normaliseRatings(data.recipeRatings),
     recipeNotes: normaliseNotes(data.recipeNotes),
+    seenAnnouncements: Array.isArray(data.seenAnnouncements)
+      ? data.seenAnnouncements.filter((id) => typeof id === "string")
+      : base.seenAnnouncements,
     settings: normaliseSettings(data.settings),
     ingredientGroups:
       data.ingredientGroups && typeof data.ingredientGroups === "object"

@@ -56,6 +56,10 @@ import { useRecipeActions } from "./hooks/useRecipeActions";
 import BrandMark from "./components/BrandMark";
 import TabIcon from "./components/TabIcon";
 
+// Id of the current Home "what's new" nudge (the Recipes tab). Stored once
+// dismissed in seenAnnouncements; change it to surface a new announcement.
+const RECIPES_ANNOUNCEMENT = "recipes-tab-2026";
+
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   // Kitchen's three sections, shown as top tabs: Stock, Recurring, Baskets.
@@ -156,6 +160,8 @@ function App() {
     setRecipeRatings,
     recipeNotes,
     setRecipeNotes,
+    seenAnnouncements,
+    setSeenAnnouncements,
     settings,
     setSettings,
     ingredientGroups,
@@ -527,6 +533,22 @@ function App() {
     setWelcomeDismissedFor(welcomeSessionKey);
   }
 
+  // One-time "what's new" nudge on Home: shown to established users (past the
+  // getting-started card) who haven't dismissed it, pointing them at the
+  // Recipes tab. Persisted in seenAnnouncements so it shows once. Bump the id to
+  // announce a future feature.
+  const showWhatsNew =
+    !showWelcome &&
+    !(seenAnnouncements || []).includes(RECIPES_ANNOUNCEMENT);
+
+  function dismissWhatsNew() {
+    setSeenAnnouncements((current = []) =>
+      current.includes(RECIPES_ANNOUNCEMENT)
+        ? current
+        : [...current, RECIPES_ANNOUNCEMENT]
+    );
+  }
+
   function openSettings() {
     setSettingsReturnTab(activeTab === "settings" ? "home" : activeTab);
     setActiveTab("settings");
@@ -700,6 +722,8 @@ function App() {
           currentWeekStart={currentWeekStart}
           showWelcome={showWelcome}
           dismissWelcome={dismissWelcome}
+          showWhatsNew={showWhatsNew}
+          dismissWhatsNew={dismissWhatsNew}
           setActiveTab={setActiveTab}
           meals={currentWeekMeals}
           getMealSummary={getMealSummary}

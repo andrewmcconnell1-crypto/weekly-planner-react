@@ -7,7 +7,7 @@
 // Motion is decorative: every animated element lands on a sensible static state,
 // and App.css disables the keyframes under prefers-reduced-motion.
 
-import { ShoppingBasket } from "lucide-react";
+import { Heart, ShoppingBasket, Star } from "lucide-react";
 
 import DishGlyph from "./DishGlyph";
 
@@ -37,7 +37,72 @@ export function SceneMeals() {
   );
 }
 
-// 2 — Stock your kitchen: pantry staples, a check badge popping onto each.
+// 2 — Discover recipes: a pair of recipe "cover" tiles rise in — one already
+// five-starred with its heart filled, mirroring the Recipes tab where you
+// browse, rate and favourite dishes.
+export function SceneRecipes() {
+  const tiles = [
+    {
+      name: "Miso Butter Cod",
+      glyph: "fish",
+      tone: "seafood",
+      rating: 5,
+      fav: true,
+    },
+    {
+      name: "Thai Green Curry",
+      glyph: "pot",
+      tone: "chicken",
+      rating: 0,
+      fav: false,
+    },
+  ];
+
+  return (
+    <div className="wt-scene wt-scene-recipes" aria-hidden="true">
+      <div className="wt-tilegrid">
+        {tiles.map((tile, index) => (
+          <div
+            className={`wt-tile wt-tile-${tile.tone}`}
+            key={tile.name}
+            style={{ "--i": index }}
+          >
+            <DishGlyph glyph={tile.glyph} className="wt-tile-mark" />
+
+            <span
+              className={`wt-tile-heart ${tile.fav ? "is-fav" : ""}`}
+              style={{ "--i": index }}
+            >
+              <Heart
+                size={12}
+                fill={tile.fav ? "currentColor" : "none"}
+                aria-hidden="true"
+              />
+            </span>
+
+            <span className="wt-tile-kicker">Bistro</span>
+            <span className="wt-tile-name">{tile.name}</span>
+
+            {tile.rating > 0 && (
+              <span className="wt-tile-stars">
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <Star
+                    key={starIndex}
+                    size={9}
+                    fill={starIndex < tile.rating ? "currentColor" : "none"}
+                    aria-hidden="true"
+                  />
+                ))}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 3 — Stock your kitchen: pantry staples, a check badge popping onto each.
 export function SceneStock() {
   const items = [
     { glyph: "bottle", name: "Olive oil" },
@@ -63,7 +128,7 @@ export function SceneStock() {
   );
 }
 
-// 3 — The list builds itself: items fly into a list from your meals + recurring
+// 4 — The list builds itself: items fly into a list from your meals + recurring
 // buys, and anything already in stock is struck through and skipped. This is the
 // centrepiece, reused at the top of the shopping explainer.
 export function SceneList() {
@@ -108,7 +173,7 @@ export function SceneList() {
   );
 }
 
-// 4 — Shop and tick off: rows check off in sequence, the progress bar fills,
+// 5 — Shop and tick off: rows check off in sequence, the progress bar fills,
 // and a little celebration lands at the end.
 export function SceneShop() {
   const rows = ["Chicken thighs", "Basmati rice", "Milk", "Coriander"];
@@ -136,7 +201,7 @@ export function SceneShop() {
   );
 }
 
-// 5 — Plan from your shop: pick a saved basket and the app shows which recipes
+// 6 — Plan from your shop: pick a saved basket and the app shows which recipes
 // it can already cook, ready to drop onto a night.
 export function SceneBaskets() {
   const rows = [
