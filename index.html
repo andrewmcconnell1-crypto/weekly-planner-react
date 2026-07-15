@@ -31,11 +31,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Bistro" />
     <title>Bistro — weekly meal planner</title>
-    <!-- Apply the saved theme before paint so there's no light flash in dark mode. -->
+    <!-- Apply the saved theme before paint so there's no flash. New visitors
+         default to dark; Light / System (from Settings) override it. -->
     <script>
       (function () {
         try {
-          var saved = localStorage.getItem("theme") || "system";
+          var saved = localStorage.getItem("theme") || "dark";
           var dark =
             saved === "dark" ||
             (saved === "system" &&
@@ -46,7 +47,7 @@
             dark ? "dark" : "light"
           );
         } catch (e) {
-          document.documentElement.setAttribute("data-theme", "light");
+          document.documentElement.setAttribute("data-theme", "dark");
         }
       })();
     </script>
