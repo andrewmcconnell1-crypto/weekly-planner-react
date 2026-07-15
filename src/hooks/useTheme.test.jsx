@@ -42,11 +42,11 @@ describe("useTheme", () => {
     const user = userEvent.setup();
     render(<Harness />);
 
-    await user.click(screen.getByText("dark"));
+    await user.click(screen.getByRole("button", { name: "dark" }));
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     expect(localStorage.getItem("theme")).toBe("dark");
 
-    await user.click(screen.getByText("light"));
+    await user.click(screen.getByRole("button", { name: "light" }));
     expect(document.documentElement.getAttribute("data-theme")).toBe("light");
   });
 
@@ -55,6 +55,13 @@ describe("useTheme", () => {
     localStorage.setItem("theme", "system");
     render(<Harness />);
     expect(screen.getByTestId("theme")).toHaveTextContent("system");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+  });
+
+  it("defaults new visitors to dark, regardless of the OS preference", () => {
+    mockMatchMedia(false); // OS not dark — the default should still be dark
+    render(<Harness />);
+    expect(screen.getByTestId("theme")).toHaveTextContent("dark");
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
   });
 });

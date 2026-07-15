@@ -1,4 +1,4 @@
-# Ladle
+# Bistro
 
 A mobile-first weekly meal planner and shopping-list generator for a household.
 Plan meals for a week, keep a list of recurring buys and pantry stock, then
@@ -90,17 +90,25 @@ mode) the import UI stays hidden and everything else works as before.
 
 ## How it works
 
-The app has four tabs:
+The app has five tabs:
 
 - **Home** – overview of the shopping week: meals planned, due recurring buys,
   and additions to buy. The primary button generates / refreshes the list.
 - **Plan** – set a meal for each day. Each day can be a saved **recipe**, a
   **custom** meal with its own ingredients, a **repeat** of another day,
   **takeaway**, or **eating out**.
+- **Recipes** – browse the whole recipe library as a tile grid, with search and
+  filters, a personal 1–5 star rating and favourites per recipe, a cooked-times
+  badge, and a **For you** discovery feed (recommendations from your ratings
+  plus curated collections).
 - **Shop** – the generated shopping list, grouped by category, plus a list of
   recurring buys to remove because they're already in stock.
-- **More** – manage recipes, household basics (recurring buys + pantry stock),
-  and settings.
+- **Kitchen** – pantry stock, recurring buys, and saved shopping baskets, across
+  three sub-tabs (Stock / Recurring / Baskets).
+
+Settings open from the header. Recipes carry a provenance label — **Bistro** and
+**Bistro+** for the app's own originals, or the publication name for imported
+ones.
 
 A "shopping week" and a "planning week" are tracked independently and default to
 next week.

@@ -21,6 +21,8 @@ export default function HomeScreen({
   currentWeekStart,
   showWelcome,
   dismissWelcome,
+  showWhatsNew,
+  dismissWhatsNew,
   setActiveTab,
   meals,
   getMealSummary,
@@ -92,47 +94,82 @@ export default function HomeScreen({
             </button>
           </div>
         </div>
-      ) : (
-        showWelcome && (
-          <div className="welcome-card">
+      ) : showWelcome ? (
+        <div className="welcome-card">
+          <button
+            type="button"
+            className="welcome-dismiss"
+            aria-label="Dismiss"
+            onClick={dismissWelcome}
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+
+          <p className="section-kicker">Getting started</p>
+          <strong>New here? Take the 60-second tour</strong>
+          <p className="welcome-lede">
+            See how planning meals, stocking your kitchen, and an auto-building
+            shopping list fit together — with a quick animated walkthrough.
+          </p>
+
+          <div className="welcome-actions">
             <button
               type="button"
-              className="welcome-dismiss"
-              aria-label="Dismiss"
-              onClick={dismissWelcome}
+              className="primary-button welcome-cta with-icon"
+              onClick={openWalkthrough}
             >
-              <X size={16} aria-hidden="true" />
+              <PlayCircle size={16} aria-hidden="true" />
+              Take the tour
             </button>
 
-            <p className="section-kicker">Getting started</p>
-            <strong>New here? Take the 60-second tour</strong>
-            <p className="welcome-lede">
-              See how planning meals, stocking your kitchen, and an
-              auto-building shopping list fit together — with a quick animated
-              walkthrough.
-            </p>
-
-            <div className="welcome-actions">
-              <button
-                type="button"
-                className="primary-button welcome-cta with-icon"
-                onClick={openWalkthrough}
-              >
-                <PlayCircle size={16} aria-hidden="true" />
-                Take the tour
-              </button>
-
-              <button
-                type="button"
-                className="welcome-skip"
-                onClick={() => setActiveTab("plan")}
-              >
-                Skip — start planning
-              </button>
-            </div>
+            <button
+              type="button"
+              className="welcome-skip"
+              onClick={() => setActiveTab("plan")}
+            >
+              Skip — start planning
+            </button>
           </div>
-        )
-      )}
+        </div>
+      ) : showWhatsNew ? (
+        <div className="welcome-card">
+          <button
+            type="button"
+            className="welcome-dismiss"
+            aria-label="Dismiss"
+            onClick={dismissWhatsNew}
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+
+          <p className="section-kicker">New</p>
+          <strong>Recipes have their own tab now</strong>
+          <p className="welcome-lede">
+            Browse every recipe as tiles, rate what you cook, save favourites,
+            and get “For you” picks tuned to your ratings — all on the new
+            Recipes tab.
+          </p>
+
+          <div className="welcome-actions">
+            <button
+              type="button"
+              className="primary-button welcome-cta with-icon"
+              onClick={() => setActiveTab("recipes")}
+            >
+              <ArrowRight size={16} aria-hidden="true" />
+              Explore recipes
+            </button>
+
+            <button
+              type="button"
+              className="welcome-skip"
+              onClick={dismissWhatsNew}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* The shopping card is noise before anything's planned — nothing to buy
           yet. Show it once the week has meals or there's actually a list. */}

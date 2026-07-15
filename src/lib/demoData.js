@@ -1,3 +1,4 @@
+import { defaultData } from "./plannerData";
 import { initialRecipes } from "../data/initialRecipes";
 import { initialStaples } from "../data/initialStaples";
 import { commonInventoryItems } from "../data/commonInventory";
@@ -105,12 +106,14 @@ export function demoData() {
     shoppingChecked[item.id] = true;
   });
 
+  // Start from the full default shape so every persisted key is present (baskets,
+  // basketByWeek, deletedRecipeIds, ingredientGroups, seenAnnouncements, …), then
+  // layer the demo content on top. Building on defaultData() keeps this from
+  // drifting out of sync with DATA_KEYS and crashing guest mode on a missing key.
+  const base = defaultData();
   return {
+    ...base,
     mealsByWeek,
-    shoppingItemsByWeek: {},
-    shoppingListMetaByWeek: {},
-    removalAcksByWeek: {},
-    recurringCheckedByWeek: {},
     shoppingChecked,
     manualShoppingItems,
     staples,
@@ -131,6 +134,6 @@ export function demoData() {
       "slow-cooker-pulled-pork":
         "Start it before work — falls apart by dinner. Great in rolls with slaw.",
     },
-    settings: { keepStandingList: true, shopUsingSavedList: true },
+    settings: { ...base.settings, keepStandingList: true, shopUsingSavedList: true },
   };
 }

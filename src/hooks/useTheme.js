@@ -26,9 +26,11 @@ function apply(theme) {
 export function useTheme() {
   const [theme, setThemeState] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) || "system";
+      // New visitors default to dark; picking Light or System from Settings
+      // overrides it (and persists), so the toggle stays fully in control.
+      return localStorage.getItem(STORAGE_KEY) || "dark";
     } catch {
-      return "system";
+      return "dark";
     }
   });
 
