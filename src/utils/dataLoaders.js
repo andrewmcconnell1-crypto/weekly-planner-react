@@ -196,7 +196,12 @@ function normaliseRecipe(recipe, index) {
 // v33: tag fix — seafood dishes with less-common fish (cod, barramundi,
 // scallops…) were being mislabelled Vegetarian; MEAT_HINTS now covers them so
 // built-ins re-derive correct tags.
-export const RECIPES_VERSION = 33;
+// v34: refresh built-in tags so filtering is consistent across accounts. Older
+// accounts kept stale tags on some built-ins (e.g. Baked Chicken Parmesan
+// lacked "One-pot"/"Kid-friendly"), so the same filter matched different
+// recipes on different devices. Also picks up the two new one-pot chicken
+// recipes' tags. (A bump refreshes built-in content to the current bundle.)
+export const RECIPES_VERSION = 34;
 
 export function mergeSavedRecipes(
   parsedRecipes,
