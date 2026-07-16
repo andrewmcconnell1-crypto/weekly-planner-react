@@ -474,6 +474,64 @@ textarea:focus-visible {
   padding: var(--space-8) var(--space-4) var(--space-4);
 }
 
+/* Header right-side actions: the share button sits beside the account avatar. */
+.app-header-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.app-header-actions .header-profile {
+  margin-top: 0;
+}
+
+.header-icon-button {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header-icon-button:hover,
+.header-icon-button:focus-visible {
+  background: var(--soft);
+  color: var(--ink);
+}
+
+/* Confirmation toast for the clipboard fallback (desktop, no native share). */
+.share-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%);
+  z-index: 60;
+  margin: 0;
+  padding: var(--space-8) var(--space-14);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--shadow-lg);
+  animation: share-toast-in 200ms var(--ease-out);
+}
+
+@keyframes share-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
 .header-profile {
   flex-shrink: 0;
   display: grid;

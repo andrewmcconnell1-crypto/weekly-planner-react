@@ -53,6 +53,8 @@ import { useMealPlanActions } from "./hooks/useMealPlanActions";
 import { useShoppingActions } from "./hooks/useShoppingActions";
 import { useHouseholdActions } from "./hooks/useHouseholdActions";
 import { useRecipeActions } from "./hooks/useRecipeActions";
+import { useShareApp } from "./hooks/useShareApp";
+import { Share2 } from "lucide-react";
 import BrandMark from "./components/BrandMark";
 import TabIcon from "./components/TabIcon";
 
@@ -176,6 +178,9 @@ function App() {
     captureRecoverySnapshot,
     restoreRecoverySnapshot,
   } = usePlannerStore(user, guest, household.ownerId);
+
+  // Native share sheet / clipboard fallback for the header + Settings buttons.
+  const { shareApp, shareStatus } = useShareApp();
 
   const favouriteRecipeIdSet = useMemo(
     () => new Set(favouriteRecipeIds),
@@ -654,9 +659,25 @@ function App() {
         </div>
 
         {activeTab !== "settings" && (
-          <ProfileButton user={user} guest={guest} onClick={openSettings} />
+          <div className="app-header-actions">
+            <button
+              type="button"
+              className="header-icon-button"
+              aria-label="Share this app"
+              onClick={shareApp}
+            >
+              <Share2 size={18} aria-hidden="true" />
+            </button>
+            <ProfileButton user={user} guest={guest} onClick={openSettings} />
+          </div>
         )}
       </header>
+
+      {shareStatus && (
+        <p className="share-toast" role="status">
+          {shareStatus}
+        </p>
+      )}
 
       {syncError && (
         <p className="sync-banner" role="status">
