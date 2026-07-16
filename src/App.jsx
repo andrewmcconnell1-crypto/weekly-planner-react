@@ -62,6 +62,10 @@ import TabIcon from "./components/TabIcon";
 // dismissed in seenAnnouncements; change it to surface a new announcement.
 const RECIPES_ANNOUNCEMENT = "recipes-tab-2026";
 
+// Marker (in seenAnnouncements) that the getting-started tour has already
+// auto-opened on this account, so it only ever pops up once on its own.
+const TOUR_AUTOSHOWN = "tour-autoshown";
+
 function App() {
   const [activeTab, setActiveTab] = useState("home");
   // Kitchen's three sections, shown as top tabs: Stock, Recurring, Baskets.
@@ -109,6 +113,8 @@ function App() {
   const [shoppingHelpOpen, setShoppingHelpOpen] = useState(false);
   const [stockCatalogOpen, setStockCatalogOpen] = useState(false);
   const [walkthroughOpen, setWalkthroughOpen] = useState(false);
+  // Guards the one-time first-run auto-open of the tour (see below).
+  const [tourAutoHandled, setTourAutoHandled] = useState(false);
   // A ?join=CODE from an invite link, captured (and stripped from the URL) once
   // on load. Drives the invite banner and prefills the Household join field.
   const [pendingJoinCode, setPendingJoinCode] = useState(captureJoinCodeFromUrl);
@@ -181,6 +187,15 @@ function App() {
 
   // Native share sheet / clipboard fallback for the header + Settings buttons.
   const { shareApp, shareStatus } = useShareApp();
+
+  // Record that the tour has been shown, so the first-run auto-open (further
+  // down, past the loading/auth gates) never fires again. Called when the tour
+  // is closed or finished — an event handler, so setState here is fine.
+  function markTourAutoShown() {
+    setSeenAnnouncements((current = []) =>
+      current.includes(TOUR_AUTOSHOWN) ? current : [...current, TOUR_AUTOSHOWN]
+    );
+  }
 
   const favouriteRecipeIdSet = useMemo(
     () => new Set(favouriteRecipeIds),
@@ -491,6 +506,35 @@ function App() {
     welcomeDismissedFor,
     welcomePreview,
   });
+
+  // First-run onboarding: on a friend's very first visit — a brand-new account
+  // with nothing planned yet — open the getting-started tour once automatically,
+  // rather than only offering it. This sits past the loading/auth gates above, so
+  // it only runs once we're actually inside the app (never over the sign-in
+  // screen). `tourAutoHandled` limits it to a single trigger per load; closing
+  // the tour records TOUR_AUTOSHOWN so it never re-opens on later visits. Skipped
+  // for the pre-populated guest demo and for anyone who has already planned a
+  // meal. It's a guarded state update during render (not an effect), so it costs
+  // one extra render and no more.
+  if (
+    !tourAutoHandled &&
+    !guest &&
+    !(seenAnnouncements || []).includes(TOUR_AUTOSHOWN) &&
+    !Object.values(mealsByWeek || {}).some(
+      (week) =>
+        week &&
+        Object.values(week).some(
+          (meal) =>
+            meal &&
+            (meal.name ||
+              meal.recipeId ||
+              (meal.mealType && meal.mealType !== "cook"))
+        )
+    )
+  ) {
+    setTourAutoHandled(true);
+    setWalkthroughOpen(true);
+  }
 
   // Group-name suggestions for the stock / recurring editors' datalist.
   const availableGroups = listKnownGroups(ingredientGroups);
@@ -1037,9 +1081,13 @@ function App() {
         >
           <Suspense fallback={null}>
             <WalkthroughSheet
-              onClose={() => setWalkthroughOpen(false)}
+              onClose={() => {
+                setWalkthroughOpen(false);
+                markTourAutoShown();
+              }}
               onStartPlanning={() => {
                 setWalkthroughOpen(false);
+                markTourAutoShown();
                 setActiveTab("plan");
               }}
             />
