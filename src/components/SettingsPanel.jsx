@@ -24,7 +24,7 @@ import AccountSettings from "./AccountSettings";
 import ProfileAvatar from "./ProfileAvatar";
 import SettingsSection from "./SettingsSection";
 import { profileIdentity } from "../utils/profile";
-import { appBaseUrl } from "../lib/household";
+import { useShareApp } from "../hooks/useShareApp";
 
 const APP_VERSION = "1.0.0";
 
@@ -102,36 +102,14 @@ function SettingsPanel({
 }) {
   const fileInputRef = useRef(null);
   const [status, setStatus] = useState(null);
-  const [shareStatus, setShareStatus] = useState(null);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   // Read the recovery points once when the panel opens; refresh after a restore.
   const [snapshots, setSnapshots] = useState(
     () => getRecoverySnapshots?.() ?? []
   );
 
-  async function shareApp() {
-    const url = appBaseUrl();
-    const text =
-      "Weekly meal planner — plan meals and build a shopping list. " +
-      "Open the link, then add it to your home screen to use it like an app " +
-      "(on iPhone: tap Share, then Add to Home Screen).";
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Weekly meal planner", text, url });
-        return;
-      } catch {
-        // Cancelled or unsupported — fall back to copying the link.
-      }
-    }
-    try {
-      // Copy the note with the link so the install tip travels too.
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      setShareStatus("Message copied.");
-      window.setTimeout(() => setShareStatus(null), 2000);
-    } catch {
-      // Clipboard blocked; nothing else to do.
-    }
-  }
+  // Native share sheet / clipboard fallback, shared with the header button.
+  const { shareApp, shareStatus } = useShareApp();
 
   function handleRestoreSnapshot(snapshot) {
     const when = new Date(snapshot.takenAt).toLocaleString();
