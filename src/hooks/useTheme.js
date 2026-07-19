@@ -19,8 +19,18 @@ function resolved(theme) {
   return prefersDark() ? "dark" : "light";
 }
 
+// Browser-chrome colour per theme: the dark canvas, or the brand terracotta on
+// light. Must match the values in index.html's pre-paint script and App.css.
+const THEME_COLORS = { dark: "#231f16", light: "#bf5840" };
+
 function apply(theme) {
-  document.documentElement.setAttribute("data-theme", resolved(theme));
+  const mode = resolved(theme);
+  document.documentElement.setAttribute("data-theme", mode);
+  // Keep the browser/PWA chrome (Android address bar, installed title bar) in
+  // step with the applied theme instead of pinned to the light-mode terracotta.
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", THEME_COLORS[mode]);
 }
 
 export function useTheme() {

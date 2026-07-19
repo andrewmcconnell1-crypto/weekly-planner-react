@@ -50,6 +50,12 @@
             "data-theme",
             dark ? "dark" : "light"
           );
+          // Match the browser chrome to the theme before paint (dark canvas vs
+          // the light-mode terracotta). Values mirror useTheme.js.
+          var themeMeta = document.querySelector('meta[name="theme-color"]');
+          if (themeMeta) {
+            themeMeta.setAttribute("content", dark ? "#231f16" : "#bf5840");
+          }
         } catch (e) {
           document.documentElement.setAttribute("data-theme", "dark");
         }
