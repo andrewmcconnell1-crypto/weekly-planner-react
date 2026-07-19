@@ -188,13 +188,18 @@ function App() {
   // Native share sheet / clipboard fallback for the header + Settings buttons.
   const { shareApp, shareStatus } = useShareApp();
 
-  // Record that the tour has been shown, so the first-run auto-open (further
-  // down, past the loading/auth gates) never fires again. Called when the tour
-  // is closed or finished — an event handler, so setState here is fine.
-  function markTourAutoShown() {
-    setSeenAnnouncements((current = []) =>
-      current.includes(TOUR_AUTOSHOWN) ? current : [...current, TOUR_AUTOSHOWN]
-    );
+  // Record that the tour has been seen, so the first-run auto-open (further
+  // down, past the loading/auth gates) never fires again. The tour includes the
+  // Recipes step, so it also retires the Recipes "what's new" card — announcing
+  // a tab someone just toured is noise. Called when the tour is closed or
+  // finished — an event handler, so setState here is fine.
+  function markTourSeen() {
+    setSeenAnnouncements((current = []) => {
+      const next = [TOUR_AUTOSHOWN, RECIPES_ANNOUNCEMENT].filter(
+        (id) => !current.includes(id)
+      );
+      return next.length ? [...current, ...next] : current;
+    });
   }
 
   const favouriteRecipeIdSet = useMemo(
@@ -1083,11 +1088,11 @@ function App() {
             <WalkthroughSheet
               onClose={() => {
                 setWalkthroughOpen(false);
-                markTourAutoShown();
+                markTourSeen();
               }}
               onStartPlanning={() => {
                 setWalkthroughOpen(false);
-                markTourAutoShown();
+                markTourSeen();
                 setActiveTab("plan");
               }}
             />
