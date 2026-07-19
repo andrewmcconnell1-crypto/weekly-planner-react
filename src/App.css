@@ -85,23 +85,26 @@
 /* Dark theme: override the semantic colour tokens (everything else keys off
    these). A warm charcoal keeps the calm, cosy feel rather than a cold grey. */
 html[data-theme="dark"] {
-  --bg: #17150f;
-  --surface: #211e17;
-  --panel: #211e17;
+  /* Warm charcoal, lifted off near-black: the canvas sits a step up from black
+     and the panel a clear step above the canvas, so cards read as floating
+     rather than dissolving into one dark-on-dark mass. */
+  --bg: #231f16;
+  --surface: #34301f;
+  --panel: #34301f;
   --ink: #f1eadc;
-  --muted: #a89e8b;
+  --muted: #ab9f8b;
   /* Hairlines need to sit clearly above the surface in dark mode, or cards and
      dividers dissolve into the background. --line is the everyday hairline;
      --line-strong outlines structural containers (cards, accordions, headers). */
-  --line: #4a4336;
-  --line-strong: #5f5747;
-  --soft: #2b2820;
-  --field: #181510;
+  --line: #5f5643;
+  --line-strong: #736a55;
+  --soft: #423c28;
+  --field: #1c1810;
   /* Olive for buttons stays a saturated mid-tone (white text reads on it);
      olive-soft becomes a dark tint for chips/tiles, with a light accent-strong
      for text/icons sitting on those tiles. */
   --olive: #7c8a4b;
-  --olive-soft: #2e3421;
+  --olive-soft: #3a4129;
   --accent-strong: #c3cf88;
   --primary-strong: #c3cf88;
   /* Button hover stays a deep olive (not the light --primary-strong accent), so
@@ -112,9 +115,9 @@ html[data-theme="dark"] {
      text ("N short", chef source, takeaway) clears WCAG AA (was #b95c44 at
      3.1:1 on --rust-soft). Only ever sits on dark backgrounds. */
   --rust-strong: #dd8168;
-  --rust-soft: #3a271f;
+  --rust-soft: #4a3327;
   --danger: #e2745f;
-  --meal-tone: #38321f;
+  --meal-tone: #453d22;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -10px rgba(0, 0, 0, 0.55);
   --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.4), 0 24px 48px -16px rgba(0, 0, 0, 0.65);
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -3993,7 +3996,7 @@ input[type="number"] {
 
 /* Keep the frosted bar dark in dark mode instead of the light fallback. */
 html[data-theme="dark"] .recipes-modes-bar {
-  background: rgba(23, 21, 15, 0.86);
+  background: rgba(35, 31, 22, 0.86);
 }
 
 /* Segmented sub-nav (Browse / For you / Favourites) — one control, the active
@@ -8066,13 +8069,13 @@ html[data-theme="dark"] .app-shell {
 }
 
 html[data-theme="dark"] .bottom-nav {
-  background: rgba(28, 25, 20, 0.985);
+  background: rgba(50, 45, 30, 0.985);
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
 }
 
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html[data-theme="dark"] .bottom-nav {
-    background: rgba(28, 25, 20, 0.82);
+    background: rgba(50, 45, 30, 0.82);
   }
 }
 
@@ -8084,7 +8087,7 @@ html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle,
 html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle[aria-expanded="true"],
 html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle:hover,
 html[data-theme="dark"] :is(.inventory-panel, .staples-panel) .category-toggle:focus-visible {
-  background: rgba(23, 21, 15, 0.82);
+  background: rgba(35, 31, 22, 0.82);
 }
 
 /* Structural containers get the stronger hairline so cards, accordions and
