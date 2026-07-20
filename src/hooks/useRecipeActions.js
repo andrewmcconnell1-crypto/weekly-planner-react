@@ -47,6 +47,7 @@ export function useRecipeActions({
         ingredients: [],
         method: "",
         serves: defaultServings,
+        addedOn: new Date().toISOString(),
       },
     ]);
 
@@ -72,6 +73,7 @@ export function useRecipeActions({
         serves: parsed.serves ?? defaultServings,
         tags: deriveRecipeTags(parsed),
         timeMins: parsed.timeMins ?? null,
+        addedOn: new Date().toISOString(),
       },
     ]);
 

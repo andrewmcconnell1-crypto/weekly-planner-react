@@ -18,7 +18,17 @@ import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 
 const SOURCE = "Original recipes";
 
-function aiRecipe({ id, name, category, ingredients, method, timeMins = null }) {
+function aiRecipe({
+  id,
+  name,
+  category,
+  ingredients,
+  method,
+  timeMins = null,
+  // ISO date the recipe joined the library, so the Recipes tab can sort by
+  // newest and badge recent additions. Older bundled recipes leave this unset.
+  addedOn = null,
+}) {
   return {
     id,
     name,
@@ -29,6 +39,7 @@ function aiRecipe({ id, name, category, ingredients, method, timeMins = null }) 
     method,
     tags: deriveRecipeTags({ name, category, ingredients }),
     timeMins,
+    addedOn,
   };
 }
 
@@ -1829,6 +1840,7 @@ export const aiRecipes = [
   }),
   aiRecipe({
     id: "one-pot-chicken-meatball-orzo",
+    addedOn: "2026-07-16",
     name: "One-Pot Chicken Meatball Orzo",
     category: "Chicken",
     ingredients: [
@@ -1861,6 +1873,7 @@ export const aiRecipes = [
   }),
   aiRecipe({
     id: "spaghetti-aglio-e-olio",
+    addedOn: "2026-07-20",
     name: "Spaghetti Aglio e Olio",
     category: "Pasta",
     ingredients: [
@@ -1883,6 +1896,7 @@ export const aiRecipes = [
   }),
   aiRecipe({
     id: "creamy-pesto-chicken-pasta",
+    addedOn: "2026-07-20",
     name: "Creamy Pesto Chicken Pasta",
     category: "Chicken",
     ingredients: [
@@ -1909,6 +1923,7 @@ export const aiRecipes = [
   }),
   aiRecipe({
     id: "penne-arrabbiata",
+    addedOn: "2026-07-20",
     name: "Penne all'Arrabbiata",
     category: "Pasta",
     ingredients: [
