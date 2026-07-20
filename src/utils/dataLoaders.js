@@ -86,6 +86,9 @@ function normaliseRecipe(recipe, index) {
       recipe.serves != null && recipe.serves !== "" ? recipe.serves : null,
     tags: Array.isArray(recipe.tags) ? recipe.tags : [],
     timeMins: typeof recipe.timeMins === "number" ? recipe.timeMins : null,
+    // ISO date the recipe was added, driving the "Newest" sort and "New" badge.
+    // Absent on older recipes — treated as "established" everywhere it's read.
+    addedOn: typeof recipe.addedOn === "string" ? recipe.addedOn : null,
   };
 }
 

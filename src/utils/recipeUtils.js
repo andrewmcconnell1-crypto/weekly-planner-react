@@ -158,6 +158,19 @@ export function deriveRecipeTags({ name = "", category = "", ingredients = [] })
   return recipeTags.filter((tag) => tags.has(tag));
 }
 
+// How long a freshly-added recipe wears its "New" badge.
+export const NEW_RECIPE_WINDOW_DAYS = 60;
+
+// Whether a recipe was added recently enough to badge as "New". Recipes without
+// an addedOn date (the established library) are never new. Reads the device
+// clock, so the badge quietly ages out on its own.
+export function isRecentlyAdded(addedOn, now = Date.now()) {
+  if (!addedOn) return false;
+  const added = Date.parse(addedOn);
+  if (Number.isNaN(added)) return false;
+  return now - added <= NEW_RECIPE_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+}
+
 export function isQuickRecipe(recipe) {
   if ((recipe.tags || []).includes("Quick")) return true;
   return recipe.timeMins != null && recipe.timeMins <= QUICK_MAX_MINS;

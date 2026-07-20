@@ -4237,6 +4237,21 @@ html[data-theme="dark"] .recipes-modes-bar {
   flex-shrink: 0;
 }
 
+/* "New" pill, inline at the start of the kicker so it never collides with the
+   cookable badge or heart. Filled gold on dark text — reads as fresh. */
+.recipe-tile-new {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: #ffdf9e;
+  color: #3a2a12;
+  font-size: 9px;
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: none;
+}
+
 .recipe-tile-name {
   margin: 0;
   font-family: var(--font-display);

@@ -13,7 +13,17 @@ import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 
 const SOURCE = "Restaurant quality";
 
-function chefRecipe({ id, name, category, ingredients, method, timeMins = null }) {
+function chefRecipe({
+  id,
+  name,
+  category,
+  ingredients,
+  method,
+  timeMins = null,
+  // ISO date the recipe joined the library (see aiRecipes.js). Older bundled
+  // recipes leave this unset.
+  addedOn = null,
+}) {
   return {
     id,
     name,
@@ -24,6 +34,7 @@ function chefRecipe({ id, name, category, ingredients, method, timeMins = null }
     method,
     tags: deriveRecipeTags({ name, category, ingredients }),
     timeMins,
+    addedOn,
   };
 }
 
@@ -365,6 +376,7 @@ export const chefRecipes = [
   }),
   chefRecipe({
     id: "one-pot-chicken-bacon-mac",
+    addedOn: "2026-07-16",
     name: "One-Pot Chicken & Bacon Macaroni Cheese",
     category: "Chicken",
     ingredients: [
@@ -397,6 +409,7 @@ export const chefRecipes = [
   }),
   chefRecipe({
     id: "spaghetti-alle-vongole",
+    addedOn: "2026-07-20",
     name: "Spaghetti alle Vongole",
     category: "Seafood",
     ingredients: [
@@ -423,6 +436,7 @@ export const chefRecipes = [
   }),
   chefRecipe({
     id: "rigatoni-allamatriciana",
+    addedOn: "2026-07-20",
     name: "Rigatoni all'Amatriciana",
     category: "Pork",
     ingredients: [
@@ -447,6 +461,7 @@ export const chefRecipes = [
   }),
   chefRecipe({
     id: "pappardelle-lamb-ragu",
+    addedOn: "2026-07-20",
     name: "Pappardelle with Lamb Ragù",
     category: "Lamb",
     ingredients: [

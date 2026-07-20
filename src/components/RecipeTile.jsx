@@ -1,6 +1,6 @@
 import { CalendarPlus, Clock, CookingPot, Heart } from "lucide-react";
 
-import { recipeProvenance } from "../utils/recipeUtils";
+import { isRecentlyAdded, recipeProvenance } from "../utils/recipeUtils";
 import { recipeImagery } from "../utils/recipeImagery";
 import DishGlyph from "./DishGlyph";
 import StarRating from "./StarRating";
@@ -22,6 +22,7 @@ function RecipeTile({
 }) {
   const imagery = recipeImagery(recipe);
   const provenance = recipeProvenance(recipe);
+  const isNew = isRecentlyAdded(recipe.addedOn);
 
   return (
     <div
@@ -61,6 +62,7 @@ function RecipeTile({
             provenance.original ? "is-original" : ""
           }`}
         >
+          {isNew && <span className="recipe-tile-new">New</span>}
           {provenance.label}
         </span>
 

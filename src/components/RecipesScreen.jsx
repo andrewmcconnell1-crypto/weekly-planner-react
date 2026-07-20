@@ -35,6 +35,7 @@ const MODES = [
 
 const SORTS = [
   { key: "mixed", label: "Mixed" },
+  { key: "newest", label: "Newest" },
   { key: "toprated", label: "Top rated" },
   { key: "az", label: "A–Z" },
   { key: "quick", label: "Quickest" },
@@ -59,6 +60,14 @@ function sortRecipes(list, sort, ratings = {}, seed = 0) {
     const t = (recipe) => recipe.timeMins || Infinity;
     return [...list].sort(
       (a, b) => t(a) - t(b) || a.name.localeCompare(b.name)
+    );
+  }
+  if (sort === "newest") {
+    // Recently added first (by addedOn); the undated established library keeps a
+    // stable A–Z order beneath them.
+    const d = (recipe) => (recipe.addedOn ? Date.parse(recipe.addedOn) : 0);
+    return [...list].sort(
+      (a, b) => d(b) - d(a) || a.name.localeCompare(b.name)
     );
   }
   if (sort === "toprated") {
