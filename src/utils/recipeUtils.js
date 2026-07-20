@@ -43,7 +43,7 @@ const MEAT_HINTS = [
   "chorizo", "prawn", "shrimp", "fish", "salmon", "tuna", "anchovy", "turkey",
   "prosciutto", "pancetta", "steak", "kofta", "veal", "duck", "brisket",
   "bratwurst", "cod", "seafood", "calamari", "squid", "mussel", "scallop",
-  "barramundi", "snapper", "crab",
+  "barramundi", "snapper", "crab", "clam",
 ];
 const KID_HINTS = [
   "nugget", "sausage", "meatball", "mac and cheese", "macaroni", "pizza",
@@ -93,7 +93,7 @@ const BEEF_HINTS = [
 const LAMB_HINTS = ["lamb"];
 const SEAFOOD_HINTS = [
   "salmon", "fish", "prawn", "shrimp", "tuna", "cod", "seafood", "calamari",
-  "squid", "mussel", "scallop", "barramundi", "snapper", "crab",
+  "squid", "mussel", "scallop", "barramundi", "snapper", "crab", "clam",
 ];
 const PORK_HINTS = [
   "pork", "bacon", "ham", "sausage", "chorizo", "prosciutto", "pancetta",
