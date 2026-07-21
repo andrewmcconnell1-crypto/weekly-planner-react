@@ -113,6 +113,40 @@ describe("useMealPlanActions — swapMealDays", () => {
     expect(next.Thursday.repeatFromDay).toBe("Wednesday");
   });
 
+  it("pushes leftovers along when a cook is dropped onto its own leftover", () => {
+    // The reported bug: Mon cook, Tue its leftovers, Wed another cook. Dragging
+    // Monday forward onto its own Tuesday leftover should push the leftovers to
+    // Wednesday and bring Wednesday's meal back to Monday — not do nothing.
+    const meals = {
+      Monday: cook("Roast"),
+      Tuesday: repeat("Monday"),
+      Wednesday: cook("Curry"),
+    };
+    const { result, setMealsByWeek, mealWeekKey } = setup(meals);
+
+    result.current.swapMealDays("Monday", "Tuesday");
+
+    const next = setMealsByWeek.mock.calls[0][0][mealWeekKey];
+    expect(next.Monday.name).toBe("Curry");
+    expect(next.Tuesday.name).toBe("Roast");
+    expect(next.Tuesday.mealType).toBe("cook");
+    expect(next.Wednesday.mealType).toBe("repeat");
+    expect(next.Wednesday.repeatFromDay).toBe("Tuesday");
+  });
+
+  it("does nothing when a block dropped on its own leftover has no neighbour", () => {
+    // Cook + leftovers with nothing after them: there's no block to push into,
+    // so the drag is a no-op rather than corrupting the plan.
+    const meals = {
+      Friday: cook("Roast"),
+      Saturday: repeat("Friday"),
+    };
+    const { result, setMealsByWeek } = setup(meals);
+
+    result.current.swapMealDays("Friday", "Saturday");
+    expect(setMealsByWeek).not.toHaveBeenCalled();
+  });
+
   it("ignores a swap of a day with itself", () => {
     const meals = { Tuesday: cook("Tacos") };
     const { result, setMealsByWeek } = setup(meals);

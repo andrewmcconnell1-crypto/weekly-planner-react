@@ -249,7 +249,22 @@ export function useMealPlanActions({
 
     let a = blockBounds(meals, sourceDay);
     let b = blockBounds(meals, targetDay);
-    if (a.start === b.start) return; // same block — nothing to do
+    if (a.start === b.start) {
+      // Dropped inside the grabbed meal's own block — e.g. dragging a Monday
+      // cook onto its own Tuesday leftover. There's no second block to swap
+      // with, so nudge this block past its neighbour in the drag direction:
+      // dropping it forward hands its slot to the next block (and pushes the
+      // leftovers along), dropping back pulls the previous block in. Without
+      // this the drag would be a no-op.
+      const dir = days.indexOf(targetDay) - days.indexOf(sourceDay);
+      if (dir > 0 && a.end + 1 < days.length) {
+        b = blockBounds(meals, days[a.end + 1]);
+      } else if (dir < 0 && a.start - 1 >= 0) {
+        b = blockBounds(meals, days[a.start - 1]);
+      } else {
+        return;
+      }
+    }
     if (a.start > b.start) [a, b] = [b, a]; // a is the earlier block
 
     const snapshot = meals;
