@@ -263,7 +263,7 @@ function App() {
   const { undoState, requestUndo, runUndo } = useUndo();
 
   const mealHelpers = useMemo(() => createMealHelpers(recipes), [recipes]);
-  const { getMealSummary } = mealHelpers;
+  const { getMealSummary, getIngredientsForMeal } = mealHelpers;
 
   // ---- Week keys + the active week's plan (feed the action hooks below) ----
   const mealWeekKey = getWeekKey(mealWeekStart);
@@ -346,6 +346,8 @@ function App() {
     setMealsByWeek,
     mealWeekKey,
     requestUndo,
+    setShoppingChecked,
+    getIngredientsForMeal,
   });
 
   const {
