@@ -4,11 +4,18 @@ import { renderHook } from "@testing-library/react";
 
 import { useMealPlanActions } from "./useMealPlanActions";
 
-function setup(meals) {
+function setup(meals, extra = {}) {
   const mealWeekKey = "2026-07-05";
-  const mealsByWeek = { [mealWeekKey]: meals };
+  const mealsByWeek = { [mealWeekKey]: meals, ...(extra.mealsByWeek || {}) };
   const setMealsByWeek = vi.fn();
   const requestUndo = vi.fn();
+  const setShoppingChecked = vi.fn();
+  // Resolve a meal's ingredients the way the app does (recipe link or the
+  // meal's own list), enough for the tick-clearing tests.
+  const getIngredientsForMeal = (meal) =>
+    (meal?.mealType || "cook") === "cook"
+      ? [...(extra.recipeIngredients?.[meal?.recipeId] || []), ...(meal?.ingredients || [])]
+      : [];
   const { result } = renderHook(() =>
     useMealPlanActions({
       meals,
@@ -16,9 +23,11 @@ function setup(meals) {
       setMealsByWeek,
       mealWeekKey,
       requestUndo,
+      setShoppingChecked,
+      getIngredientsForMeal,
     })
   );
-  return { result, setMealsByWeek, requestUndo, mealWeekKey };
+  return { result, setMealsByWeek, setShoppingChecked, requestUndo, mealWeekKey };
 }
 
 const cook = (name) => ({
@@ -153,6 +162,75 @@ describe("useMealPlanActions — swapMealDays", () => {
 
     result.current.swapMealDays("Tuesday", "Tuesday");
     expect(setMealsByWeek).not.toHaveBeenCalled();
+  });
+});
+
+describe("useMealPlanActions — clears stale shopping ticks", () => {
+  // A tick left over from a past shop (checked map is keyed by item name and
+  // persists) must not silently mark a newly-planned meal's ingredient as Done.
+  function checkedUpdates(setShoppingChecked) {
+    // Apply each functional update to a seeded map to see what was cleared.
+    return (seed) =>
+      setShoppingChecked.mock.calls.reduce(
+        (state, [updater]) =>
+          typeof updater === "function" ? updater(state) : updater,
+        seed
+      );
+  }
+
+  it("clears ticks for a recipe assigned to a day (assignRecipeToDay)", () => {
+    const { result, setShoppingChecked } = setup(
+      { Monday: cook("") },
+      { recipeIngredients: { r1: ["Chicken thighs", "Rice"] } }
+    );
+
+    result.current.assignRecipeToDay("Monday", {
+      id: "r1",
+      name: "Katsu",
+      ingredients: ["Chicken thighs", "Rice"],
+    });
+
+    const next = checkedUpdates(setShoppingChecked)({
+      "chicken thigh": true,
+      rice: true,
+      milk: true,
+    });
+    expect(next["chicken thigh"]).toBeUndefined();
+    expect(next.rice).toBeUndefined();
+    expect(next.milk).toBe(true); // untouched — not part of the new meal
+  });
+
+  it("clears ticks for a recipe planned on a specific week/day (assignRecipeToWeekDay)", () => {
+    const { result, setShoppingChecked } = setup(
+      {},
+      { recipeIngredients: { r1: ["Basil"] } }
+    );
+
+    result.current.assignRecipeToWeekDay("2026-07-12", "Thursday", {
+      id: "r1",
+      name: "Pesto pasta",
+      ingredients: ["Basil"],
+    });
+
+    const next = checkedUpdates(setShoppingChecked)({ basil: true });
+    expect(next.basil).toBeUndefined();
+  });
+
+  it("does not re-clear ticks for ingredients already on that day", () => {
+    // Editing a meal that keeps the same ingredients (e.g. bumping servings)
+    // must not yank already-bought items back out of Done.
+    const { result, setShoppingChecked } = setup({
+      Monday: { ...cook("Soup"), ingredients: ["Carrot"] },
+    });
+
+    result.current.updateMeal("Monday", {
+      ...cook("Soup"),
+      ingredients: ["Carrot"],
+      batches: 2,
+    });
+
+    const next = checkedUpdates(setShoppingChecked)({ carrot: true });
+    expect(next.carrot).toBe(true); // still bought — nothing newly introduced
   });
 });
 

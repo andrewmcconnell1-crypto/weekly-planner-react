@@ -1,4 +1,5 @@
 import { createEmptyMeal, days } from "../utils/mealUtils";
+import { normaliseItemName } from "../utils/itemUtils";
 
 // Meal-plan mutators for the active week. Each operates on `meals` (the active
 // week's plan) and writes back into `mealsByWeek` under `mealWeekKey`.
@@ -8,7 +9,48 @@ export function useMealPlanActions({
   setMealsByWeek,
   mealWeekKey,
   requestUndo,
+  // Shopping ticks are keyed by item name and persist across list rebuilds, so
+  // planning a meal has to clear any stale tick on its ingredients (see
+  // clearChecksForNewMeal). Optional so the hook works without a shopping list.
+  setShoppingChecked,
+  getIngredientsForMeal,
 }) {
+  // A newly-planned meal's ingredients are things still to buy. But the
+  // shopping list marks an item Done from a name-keyed `shoppingChecked` map
+  // that's never pruned, so an ingredient sharing a name with something ticked
+  // off on an earlier shop (e.g. "chicken" bought weeks ago) would inherit that
+  // tick and land in Done without the user ever ticking it. When a meal changes,
+  // clear the ticks for any ingredient it *newly* introduces (versus what was on
+  // that day before), so those items land back on the active list — and edits
+  // that don't add ingredients (servings, meal type) leave bought items alone.
+  function clearChecksForNewMeal(previousMeal, nextIngredients) {
+    if (!setShoppingChecked) return;
+
+    const nextNames = (nextIngredients || [])
+      .map((ingredient) => normaliseItemName(String(ingredient)))
+      .filter(Boolean);
+    if (nextNames.length === 0) return;
+
+    const previousNames = new Set(
+      (getIngredientsForMeal?.(previousMeal) || [])
+        .map((ingredient) => normaliseItemName(String(ingredient)))
+        .filter(Boolean)
+    );
+    const introduced = nextNames.filter((name) => !previousNames.has(name));
+    if (introduced.length === 0) return;
+
+    setShoppingChecked((previous = {}) => {
+      let changed = false;
+      const next = { ...previous };
+      for (const name of introduced) {
+        if (name in next) {
+          delete next[name];
+          changed = true;
+        }
+      }
+      return changed ? next : previous;
+    });
+  }
   // Cook once, eat for `nights` nights: keep the meal on startDay and mark the
   // next nights-1 consecutive days as repeats of it. Shrinking clears the
   // trailing repeat days that pointed back at startDay; never spills past
@@ -82,6 +124,8 @@ export function useMealPlanActions({
   function assignRecipeToDay(day, recipe, nights = 1) {
     const startIndex = days.indexOf(day);
 
+    clearChecksForNewMeal(meals[day], recipe.ingredients);
+
     setMealsByWeek((prevByWeek) => {
       const current = prevByWeek[mealWeekKey] || {};
       const nextMeals = {
@@ -123,6 +167,8 @@ export function useMealPlanActions({
   }
 
   function updateMeal(day, updatedMeal) {
+    clearChecksForNewMeal(meals[day], getIngredientsForMeal?.(updatedMeal));
+
     const nextMeals = { ...meals, [day]: updatedMeal };
 
     // If this day is no longer a cooked meal, it can't feed leftovers — clear
@@ -313,6 +359,7 @@ export function useMealPlanActions({
   // Overwrites whatever's there; leftover-repeat spreading stays a Meals-tab job.
   function assignRecipeToWeekDay(weekKey, day, recipe) {
     if (!days.includes(day)) return;
+    clearChecksForNewMeal((mealsByWeek[weekKey] || {})[day], recipe.ingredients);
     setMealsByWeek((prevByWeek) => {
       const current = prevByWeek[weekKey] || {};
       return {
