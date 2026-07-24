@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChefHat,
+  Check,
   ExternalLink,
   PencilLine,
   Repeat2,
@@ -18,6 +19,7 @@ import {
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import RecipeFilterSheet from "./RecipeFilterSheet";
+import { getRecipeTone, recipeProvenance } from "../utils/recipeUtils";
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 
@@ -118,6 +120,10 @@ function MealEditorSheet({
   // In the recipe view, a planned day opens in edit mode (no list); flipping
   // this reveals the picker to swap to a different recipe.
   const [changingRecipe, setChangingRecipe] = useState(false);
+  // Tapping a recipe in the picker opens it here to explore first — nothing is
+  // committed until "Plan for <day>". Keeps a stray tap while scrolling from
+  // silently locking in a meal, and makes "select" mean one thing.
+  const [previewRecipeId, setPreviewRecipeId] = useState(null);
   const [newIngredient, setNewIngredient] = useState("");
   const recipeFilters = useRecipeFilters(recipes);
   const [recipeFiltersOpen, setRecipeFiltersOpen] = useState(false);
@@ -237,6 +243,8 @@ function MealEditorSheet({
   // choice implies up front (takeaway / eating out are decided on the spot;
   // recipe / repeat wait for a further pick).
   function chooseType(typeId) {
+    setPreviewRecipeId(null);
+
     if (typeId === "swipe") {
       onFindMeals?.();
       return;
@@ -274,6 +282,7 @@ function MealEditorSheet({
 
     recipeFilters.clearFilters();
     setChangingRecipe(false);
+    setPreviewRecipeId(null);
   }
 
   function clearDay() {
@@ -523,6 +532,69 @@ function MealEditorSheet({
     );
   }
 
+  // A tapped recipe, shown to explore before committing. Nothing is saved until
+  // "Plan for <day>", so backing out leaves the day untouched.
+  function renderRecipePreview(previewRecipe) {
+    const meta = [
+      previewRecipe.category,
+      previewRecipe.serves ? `Serves ${previewRecipe.serves}` : null,
+      previewRecipe.timeMins ? `${previewRecipe.timeMins} min` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    return (
+      <div className="meal-preview">
+        <button
+          type="button"
+          className="meal-type-back"
+          onClick={() => setPreviewRecipeId(null)}
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to recipes
+        </button>
+
+        <div
+          className="meal-preview-card"
+          data-tone={getRecipeTone(previewRecipe.category)}
+        >
+          <span className="section-kicker">
+            {recipeProvenance(previewRecipe).label}
+          </span>
+          <strong className="meal-preview-name">{previewRecipe.name}</strong>
+          {meta && <span className="meal-preview-meta">{meta}</span>}
+
+          {previewRecipe.tags?.length > 0 && (
+            <span className="recipe-view-tags">
+              {previewRecipe.tags.map((tag) => (
+                <span className="recipe-tag" key={tag}>
+                  {tag}
+                </span>
+              ))}
+            </span>
+          )}
+
+          <RecipeDetail
+            variant="sheet"
+            defaultOpen
+            ingredients={previewRecipe.ingredients || []}
+            method={previewRecipe.method || ""}
+            sourceUrl={previewRecipe.sourceUrl || ""}
+          />
+        </div>
+
+        <button
+          type="button"
+          className="primary-button meal-preview-add"
+          onClick={() => selectRecipe(previewRecipe.id)}
+        >
+          <Check size={16} aria-hidden="true" />
+          Plan for {day}
+        </button>
+      </div>
+    );
+  }
+
   function renderRecipeView() {
     // A planned recipe opens in edit mode — just the details and a way to swap
     // — rather than dropping back into the full picker.
@@ -543,6 +615,12 @@ function MealEditorSheet({
         </>
       );
     }
+
+    // A recipe tapped in the picker — explore it, commit only via the button.
+    const previewRecipe = recipes.find(
+      (recipe) => recipe.id === previewRecipeId
+    );
+    if (previewRecipe) return renderRecipePreview(previewRecipe);
 
     return (
       <>
@@ -633,7 +711,7 @@ function MealEditorSheet({
                   key={recipe.id}
                   recipe={recipe}
                   active={selectedRecipeId === recipe.id}
-                  onClick={() => selectRecipe(recipe.id)}
+                  onClick={() => setPreviewRecipeId(recipe.id)}
                   coverage={recipeCoverageById?.get(recipe.id)}
                 />
               ));
@@ -774,7 +852,10 @@ function MealEditorSheet({
             <button
               type="button"
               className="meal-type-back"
-              onClick={() => setView("chooser")}
+              onClick={() => {
+                setPreviewRecipeId(null);
+                setView("chooser");
+              }}
             >
               <ArrowLeft size={16} aria-hidden="true" />
               Change type
