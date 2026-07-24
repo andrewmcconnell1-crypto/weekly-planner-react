@@ -421,12 +421,30 @@ function MealEditorSheet({
   }
 
   function renderNightsAndBatch() {
-    return (
-      <>
-        {showNights && (
-          <div className="nights-panel">
-            <p className="section-kicker">How many nights?</p>
+    if (!isCookedMeal) return null;
 
+    // A single quiet hint, shown only when a non-default is picked — the
+    // defaults ("1 night", "single batch") don't need explaining and the extra
+    // lines were the bulk of the wasted height.
+    const nightsHint =
+      showNights && leftoverNights > 1
+        ? `Leftovers cover ${leftoverDaysLabel} — no extra shopping.`
+        : null;
+    const batchHint =
+      batches > 1
+        ? `${
+            batches === 2 ? "Double" : batches === 3 ? "Triple" : `×${batches}`
+          } batch${
+            recipeServes ? ` — serves ${recipeServes * batches}` : ""
+          }, shopping ×${batches}.`
+        : null;
+    const hint = [nightsHint, batchHint].filter(Boolean).join(" ");
+
+    return (
+      <div className="cook-options">
+        {showNights && (
+          <div className="cook-option-row">
+            <span className="cook-option-label">Nights</span>
             <div
               className="nights-buttons"
               role="radiogroup"
@@ -447,54 +465,33 @@ function MealEditorSheet({
                 )
               )}
             </div>
-
-            <p className="nights-hint">
-              {leftoverNights > 1
-                ? `Cook once — leftovers cover ${leftoverDaysLabel}, no extra shopping.`
-                : "Pick more nights to fill the next days with leftovers."}
-            </p>
           </div>
         )}
 
-        {isCookedMeal && (
-          <div className="batch-panel">
-            <p className="section-kicker">Batch size</p>
-
-            <div
-              className="nights-buttons"
-              role="radiogroup"
-              aria-label="Batch size"
-            >
-              {[1, 2, 3].map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  role="radio"
-                  aria-checked={batches === size}
-                  className={batches === size ? "active" : ""}
-                  onClick={() => updateMeal(day, { ...meal, batches: size })}
-                >
-                  ×{size}
-                </button>
-              ))}
-            </div>
-
-            <p className="nights-hint">
-              {batches > 1
-                ? `${
-                    batches === 2 ? "Double" : batches === 3 ? "Triple" : `×${batches}`
-                  } batch${
-                    recipeServes
-                      ? ` — serves ${recipeServes} → ${recipeServes * batches}`
-                      : ""
-                  }. Shopping amounts scaled ×${batches}.`
-                : recipeServes
-                  ? `Single batch — serves ${recipeServes}.`
-                  : "Cooking a single batch."}
-            </p>
+        <div className="cook-option-row">
+          <span className="cook-option-label">Batch</span>
+          <div
+            className="nights-buttons"
+            role="radiogroup"
+            aria-label="Batch size"
+          >
+            {[1, 2, 3].map((size) => (
+              <button
+                key={size}
+                type="button"
+                role="radio"
+                aria-checked={batches === size}
+                className={batches === size ? "active" : ""}
+                onClick={() => updateMeal(day, { ...meal, batches: size })}
+              >
+                ×{size}
+              </button>
+            ))}
           </div>
-        )}
-      </>
+        </div>
+
+        {hint && <p className="cook-options-hint">{hint}</p>}
+      </div>
     );
   }
 

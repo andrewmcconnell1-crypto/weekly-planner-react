@@ -2365,26 +2365,44 @@ body.meal-dragging {
   color: #ffffff;
 }
 
-.nights-panel {
+/* Nights + batch, folded into one compact card: each control is a single row
+   with an inline label beside its buttons, and only a short hint when a
+   non-default is picked — so the pair no longer eats a screenful. */
+.cook-options {
   display: grid;
   gap: var(--space-8);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--olive-soft);
-  padding: var(--space-12);
+  padding: var(--space-10) var(--space-12);
 }
 
-.batch-panel {
-  display: grid;
-  gap: var(--space-8);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  padding: var(--space-12);
+.cook-option-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.cook-option-label {
+  flex: 0 0 auto;
+  width: 3.4rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.02em;
+}
+
+.cook-options-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
 }
 
 .nights-buttons {
   display: flex;
+  flex: 1;
+  min-width: 0;
   gap: var(--space-8);
 }
 
@@ -2411,12 +2429,6 @@ body.meal-dragging {
   box-shadow: inset 0 -3px 0 var(--accent);
 }
 
-.nights-hint {
-  margin: 0;
-  color: var(--muted);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-}
 
 .meal-picker {
   display: grid;

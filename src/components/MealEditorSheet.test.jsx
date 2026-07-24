@@ -102,6 +102,34 @@ describe("MealEditorSheet — recipe picker", () => {
     );
   });
 
+  it("keeps the compact nights + batch controls working", async () => {
+    const user = userEvent.setup();
+    const plannedMeal = {
+      ...emptyMeal,
+      name: "Beef Tacos",
+      recipeId: "r1",
+    };
+    const { updateMeal } = setup({
+      meal: plannedMeal,
+      linkedRecipe: recipes[0],
+      leftoverNights: 1,
+      maxNights: 3,
+      weekDaySummaries: [
+        { day: "Monday", meal: plannedMeal, hasMeal: true, name: "Beef Tacos", label: "Chicken", tone: "beef" },
+      ],
+    });
+
+    // Both controls live in one card, each a labelled row.
+    expect(screen.getByText("Nights")).toBeInTheDocument();
+    expect(screen.getByText("Batch")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("radio", { name: "×2" }));
+    expect(updateMeal).toHaveBeenCalledWith(
+      "Monday",
+      expect.objectContaining({ batches: 2 })
+    );
+  });
+
   it("backs out of a preview without touching the day", async () => {
     const user = userEvent.setup();
     const { updateMeal } = setup();
