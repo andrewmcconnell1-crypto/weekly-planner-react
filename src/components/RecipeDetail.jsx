@@ -18,8 +18,9 @@ function RecipeDetail({
   method = "",
   sourceUrl = "",
   variant = "sheet",
+  defaultOpen = false,
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
 
   const hasDetail = ingredients.length > 0 || Boolean(method);
   if (!hasDetail) return null;

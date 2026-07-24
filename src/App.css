@@ -5612,6 +5612,56 @@ html[data-theme="dark"] .recipes-modes-bar {
   color: var(--ink);
 }
 
+/* Recipe preview: a tapped recipe shown to explore before committing. The card
+   mirrors the "Selected" block's toned look so the flow reads as one family. */
+.meal-preview {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.meal-preview-card {
+  display: grid;
+  gap: var(--space-8);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--recipe-tone, var(--accent));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--recipe-tone, var(--accent)) 12%, var(--surface));
+  box-shadow: var(--shadow);
+  padding: var(--space-12);
+}
+
+.meal-preview-card .section-kicker {
+  color: color-mix(in srgb, var(--recipe-tone, var(--accent)) 70%, #2a2420);
+}
+
+.meal-preview-name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.meal-preview-meta {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+/* Full-width commit — the one place a recipe is actually locked onto the day. */
+.meal-preview-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  width: 100%;
+}
+
+/* Match the Selected block's dark tint so both toned cards read alike. */
+html[data-theme="dark"] .meal-preview-card {
+  color: color-mix(in srgb, var(--recipe-tone, var(--accent)) 55%, var(--ink));
+}
+
 /* Destructive action parked at the bottom-right of the editor body. */
 .meal-remove-row {
   display: flex;
