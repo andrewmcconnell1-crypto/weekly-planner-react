@@ -171,4 +171,28 @@ describe("MealEditorSheet — recipe picker", () => {
     expect(screen.getByRole("button", { name: /lentil dahl/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /beef tacos/i })).toBeInTheDocument();
   });
+
+  it("hides the meal-level chrome while previewing a candidate recipe", async () => {
+    const user = userEvent.setup();
+    const plannedMeal = { ...emptyMeal, name: "Beef Tacos", recipeId: "r1" };
+    setup({
+      meal: plannedMeal,
+      linkedRecipe: recipes[0],
+      weekDaySummaries: [
+        { day: "Monday", meal: plannedMeal, hasMeal: true, name: "Beef Tacos", label: "Chicken", tone: "beef" },
+      ],
+    });
+
+    // A planned meal → swap → preview a different recipe.
+    await user.click(screen.getByRole("button", { name: /choose a different recipe/i }));
+    await user.click(screen.getByRole("button", { name: /lentil dahl/i }));
+
+    // Only the two selection actions remain; the day-level chrome is stripped.
+    expect(screen.getByRole("button", { name: /add to monday/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /back to recipes/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^done$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^cancel$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /remove plan/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /change type/i })).not.toBeInTheDocument();
+  });
 });
