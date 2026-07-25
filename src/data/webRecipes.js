@@ -46,6 +46,7 @@ const EXTRA_TAGS = {
   "wol-mapo-tofu": ["Quick", "Spicy"],
   "wol-general-tso-tofu": ["Quick", "Spicy", "Kid-friendly"],
   "wol-kung-pao-tofu": ["Quick", "Spicy"],
+  "abc-creamy-chicken-risoni-soup": ["Kid-friendly"],
 };
 
 function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
@@ -96,6 +97,13 @@ const TIME_BY_ID = {
   "wol-mapo-tofu": 30,
   "wol-general-tso-tofu": 40,
   "wol-kung-pao-tofu": 40,
+  "abc-creamy-chicken-risoni-soup": 40,
+};
+
+// When a recipe was added to the bundle, so the Recipes tab can flag and sort by
+// what's new. Only the recent additions carry a date; the rest are undated.
+const ADDED_ON_BY_ID = {
+  "abc-creamy-chicken-risoni-soup": "2026-07-25",
 };
 
 const baseWebRecipes = [
@@ -692,9 +700,41 @@ const baseWebRecipes = [
       "2 cups jasmine rice",
     ],
   }),
+  webRecipe({
+    id: "abc-creamy-chicken-risoni-soup",
+    name: "Creamy Chicken, Risoni & Veggie Soup",
+    category: "Chicken",
+    source: "ABC",
+    sourceUrl:
+      "https://www.abc.net.au/news/2026-06-06/creamy-soup-chicken-mince-risoni-and-veggies-lina-jebeile/106755310",
+    ingredients: [
+      "2 tbsp butter",
+      "1 tbsp olive oil",
+      "1 brown onion",
+      "2 garlic cloves",
+      "1 celery stick",
+      "1 tbsp tomato paste",
+      "1 tsp smoked paprika",
+      "500 g chicken mince",
+      "2 tbsp cornflour",
+      "2 carrots",
+      "3 potatoes",
+      "2 sprigs thyme",
+      "1 bay leaf",
+      "1.5 L chicken stock",
+      "1/2 cup frozen peas",
+      "1/2 cup frozen corn",
+      "1/2 cup risoni",
+      "300 ml cooking cream",
+      "1 bunch parsley",
+      "1 tsp salt",
+      "1/2 tsp black pepper",
+    ],
+  }),
 ];
 
 export const webRecipes = baseWebRecipes.map((recipe) => ({
   ...recipe,
   timeMins: TIME_BY_ID[recipe.id] ?? recipe.timeMins,
+  addedOn: ADDED_ON_BY_ID[recipe.id] ?? null,
 }));
