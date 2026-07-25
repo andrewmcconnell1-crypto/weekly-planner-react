@@ -198,6 +198,14 @@ function MealEditorSheet({
       (view === "eating-out" && mealType === "eating-out") ||
       (view === "repeat" && mealType === "repeat" && meal.repeatFromDay));
 
+  // True while the recipe-selection flow is on screen — the picker list or a
+  // preview, as opposed to viewing the meal you've settled on. Used to strip the
+  // meal-level chrome (change type, remove plan, the Cancel/Done footer) so
+  // choosing a recipe isn't buried under half a dozen competing actions.
+  const browsingRecipes =
+    view === "recipe" &&
+    (changingRecipe || Boolean(previewRecipeId) || !selectedRecipeId);
+
   // Lock background scroll and close on Escape while the sheet is open.
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -667,8 +675,21 @@ function MealEditorSheet({
 
     return (
       <>
-        {renderCurrentCard()}
-        {renderNightsAndBatch()}
+        {/* One back out of the list: to the meal you're swapping (if any),
+            otherwise to the type chooser. The meal-level chrome is hidden while
+            browsing, so this is the only "up" here. */}
+        <button
+          type="button"
+          className="meal-type-back"
+          onClick={() => {
+            setPreviewRecipeId(null);
+            if (changingRecipe) setChangingRecipe(false);
+            else setView("chooser");
+          }}
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back
+        </button>
 
         <div className="meal-picker">
           <div className="recipe-search-row">
@@ -891,7 +912,7 @@ function MealEditorSheet({
         </div>
 
         <div className="sheet-body">
-          {view !== "chooser" && (
+          {view !== "chooser" && !browsingRecipes && (
             <button
               type="button"
               className="meal-type-back"
@@ -915,7 +936,7 @@ function MealEditorSheet({
             {view === "chooser" ? renderChooser() : renderDetail()}
           </div>
 
-          {view !== "chooser" && hasMeal && onClearDay && (
+          {view !== "chooser" && !browsingRecipes && hasMeal && onClearDay && (
             <div className="meal-remove-row">
               <button
                 type="button"
@@ -929,19 +950,21 @@ function MealEditorSheet({
           )}
         </div>
 
-        <div className="sheet-footer">
-          <button type="button" className="secondary" onClick={undoChanges}>
-            Cancel
-          </button>
+        {!browsingRecipes && (
+          <div className="sheet-footer">
+            <button type="button" className="secondary" onClick={undoChanges}>
+              Cancel
+            </button>
 
-          <button
-            type="button"
-            className="primary-button"
-            onClick={requestClose}
-          >
-            Done
-          </button>
-        </div>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={requestClose}
+            >
+              Done
+            </button>
+          </div>
+        )}
       </div>
     </div>
 
