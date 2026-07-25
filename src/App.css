@@ -2365,16 +2365,51 @@ body.meal-dragging {
   color: #ffffff;
 }
 
-/* Nights + batch, folded into one compact card: each control is a single row
-   with an inline label beside its buttons, and only a short hint when a
-   non-default is picked — so the pair no longer eats a screenful. */
+/* Nights + batch, collapsed to a single-line accordion: a summary row you tap
+   to reveal the controls, so the pair costs one line until you need it. */
 .cook-options {
-  display: grid;
-  gap: var(--space-8);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--olive-soft);
-  padding: var(--space-10) var(--space-12);
+  overflow: hidden;
+}
+
+/* The always-visible summary line: current picks + a disclosure chevron. */
+.cook-options-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: var(--space-8) var(--space-12);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-align: left;
+}
+
+.cook-options-summary > svg:first-child {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.cook-options-summary-text {
+  flex: 1;
+  min-width: 0;
+  text-transform: capitalize;
+}
+
+.cook-options-summary:hover {
+  background: color-mix(in srgb, var(--olive) 12%, transparent);
+}
+
+.cook-options-body {
+  display: grid;
+  gap: var(--space-8);
+  padding: var(--space-10) var(--space-12) var(--space-12);
+  border-top: 1px solid var(--line);
 }
 
 .cook-option-row {
