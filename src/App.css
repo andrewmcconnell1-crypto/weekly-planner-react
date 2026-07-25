@@ -5955,6 +5955,15 @@ html[data-theme="dark"] .update-banner-button:hover {
   animation: sheet-up var(--dur-med) var(--ease-spring);
 }
 
+/* The meal editor steps through sub-views of very different heights (type
+   chooser, recipe detail, preview, custom…). Pin it to one stable height so it
+   lands in the same spot every time and never jumps as you move between them —
+   the header and footer stay put and the body scrolls within. */
+.sheet.meal-sheet {
+  height: min(86vh, 760px);
+  height: min(86dvh, 760px);
+}
+
 /* Exit animations, played while the editor sets a closing flag before unmount. */
 .sheet-backdrop.closing {
   animation: sheet-fade-out var(--dur-med) var(--ease-standard) both;
