@@ -2262,6 +2262,23 @@ body.meal-dragging {
 }
 
 /* Meal editor: current pick, nights stepper, recipe picker, "Or…" options */
+
+/* Each editor view (chooser, recipe list, preview, detail) fades and rises in
+   on entry — the same gentle motion the discover wizard uses — so moving
+   between them feels of a piece with the rest of the app rather than instant. */
+.meal-view {
+  display: grid;
+  gap: var(--space-14);
+  align-content: start;
+  animation: wizard-card-in var(--dur-med) var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meal-view {
+    animation: none;
+  }
+}
+
 /* Accent rail tinted by the meal's recipe category tone, plus a tinted
    "Selected" kicker. Falls back to the accent for takeaway / custom meals with
    no category tone. Uses a plain border-left rail (not an absolutely-positioned

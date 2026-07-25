@@ -136,6 +136,28 @@ describe("MealEditorSheet — recipe picker", () => {
     );
   });
 
+  it("doesn't grab the title when opening an existing custom meal", () => {
+    const customMeal = { ...emptyMeal, name: "Grandma's stew", mealType: "cook" };
+    setup({
+      meal: customMeal,
+      weekDaySummaries: [
+        { day: "Monday", meal: customMeal, hasMeal: true, name: "Grandma's stew", label: "Custom meal", tone: "custom" },
+      ],
+    });
+
+    // The name field is there to edit, but the cursor isn't dumped into it.
+    expect(screen.getByPlaceholderText(/meal name/i)).not.toHaveFocus();
+  });
+
+  it("focuses the title when you deliberately choose Custom meal", async () => {
+    const user = userEvent.setup();
+    setup(); // empty day → chooser
+
+    await user.click(screen.getByRole("button", { name: /custom meal/i }));
+
+    expect(screen.getByPlaceholderText(/meal name/i)).toHaveFocus();
+  });
+
   it("backs out of a preview without touching the day", async () => {
     const user = userEvent.setup();
     const { updateMeal } = setup();
