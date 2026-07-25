@@ -3460,6 +3460,41 @@ input[type="number"] {
   gap: var(--space-8);
 }
 
+/* Adding an ingredient is a small, incidental action — an inline field with a
+   quiet outlined button beside it, not a full-width solid slab under the input. */
+.meal-add-ingredient-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: var(--space-8);
+}
+
+.meal-add-ingredient-row .meal-add-ingredient {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: auto;
+  padding: 0 var(--space-14);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--olive);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.meal-add-ingredient:hover:not(:disabled) {
+  background: var(--olive-soft);
+  border-color: var(--olive);
+  color: var(--ink);
+}
+
+.meal-add-ingredient:disabled {
+  opacity: 0.5;
+}
+
+.meal-add-ingredient svg {
+  opacity: 0.75;
+}
+
 .done-section summary,
 .skipped-section summary,
 .manual-add-panel summary {
