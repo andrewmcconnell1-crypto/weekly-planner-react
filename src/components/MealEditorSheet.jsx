@@ -145,6 +145,10 @@ function MealEditorSheet({
       }).length
     : 0;
   const nameInputRef = useRef(null);
+  // False until after the first render, so the focus effect below can tell
+  // "the user just switched into the custom view" from "the sheet opened on an
+  // existing custom meal" (which should stay calm, cursor out of the field).
+  const didMountRef = useRef(false);
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
   // The day's meal exactly as it was when this sheet opened, captured once on
@@ -215,12 +219,16 @@ function MealEditorSheet({
   // Clear any pending close timer if the sheet unmounts first.
   useEffect(() => () => window.clearTimeout(closeTimerRef.current), []);
 
-  // Put the cursor straight in the name field when the custom view opens.
+  // Drop the cursor in the name field only when the user switches into the
+  // custom view during the session — not on the opening render of an existing
+  // custom meal, where auto-focusing the title reads as an unwanted edit.
   useEffect(() => {
-    if (view === "custom") {
+    if (didMountRef.current && view === "custom") {
       nameInputRef.current?.focus();
     }
+    didMountRef.current = true;
   }, [view]);
+
 
   function changeMealType(nextMealType) {
     if (nextMealType === "cook") {
@@ -897,7 +905,15 @@ function MealEditorSheet({
             </button>
           )}
 
-          {view === "chooser" ? renderChooser() : renderDetail()}
+          {/* Keyed so each swap (type → detail, list → preview, and back)
+              remounts and replays the entrance animation, matching the gentle
+              transitions elsewhere instead of snapping between states. */}
+          <div
+            key={`${view}|${changingRecipe}|${Boolean(previewRecipeId)}`}
+            className="meal-view"
+          >
+            {view === "chooser" ? renderChooser() : renderDetail()}
+          </div>
 
           {view !== "chooser" && hasMeal && onClearDay && (
             <div className="meal-remove-row">
