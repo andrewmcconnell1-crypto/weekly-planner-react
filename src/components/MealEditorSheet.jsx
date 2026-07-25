@@ -632,7 +632,7 @@ function MealEditorSheet({
           onClick={() => selectRecipe(previewRecipe.id)}
         >
           <Check size={16} aria-hidden="true" />
-          Plan for {day}
+          Add to {day}
         </button>
       </div>
     );
@@ -810,7 +810,7 @@ function MealEditorSheet({
         )}
 
         <p className="meal-away-hint">
-          {label} needs nothing else — you&apos;re all set. Tap Save, or change
+          {label} needs nothing else — you&apos;re all set. Tap Done, or change
           the type above.
         </p>
       </>
@@ -931,7 +931,7 @@ function MealEditorSheet({
 
         <div className="sheet-footer">
           <button type="button" className="secondary" onClick={undoChanges}>
-            Undo changes
+            Cancel
           </button>
 
           <button
@@ -939,7 +939,7 @@ function MealEditorSheet({
             className="primary-button"
             onClick={requestClose}
           >
-            Save
+            Done
           </button>
         </div>
       </div>

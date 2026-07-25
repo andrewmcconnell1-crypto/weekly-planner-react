@@ -81,19 +81,19 @@ describe("MealEditorSheet — recipe picker", () => {
     // Tapping opens a preview — nothing is saved to the day yet.
     expect(updateMeal).not.toHaveBeenCalled();
     expect(
-      screen.getByRole("button", { name: /plan for monday/i })
+      screen.getByRole("button", { name: /add to monday/i })
     ).toBeInTheDocument();
     // The ingredients are shown so you can explore before deciding.
     expect(screen.getByText(/beef mince/i)).toBeInTheDocument();
   });
 
-  it("commits only when 'Plan for <day>' is pressed", async () => {
+  it("commits only when 'Add to <day>' is pressed", async () => {
     const user = userEvent.setup();
     const { updateMeal } = setup();
 
     await openPicker(user);
     await user.click(screen.getByRole("button", { name: /beef tacos/i }));
-    await user.click(screen.getByRole("button", { name: /plan for monday/i }));
+    await user.click(screen.getByRole("button", { name: /add to monday/i }));
 
     expect(updateMeal).toHaveBeenCalledTimes(1);
     expect(updateMeal).toHaveBeenCalledWith(
