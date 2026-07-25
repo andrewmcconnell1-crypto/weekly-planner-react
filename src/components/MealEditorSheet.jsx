@@ -898,7 +898,7 @@ function MealEditorSheet({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className={`sheet ${closing ? "closing" : ""}`}
+        className={`sheet meal-sheet ${closing ? "closing" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={`${day} meal`}
