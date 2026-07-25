@@ -102,7 +102,7 @@ describe("MealEditorSheet — recipe picker", () => {
     );
   });
 
-  it("keeps the compact nights + batch controls working", async () => {
+  it("collapses nights + batch to a summary line that expands to the controls", async () => {
     const user = userEvent.setup();
     const plannedMeal = {
       ...emptyMeal,
@@ -119,7 +119,13 @@ describe("MealEditorSheet — recipe picker", () => {
       ],
     });
 
-    // Both controls live in one card, each a labelled row.
+    // Collapsed by default: the current picks show as one summary line, and the
+    // control rows are hidden.
+    expect(screen.getByText(/1 night · single batch/i)).toBeInTheDocument();
+    expect(screen.queryByText("Nights")).not.toBeInTheDocument();
+
+    // Tapping the summary reveals the controls.
+    await user.click(screen.getByText(/1 night · single batch/i));
     expect(screen.getByText("Nights")).toBeInTheDocument();
     expect(screen.getByText("Batch")).toBeInTheDocument();
 

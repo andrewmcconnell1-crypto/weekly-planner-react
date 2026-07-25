@@ -3,6 +3,8 @@ import {
   ArrowLeft,
   ChefHat,
   Check,
+  ChevronDown,
+  ChevronUp,
   ExternalLink,
   PencilLine,
   Repeat2,
@@ -124,6 +126,9 @@ function MealEditorSheet({
   // committed until "Plan for <day>". Keeps a stray tap while scrolling from
   // silently locking in a meal, and makes "select" mean one thing.
   const [previewRecipeId, setPreviewRecipeId] = useState(null);
+  // Nights + batch collapse to a single summary line by default (most meals are
+  // one night, single batch); tapping it reveals the controls.
+  const [cookOptionsOpen, setCookOptionsOpen] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
   const recipeFilters = useRecipeFilters(recipes);
   const [recipeFiltersOpen, setRecipeFiltersOpen] = useState(false);
@@ -424,8 +429,7 @@ function MealEditorSheet({
     if (!isCookedMeal) return null;
 
     // A single quiet hint, shown only when a non-default is picked — the
-    // defaults ("1 night", "single batch") don't need explaining and the extra
-    // lines were the bulk of the wasted height.
+    // defaults ("1 night", "single batch") don't need explaining.
     const nightsHint =
       showNights && leftoverNights > 1
         ? `Leftovers cover ${leftoverDaysLabel} — no extra shopping.`
@@ -440,57 +444,91 @@ function MealEditorSheet({
         : null;
     const hint = [nightsHint, batchHint].filter(Boolean).join(" ");
 
+    // The collapsed summary — the current picks at a glance, so the row can stay
+    // shut until you actually want to change something.
+    const batchLabel =
+      batches === 1
+        ? "single batch"
+        : batches === 2
+          ? "double batch"
+          : batches === 3
+            ? "triple batch"
+            : `×${batches} batch`;
+    const nightsLabel =
+      leftoverNights === 1 ? "1 night" : `${leftoverNights} nights`;
+    const summary = showNights ? `${nightsLabel} · ${batchLabel}` : batchLabel;
+
     return (
-      <div className="cook-options">
-        {showNights && (
-          <div className="cook-option-row">
-            <span className="cook-option-label">Nights</span>
-            <div
-              className="nights-buttons"
-              role="radiogroup"
-              aria-label={`How many nights for ${day}'s meal`}
-            >
-              {Array.from({ length: maxNights }, (_, index) => index + 1).map(
-                (nights) => (
+      <div className={`cook-options ${cookOptionsOpen ? "open" : ""}`}>
+        <button
+          type="button"
+          className="cook-options-summary"
+          aria-expanded={cookOptionsOpen}
+          onClick={() => setCookOptionsOpen((open) => !open)}
+        >
+          <SlidersHorizontal size={15} aria-hidden="true" />
+          <span className="cook-options-summary-text">{summary}</span>
+          {cookOptionsOpen ? (
+            <ChevronUp size={16} aria-hidden="true" />
+          ) : (
+            <ChevronDown size={16} aria-hidden="true" />
+          )}
+        </button>
+
+        {cookOptionsOpen && (
+          <div className="cook-options-body">
+            {showNights && (
+              <div className="cook-option-row">
+                <span className="cook-option-label">Nights</span>
+                <div
+                  className="nights-buttons"
+                  role="radiogroup"
+                  aria-label={`How many nights for ${day}'s meal`}
+                >
+                  {Array.from(
+                    { length: maxNights },
+                    (_, index) => index + 1
+                  ).map((nights) => (
+                    <button
+                      key={nights}
+                      type="button"
+                      role="radio"
+                      aria-checked={leftoverNights === nights}
+                      className={leftoverNights === nights ? "active" : ""}
+                      onClick={() => onSetNights(nights)}
+                    >
+                      {nights}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="cook-option-row">
+              <span className="cook-option-label">Batch</span>
+              <div
+                className="nights-buttons"
+                role="radiogroup"
+                aria-label="Batch size"
+              >
+                {[1, 2, 3].map((size) => (
                   <button
-                    key={nights}
+                    key={size}
                     type="button"
                     role="radio"
-                    aria-checked={leftoverNights === nights}
-                    className={leftoverNights === nights ? "active" : ""}
-                    onClick={() => onSetNights(nights)}
+                    aria-checked={batches === size}
+                    className={batches === size ? "active" : ""}
+                    onClick={() => updateMeal(day, { ...meal, batches: size })}
                   >
-                    {nights}
+                    ×{size}
                   </button>
-                )
-              )}
+                ))}
+              </div>
             </div>
+
+            {hint && <p className="cook-options-hint">{hint}</p>}
           </div>
         )}
-
-        <div className="cook-option-row">
-          <span className="cook-option-label">Batch</span>
-          <div
-            className="nights-buttons"
-            role="radiogroup"
-            aria-label="Batch size"
-          >
-            {[1, 2, 3].map((size) => (
-              <button
-                key={size}
-                type="button"
-                role="radio"
-                aria-checked={batches === size}
-                className={batches === size ? "active" : ""}
-                onClick={() => updateMeal(day, { ...meal, batches: size })}
-              >
-                ×{size}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {hint && <p className="cook-options-hint">{hint}</p>}
       </div>
     );
   }
