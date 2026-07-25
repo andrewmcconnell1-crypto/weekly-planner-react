@@ -5762,10 +5762,17 @@ html[data-theme="dark"] .meal-preview-card {
 }
 
 /* Destructive action parked at the bottom-right of the editor body. */
-.meal-remove-row {
+/* Meal-level actions grouped at the foot of the detail: switch the meal type
+   (left) and clear the day (right), set off from the content by a hairline. */
+.meal-detail-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  flex-wrap: wrap;
   margin-top: var(--space-4);
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--line);
 }
 
 /* "New version available" prompt — floats above the bottom nav. */

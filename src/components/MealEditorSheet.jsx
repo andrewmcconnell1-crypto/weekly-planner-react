@@ -15,6 +15,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Trash2,
+  Utensils,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -840,7 +841,7 @@ function MealEditorSheet({
 
         <p className="meal-away-hint">
           {label} needs nothing else — you&apos;re all set. Tap Done, or change
-          the type above.
+          the meal type below.
         </p>
       </>
     );
@@ -920,20 +921,6 @@ function MealEditorSheet({
         </div>
 
         <div className="sheet-body">
-          {view !== "chooser" && !browsingRecipes && (
-            <button
-              type="button"
-              className="meal-type-back"
-              onClick={() => {
-                setPreviewRecipeId(null);
-                setView("chooser");
-              }}
-            >
-              <ArrowLeft size={16} aria-hidden="true" />
-              Change type
-            </button>
-          )}
-
           {/* Keyed so each swap (type → detail, list → preview, and back)
               remounts and replays the entrance animation, matching the gentle
               transitions elsewhere instead of snapping between states. */}
@@ -944,16 +931,33 @@ function MealEditorSheet({
             {view === "chooser" ? renderChooser() : renderDetail()}
           </div>
 
-          {view !== "chooser" && !browsingRecipes && hasMeal && onClearDay && (
-            <div className="meal-remove-row">
+          {/* The meal-level edit actions, grouped at the foot of the detail:
+              switch what kind of meal it is, or clear the day. Kept out of the
+              recipe-selection flow, which has its own back/commit. */}
+          {view !== "chooser" && !browsingRecipes && (
+            <div className="meal-detail-actions">
               <button
                 type="button"
-                className="meal-current-remove"
-                onClick={clearDay}
+                className="meal-change-recipe-link"
+                onClick={() => {
+                  setPreviewRecipeId(null);
+                  setView("chooser");
+                }}
               >
-                <Trash2 size={14} aria-hidden="true" />
-                Remove plan
+                <Utensils size={14} aria-hidden="true" />
+                Change meal type
               </button>
+
+              {hasMeal && onClearDay && (
+                <button
+                  type="button"
+                  className="meal-current-remove"
+                  onClick={clearDay}
+                >
+                  <Trash2 size={14} aria-hidden="true" />
+                  Remove plan
+                </button>
+              )}
             </div>
           )}
         </div>
