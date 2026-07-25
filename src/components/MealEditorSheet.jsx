@@ -7,6 +7,7 @@ import {
   ChevronUp,
   ExternalLink,
   PencilLine,
+  Plus,
   Repeat2,
   Replace,
   Search,
@@ -362,7 +363,7 @@ function MealEditorSheet({
       <div className="meal-extra-ingredients">
         <p className="section-kicker">Extra ingredients</p>
 
-        <div className="add-item-row">
+        <div className="add-item-row meal-add-ingredient-row">
           <input
             type="text"
             placeholder={placeholder}
@@ -373,7 +374,14 @@ function MealEditorSheet({
             }}
           />
 
-          <button type="button" onClick={addIngredient}>
+          <button
+            type="button"
+            className="meal-add-ingredient"
+            onClick={addIngredient}
+            aria-label="Add ingredient"
+            disabled={newIngredient.trim() === ""}
+          >
+            <Plus size={16} aria-hidden="true" />
             Add
           </button>
         </div>
