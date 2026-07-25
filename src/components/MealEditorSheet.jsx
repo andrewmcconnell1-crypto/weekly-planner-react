@@ -920,7 +920,7 @@ function MealEditorSheet({
           </button>
         </div>
 
-        <div className="sheet-body">
+        <div className={`sheet-body ${browsingRecipes ? "sheet-body-fill" : ""}`}>
           {/* Keyed so each swap (type → detail, list → preview, and back)
               remounts and replays the entrance animation, matching the gentle
               transitions elsewhere instead of snapping between states. */}
