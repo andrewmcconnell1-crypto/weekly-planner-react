@@ -98,12 +98,14 @@ const TIME_BY_ID = {
   "wol-general-tso-tofu": 40,
   "wol-kung-pao-tofu": 40,
   "abc-creamy-chicken-risoni-soup": 40,
+  "abc-french-yoghurt-cake": 75,
 };
 
 // When a recipe was added to the bundle, so the Recipes tab can flag and sort by
 // what's new. Only the recent additions carry a date; the rest are undated.
 const ADDED_ON_BY_ID = {
   "abc-creamy-chicken-risoni-soup": "2026-07-25",
+  "abc-french-yoghurt-cake": "2026-07-25",
 };
 
 const baseWebRecipes = [
@@ -731,6 +733,32 @@ const baseWebRecipes = [
       "1/2 tsp black pepper",
     ],
   }),
+  // A dessert — the first "Sweet" recipe. It doesn't go through webRecipe()
+  // because deriveMainCategory only knows dinner categories (it would force a
+  // cake to "Vegetarian"), and it carries no dinner tags so it stays out of the
+  // dinner filters. Proper handling of a sweet/dessert section is still to come.
+  {
+    id: "abc-french-yoghurt-cake",
+    name: "French Yoghurt Cake with Sour Cherry Compote",
+    category: "Sweet",
+    source: "ABC",
+    sourceUrl:
+      "https://www.abc.net.au/news/2026-07-25/emelia-jacksons-french-yoghurt-cake-recipe/106919586",
+    ingredients: [
+      "125 g Greek-style yoghurt",
+      "65 ml grapeseed oil",
+      "3 eggs",
+      "1 tbsp vanilla bean paste",
+      "315 g caster sugar",
+      "375 g plain flour",
+      "1 tbsp baking powder",
+      "400 g frozen sour cherries",
+      "1 cinnamon stick",
+    ],
+    method: METHOD_NOTE,
+    tags: [],
+    timeMins: null,
+  },
 ];
 
 export const webRecipes = baseWebRecipes.map((recipe) => ({
