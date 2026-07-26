@@ -4210,40 +4210,45 @@ html[data-theme="dark"] .recipes-modes-bar {
   color: var(--ink);
 }
 
-/* Dinners | Sweet course switch — a secondary segmented control under the mode
-   bar, same shape as the modes but two-up. */
+/* Course switch — dinners is the default, so this is just a small opt-in chip
+   rather than a 50/50 toggle. Browsing dinners shows a "Sweet" chip; tapping it
+   flips to the dessert view, where a "Dinners" chip leads back. */
 .recipes-course {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
-  background: var(--soft);
+  display: flex;
+  justify-content: flex-end;
 }
 
-.recipes-course-tab {
-  min-height: 34px;
+.recipes-course-chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid transparent;
+  gap: var(--space-2);
+  min-height: 30px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line);
   border-radius: var(--radius-pill);
-  background: transparent;
+  background: var(--panel);
   color: var(--muted);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   font-weight: var(--weight-bold);
 }
 
-.recipes-course-tab.active {
-  background: var(--panel);
-  border-color: var(--line);
-  color: var(--ink);
-  box-shadow: var(--shadow);
+.recipes-course-chip svg {
+  color: var(--rust);
 }
 
-.recipes-course-tab:hover:not(.active) {
+.recipes-course-chip:hover {
   color: var(--ink);
+}
+
+/* On the Sweet view the chip is the way back, so give it a touch more presence
+   and a "you are here" tint. */
+.recipes-course-chip.active {
+  color: var(--ink);
+  background: var(--soft);
+}
+
+.recipes-course-chip.active svg {
+  color: var(--muted);
 }
 
 .recipes-mode-count {

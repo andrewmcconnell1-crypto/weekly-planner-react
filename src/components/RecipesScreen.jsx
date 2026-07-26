@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import {
+  ArrowLeft,
+  CakeSlice,
   ChevronDown,
   Heart,
   Link2,
@@ -274,33 +276,26 @@ function RecipesScreen({
       {mode === "browse" && (
         <>
           {hasDesserts && (
-            <div
-              className="recipes-course"
-              role="tablist"
-              aria-label="Recipe course"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={course === "dinner"}
-                className={`recipes-course-tab ${
-                  course === "dinner" ? "active" : ""
-                }`}
-                onClick={() => selectCourse("dinner")}
-              >
-                Dinners
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={course === "dessert"}
-                className={`recipes-course-tab ${
-                  course === "dessert" ? "active" : ""
-                }`}
-                onClick={() => selectCourse("dessert")}
-              >
-                Sweet
-              </button>
+            <div className="recipes-course">
+              {course === "dinner" ? (
+                <button
+                  type="button"
+                  className="recipes-course-chip"
+                  onClick={() => selectCourse("dessert")}
+                >
+                  <CakeSlice size={14} aria-hidden="true" />
+                  Sweet
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="recipes-course-chip active"
+                  onClick={() => selectCourse("dinner")}
+                >
+                  <ArrowLeft size={14} aria-hidden="true" />
+                  Dinners
+                </button>
+              )}
             </div>
           )}
 
