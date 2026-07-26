@@ -300,6 +300,7 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
 
     return {
       setMealsByWeek: makeSetter("mealsByWeek"),
+      setDessertsByWeek: makeSetter("dessertsByWeek"),
       setShoppingItemsByWeek: makeSetter("shoppingItemsByWeek"),
       setShoppingListMetaByWeek: makeSetter("shoppingListMetaByWeek"),
       setRemovalAcksByWeek: makeSetter("removalAcksByWeek"),

@@ -1,4 +1,5 @@
 import {
+  CakeSlice,
   ChevronRight,
   CookingPot,
   Plus,
@@ -45,12 +46,19 @@ function MealCard({
   mealLabel,
   mealTone,
   hasMeal,
+  dessertName = "",
   isToday = false,
   isDragOver = false,
   onOpen,
   reorder = null,
 }) {
   const mealType = meal.mealType || "cook";
+  const dessertLine = dessertName ? (
+    <span className="meal-row-dessert">
+      <CakeSlice size={13} aria-hidden="true" />
+      {dessertName}
+    </span>
+  ) : null;
   const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
   const mealName = displayName || (meal.name || "").trim();
 
@@ -73,6 +81,7 @@ function MealCard({
 
           <span className="meal-row-main">
             <strong className="meal-row-add">Add a meal</strong>
+            {dessertLine}
           </span>
         </button>
       </article>
@@ -112,6 +121,7 @@ function MealCard({
         <span className="meal-row-main">
           <strong>{mealName}</strong>
           <span className="meal-row-sub">{subText}</span>
+          {dessertLine}
         </span>
 
         <ChevronRight className="meal-row-chevron" size={18} aria-hidden="true" />

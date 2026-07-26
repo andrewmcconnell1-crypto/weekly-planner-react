@@ -254,3 +254,40 @@ describe("buildShoppingPlan — basket-driven week", () => {
     expect(names).toEqual(["Beef mince"]);
   });
 });
+
+describe("buildShoppingPlan — desserts", () => {
+  it("folds a planned dessert's ingredients into the list", () => {
+    const result = buildShoppingPlan({
+      staples: [],
+      inventory: [],
+      shoppingItems: [],
+      weekMeals: {},
+      weekKey: "2026-06-14",
+      getMealSummary: (day) => ({ hasMeal: false, name: day, ingredients: [] }),
+      weekDesserts: { Friday: { recipeId: "cake", name: "Yoghurt Cake" } },
+      getRecipeIngredients: (id) =>
+        id === "cake" ? ["375 g plain flour", "250 g caster sugar"] : [],
+    });
+    const rows = result.newItems.filter((item) => item.source === "Meal");
+    const names = rows.map((item) => item.name);
+    expect(names).toEqual(
+      expect.arrayContaining(["375 g plain flour", "250 g caster sugar"])
+    );
+    // Tagged to the day it's planned, so the unified list can tier it.
+    expect(rows.every((item) => item.day === "Friday")).toBe(true);
+  });
+
+  it("adds nothing when no dessert is planned", () => {
+    const result = buildShoppingPlan({
+      staples: [],
+      inventory: [],
+      shoppingItems: [],
+      weekMeals: {},
+      weekKey: "2026-06-14",
+      getMealSummary: (day) => ({ hasMeal: false, name: day, ingredients: [] }),
+      weekDesserts: {},
+      getRecipeIngredients: () => ["should not appear"],
+    });
+    expect(result.newItems).toHaveLength(0);
+  });
+});

@@ -8,6 +8,7 @@ function setup(meals, extra = {}) {
   const mealWeekKey = "2026-07-05";
   const mealsByWeek = { [mealWeekKey]: meals, ...(extra.mealsByWeek || {}) };
   const setMealsByWeek = vi.fn();
+  const setDessertsByWeek = vi.fn();
   const requestUndo = vi.fn();
   const setShoppingChecked = vi.fn();
   // Resolve a meal's ingredients the way the app does (recipe link or the
@@ -21,13 +22,21 @@ function setup(meals, extra = {}) {
       meals,
       mealsByWeek,
       setMealsByWeek,
+      setDessertsByWeek,
       mealWeekKey,
       requestUndo,
       setShoppingChecked,
       getIngredientsForMeal,
     })
   );
-  return { result, setMealsByWeek, setShoppingChecked, requestUndo, mealWeekKey };
+  return {
+    result,
+    setMealsByWeek,
+    setDessertsByWeek,
+    setShoppingChecked,
+    requestUndo,
+    mealWeekKey,
+  };
 }
 
 const cook = (name) => ({
@@ -257,5 +266,37 @@ describe("useMealPlanActions — assignRecipeToWeekDay", () => {
       name: "X",
     });
     expect(setMealsByWeek).not.toHaveBeenCalled();
+  });
+});
+
+describe("useMealPlanActions — desserts", () => {
+  it("sets the active week's dessert for a day", () => {
+    const { result, setDessertsByWeek, mealWeekKey } = setup({});
+    result.current.setDessertForDay("Friday", { id: "cake", name: "Cake" });
+
+    const updater = setDessertsByWeek.mock.calls[0][0];
+    const next = updater({});
+    expect(next[mealWeekKey].Friday).toEqual({ recipeId: "cake", name: "Cake" });
+  });
+
+  it("clears a day's dessert without touching other days", () => {
+    const { result, setDessertsByWeek, mealWeekKey } = setup({});
+    result.current.clearDessertForDay("Friday");
+
+    const updater = setDessertsByWeek.mock.calls[0][0];
+    const next = updater({
+      [mealWeekKey]: {
+        Friday: { recipeId: "cake", name: "Cake" },
+        Sunday: { recipeId: "pie", name: "Pie" },
+      },
+    });
+    expect(next[mealWeekKey].Friday).toBeUndefined();
+    expect(next[mealWeekKey].Sunday).toEqual({ recipeId: "pie", name: "Pie" });
+  });
+
+  it("ignores an unknown day", () => {
+    const { result, setDessertsByWeek } = setup({});
+    result.current.setDessertForDay("Someday", { id: "cake", name: "Cake" });
+    expect(setDessertsByWeek).not.toHaveBeenCalled();
   });
 });

@@ -37,6 +37,7 @@ export default function MealGroups({
   dayList,
   meals,
   getMealSummary,
+  weekDesserts = {},
   onOpenDay,
   todayDayName,
   weekStart,
@@ -65,6 +66,7 @@ export default function MealGroups({
         mealLabel={group.leadSummary.label}
         mealTone={group.leadSummary.tone}
         hasMeal={group.leadSummary.hasMeal}
+        dessertName={weekDesserts[group.leadDay]?.name || ""}
         isToday={group.leadDay === todayDayName}
         isDragOver={dragOverDay === group.leadDay}
         onOpen={() => onOpenDay(group.leadDay)}
@@ -76,6 +78,7 @@ export default function MealGroups({
         leadDay={group.leadDay}
         leadSummary={group.leadSummary}
         repeatDays={group.repeatDays}
+        weekDesserts={weekDesserts}
         onOpenDay={onOpenDay}
         todayDayName={todayDayName}
         getDate={getDate}

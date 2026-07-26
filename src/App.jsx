@@ -37,6 +37,7 @@ import { buildUnifiedShoppingList } from "./utils/priorityShoppingList";
 import { buildPlannerView } from "./utils/plannerView";
 import { listKnownGroups } from "./utils/ingredientMatch";
 import { rankRecipesByCoverage } from "./utils/recipeCoverage";
+import { isDessertRecipe } from "./utils/recipeUtils";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { applyBackup } from "./lib/applyBackup";
 import { captureJoinCodeFromUrl } from "./lib/household";
@@ -143,6 +144,8 @@ function App() {
   const {
     mealsByWeek,
     setMealsByWeek,
+    dessertsByWeek,
+    setDessertsByWeek,
     setShoppingItemsByWeek,
     setShoppingListMetaByWeek,
     removalAcksByWeek,
@@ -271,6 +274,16 @@ function App() {
   const currentWeekKey = getWeekKey(currentWeekStart);
   const nextWeekKey = getWeekKey(nextWeekStart);
   const meals = mealsByWeek[mealWeekKey] || createEmptyMeals();
+  // The active meal week's desserts (day -> { recipeId, name }).
+  const weekDesserts = dessertsByWeek[mealWeekKey] || {};
+  const dessertRecipes = useMemo(
+    () => recipes.filter(isDessertRecipe),
+    [recipes]
+  );
+  const recipeById = useMemo(
+    () => new Map(recipes.map((recipe) => [recipe.id, recipe])),
+    [recipes]
+  );
 
   // What the kitchen can already cook this meal week — the week's basket (if
   // assigned) plus recurring buys and stock — keyed by recipe id so the meal
@@ -329,6 +342,9 @@ function App() {
     baskets,
     basketByWeek,
     shoppingWeekKey,
+    dessertsByWeek,
+    getRecipeIngredients: (recipeId) =>
+      recipeById.get(recipeId)?.ingredients || [],
   });
   const removalIds = new Set(recurringRemovals.map((item) => item.id));
 
@@ -340,10 +356,13 @@ function App() {
     assignRecipeToWeekDay,
     updateMeal,
     swapMealDays,
+    setDessertForDay,
+    clearDessertForDay,
   } = useMealPlanActions({
     meals,
     mealsByWeek,
     setMealsByWeek,
+    setDessertsByWeek,
     mealWeekKey,
     requestUndo,
     setShoppingChecked,
@@ -623,6 +642,7 @@ function App() {
   function applyImportedData(backup) {
     return applyBackup(backup, {
       mealsByWeek,
+      dessertsByWeek,
       shoppingChecked,
       manualShoppingItems,
       settings,
@@ -630,6 +650,7 @@ function App() {
       inventory,
       recipes,
       setMealsByWeek,
+      setDessertsByWeek,
       setShoppingItemsByWeek,
       setShoppingListMetaByWeek,
       setShoppingChecked,
@@ -826,6 +847,10 @@ function App() {
           meals={meals}
           getMealSummary={getMealSummary}
           recipes={recipes}
+          weekDesserts={weekDesserts}
+          dessertRecipes={dessertRecipes}
+          setDessertForDay={setDessertForDay}
+          clearDessertForDay={clearDessertForDay}
           expandedMealDay={expandedMealDay}
           expandedDayLabel={expandedDayLabel}
           expandedMeal={expandedMeal}
