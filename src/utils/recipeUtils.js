@@ -158,6 +158,13 @@ export function deriveRecipeTags({ name = "", category = "", ingredients = [] })
   return recipeTags.filter((tag) => tags.has(tag));
 }
 
+// A dessert recipe — kept out of the dinner planner, discovery deck and
+// For-you feed, and shown under the Recipes tab's "Sweet" view. Everything
+// without an explicit dessert course counts as a dinner.
+export function isDessertRecipe(recipe) {
+  return recipe?.course === "dessert";
+}
+
 // How long a freshly-added recipe wears its "New" badge.
 export const NEW_RECIPE_WINDOW_DAYS = 60;
 

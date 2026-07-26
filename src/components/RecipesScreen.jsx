@@ -15,6 +15,7 @@ import {
   isRecipeImportAvailable,
 } from "../lib/recipeImportClient";
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
+import { isDessertRecipe } from "../utils/recipeUtils";
 import { rankRecipesByCoverage } from "../utils/recipeCoverage";
 import { recommendFromRatings } from "../utils/recipeRecommendations";
 import {
@@ -113,6 +114,9 @@ function RecipesScreen({
   onPlanRecipeOnWeekDay,
 }) {
   const [mode, setMode] = useState("browse");
+  // Browse splits by course: dinners (the whole planner-facing library) or
+  // desserts. For-you and Favourites are unaffected.
+  const [course, setCourse] = useState("dinner");
   const [sort, setSort] = useState("mixed");
   // A fresh shuffle seed each time the Recipes tab opens — Mixed feels random
   // per visit but stays stable while you scroll/filter.
@@ -125,20 +129,41 @@ function RecipesScreen({
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
 
-  const filters = useRecipeFilters(recipes);
+  const dinnerRecipes = useMemo(
+    () => recipes.filter((recipe) => !isDessertRecipe(recipe)),
+    [recipes]
+  );
+  const dessertRecipes = useMemo(
+    () => recipes.filter(isDessertRecipe),
+    [recipes]
+  );
+  const hasDesserts = dessertRecipes.length > 0;
+  // Browse filters/search/sort operate over just the chosen course.
+  const browseSource = course === "dessert" ? dessertRecipes : dinnerRecipes;
+
+  const filters = useRecipeFilters(browseSource);
   const { searchText, setSearchText, visibleRecipes, clearFilters } = filters;
+
+  // Dinners | Sweet switch: reset the (protein/tag) filters, which don't carry
+  // across courses, and jump back to the top.
+  function selectCourse(next) {
+    if (next === course) return;
+    setCourse(next);
+    clearFilters();
+    window.scrollTo(0, 0);
+  }
 
   // "For you": rank every recipe by how much of it the kitchen already covers
   // (stock + active recurring buys). Reuses the Baskets coverage engine.
   const coverageList = useMemo(
     () =>
       rankRecipesByCoverage({
-        recipes,
+        recipes: dinnerRecipes,
         staples,
         inventory,
         ingredientGroups,
       }),
-    [recipes, staples, inventory, ingredientGroups]
+    [dinnerRecipes, staples, inventory, ingredientGroups]
   );
   const coverageByRecipe = useMemo(() => {
     const map = new Map();
@@ -165,8 +190,8 @@ function RecipesScreen({
 
   // "More like your top-rated": suggestions built from your 4–5 star recipes.
   const recommended = useMemo(
-    () => recommendFromRatings(recipes, recipeRatings),
-    [recipes, recipeRatings]
+    () => recommendFromRatings(dinnerRecipes, recipeRatings),
+    [dinnerRecipes, recipeRatings]
   );
 
   const favouriteRecipes = useMemo(
@@ -208,7 +233,7 @@ function RecipesScreen({
         isFavourite={favouriteRecipeIdSet.has(recipe.id)}
         onToggleFavourite={onToggleFavourite}
         onOpen={() => setOpenRecipeId(recipe.id)}
-        onPlan={canPlan ? setPlanRecipe : undefined}
+        onPlan={canPlan && !isDessertRecipe(recipe) ? setPlanRecipe : undefined}
       />
     );
   }
@@ -248,6 +273,37 @@ function RecipesScreen({
 
       {mode === "browse" && (
         <>
+          {hasDesserts && (
+            <div
+              className="recipes-course"
+              role="tablist"
+              aria-label="Recipe course"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={course === "dinner"}
+                className={`recipes-course-tab ${
+                  course === "dinner" ? "active" : ""
+                }`}
+                onClick={() => selectCourse("dinner")}
+              >
+                Dinners
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={course === "dessert"}
+                className={`recipes-course-tab ${
+                  course === "dessert" ? "active" : ""
+                }`}
+                onClick={() => selectCourse("dessert")}
+              >
+                Sweet
+              </button>
+            </div>
+          )}
+
           <div className="recipe-search-row">
             <div className="recipe-search">
               <Search
@@ -258,27 +314,35 @@ function RecipesScreen({
               <input
                 type="search"
                 aria-label="Search recipes"
-                placeholder="Search recipes..."
+                placeholder={
+                  course === "dessert"
+                    ? "Search desserts..."
+                    : "Search recipes..."
+                }
                 value={searchText}
                 onChange={(event) => setSearchText(event.target.value)}
               />
             </div>
 
-            <button
-              type="button"
-              className={`recipe-filter-button ${
-                filters.activeFilterCount > 0 ? "active" : ""
-              }`}
-              onClick={() => setFiltersOpen(true)}
-            >
-              <SlidersHorizontal size={16} aria-hidden="true" />
-              Filters
-              {filters.activeFilterCount > 0 && (
-                <span className="recipe-filter-count">
-                  {filters.activeFilterCount}
-                </span>
-              )}
-            </button>
+            {/* Protein/tag filters are dinner concepts, so they're hidden on the
+                Sweet view (search + sort still apply). */}
+            {course === "dinner" && (
+              <button
+                type="button"
+                className={`recipe-filter-button ${
+                  filters.activeFilterCount > 0 ? "active" : ""
+                }`}
+                onClick={() => setFiltersOpen(true)}
+              >
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                Filters
+                {filters.activeFilterCount > 0 && (
+                  <span className="recipe-filter-count">
+                    {filters.activeFilterCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
 
           <div className="recipes-sort-row">
@@ -326,6 +390,7 @@ function RecipesScreen({
             </div>
           )}
 
+          {course === "dinner" && (
           <div className="recipes-add">
             <button
               type="button"
@@ -403,6 +468,7 @@ function RecipesScreen({
               </>
             )}
           </div>
+          )}
         </>
       )}
 
@@ -435,7 +501,7 @@ function RecipesScreen({
               title={collection.title}
               subtitle={collection.subtitle}
             >
-              {collectionRecipes(recipes, collection).map((recipe) =>
+              {collectionRecipes(dinnerRecipes, collection).map((recipe) =>
                 renderTile(recipe)
               )}
             </RecipeRow>

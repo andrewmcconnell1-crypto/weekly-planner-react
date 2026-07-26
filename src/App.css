@@ -4184,6 +4184,42 @@ html[data-theme="dark"] .recipes-modes-bar {
   color: var(--ink);
 }
 
+/* Dinners | Sweet course switch — a secondary segmented control under the mode
+   bar, same shape as the modes but two-up. */
+.recipes-course {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--soft);
+}
+
+.recipes-course-tab {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.recipes-course-tab.active {
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.recipes-course-tab:hover:not(.active) {
+  color: var(--ink);
+}
+
 .recipes-mode-count {
   display: inline-grid;
   place-items: center;

@@ -741,6 +741,7 @@ const baseWebRecipes = [
     id: "abc-french-yoghurt-cake",
     name: "French Yoghurt Cake with Sour Cherry Compote",
     category: "Sweet",
+    course: "dessert",
     source: "ABC",
     sourceUrl:
       "https://www.abc.net.au/news/2026-07-25/emelia-jacksons-french-yoghurt-cake-recipe/106919586",
