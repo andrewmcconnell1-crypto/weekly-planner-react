@@ -13,6 +13,7 @@ import {
 export function applyBackup(backup, ctx) {
   const {
     mealsByWeek,
+    dessertsByWeek,
     shoppingChecked,
     manualShoppingItems,
     settings,
@@ -22,6 +23,7 @@ export function applyBackup(backup, ctx) {
     recipes,
     deletedRecipeIds,
     setMealsByWeek,
+    setDessertsByWeek,
     setShoppingItemsByWeek,
     setShoppingListMetaByWeek,
     setShoppingChecked,
@@ -64,6 +66,11 @@ export function applyBackup(backup, ctx) {
   };
 
   apply("mealsByWeek", mealsByWeek, setMealsByWeek, { label: "meal plan" });
+  if (setDessertsByWeek) {
+    apply("dessertsByWeek", dessertsByWeek, setDessertsByWeek, {
+      label: "planned desserts",
+    });
+  }
   apply("shoppingItemsByWeek", null, setShoppingItemsByWeek);
   apply("shoppingListMetaByWeek", null, setShoppingListMetaByWeek);
   apply("shoppingChecked", shoppingChecked, setShoppingChecked);

@@ -52,6 +52,10 @@ export function buildShoppingPlan({
   // as rows and count as "already covered" for meal-ingredient suppression.
   basketItems = [],
   basketName = "",
+  // The week's planned desserts (day -> { recipeId, name }) plus a resolver for
+  // a recipe's ingredients, so a dessert's shopping folds in like a meal's.
+  weekDesserts = {},
+  getRecipeIngredients = null,
 }) {
   // Basket lines can carry a count ("Beef mince x2"); the shopping list only
   // cares about the item, so strip counts to clean names here.
@@ -99,6 +103,24 @@ export function buildShoppingPlan({
       day,
     }));
   });
+
+  // A planned dessert shops like a meal: its recipe's ingredients join the day's
+  // list, deduped and coverage-suppressed the same way.
+  const dessertIngredients = getRecipeIngredients
+    ? days.flatMap((day) => {
+        const dessert = weekDesserts[day];
+        if (!dessert?.recipeId) return [];
+        return (getRecipeIngredients(dessert.recipeId) || []).map(
+          (ingredient) => ({
+            name: ingredient,
+            category: "Meal ingredients",
+            source: "Meal",
+            sourceDetail: dessert.name || "Dessert",
+            day,
+          })
+        );
+      })
+    : [];
 
   const recurringBuyNames = new Set(
     recurringBuys.flatMap((item) => [
@@ -193,7 +215,12 @@ export function buildShoppingPlan({
       sourceDetail: basketName,
     }));
 
-  const allNewItems = [...basketRows, ...restockInventory, ...mealIngredients];
+  const allNewItems = [
+    ...basketRows,
+    ...restockInventory,
+    ...mealIngredients,
+    ...dessertIngredients,
+  ];
 
   const existingGeneratedItems = shoppingItems.filter((item) =>
     generatedShoppingSources.includes(item.source)

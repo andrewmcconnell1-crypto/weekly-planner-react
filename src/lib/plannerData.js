@@ -21,6 +21,7 @@ function migrateItemCategories(items) {
 // The slices of app state that get persisted (locally or to the cloud).
 export const DATA_KEYS = [
   "mealsByWeek",
+  "dessertsByWeek",
   "shoppingItemsByWeek",
   "shoppingListMetaByWeek",
   "removalAcksByWeek",
@@ -106,6 +107,10 @@ function normaliseSettings(raw) {
 export function defaultData() {
   return {
     mealsByWeek: {},
+    // An optional dessert per day, keyed by week then day: { recipeId, name }.
+    // Independent of the dinner meal, so it isn't touched by clearing or
+    // dragging dinners around.
+    dessertsByWeek: {},
     shoppingItemsByWeek: {},
     shoppingListMetaByWeek: {},
     removalAcksByWeek: {},
@@ -150,6 +155,10 @@ export function normaliseData(raw) {
 
   return {
     mealsByWeek: data.mealsByWeek ?? base.mealsByWeek,
+    dessertsByWeek:
+      data.dessertsByWeek && typeof data.dessertsByWeek === "object"
+        ? data.dessertsByWeek
+        : base.dessertsByWeek,
     shoppingItemsByWeek: data.shoppingItemsByWeek ?? base.shoppingItemsByWeek,
     shoppingListMetaByWeek:
       data.shoppingListMetaByWeek ?? base.shoppingListMetaByWeek,

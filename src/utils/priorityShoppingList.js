@@ -43,6 +43,8 @@ export function buildUnifiedShoppingList({
   baskets = [],
   basketByWeek = {},
   shoppingWeekKey = null,
+  dessertsByWeek = {},
+  getRecipeIngredients = null,
 }) {
   const todayIndex = days.indexOf(todayDayName);
 
@@ -67,6 +69,8 @@ export function buildUnifiedShoppingList({
     ingredientGroups,
     basketItems: basketForWeek(currentWeekKey)?.items || [],
     basketName: basketForWeek(currentWeekKey)?.name || "",
+    weekDesserts: dessertsByWeek[currentWeekKey] || {},
+    getRecipeIngredients,
   });
   const nextPlan = buildShoppingPlan({
     staples,
@@ -78,6 +82,8 @@ export function buildUnifiedShoppingList({
     ingredientGroups,
     basketItems: basketForWeek(nextWeekKey)?.items || [],
     basketName: basketForWeek(nextWeekKey)?.name || "",
+    weekDesserts: dessertsByWeek[nextWeekKey] || {},
+    getRecipeIngredients,
   });
 
   const collected = [];

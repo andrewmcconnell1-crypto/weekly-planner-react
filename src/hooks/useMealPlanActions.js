@@ -7,6 +7,7 @@ export function useMealPlanActions({
   meals,
   mealsByWeek,
   setMealsByWeek,
+  setDessertsByWeek,
   mealWeekKey,
   requestUndo,
   // Shopping ticks are keyed by item name and persist across list rebuilds, so
@@ -377,6 +378,36 @@ export function useMealPlanActions({
     });
   }
 
+  // ---- Desserts: an optional, independent second course per day ---------------
+  // Stored in their own dessertsByWeek slice, so they're untouched by clearing
+  // or dragging the dinner. { recipeId, name } per day.
+  function writeDessert(weekKey, day, dessert) {
+    if (!days.includes(day) || !setDessertsByWeek) return;
+    setDessertsByWeek((prevByWeek = {}) => {
+      const week = prevByWeek[weekKey] || {};
+      const nextWeek = { ...week };
+      if (dessert) nextWeek[day] = dessert;
+      else delete nextWeek[day];
+      return { ...prevByWeek, [weekKey]: nextWeek };
+    });
+  }
+
+  // Set the active week's dessert for a day (from the meal editor).
+  function setDessertForDay(day, recipe) {
+    if (!recipe) return;
+    writeDessert(mealWeekKey, day, { recipeId: recipe.id, name: recipe.name });
+  }
+
+  // Set a dessert for a specific week + day (from the Recipes tab's day picker).
+  function setDessertForWeekDay(weekKey, day, recipe) {
+    if (!recipe) return;
+    writeDessert(weekKey, day, { recipeId: recipe.id, name: recipe.name });
+  }
+
+  function clearDessertForDay(day) {
+    writeDessert(mealWeekKey, day, null);
+  }
+
   return {
     setLeftoverNights,
     clearMealDay,
@@ -384,5 +415,8 @@ export function useMealPlanActions({
     assignRecipeToWeekDay,
     updateMeal,
     swapMealDays,
+    setDessertForDay,
+    setDessertForWeekDay,
+    clearDessertForDay,
   };
 }

@@ -1,4 +1,9 @@
-import { ChevronRight, CookingPot, CornerDownRight } from "lucide-react";
+import {
+  CakeSlice,
+  ChevronRight,
+  CookingPot,
+  CornerDownRight,
+} from "lucide-react";
 
 import { DayRail } from "./MealCard";
 import MealReorderHandle from "./MealReorderHandle";
@@ -10,12 +15,20 @@ function MealLeftoverCluster({
   leadDay,
   leadSummary,
   repeatDays,
+  weekDesserts = {},
   onOpenDay,
   todayDayName,
   getDate,
   dragOverDay = null,
   reorder = null,
 }) {
+  const dessertLine = (dayName) =>
+    weekDesserts[dayName]?.name ? (
+      <span className="meal-row-dessert">
+        <CakeSlice size={13} aria-hidden="true" />
+        {weekDesserts[dayName].name}
+      </span>
+    ) : null;
   const coversNights = repeatDays.length + 1;
   const leadName = leadSummary.name || "No meal planned";
   const batches = Math.max(1, Math.round(Number(leadSummary.meal?.batches) || 1));
@@ -51,6 +64,7 @@ function MealLeftoverCluster({
             Cook once · eat {coversNights} nights
             {batches > 1 ? ` · ×${batches}` : ""}
           </span>
+          {dessertLine(leadDay)}
         </span>
 
         <ChevronRight className="meal-row-chevron" size={18} aria-hidden="true" />
@@ -76,8 +90,11 @@ function MealLeftoverCluster({
             />
 
             <span className="meal-cluster-repeat-label">
-              <CornerDownRight size={14} aria-hidden="true" />
-              Leftovers
+              <span className="meal-cluster-repeat-leftovers">
+                <CornerDownRight size={14} aria-hidden="true" />
+                Leftovers
+              </span>
+              {dessertLine(repeatDay)}
             </span>
 
             <ChevronRight className="meal-row-chevron" size={18} aria-hidden="true" />

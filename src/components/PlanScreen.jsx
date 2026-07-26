@@ -30,6 +30,10 @@ export default function PlanScreen({
   meals,
   getMealSummary,
   recipes,
+  weekDesserts,
+  dessertRecipes,
+  setDessertForDay,
+  clearDessertForDay,
   recipeCoverageById,
   expandedMealDay,
   expandedDayLabel,
@@ -103,6 +107,7 @@ export default function PlanScreen({
           dayList={days}
           meals={meals}
           getMealSummary={getMealSummary}
+          weekDesserts={weekDesserts}
           onOpenDay={setExpandedMealDay}
           weekStart={mealWeekStart}
           dragOverDay={drag?.overDay}
@@ -141,6 +146,10 @@ export default function PlanScreen({
             onSetNights={(nights) => setLeftoverNights(expandedMealDay, nights)}
             onClearDay={() => clearMealDay(expandedMealDay)}
             updateMeal={updateMeal}
+            dessert={weekDesserts?.[expandedMealDay] || null}
+            desserts={dessertRecipes}
+            onSetDessert={(recipe) => setDessertForDay(expandedMealDay, recipe)}
+            onClearDessert={() => clearDessertForDay(expandedMealDay)}
             onClose={() => setExpandedMealDay(null)}
             onFindMeals={() => {
               const day = expandedMealDay;

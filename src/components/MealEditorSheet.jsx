@@ -94,6 +94,10 @@ function MealEditorSheet({
   onSetNights,
   onClearDay,
   updateMeal,
+  dessert = null,
+  desserts = [],
+  onSetDessert,
+  onClearDessert,
   onClose,
   onFindMeals,
 }) {
@@ -132,6 +136,11 @@ function MealEditorSheet({
   // committed until "Plan for <day>". Keeps a stray tap while scrolling from
   // silently locking in a meal, and makes "select" mean one thing.
   const [previewRecipeId, setPreviewRecipeId] = useState(null);
+  // Desserts are an independent second course — this opens a small dessert
+  // picker over the sheet.
+  const [dessertPickerOpen, setDessertPickerOpen] = useState(false);
+  const [dessertSearch, setDessertSearch] = useState("");
+  const canAddDessert = desserts.length > 0 && Boolean(onSetDessert);
   // Nights + batch collapse to a single summary line by default (most meals are
   // one night, single batch); tapping it reveals the controls.
   const [cookOptionsOpen, setCookOptionsOpen] = useState(false);
@@ -898,6 +907,106 @@ function MealEditorSheet({
     return null;
   }
 
+  // The day's optional dessert, shown at the foot of the sheet — independent of
+  // the dinner above it.
+  function renderDessertSection() {
+    if (!canAddDessert) return null;
+    return (
+      <div className="meal-dessert">
+        <span className="section-kicker">Dessert</span>
+        {dessert ? (
+          <div className="meal-dessert-current">
+            <span className="meal-dessert-name">{dessert.name}</span>
+            <div className="meal-dessert-links">
+              <button
+                type="button"
+                className="meal-change-recipe-link"
+                onClick={() => setDessertPickerOpen(true)}
+              >
+                <Replace size={14} aria-hidden="true" />
+                Change
+              </button>
+              <button
+                type="button"
+                className="meal-current-remove"
+                onClick={onClearDessert}
+              >
+                <Trash2 size={14} aria-hidden="true" />
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="meal-add-dessert"
+            onClick={() => setDessertPickerOpen(true)}
+          >
+            <Plus size={16} aria-hidden="true" />
+            Add dessert
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  function renderDessertPicker() {
+    const query = dessertSearch.trim().toLowerCase();
+    const list = query
+      ? desserts.filter((recipe) => recipe.name.toLowerCase().includes(query))
+      : desserts;
+    return (
+      <>
+        <button
+          type="button"
+          className="meal-type-back"
+          onClick={() => setDessertPickerOpen(false)}
+        >
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back
+        </button>
+
+        <div className="meal-picker">
+          <div className="recipe-search-row">
+            <div className="recipe-search">
+              <Search
+                className="recipe-search-icon"
+                size={16}
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                aria-label="Search desserts"
+                placeholder="Search desserts..."
+                value={dessertSearch}
+                onChange={(event) => setDessertSearch(event.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="recipe-picker-results recipe-picker-flat">
+            {list.length === 0 ? (
+              <p className="empty-state">No desserts match — try a different search.</p>
+            ) : (
+              list.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  recipe={recipe}
+                  active={dessert?.recipeId === recipe.id}
+                  onClick={() => {
+                    onSetDessert(recipe);
+                    setDessertSearch("");
+                    setDessertPickerOpen(false);
+                  }}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
     <div
@@ -930,49 +1039,61 @@ function MealEditorSheet({
           </button>
         </div>
 
-        <div className={`sheet-body ${browsingRecipes ? "sheet-body-fill" : ""}`}>
-          {/* Keyed so each swap (type → detail, list → preview, and back)
-              remounts and replays the entrance animation, matching the gentle
-              transitions elsewhere instead of snapping between states. */}
-          <div
-            key={`${view}|${changingRecipe}|${Boolean(previewRecipeId)}`}
-            className="meal-view"
-          >
-            {view === "chooser" ? renderChooser() : renderDetail()}
-          </div>
-
-          {/* The meal-level edit actions, grouped at the foot of the detail:
-              switch what kind of meal it is, or clear the day. Kept out of the
-              recipe-selection flow, which has its own back/commit. */}
-          {view !== "chooser" && !browsingRecipes && (
-            <div className="meal-detail-actions">
-              <button
-                type="button"
-                className="meal-change-recipe-link"
-                onClick={() => {
-                  setPreviewRecipeId(null);
-                  setView("chooser");
-                }}
+        <div
+          className={`sheet-body ${
+            browsingRecipes || dessertPickerOpen ? "sheet-body-fill" : ""
+          }`}
+        >
+          {dessertPickerOpen ? (
+            <div className="meal-view">{renderDessertPicker()}</div>
+          ) : (
+            <>
+              {/* Keyed so each swap (type → detail, list → preview, and back)
+                  remounts and replays the entrance animation, matching the
+                  gentle transitions elsewhere instead of snapping. */}
+              <div
+                key={`${view}|${changingRecipe}|${Boolean(previewRecipeId)}`}
+                className="meal-view"
               >
-                <Utensils size={14} aria-hidden="true" />
-                Change meal type
-              </button>
+                {view === "chooser" ? renderChooser() : renderDetail()}
+              </div>
 
-              {hasMeal && onClearDay && (
-                <button
-                  type="button"
-                  className="meal-current-remove"
-                  onClick={clearDay}
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                  Remove plan
-                </button>
+              {/* The meal-level edit actions, grouped at the foot of the detail:
+                  switch what kind of meal it is, or clear the day. Kept out of
+                  the recipe-selection flow, which has its own back/commit. */}
+              {view !== "chooser" && !browsingRecipes && (
+                <div className="meal-detail-actions">
+                  <button
+                    type="button"
+                    className="meal-change-recipe-link"
+                    onClick={() => {
+                      setPreviewRecipeId(null);
+                      setView("chooser");
+                    }}
+                  >
+                    <Utensils size={14} aria-hidden="true" />
+                    Change meal type
+                  </button>
+
+                  {hasMeal && onClearDay && (
+                    <button
+                      type="button"
+                      className="meal-current-remove"
+                      onClick={clearDay}
+                    >
+                      <Trash2 size={14} aria-hidden="true" />
+                      Remove plan
+                    </button>
+                  )}
+                </div>
               )}
-            </div>
+
+              {!browsingRecipes && renderDessertSection()}
+            </>
           )}
         </div>
 
-        {!browsingRecipes && (
+        {!browsingRecipes && !dessertPickerOpen && (
           <div className="sheet-footer">
             <button type="button" className="secondary" onClick={undoChanges}>
               Cancel
