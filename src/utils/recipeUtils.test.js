@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 
 import {
   deriveRecipeTags,
+  isDessertRecipe,
   isQuickRecipe,
   recipeTags,
 } from "./recipeUtils";
@@ -91,5 +92,14 @@ describe("isQuickRecipe", () => {
 
   it("is not quick otherwise", () => {
     expect(isQuickRecipe({ tags: ["Spicy"], timeMins: null })).toBe(false);
+  });
+});
+
+describe("isDessertRecipe", () => {
+  it("is true only for the dessert course", () => {
+    expect(isDessertRecipe({ course: "dessert" })).toBe(true);
+    expect(isDessertRecipe({ course: "dinner" })).toBe(false);
+    expect(isDessertRecipe({})).toBe(false);
+    expect(isDessertRecipe(null)).toBe(false);
   });
 });

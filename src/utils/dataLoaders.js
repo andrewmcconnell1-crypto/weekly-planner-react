@@ -89,6 +89,10 @@ function normaliseRecipe(recipe, index) {
     // ISO date the recipe was added, driving the "Newest" sort and "New" badge.
     // Absent on older recipes — treated as "established" everywhere it's read.
     addedOn: typeof recipe.addedOn === "string" ? recipe.addedOn : null,
+    // Which part of a day a recipe belongs to. "dinner" is the whole existing
+    // library and the default; "dessert" is kept out of the dinner planner,
+    // discovery deck and For-you, and lives under the Recipes tab's Sweet view.
+    course: recipe.course === "dessert" ? "dessert" : "dinner",
   };
 }
 

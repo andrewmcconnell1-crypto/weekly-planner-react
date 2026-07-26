@@ -52,6 +52,28 @@ describe("mergeSavedRecipes", () => {
     expect(recipe.timeMins).toBeNull();
   });
 
+  it("defaults course to dinner and preserves an explicit dessert course", () => {
+    const merged = mergeSavedRecipes([
+      { id: "mine-2", name: "No Course", ingredients: [] },
+      { id: "mine-3", name: "A Cake", ingredients: [], course: "dessert" },
+      { id: "mine-4", name: "Odd Course", ingredients: [], course: "brunch" },
+    ]);
+    expect(merged.find((r) => r.id === "mine-2").course).toBe("dinner");
+    expect(merged.find((r) => r.id === "mine-3").course).toBe("dessert");
+    // Unknown courses fall back to dinner.
+    expect(merged.find((r) => r.id === "mine-4").course).toBe("dinner");
+  });
+
+  it("marks the bundled cake as the only dessert; the rest read as dinners", () => {
+    const merged = mergeSavedRecipes([]);
+    const cake = merged.find((r) => r.id === "abc-french-yoghurt-cake");
+    expect(cake.course).toBe("dessert");
+    // Only the cake is a dessert; every other bundled recipe is treated as a
+    // dinner (course "dessert" is the sole marker; anything else is a dinner).
+    const desserts = merged.filter((r) => r.course === "dessert");
+    expect(desserts.map((r) => r.id)).toEqual(["abc-french-yoghurt-cake"]);
+  });
+
   it("seeds the bundled recipes with metadata tags", () => {
     const merged = mergeSavedRecipes([]);
     expect(merged.every((r) => Array.isArray(r.tags))).toBe(true);

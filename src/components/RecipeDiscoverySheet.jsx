@@ -12,6 +12,7 @@ import {
 
 import RecipeDetail from "./RecipeDetail";
 import {
+  isDessertRecipe,
   recipeCategories,
   recipeProvenance,
   recipeTags,
@@ -122,6 +123,8 @@ function RecipeDiscoverySheet({
     const cats = [...selectedCategories];
     const tags = [...selectedTags];
     return recipes.filter((recipe) => {
+      // The deck plans dinners — desserts are chosen from their own place.
+      if (isDessertRecipe(recipe)) return false;
       if (handled.has(recipe.id) || plannedSet.has(recipe.id)) return false;
       if (cats.length && !cats.includes(recipe.category)) return false;
       const recipeTagList = recipe.tags || [];

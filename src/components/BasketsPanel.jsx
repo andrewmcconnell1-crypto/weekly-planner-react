@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { rankRecipesByCoverage } from "../utils/recipeCoverage";
+import { isDessertRecipe } from "../utils/recipeUtils";
 import { parseBasketQuantity } from "../utils/basketQuantity";
 import { slugifyIdPart } from "../utils/itemUtils";
 import { days } from "../utils/mealUtils";
@@ -140,7 +141,8 @@ function BasketsPanel({
   const ranked = useMemo(
     () =>
       rankRecipesByCoverage({
-        recipes,
+        // Baskets plan dinners to cook — desserts are handled separately.
+        recipes: recipes.filter((recipe) => !isDessertRecipe(recipe)),
         basketItems: cookFrom?.items || [],
         staples,
         inventory,

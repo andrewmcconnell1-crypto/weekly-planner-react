@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChefHat,
@@ -23,7 +23,11 @@ import {
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import RecipeFilterSheet from "./RecipeFilterSheet";
-import { getRecipeTone, recipeProvenance } from "../utils/recipeUtils";
+import {
+  getRecipeTone,
+  isDessertRecipe,
+  recipeProvenance,
+} from "../utils/recipeUtils";
 import { useRecipeFilters } from "../hooks/useRecipeFilters";
 import { useDialogFocus } from "../hooks/useDialogFocus";
 
@@ -132,7 +136,13 @@ function MealEditorSheet({
   // one night, single batch); tapping it reveals the controls.
   const [cookOptionsOpen, setCookOptionsOpen] = useState(false);
   const [newIngredient, setNewIngredient] = useState("");
-  const recipeFilters = useRecipeFilters(recipes);
+  // The night's meal is always a dinner — desserts are planned separately, so
+  // they never appear in this picker.
+  const dinnerRecipes = useMemo(
+    () => recipes.filter((recipe) => !isDessertRecipe(recipe)),
+    [recipes]
+  );
+  const recipeFilters = useRecipeFilters(dinnerRecipes);
   const [recipeFiltersOpen, setRecipeFiltersOpen] = useState(false);
   // "Ready to cook" narrows the picker to recipes the kitchen can already make
   // (this week's basket + recurring + stock), for planning from what you have.
@@ -291,7 +301,7 @@ function MealEditorSheet({
   }
 
   function selectRecipe(recipeId) {
-    const selectedRecipe = recipes.find((recipe) => recipe.id === recipeId);
+    const selectedRecipe = dinnerRecipes.find((recipe) => recipe.id === recipeId);
 
     if (!selectedRecipe) return;
 
@@ -677,7 +687,7 @@ function MealEditorSheet({
     }
 
     // A recipe tapped in the picker — explore it, commit only via the button.
-    const previewRecipe = recipes.find(
+    const previewRecipe = dinnerRecipes.find(
       (recipe) => recipe.id === previewRecipeId
     );
     if (previewRecipe) return renderRecipePreview(previewRecipe);
