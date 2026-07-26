@@ -8,7 +8,13 @@ import RecipeFilter from "./RecipeFilter";
 // fully (wrapped, nothing hidden off-screen). Driven by a useRecipeFilters
 // object, so toggling updates the list behind it live; the footer shows the
 // live result count and closes.
-function RecipeFilterSheet({ filters, onClose }) {
+function RecipeFilterSheet({
+  filters,
+  course = "dinner",
+  hasDesserts = false,
+  onSelectCourse,
+  onClose,
+}) {
   const [closing, setClosing] = useState(false);
   const closeTimerRef = useRef(null);
   const dialogRef = useRef(null);
@@ -80,6 +86,36 @@ function RecipeFilterSheet({ filters, onClose }) {
         </div>
 
         <div className="sheet-body recipe-filter-sheet-body">
+          {/* Course sits at the top as a plain two-way switch. Dinners is the
+              default; picking Sweet swaps the list to desserts (and the
+              protein/tag groups below fall away, since there's little to filter
+              there). Built inline rather than via RecipeFilter, which hides
+              two-option groups. */}
+          {hasDesserts && onSelectCourse && (
+            <div className="recipe-filter-group">
+              <p className="recipe-filter-label">Course</p>
+              <div
+                className="recipe-filter-chips"
+                aria-label="Filter by course"
+              >
+                <button
+                  type="button"
+                  className={course === "dinner" ? "active" : ""}
+                  onClick={() => onSelectCourse("dinner")}
+                >
+                  Dinners
+                </button>
+                <button
+                  type="button"
+                  className={course === "dessert" ? "active" : ""}
+                  onClick={() => onSelectCourse("dessert")}
+                >
+                  Sweet
+                </button>
+              </div>
+            </div>
+          )}
+
           <RecipeFilter
             label="Category"
             options={filters.categories}

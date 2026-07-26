@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft,
-  CakeSlice,
   ChevronDown,
   Heart,
   Link2,
@@ -295,55 +293,35 @@ function RecipesScreen({
               />
             </div>
 
-            {/* Protein/tag filters are dinner concepts, so they're hidden on the
-                Sweet view (search + sort still apply). */}
-            {course === "dinner" && (
-              <button
-                type="button"
-                className={`recipe-filter-button ${
-                  filters.activeFilterCount > 0 ? "active" : ""
-                }`}
-                onClick={() => setFiltersOpen(true)}
-              >
-                <SlidersHorizontal size={16} aria-hidden="true" />
-                Filters
-                {filters.activeFilterCount > 0 && (
-                  <span className="recipe-filter-count">
-                    {filters.activeFilterCount}
-                  </span>
-                )}
-              </button>
-            )}
+            {/* Filters also hosts the Dinners/Sweet course switch, so it stays
+                available on both courses. Protein/tag filters are dinner
+                concepts and simply fall away on the Sweet course (too few
+                desserts to filter). The button reads "active" while on Sweet so
+                there's a cue you're off the default course. */}
+            <button
+              type="button"
+              className={`recipe-filter-button ${
+                filters.activeFilterCount > 0 || course === "dessert"
+                  ? "active"
+                  : ""
+              }`}
+              onClick={() => setFiltersOpen(true)}
+            >
+              <SlidersHorizontal size={16} aria-hidden="true" />
+              Filters
+              {filters.activeFilterCount > 0 && (
+                <span className="recipe-filter-count">
+                  {filters.activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
 
           <div className="recipes-sort-row">
-            <div className="recipes-sort-left">
-              <span className="recipe-result-count small-text">
-                {browseList.length}{" "}
-                {browseList.length === 1 ? "recipe" : "recipes"}
-              </span>
-
-              {hasDesserts &&
-                (course === "dinner" ? (
-                  <button
-                    type="button"
-                    className="recipes-course-chip"
-                    onClick={() => selectCourse("dessert")}
-                  >
-                    <CakeSlice size={14} aria-hidden="true" />
-                    Sweet
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="recipes-course-chip active"
-                    onClick={() => selectCourse("dinner")}
-                  >
-                    <ArrowLeft size={14} aria-hidden="true" />
-                    Dinners
-                  </button>
-                ))}
-            </div>
+            <span className="recipe-result-count small-text">
+              {browseList.length}{" "}
+              {browseList.length === 1 ? "recipe" : "recipes"}
+            </span>
 
             <label className="recipes-sort">
               <span className="visually-hidden">Sort recipes</span>
@@ -526,6 +504,9 @@ function RecipesScreen({
       {filtersOpen && (
         <RecipeFilterSheet
           filters={filters}
+          course={course}
+          hasDesserts={hasDesserts}
+          onSelectCourse={selectCourse}
           onClose={() => setFiltersOpen(false)}
         />
       )}
