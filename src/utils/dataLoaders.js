@@ -208,7 +208,11 @@ function normaliseRecipe(recipe, index) {
 // lacked "One-pot"/"Kid-friendly"), so the same filter matched different
 // recipes on different devices. Also picks up the two new one-pot chicken
 // recipes' tags. (A bump refreshes built-in content to the current bundle.)
-export const RECIPES_VERSION = 34;
+// v35: refresh built-ins so existing accounts pick up the new "course" field —
+// the French Yoghurt Cake reached older accounts as an appended recipe before
+// desserts existed, so it lacked course:"dessert" and never showed under Sweet
+// or as a plannable dessert. The bump re-applies the bundle so it's classified.
+export const RECIPES_VERSION = 35;
 
 export function mergeSavedRecipes(
   parsedRecipes,
