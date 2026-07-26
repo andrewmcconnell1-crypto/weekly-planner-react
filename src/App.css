@@ -4211,11 +4211,13 @@ html[data-theme="dark"] .recipes-modes-bar {
 }
 
 /* Course switch — dinners is the default, so this is just a small opt-in chip
-   rather than a 50/50 toggle. Browsing dinners shows a "Sweet" chip; tapping it
-   flips to the dessert view, where a "Dinners" chip leads back. */
-.recipes-course {
+   rather than a 50/50 toggle. It rides on the results-count row (no row of its
+   own): browsing dinners shows a "Sweet" chip; tapping it flips to the dessert
+   view, where a "Dinners" chip leads back. */
+.recipes-sort-left {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-6);
 }
 
 .recipes-course-chip {

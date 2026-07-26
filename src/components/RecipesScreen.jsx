@@ -275,30 +275,6 @@ function RecipesScreen({
 
       {mode === "browse" && (
         <>
-          {hasDesserts && (
-            <div className="recipes-course">
-              {course === "dinner" ? (
-                <button
-                  type="button"
-                  className="recipes-course-chip"
-                  onClick={() => selectCourse("dessert")}
-                >
-                  <CakeSlice size={14} aria-hidden="true" />
-                  Sweet
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="recipes-course-chip active"
-                  onClick={() => selectCourse("dinner")}
-                >
-                  <ArrowLeft size={14} aria-hidden="true" />
-                  Dinners
-                </button>
-              )}
-            </div>
-          )}
-
           <div className="recipe-search-row">
             <div className="recipe-search">
               <Search
@@ -341,10 +317,33 @@ function RecipesScreen({
           </div>
 
           <div className="recipes-sort-row">
-            <span className="recipe-result-count small-text">
-              {browseList.length}{" "}
-              {browseList.length === 1 ? "recipe" : "recipes"}
-            </span>
+            <div className="recipes-sort-left">
+              <span className="recipe-result-count small-text">
+                {browseList.length}{" "}
+                {browseList.length === 1 ? "recipe" : "recipes"}
+              </span>
+
+              {hasDesserts &&
+                (course === "dinner" ? (
+                  <button
+                    type="button"
+                    className="recipes-course-chip"
+                    onClick={() => selectCourse("dessert")}
+                  >
+                    <CakeSlice size={14} aria-hidden="true" />
+                    Sweet
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="recipes-course-chip active"
+                    onClick={() => selectCourse("dinner")}
+                  >
+                    <ArrowLeft size={14} aria-hidden="true" />
+                    Dinners
+                  </button>
+                ))}
+            </div>
 
             <label className="recipes-sort">
               <span className="visually-hidden">Sort recipes</span>
