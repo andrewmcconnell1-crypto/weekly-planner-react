@@ -1047,6 +1047,7 @@ const SERVES_BY_ID = {
   "sausage-bean-cassoulet": 5,
   "lamb-rogan-josh": 5,
   "greek-lamb-orzo": 6,
+  "classic-spaghetti-bolognese": 6,
   // Restaurant quality — as with the originals, only the non-4 exceptions.
   "crispy-pork-belly-apple": 5,
   "slow-lamb-shoulder-anchovy": 6,
