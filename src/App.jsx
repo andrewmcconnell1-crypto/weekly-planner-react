@@ -80,6 +80,10 @@ function App() {
     window.scrollTo(0, 0);
   }, [activeTab, kitchenSection]);
   const [expandedMealDay, setExpandedMealDay] = useState(null);
+  // Which recipe's full sheet is open on the Recipes tab. Lifted here (rather
+  // than kept inside RecipesScreen) so a planned meal can deep-link to its
+  // recipe: open the sheet and switch tabs in one go.
+  const [openRecipeId, setOpenRecipeId] = useState(null);
   const [discoverOpen, setDiscoverOpen] = useState(false);
   const [discoverDay, setDiscoverDay] = useState(null);
   const updateReady = useUpdatePrompt();
@@ -230,6 +234,14 @@ function App() {
       }
       return next;
     });
+  }
+
+  // Deep-link to a recipe's full sheet from elsewhere (e.g. a planned meal):
+  // open that recipe and switch to the Recipes tab so it's visible.
+  function openRecipePage(id) {
+    if (!id) return;
+    setOpenRecipeId(id);
+    setActiveTab("recipes");
   }
 
   // Save a recipe's free-text note, or drop the entry when it's cleared.
@@ -847,6 +859,9 @@ function App() {
           meals={meals}
           getMealSummary={getMealSummary}
           recipes={recipes}
+          recipeRatings={recipeRatings}
+          onRateRecipe={setRecipeRating}
+          onOpenRecipe={openRecipePage}
           weekDesserts={weekDesserts}
           dessertRecipes={dessertRecipes}
           setDessertForDay={setDessertForDay}
@@ -868,6 +883,8 @@ function App() {
       {activeTab === "recipes" && (
         <RecipesScreen
           recipes={recipes}
+          openRecipeId={openRecipeId}
+          setOpenRecipeId={setOpenRecipeId}
           favouriteRecipeIdSet={favouriteRecipeIdSet}
           onToggleFavourite={toggleFavouriteRecipe}
           recipeRatings={recipeRatings}

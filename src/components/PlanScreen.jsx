@@ -30,6 +30,9 @@ export default function PlanScreen({
   meals,
   getMealSummary,
   recipes,
+  recipeRatings = {},
+  onRateRecipe,
+  onOpenRecipe,
   weekDesserts,
   dessertRecipes,
   setDessertForDay,
@@ -146,6 +149,18 @@ export default function PlanScreen({
             onSetNights={(nights) => setLeftoverNights(expandedMealDay, nights)}
             onClearDay={() => clearMealDay(expandedMealDay)}
             updateMeal={updateMeal}
+            linkedRecipeRating={
+              recipeRatings?.[expandedDaySummary?.linkedRecipe?.id] || 0
+            }
+            onRateLinkedRecipe={onRateRecipe}
+            onOpenRecipe={
+              onOpenRecipe
+                ? (recipeId) => {
+                    setExpandedMealDay(null);
+                    onOpenRecipe(recipeId);
+                  }
+                : undefined
+            }
             dessert={weekDesserts?.[expandedMealDay] || null}
             desserts={dessertRecipes}
             onSetDessert={(recipe) => setDessertForDay(expandedMealDay, recipe)}

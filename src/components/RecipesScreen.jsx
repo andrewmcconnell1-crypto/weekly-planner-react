@@ -90,6 +90,8 @@ function sortRecipes(list, sort, ratings = {}, seed = 0) {
 // act without leaving the grid.
 function RecipesScreen({
   recipes,
+  openRecipeId,
+  setOpenRecipeId,
   favouriteRecipeIdSet,
   onToggleFavourite,
   recipeRatings = {},
@@ -121,7 +123,6 @@ function RecipesScreen({
   // A fresh shuffle seed each time the Recipes tab opens — Mixed feels random
   // per visit but stays stable while you scroll/filter.
   const [mixSeed] = useState(() => Math.floor(Math.random() * 1e9));
-  const [openRecipeId, setOpenRecipeId] = useState(null);
   const [planRecipe, setPlanRecipe] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showAddRecipe, setShowAddRecipe] = useState(false);

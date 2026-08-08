@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  NotebookText,
   PencilLine,
   Plus,
   Repeat2,
@@ -23,6 +24,7 @@ import {
 import RecipeCard from "./RecipeCard";
 import RecipeDetail from "./RecipeDetail";
 import RecipeFilterSheet from "./RecipeFilterSheet";
+import StarRating from "./StarRating";
 import {
   getRecipeTone,
   isDessertRecipe,
@@ -94,6 +96,9 @@ function MealEditorSheet({
   onSetNights,
   onClearDay,
   updateMeal,
+  linkedRecipeRating = 0,
+  onRateLinkedRecipe,
+  onOpenRecipe,
   dessert = null,
   desserts = [],
   onSetDessert,
@@ -431,6 +436,12 @@ function MealEditorSheet({
   function renderCurrentCard() {
     if (!currentMatchesView || !daySummary) return null;
 
+    // A meal that came from a saved recipe can jump to that recipe's page and
+    // be rated right here — the two interactions that were previously only
+    // reachable from the Recipes tab.
+    const canOpenRecipe = Boolean(linkedRecipe?.id && onOpenRecipe);
+    const canRate = Boolean(linkedRecipe?.id && onRateLinkedRecipe);
+
     return (
       <div className="meal-current" data-tone={daySummary.tone}>
         <div className="meal-current-header">
@@ -443,20 +454,46 @@ function MealEditorSheet({
             </span>
           </div>
 
-          {linkedRecipe?.sourceUrl && (
+          {(canOpenRecipe || linkedRecipe?.sourceUrl) && (
             <div className="meal-current-actions">
-              <a
-                className="meal-current-source"
-                href={linkedRecipe.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink size={14} aria-hidden="true" />
-                Source
-              </a>
+              {canOpenRecipe && (
+                <button
+                  type="button"
+                  className="meal-current-source"
+                  onClick={() => onOpenRecipe(linkedRecipe.id)}
+                >
+                  <NotebookText size={14} aria-hidden="true" />
+                  Open recipe
+                </button>
+              )}
+
+              {linkedRecipe?.sourceUrl && (
+                <a
+                  className="meal-current-source"
+                  href={linkedRecipe.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={14} aria-hidden="true" />
+                  Source
+                </a>
+              )}
             </div>
           )}
         </div>
+
+        {canRate && (
+          <div className="meal-current-rating">
+            <span className="meal-current-rating-label">
+              {linkedRecipeRating ? "Your rating" : "Rate this meal"}
+            </span>
+            <StarRating
+              value={linkedRecipeRating}
+              onRate={(value) => onRateLinkedRecipe(linkedRecipe.id, value)}
+              size={24}
+            />
+          </div>
+        )}
 
         {view === "recipe" && (
           <RecipeDetail
