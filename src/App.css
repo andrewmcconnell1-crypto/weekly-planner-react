@@ -2384,6 +2384,22 @@ body.meal-dragging {
   background: #e3e7cf;
 }
 
+/* Rate the linked recipe without leaving the meal — a quiet row under the
+   header with the stars, so the interaction sits where you'd expect it. */
+.meal-current-rating {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.meal-current-rating-label {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
 /* Destructive "remove this day's meal" action, sitting on its own at the foot
    of the card (away from the Source link) with a trash icon and a fill-red
    hover so its intent is unmistakable. */
