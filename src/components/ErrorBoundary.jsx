@@ -56,9 +56,18 @@ export default class ErrorBoundary extends Component {
             again, or reload if it keeps happening.
           </p>
 
-          {import.meta.env.DEV && (
-            <pre className="error-detail">{String(error?.stack || error)}</pre>
-          )}
+          {/* The error message helps diagnose a crash from the field (the full
+              stack stays DEV-only). Collapsed by default so it doesn't alarm. */}
+          <details className="error-detail-toggle">
+            <summary>Show error details</summary>
+            <pre className="error-detail">
+              {String(
+                import.meta.env.DEV
+                  ? error?.stack || error
+                  : error?.message || error
+              )}
+            </pre>
+          </details>
 
           <button
             type="button"
