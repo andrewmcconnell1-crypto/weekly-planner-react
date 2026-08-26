@@ -6287,8 +6287,25 @@ html[data-theme="dark"] .update-banner-button:hover {
 }
 
 /* Dev-only crash detail in the error-boundary fallback. */
+.error-detail-toggle {
+  width: 100%;
+  text-align: left;
+}
+
+.error-detail-toggle > summary {
+  cursor: pointer;
+  padding: var(--space-6) 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.error-detail-toggle > summary:hover {
+  color: var(--ink);
+}
+
 .error-detail {
-  margin: 0;
+  margin: var(--space-6) 0 0;
   max-height: 40vh;
   overflow: auto;
   padding: var(--space-12);
