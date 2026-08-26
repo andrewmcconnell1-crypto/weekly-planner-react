@@ -39,6 +39,15 @@ describe("MealCard", () => {
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
+  it("renders the add tile when the day has no meal object at all", () => {
+    // An unplanned day in a week that was never seeded (or restored/partial
+    // data) passes meal={undefined} — it must render, not crash on meal.mealType.
+    render(
+      <MealCard day="Monday" meal={undefined} hasMeal={false} onOpen={() => {}} />
+    );
+    expect(screen.getByText("Add a meal")).toBeInTheDocument();
+  });
+
   it("badges a leftovers day", () => {
     render(
       <MealCard

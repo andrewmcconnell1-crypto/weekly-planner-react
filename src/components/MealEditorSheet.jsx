@@ -85,7 +85,10 @@ const MEAL_TYPES = [
 function MealEditorSheet({
   day,
   dateLabel,
-  meal,
+  // Defaults to an empty object so opening an unplanned day (which has no meal
+  // entry — e.g. a week that was never seeded, or restored/partial data) reads
+  // as a fresh "cook" meal instead of crashing on `meal.mealType`.
+  meal = {},
   days,
   recipes,
   recipeCoverageById,

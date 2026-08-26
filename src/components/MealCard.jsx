@@ -52,15 +52,18 @@ function MealCard({
   onOpen,
   reorder = null,
 }) {
-  const mealType = meal.mealType || "cook";
+  // `meal` is undefined for an unplanned day (no entry for that day in the
+  // week) — guard every read so the "Add a meal" tile still renders instead of
+  // crashing. This also covers a restored/partial week that has no object yet.
+  const mealType = meal?.mealType || "cook";
   const dessertLine = dessertName ? (
     <span className="meal-row-dessert">
       <CakeSlice size={13} aria-hidden="true" />
       {dessertName}
     </span>
   ) : null;
-  const batches = Math.max(1, Math.round(Number(meal.batches) || 1));
-  const mealName = displayName || (meal.name || "").trim();
+  const batches = Math.max(1, Math.round(Number(meal?.batches) || 1));
+  const mealName = displayName || (meal?.name || "").trim();
 
   // Unplanned day: an inviting "add" tile, not a faded version of a meal card.
   if (!hasMeal) {
