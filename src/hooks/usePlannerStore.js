@@ -9,6 +9,7 @@ import {
   hasLocalData,
   fetchCloudData,
   saveCloudData,
+  seedCloudDataIfAbsent,
 } from "../lib/plannerData";
 import { demoData } from "../lib/demoData";
 import {
@@ -48,6 +49,11 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
   // Skip the very next autosave after we *load* data (so loading doesn't
   // immediately write the same data straight back out).
   const skipNextSaveRef = useRef(true);
+  // Whether we've successfully reconciled with the cloud for the current row.
+  // Autosave to the cloud is blocked until this is true, so a failed or empty
+  // load can never let a later edit (or the empty fallback on screen) overwrite
+  // real data. Reset whenever the row we're loading changes.
+  const loadOkRef = useRef(false);
   const saveTimerRef = useRef(null);
   // updated_at of our most recent write, so realtime can ignore our own echo.
   const lastWrittenAtRef = useRef(null);
@@ -79,6 +85,8 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
   // device" case) it applies straight away.
   const receiveRemote = useCallback((remote) => {
     if (!remote) return;
+    // A good cloud read — safe to resume saving even if the initial load failed.
+    loadOkRef.current = true;
     const normalised = normaliseData(remote);
     if (JSON.stringify(normalised) === JSON.stringify(dataRef.current)) return;
 
@@ -96,6 +104,9 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
     if (!cloud) return;
 
     let cancelled = false;
+    // A load for this row is now in flight and not yet reconciled — block cloud
+    // autosave until it succeeds, so nothing writes over a row we can't read.
+    loadOkRef.current = false;
 
     (async () => {
       setSyncError(false);
@@ -104,23 +115,31 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
         if (cancelled) return;
 
         if (remote) {
+          loadOkRef.current = true;
           skipNextSaveRef.current = true;
           setData(normaliseData(remote));
         } else {
-          // First sign-in: seed the account from existing local data if there
-          // is any on this device, otherwise from the bundled defaults.
+          // No row came back. This is usually a genuine first sign-in — but a
+          // read can also momentarily return nothing for a row that exists
+          // (auth/RLS blip). So seed WITHOUT overwriting (insert-if-absent),
+          // then read back what's really there: our seed for a new account, or
+          // the pre-existing row we briefly couldn't see. Never a blind write.
           const seed = hasLocalData() ? loadLocalData() : defaultData();
-          const writtenAt = await saveCloudData(dataKey, seed);
+          await seedCloudDataIfAbsent(dataKey, seed);
           if (cancelled) return;
-          lastWrittenAtRef.current = writtenAt;
+          const authoritative = await fetchCloudData(dataKey);
+          if (cancelled) return;
+          loadOkRef.current = true;
           skipNextSaveRef.current = true;
-          setData(normaliseData(seed));
+          setData(normaliseData(authoritative ?? seed));
         }
 
         setLoadedKey(dataKey);
       } catch {
         if (cancelled) return;
-        // Surface the error but stop blocking on the loading screen.
+        // Surface the error and stop blocking on the loading screen, but leave
+        // loadOkRef false so autosave stays disabled until a read succeeds —
+        // otherwise an edit over the empty fallback would erase the cloud row.
         setSyncError(true);
         setLoadedKey(dataKey);
       }
@@ -174,6 +193,12 @@ export function usePlannerStore(user, guest = false, dataOwnerId) {
       saveLocalData(data);
       return;
     }
+
+    // Never write to the cloud until we've successfully read the current row.
+    // Without this, a failed/empty load leaves the blank fallback on screen and
+    // the next change saves that emptiness over real data — the exact fault
+    // that wiped an account. Saving resumes as soon as a read succeeds.
+    if (!loadOkRef.current) return;
 
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     // A real edit is queued but not yet persisted — mark us dirty so an

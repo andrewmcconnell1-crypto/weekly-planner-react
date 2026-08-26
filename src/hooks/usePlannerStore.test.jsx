@@ -23,11 +23,20 @@ vi.mock("../lib/supabase", () => {
 // Real data normalisation / local helpers; only the network calls are stubbed.
 vi.mock("../lib/plannerData", async (importOriginal) => {
   const actual = await importOriginal();
-  return { ...actual, fetchCloudData: vi.fn(), saveCloudData: vi.fn() };
+  return {
+    ...actual,
+    fetchCloudData: vi.fn(),
+    saveCloudData: vi.fn(),
+    seedCloudDataIfAbsent: vi.fn(),
+  };
 });
 
 import { usePlannerStore } from "./usePlannerStore";
-import { fetchCloudData, saveCloudData } from "../lib/plannerData";
+import {
+  fetchCloudData,
+  saveCloudData,
+  seedCloudDataIfAbsent,
+} from "../lib/plannerData";
 
 const USER = { id: "user-1" };
 const staple = (id, name) => ({ id, name, category: "Other" });
@@ -38,6 +47,7 @@ beforeEach(() => {
   realtime.emit = null;
   fetchCloudData.mockReset();
   saveCloudData.mockReset().mockResolvedValue("2026-01-01T00:00:00.000Z");
+  seedCloudDataIfAbsent.mockReset().mockResolvedValue(false);
 });
 
 // Render the store in cloud mode and wait for the initial load to settle.
@@ -105,6 +115,39 @@ describe("usePlannerStore cloud sync conflicts", () => {
     act(() => result.current.applyRemoteUpdate());
     expect(result.current.remoteUpdatePending).toBe(false);
     expect(names(result.current.staples)).toEqual(["Cheese"]);
+  });
+
+  it("never overwrites a row a read momentarily missed (no blind seed)", async () => {
+    // The first read comes back empty — as if the existing row were briefly
+    // invisible (auth/RLS blip). Seeding is a no-op because the row exists, and
+    // the re-read returns the real data.
+    fetchCloudData
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ staples: [staple("s1", "Milk")] });
+    seedCloudDataIfAbsent.mockResolvedValue(false);
+
+    const view = renderHook(() => usePlannerStore(USER, false));
+    await waitFor(() => expect(view.result.current.loading).toBe(false));
+
+    // The real data was adopted, and defaults were never written over it.
+    expect(names(view.result.current.staples)).toEqual(["Milk"]);
+    expect(seedCloudDataIfAbsent).toHaveBeenCalledTimes(1);
+    expect(saveCloudData).not.toHaveBeenCalled();
+  });
+
+  it("does not autosave after a failed load, so it can't erase the cloud", async () => {
+    fetchCloudData.mockRejectedValue(new Error("network"));
+
+    const view = renderHook(() => usePlannerStore(USER, false));
+    await waitFor(() => expect(view.result.current.loading).toBe(false));
+    expect(view.result.current.syncError).toBe(true);
+
+    // An edit while the row is unreconciled must not reach the cloud.
+    act(() => {
+      view.result.current.setStaples([staple("s1", "Milk")]);
+    });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(saveCloudData).not.toHaveBeenCalled();
   });
 
   it("ignores a remote echo identical to the current data", async () => {

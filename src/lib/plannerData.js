@@ -261,3 +261,23 @@ export async function saveCloudData(userId, data) {
   if (error) throw error;
   return updatedAt;
 }
+
+// Seed a brand-new account's row WITHOUT ever overwriting an existing one.
+// A plain upsert would clobber real data whenever a read momentarily reports
+// "no row" for a row that does exist (an auth/RLS blip, a transient error) —
+// which is exactly how a populated account got reset to defaults. `insert …
+// on conflict do nothing` (ignoreDuplicates) makes seeding a no-op when a row
+// is already there, so defaults can never replace real data. Returns true only
+// when a fresh row was actually created.
+export async function seedCloudDataIfAbsent(userId, data) {
+  const { data: inserted, error } = await supabase
+    .from(TABLE)
+    .upsert(
+      { user_id: userId, data, updated_at: new Date().toISOString() },
+      { onConflict: "user_id", ignoreDuplicates: true }
+    )
+    .select("user_id");
+
+  if (error) throw error;
+  return Array.isArray(inserted) && inserted.length > 0;
+}
