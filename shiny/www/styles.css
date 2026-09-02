@@ -1,0 +1,49 @@
+/* Homepage grid: 5 columns x 4 rows.
+   A (2x2) and B (2x2) sit side by side on the top two rows,
+   C (2x4) spans the bottom two rows under them,
+   D (4x1) runs the full height of the page down the right edge. */
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  min-height: calc(100vh - 4.5rem);
+}
+
+.home-grid > .card {
+  /* let cards shrink inside grid tracks instead of overflowing them */
+  min-height: 0;
+  min-width: 0;
+}
+
+.grid-a { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+.grid-b { grid-column: 3 / span 2; grid-row: 1 / span 2; }
+.grid-c { grid-column: 1 / span 4; grid-row: 3 / span 2; }
+.grid-d { grid-column: 5 / span 1; grid-row: 1 / span 4; }
+
+/* Tablet: drop the right-hand rail to the bottom, keep A/B side by side. */
+@media (max-width: 992px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(240px, auto));
+    min-height: 0;
+  }
+  .grid-a { grid-column: 1; grid-row: 1; }
+  .grid-b { grid-column: 2; grid-row: 1; }
+  .grid-c { grid-column: 1 / span 2; grid-row: 2; }
+  .grid-d { grid-column: 1 / span 2; grid-row: 3; }
+}
+
+/* Phone: single column, source order. */
+@media (max-width: 576px) {
+  .home-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(4, minmax(220px, auto));
+  }
+  .grid-a, .grid-b, .grid-c, .grid-d {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
