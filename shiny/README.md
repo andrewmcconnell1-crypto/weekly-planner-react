@@ -13,15 +13,15 @@ shiny::runApp("shiny")
 ## Homepage layout
 
 One CSS grid, 5 columns wide and 4 rows tall (`www/styles.css`), with the cards
-placed by the `.grid-a` … `.grid-d` classes in `app.R`:
+placed by the `.grid-a` … `.grid-d` classes in `app.R`. Card sizes are width x height:
 
 ```
 +---------+---------+---+
-|    A    |    B    | D |   A: 2 rows x 2 cols  (this week at a glance)
-|  (2x2)  |  (2x2)  |   |   B: 2 rows x 2 cols  (cooking time chart)
-+---------+---------+ 4 |   C: 2 rows x 4 cols  (meal plan table)
-|         C         | x |   D: 4 rows x 1 col   (shopping list, full height)
-|       (2x4)       | 1 |
+|    A    |    B    | D |   A: top left,    2 wide x 2 tall  (this week at a glance)
+|  (2x2)  |  (2x2)  |1x4|   B: top middle,  2 wide x 2 tall  (cooking time chart)
++---------+---------+   |   C: bottom left, 4 wide x 2 tall  (meal plan table)
+|         C         |   |   D: right rail,  1 wide x 4 tall  (shopping list)
+|       (4x2)       |   |
 +-------------------+---+
 ```
 

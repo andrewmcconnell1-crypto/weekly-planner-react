@@ -1,13 +1,13 @@
 # Bistro — Shiny homepage
 #
-# Homepage layout (a single 5-column x 4-row CSS grid):
+# Homepage layout, in width x height (a single 5-column x 4-row CSS grid):
 #
 #   +---------+---------+---+
-#   |    A    |    B    | D |   A: 2 rows x 2 cols
-#   |  (2x2)  |  (2x2)  |   |   B: 2 rows x 2 cols
-#   +---------+---------+ 4 |   C: 2 rows x 4 cols
-#   |         C         | x |   D: 4 rows x 1 col (full page height)
-#   |       (2x4)       | 1 |
+#   |    A    |    B    | D |   A: top left,   2 wide x 2 tall
+#   |  (2x2)  |  (2x2)  |1x4|   B: top middle, 2 wide x 2 tall
+#   +---------+---------+   |   C: bottom left, 4 wide x 2 tall
+#   |         C         |   |   D: right rail,  1 wide x 4 tall (full page height)
+#   |       (4x2)       |   |
 #   +-------------------+---+
 #
 # Run with:  shiny::runApp("shiny")

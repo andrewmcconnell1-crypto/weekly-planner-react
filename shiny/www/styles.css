@@ -1,7 +1,7 @@
-/* Homepage grid: 5 columns x 4 rows.
+/* Homepage grid: 5 columns x 4 rows. Card sizes below are width x height.
    A (2x2) and B (2x2) sit side by side on the top two rows,
-   C (2x4) spans the bottom two rows under them,
-   D (4x1) runs the full height of the page down the right edge. */
+   C (4x2) spans the bottom two rows under them,
+   D (1x4) runs the full height of the page down the right edge. */
 
 .home-grid {
   display: grid;
