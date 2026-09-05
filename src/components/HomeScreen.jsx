@@ -46,6 +46,50 @@ export default function HomeScreen({
 
   return (
     <section className="screen home-screen">
+      {/* Golden-hour week hero: the week's progress as a large editorial numeral
+          over a warm gold band. Hidden on a fresh week, where the first-run card
+          is the single call to action. */}
+      {!weekEmpty && (
+        <section className="home-hero" aria-label="This week at a glance">
+          <span className="home-hero-glow" aria-hidden="true" />
+
+          <div className="home-hero-body">
+            <p className="section-kicker">This week</p>
+            <p className="home-hero-dates">
+              {formatDate(currentWeekStart)} – {formatDate(weekEnd)}
+            </p>
+            <p className="home-hero-count">
+              <span className="home-hero-count-num">{plannedCount}</span>
+              <span className="home-hero-count-of">of {days.length}</span>
+              <span className="home-hero-count-label">nights planned</span>
+            </p>
+
+            {gapCount > 0 ? (
+              <button
+                type="button"
+                className="home-hero-cta"
+                onClick={() => openHomeDayInPlan(gapDays[0])}
+              >
+                Plan {gapCount} {gapCount === 1 ? "gap" : "gaps"}
+                <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            ) : (
+              <p className="home-hero-done">
+                <BistroMark size={16} />
+                Every night&apos;s planned — nice work.
+              </p>
+            )}
+          </div>
+
+          <ProgressRing
+            value={plannedCount}
+            max={days.length}
+            size={72}
+            className="home-hero-ring"
+          />
+        </section>
+      )}
+
       {/* On a fresh week the first-run card below is the single call to action;
           the Tonight card would just repeat "plan tonight". Bring it back once
           the week has meals, where it shows what's actually on tonight. */}
@@ -198,29 +242,20 @@ export default function HomeScreen({
       <div className="home-week">
         <div className="home-section-head">
           <div className="home-week-heading">
-            <p className="section-kicker">This week</p>
-            <h2>
-              {formatDate(currentWeekStart)} – {formatDate(weekEnd)}
-            </h2>
+            <p className="section-kicker">
+              {weekEmpty ? "This week" : "Your nights"}
+            </p>
+            {weekEmpty && (
+              <h2>
+                {formatDate(currentWeekStart)} – {formatDate(weekEnd)}
+              </h2>
+            )}
           </div>
 
-          <ProgressRing value={plannedCount} max={days.length} size={52} />
+          {weekEmpty && (
+            <ProgressRing value={plannedCount} max={days.length} size={52} />
+          )}
         </div>
-
-        {weekEmpty ? null : gapCount > 0 ? (
-          <button
-            type="button"
-            className="primary-button home-plan-gaps"
-            onClick={() => openHomeDayInPlan(gapDays[0])}
-          >
-            Plan {gapCount} {gapCount === 1 ? "gap" : "gaps"}
-          </button>
-        ) : (
-          <p className="home-week-done">
-            <BistroMark size={16} className="home-week-done-glyph" />
-            Every night's planned — nice work.
-          </p>
-        )}
 
         <div className="meal-grid">
           <MealGroups

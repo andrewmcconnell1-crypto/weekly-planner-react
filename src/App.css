@@ -1707,48 +1707,192 @@ body.meal-dragging {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* "Golden hour" week hero — a warm honey-gold band that anchors Home, with the
+   week's progress as a large editorial numeral. A low radial "sun" and a soft
+   45° sheen give it depth. */
 .home-hero {
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--panel);
-  box-shadow: var(--shadow);
-}
-
-.home-hero {
-  display: grid;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-16);
-  padding: var(--space-16);
+  border: 1px solid #e7c98c;
+  border-radius: var(--radius-lg);
+  padding: var(--space-20) var(--space-16);
+  background: linear-gradient(118deg, #fbe3b0 0%, #f6cf8e 46%, #eeb474 100%);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--space-14);
 }
 
-.tab-home .home-hero {
-  background: var(--surface);
-  color: var(--ink);
+.home-hero-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(140px 130px at 84% -18%, rgba(255, 255, 255, 0.7), transparent 70%),
+    linear-gradient(45deg, transparent 54%, rgba(255, 255, 255, 0.3) 72%, transparent 82%);
 }
 
-.home-hero h2 {
+.home-hero-body {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.home-hero .section-kicker {
+  color: #a85d24;
+}
+
+.home-hero-dates {
   margin: 0;
+  color: #855322;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.home-hero-count {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin: var(--space-4) 0 var(--space-8);
+  color: #3a2915;
+}
+
+.home-hero-count-num {
   font-family: var(--font-display);
+  font-size: 3.1rem;
   font-weight: var(--weight-medium);
-  font-size: var(--text-4xl);
-  line-height: 1.12;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
 }
 
-.tab-home .home-hero h2 {
-  color: var(--ink);
+.home-hero-count-of {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: #97591f;
 }
 
-.home-hero p {
-  margin: var(--space-8) 0 0;
-  color: var(--muted);
-  line-height: 1.4;
+.home-hero-count-label {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: #6f4a21;
 }
 
-.tab-home .home-hero p {
-  color: var(--muted);
+.home-hero-cta {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  min-height: 40px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: #3a2915;
+  color: #fdf1dc;
+  padding: var(--space-8) var(--space-16);
+  font-weight: var(--weight-bold);
 }
 
-.tab-home .home-hero .section-kicker {
-  color: var(--muted);
+.home-hero-cta:hover {
+  background: #2a1c0d;
+}
+
+.home-hero-done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin: var(--space-2) 0 0;
+  color: #6f4a21;
+  font-weight: var(--weight-semibold);
+}
+
+.home-hero-done svg {
+  flex: none;
+  color: #a85d24;
+}
+
+.home-hero-ring {
+  flex: none;
+}
+
+.home-hero-ring .progress-ring-track {
+  stroke: rgba(120, 72, 30, 0.22);
+}
+
+.home-hero-ring .progress-ring-fill {
+  stroke: #bf5840;
+}
+
+.home-hero-ring .progress-ring.complete .progress-ring-fill {
+  stroke: #8a5a1e;
+}
+
+.home-hero-ring .progress-ring-text {
+  fill: #3a2915;
+}
+
+/* Golden hour after dark: deep bronze/amber with warm light text. */
+html[data-theme="dark"] .home-hero {
+  border-color: #6d4f24;
+  background: linear-gradient(118deg, #493516 0%, #5b411b 52%, #6a4a1d 100%);
+}
+
+html[data-theme="dark"] .home-hero-glow {
+  background:
+    radial-gradient(140px 130px at 84% -18%, rgba(255, 213, 148, 0.22), transparent 70%),
+    linear-gradient(45deg, transparent 54%, rgba(255, 224, 170, 0.1) 72%, transparent 82%);
+}
+
+html[data-theme="dark"] .home-hero .section-kicker {
+  color: #f0b972;
+}
+
+html[data-theme="dark"] .home-hero-dates {
+  color: #e4c496;
+}
+
+html[data-theme="dark"] .home-hero-count {
+  color: #fbe7d0;
+}
+
+html[data-theme="dark"] .home-hero-count-of {
+  color: #e6bd85;
+}
+
+html[data-theme="dark"] .home-hero-count-label {
+  color: #d8bd91;
+}
+
+html[data-theme="dark"] .home-hero-cta {
+  background: #f2d29a;
+  color: #33240f;
+}
+
+html[data-theme="dark"] .home-hero-cta:hover {
+  background: #f7dcae;
+}
+
+html[data-theme="dark"] .home-hero-done {
+  color: #e4c496;
+}
+
+html[data-theme="dark"] .home-hero-done svg {
+  color: #f0b972;
+}
+
+html[data-theme="dark"] .home-hero-ring .progress-ring-track {
+  stroke: rgba(255, 213, 148, 0.2);
+}
+
+html[data-theme="dark"] .home-hero-ring .progress-ring-fill {
+  stroke: #f0b972;
+}
+
+html[data-theme="dark"] .home-hero-ring .progress-ring-text {
+  fill: #fbe7d0;
 }
 
 .home-week-switch {
