@@ -8,6 +8,18 @@ import BistroMark from "./BistroMark";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 
+// Editorial section divider: a serif title with a hairline rule running to the
+// edge — the magazine-style separators that give the redesigned Home its
+// structure and rhythm.
+function SectionRule({ title }) {
+  return (
+    <div className="home-rule">
+      <span className="home-rule-title">{title}</span>
+      <span className="home-rule-line" aria-hidden="true" />
+    </div>
+  );
+}
+
 // Home is the glance-and-go dashboard: what's for dinner tonight, how the week
 // is shaping up (with a one-tap way to fill the gaps), and whether there's
 // shopping to do. No management trivia — stock lives in Kitchen.
@@ -94,14 +106,17 @@ export default function HomeScreen({
           the Tonight card would just repeat "plan tonight". Bring it back once
           the week has meals, where it shows what's actually on tonight. */}
       {!weekEmpty && (
-        <TonightCard
-          dayName={todayDayName}
-          dateLabel={tonightDateLabel}
-          summary={tonightSummary}
-          coversNights={tonightCovers}
-          leftoverDaysLabel={tonightLeftoverLabel}
-          onOpenPlan={openTonightInPlan}
-        />
+        <>
+          <SectionRule title="Tonight" />
+          <TonightCard
+            dayName={todayDayName}
+            dateLabel={tonightDateLabel}
+            summary={tonightSummary}
+            coversNights={tonightCovers}
+            leftoverDaysLabel={tonightLeftoverLabel}
+            onOpenPlan={openTonightInPlan}
+          />
+        </>
       )}
 
       {weekEmpty ? (
@@ -218,44 +233,45 @@ export default function HomeScreen({
       {/* The shopping card is noise before anything's planned — nothing to buy
           yet. Show it once the week has meals or there's actually a list. */}
       {(!weekEmpty || homeShopStatus.actionLabel) && (
-        <div className={`home-topup ${homeShopStatus.tone}`}>
-          <div className="home-topup-body">
-            <p className="section-kicker">Shopping</p>
-            <strong>{homeShopStatus.title}</strong>
-            <span>{homeShopStatus.sub}</span>
-          </div>
+        <>
+          <SectionRule title="Shopping" />
+          <div className={`home-topup ${homeShopStatus.tone}`}>
+            <div className="home-topup-body">
+              <strong>{homeShopStatus.title}</strong>
+              <span>{homeShopStatus.sub}</span>
+            </div>
 
-          {homeShopStatus.actionLabel && (
-            <button
-              type="button"
-              className={
-                homeShopStatus.tone === "needs" ? "primary-button" : "secondary"
-              }
-              onClick={homeShopStatus.onAction}
-            >
-              {homeShopStatus.actionLabel}
-            </button>
-          )}
-        </div>
+            {homeShopStatus.actionLabel && (
+              <button
+                type="button"
+                className={
+                  homeShopStatus.tone === "needs"
+                    ? "primary-button"
+                    : "secondary"
+                }
+                onClick={homeShopStatus.onAction}
+              >
+                {homeShopStatus.actionLabel}
+              </button>
+            )}
+          </div>
+        </>
       )}
 
       <div className="home-week">
-        <div className="home-section-head">
-          <div className="home-week-heading">
-            <p className="section-kicker">
-              {weekEmpty ? "This week" : "Your nights"}
-            </p>
-            {weekEmpty && (
+        {weekEmpty ? (
+          <div className="home-section-head">
+            <div className="home-week-heading">
+              <p className="section-kicker">This week</p>
               <h2>
                 {formatDate(currentWeekStart)} – {formatDate(weekEnd)}
               </h2>
-            )}
-          </div>
-
-          {weekEmpty && (
+            </div>
             <ProgressRing value={plannedCount} max={days.length} size={52} />
-          )}
-        </div>
+          </div>
+        ) : (
+          <SectionRule title="This week" />
+        )}
 
         <div className="meal-grid">
           <MealGroups
