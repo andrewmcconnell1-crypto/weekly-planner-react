@@ -8,12 +8,16 @@ import BistroMark from "./BistroMark";
 import { formatDate } from "../utils/dateUtils";
 import { days } from "../utils/mealUtils";
 
-// Editorial section divider: a serif title with a hairline rule running to the
-// edge — the magazine-style separators that give the redesigned Home its
-// structure and rhythm.
-function SectionRule({ title }) {
+// Ledger section header: a mono two-digit index + mono label with a hairline
+// rule running to the edge — the signature motif repeated down Home.
+function SectionRule({ index, title }) {
   return (
     <div className="home-rule">
+      {index && (
+        <span className="home-rule-index" aria-hidden="true">
+          {index}
+        </span>
+      )}
       <span className="home-rule-title">{title}</span>
       <span className="home-rule-line" aria-hidden="true" />
     </div>
@@ -107,7 +111,7 @@ export default function HomeScreen({
           the week has meals, where it shows what's actually on tonight. */}
       {!weekEmpty && (
         <>
-          <SectionRule title="Tonight" />
+          <SectionRule index="01" title="Tonight" />
           <TonightCard
             dayName={todayDayName}
             dateLabel={tonightDateLabel}
@@ -234,7 +238,7 @@ export default function HomeScreen({
           yet. Show it once the week has meals or there's actually a list. */}
       {(!weekEmpty || homeShopStatus.actionLabel) && (
         <>
-          <SectionRule title="Shopping" />
+          <SectionRule index="02" title="Shopping" />
           <div className={`home-topup ${homeShopStatus.tone}`}>
             <div className="home-topup-body">
               <strong>{homeShopStatus.title}</strong>
@@ -270,7 +274,7 @@ export default function HomeScreen({
             <ProgressRing value={plannedCount} max={days.length} size={52} />
           </div>
         ) : (
-          <SectionRule title="This week" />
+          <SectionRule index="03" title="This week" />
         )}
 
         <div className="meal-grid">

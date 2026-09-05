@@ -1,40 +1,41 @@
 :root {
-  --bg: #f5f8fb;
-  --surface: #ffffff;
-  --panel: #ffffff;
-  --ink: #1f2a37;
-  --muted: #667587;
-  --line: #e6ecf2;
-  --line-strong: #d5dee7;
-  --soft: #eef2f7;
+  --bg: #eeede8;
+  --surface: #fbfbf8;
+  --panel: #fbfbf8;
+  --ink: #1c1d22;
+  --muted: #6a6a66;
+  --line: #e5e3dc;
+  --line-strong: #d4d2c8;
+  --soft: #eae8e1;
   /* Form-control fill. Matches --panel in light; recessed below the surface in
      dark so inputs read as tappable fields, not flat panels. */
-  --field: #ffffff;
-  /* Slate & sky-blue: a cool, clinical primary. --olive / --rust are kept as
-     token names for compatibility across the app, but now resolve to the blue
-     accent family rather than the old warm olive/terracotta. */
+  --field: #fbfbf8;
+  /* "Technical ledger": ink on neutral paper with a single blueprint-indigo
+     accent. --olive / --rust are kept as token names for compatibility across
+     the app, but resolve to the indigo family. */
   --accent: var(--olive);
-  --accent-strong: #2f5da3;
+  --accent-strong: #2b3585;
   --accent-soft: var(--olive-soft);
-  --olive: #3f74c0;
-  --olive-soft: #eaf1fb;
+  --olive: #3a46a6;
+  --olive-soft: #e7e8f6;
   --primary: var(--olive);
-  --primary-strong: #2f5da3;
+  --primary-strong: #2b3585;
   /* Hover fill for the base/primary button (white text sits on it, so it must
      stay dark enough in both themes — unlike --primary-strong, which is a light
      text accent in dark mode). */
-  --primary-hover: #2f5da3;
-  --rust: #3f74c0;
-  --rust-strong: #2f5da3;
-  --rust-soft: #eaf1fb;
-  --danger: #c0402c;
+  --primary-hover: #2b3585;
+  --rust: #3a46a6;
+  --rust-strong: #2b3585;
+  --rust-soft: #e7e8f6;
+  --danger: #b23b2a;
   /* Layered, tighter shadows (a soft contact shadow + a wider ambient one),
-     tinted cool slate rather than warm brown. */
-  --shadow: 0 1px 2px rgba(30, 41, 59, 0.06), 0 8px 24px -10px rgba(30, 41, 59, 0.14);
-  --shadow-lg: 0 2px 6px rgba(30, 41, 59, 0.07), 0 24px 48px -16px rgba(30, 41, 59, 0.18);
+     tinted to the ink so cards feel printed rather than floating. */
+  --shadow: 0 1px 2px rgba(28, 29, 34, 0.05), 0 10px 30px -14px rgba(28, 29, 34, 0.15);
+  --shadow-lg: 0 2px 6px rgba(28, 29, 34, 0.06), 0 26px 52px -18px rgba(28, 29, 34, 0.19);
   --radius: 14px;
   --font-display: "Fraunces", Georgia, serif;
-  --meal-tone: #dbe3ec;
+  --font-mono: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", monospace;
+  --meal-tone: #dcdac9;
 
   /* Motion tokens (a little more pronounced; --ease-spring adds a gentle
      overshoot on entrances). */
@@ -89,33 +90,33 @@ html[data-theme="dark"] {
   /* Warm charcoal, lifted off near-black: the canvas sits a step up from black
      and the panel a clear step above the canvas, so cards read as floating
      rather than dissolving into one dark-on-dark mass. */
-  --bg: #12171e;
-  --surface: #1a212b;
-  --panel: #1a212b;
-  --ink: #e9eef4;
-  --muted: #98a6b8;
+  --bg: #131417;
+  --surface: #1c1e23;
+  --panel: #1c1e23;
+  --ink: #ecebe4;
+  --muted: #9a9992;
   /* Hairlines need to sit clearly above the surface in dark mode, or cards and
      dividers dissolve into the background. --line is the everyday hairline;
      --line-strong outlines structural containers (cards, accordions, headers). */
-  --line: #29333f;
-  --line-strong: #384656;
-  --soft: #232d39;
-  --field: #141a22;
-  /* Blue for buttons stays a saturated mid-tone (white text reads on it);
+  --line: #2a2c31;
+  --line-strong: #3a3c44;
+  --soft: #23252b;
+  --field: #15161a;
+  /* Indigo for buttons stays a saturated mid-tone (white text reads on it);
      olive-soft becomes a dark tint for chips/tiles, with a light accent-strong
      for text/icons sitting on those tiles. */
-  --olive: #6ea3e6;
-  --olive-soft: #1d2a3b;
-  --accent-strong: #8bb8f0;
-  --primary-strong: #8bb8f0;
-  /* Button hover stays a deep blue (not the light --primary-strong accent), so
-     white button text keeps its contrast on hover. */
-  --primary-hover: #2f5da3;
-  --rust: #6ea3e6;
-  --rust-strong: #8bb8f0;
-  --rust-soft: #1d2a3b;
+  --olive: #8f9cf0;
+  --olive-soft: #23263a;
+  --accent-strong: #aab4f5;
+  --primary-strong: #aab4f5;
+  /* Button hover stays a deep indigo (not the light --primary-strong accent),
+     so white button text keeps its contrast on hover. */
+  --primary-hover: #3a46a6;
+  --rust: #8f9cf0;
+  --rust-strong: #aab4f5;
+  --rust-soft: #23263a;
   --danger: #e2745f;
-  --meal-tone: #2a333f;
+  --meal-tone: #262931;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -10px rgba(0, 0, 0, 0.55);
   --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.4), 0 24px 48px -16px rgba(0, 0, 0, 0.65);
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -654,9 +655,10 @@ textarea:focus-visible {
 .section-kicker {
   margin: 0 0 var(--space-6);
   color: var(--olive);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-heavy);
-  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -1711,33 +1713,33 @@ body.meal-dragging {
    so the rest of the app keeps its warm identity.
    ============================================================ */
 .home-screen {
-  --h-card: #ffffff;
-  --h-line: #e6ecf2;
-  --h-line-strong: #d5dee7;
-  --h-ink: #1f2a37;
-  --h-muted: #667587;
-  --h-accent: #3f74c0;
-  --h-accent-strong: #2f5da3;
-  --h-accent-soft: #eaf1fb;
+  --h-card: #fbfbf8;
+  --h-line: #e5e3dc;
+  --h-line-strong: #d4d2c8;
+  --h-ink: #1c1d22;
+  --h-muted: #6a6a66;
+  --h-accent: #3a46a6;
+  --h-accent-strong: #2b3585;
+  --h-accent-soft: #e7e8f6;
 }
 
 html[data-theme="dark"] .home-screen {
-  --h-card: #1a212b;
-  --h-line: #29333f;
-  --h-line-strong: #384656;
-  --h-ink: #e9eef4;
-  --h-muted: #98a6b8;
-  --h-accent: #6ea3e6;
-  --h-accent-strong: #8bb8f0;
-  --h-accent-soft: #1d2a3b;
+  --h-card: #1c1e23;
+  --h-line: #2a2c31;
+  --h-line-strong: #3a3c44;
+  --h-ink: #ecebe4;
+  --h-muted: #9a9992;
+  --h-accent: #8f9cf0;
+  --h-accent-strong: #aab4f5;
+  --h-accent-soft: #23263a;
 }
 
-/* Cool, calm backdrop for the whole Home tab. */
+/* Paper backdrop for the whole Home tab. */
 .app-shell.tab-home {
-  background: #f5f8fb;
+  background: #eeede8;
 }
 html[data-theme="dark"] .app-shell.tab-home {
-  background: #12171e;
+  background: #131417;
 }
 
 /* Week hero: a clean white card with generous whitespace, a light-weight
@@ -1773,8 +1775,10 @@ html[data-theme="dark"] .app-shell.tab-home {
 .home-hero-dates {
   margin: 0;
   color: var(--h-muted);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 .home-hero-count {
@@ -1787,11 +1791,12 @@ html[data-theme="dark"] .app-shell.tab-home {
 }
 
 .home-hero-count-num {
-  font-family: inherit;
-  font-size: 3rem;
-  font-weight: 300;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-size: 3.4rem;
+  font-weight: 380;
+  font-variant-numeric: lining-nums;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
   color: var(--h-ink);
 }
 
@@ -2181,27 +2186,37 @@ html[data-theme="dark"] .home-hero-cta {
   margin-bottom: 0;
 }
 
-/* Clinical section label: small, tracked, muted, with a hairline to the edge. */
+/* Ledger section header: a mono two-digit index, a mono label, and a hairline
+   rule running to the edge — the signature motif that repeats down the page. */
 .home-rule {
   display: flex;
-  align-items: center;
-  gap: var(--space-12);
-  margin-bottom: calc(var(--space-8) * -1);
+  align-items: baseline;
+  gap: var(--space-10);
+  margin-bottom: calc(var(--space-4) * -1);
+}
+
+.home-rule-index {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--h-accent);
 }
 
 .home-rule-title {
-  font-family: inherit;
-  font-size: var(--text-xs);
-  font-weight: var(--weight-heavy);
-  letter-spacing: 0.14em;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--h-muted);
+  color: var(--h-ink);
 }
 
 .home-rule-line {
   flex: 1;
+  align-self: center;
   height: 1px;
-  background: var(--h-line);
+  background: var(--h-line-strong);
 }
 
 /* The week as one clean agenda: a white card, hairline rows, a blue spine on
@@ -2245,6 +2260,18 @@ html[data-theme="dark"] .home-hero-cta {
 .home-screen .meal-grid .meal-row-add {
   color: var(--h-ink);
 }
+/* Ledger numerals: the day-of-month reads as a tabular mono figure. */
+.home-screen .meal-grid .meal-daycol-dom {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.home-screen .meal-grid .meal-daycol-dow {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
 .home-screen .meal-grid .meal-row-sub,
 .home-screen .meal-grid .meal-row-chevron,
 .home-screen .meal-grid .meal-daycol-dow,
@@ -2278,9 +2305,9 @@ html[data-theme="dark"] .home-hero-cta {
   color: var(--h-accent);
 }
 .home-screen .tonight-dish {
-  font-family: inherit;
-  font-weight: var(--weight-bold);
-  font-size: var(--text-2xl);
+  font-family: var(--font-display);
+  font-weight: 420;
+  font-size: var(--text-3xl);
   letter-spacing: -0.01em;
   color: var(--h-ink);
 }
