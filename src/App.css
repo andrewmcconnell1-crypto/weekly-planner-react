@@ -2207,6 +2207,80 @@ html[data-theme="dark"] .home-hero-ring .progress-ring-text {
   box-shadow: none;
 }
 
+/* ============================================================
+   Home — "Golden Hour Editorial" redesign.
+   Serif section dividers, the week as one flat agenda, and even
+   vertical rhythm. Scoped to .home-screen so Meals/Shop/Recipes
+   keep their existing chunky-card styling.
+   ============================================================ */
+
+/* Let the screen's grid gap carry the rhythm evenly — drop the ad-hoc bottom
+   margins on the two big feature cards. */
+.home-screen .home-hero,
+.home-screen .tonight-card {
+  margin-bottom: 0;
+}
+
+/* Serif section divider: a title with a hairline rule running to the edge. */
+.home-rule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-bottom: calc(var(--space-8) * -1);
+}
+
+.home-rule-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.home-rule-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line-strong) 0%, transparent 100%);
+}
+
+/* The week as one editorial agenda: a single bordered list with hairline row
+   separators, instead of a stack of chunky separated cards. */
+.home-screen .meal-grid {
+  gap: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.home-screen .meal-grid > * + * {
+  border-top: 1px solid var(--line);
+}
+
+.home-screen .meal-grid .meal-card,
+.home-screen .meal-grid .meal-cluster {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.home-screen .meal-grid .meal-card-empty {
+  background: transparent;
+  border: none;
+}
+
+/* Today's row gets a warm gold spine down its left edge. */
+.home-screen .meal-grid .meal-card-today {
+  box-shadow: inset 3px 0 0 var(--rust);
+}
+
+/* Shopping block: rounder, to match the new editorial radii. */
+.home-screen .home-topup {
+  border-radius: var(--radius-lg);
+}
+
 .group-count,
 .meal-row-count {
   border-radius: var(--radius-pill);
