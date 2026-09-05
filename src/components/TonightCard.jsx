@@ -78,7 +78,7 @@ function TonightCard({
 
       {mealType === "cook" && summary.hasMeal && (
         <RecipeDetail
-          variant="hero"
+          variant="sheet"
           ingredients={ingredients}
           method={method}
           sourceUrl={linkedRecipe?.sourceUrl || ""}

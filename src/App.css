@@ -1707,48 +1707,74 @@ body.meal-dragging {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-/* "Golden hour" week hero — a warm honey-gold band that anchors Home, with the
-   week's progress as a large editorial numeral. A low radial "sun" and a soft
-   45° sheen give it depth. */
+/* ============================================================
+   Home — light, airy, clinical redesign (slate & sky blue).
+   A cool palette scoped to .home-screen (+ the Home tab backdrop)
+   so the rest of the app keeps its warm identity.
+   ============================================================ */
+.home-screen {
+  --h-card: #ffffff;
+  --h-line: #e6ecf2;
+  --h-line-strong: #d5dee7;
+  --h-ink: #1f2a37;
+  --h-muted: #667587;
+  --h-accent: #3f74c0;
+  --h-accent-strong: #2f5da3;
+  --h-accent-soft: #eaf1fb;
+}
+
+html[data-theme="dark"] .home-screen {
+  --h-card: #1a212b;
+  --h-line: #29333f;
+  --h-line-strong: #384656;
+  --h-ink: #e9eef4;
+  --h-muted: #98a6b8;
+  --h-accent: #6ea3e6;
+  --h-accent-strong: #8bb8f0;
+  --h-accent-soft: #1d2a3b;
+}
+
+/* Cool, calm backdrop for the whole Home tab. */
+.app-shell.tab-home {
+  background: #f5f8fb;
+}
+html[data-theme="dark"] .app-shell.tab-home {
+  background: #12171e;
+}
+
+/* Week hero: a clean white card with generous whitespace, a light-weight
+   number and a thin cool progress ring — a clinical summary, not a warm band. */
 .home-hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-16);
-  border: 1px solid #e7c98c;
+  border: 1px solid var(--h-line);
   border-radius: var(--radius-lg);
+  background: var(--h-card);
   padding: var(--space-20) var(--space-16);
-  background: linear-gradient(118deg, #fbe3b0 0%, #f6cf8e 46%, #eeb474 100%);
-  box-shadow: var(--shadow);
-  margin-bottom: var(--space-14);
+  margin-bottom: 0;
 }
 
+/* No sun/sheen in the clinical look. */
 .home-hero-glow {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(140px 130px at 84% -18%, rgba(255, 255, 255, 0.7), transparent 70%),
-    linear-gradient(45deg, transparent 54%, rgba(255, 255, 255, 0.3) 72%, transparent 82%);
+  display: none;
 }
 
 .home-hero-body {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-6);
   min-width: 0;
 }
 
 .home-hero .section-kicker {
-  color: #a85d24;
+  color: var(--h-muted);
+  letter-spacing: 0.14em;
 }
 
 .home-hero-dates {
   margin: 0;
-  color: #855322;
+  color: var(--h-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
 }
@@ -1757,29 +1783,26 @@ body.meal-dragging {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: var(--space-6);
-  margin: var(--space-4) 0 var(--space-8);
-  color: #3a2915;
+  gap: var(--space-8);
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--h-ink);
 }
 
 .home-hero-count-num {
-  font-family: var(--font-display);
-  font-size: 3.1rem;
-  font-weight: var(--weight-medium);
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+  font-family: inherit;
+  font-size: 3rem;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--h-ink);
 }
 
-.home-hero-count-of {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  color: #97591f;
-}
-
+.home-hero-count-of,
 .home-hero-count-label {
+  font-family: inherit;
   font-size: var(--text-md);
   font-weight: var(--weight-semibold);
-  color: #6f4a21;
+  color: var(--h-muted);
 }
 
 .home-hero-cta {
@@ -1787,17 +1810,22 @@ body.meal-dragging {
   display: inline-flex;
   align-items: center;
   gap: var(--space-6);
-  min-height: 40px;
-  border: none;
+  min-height: 38px;
+  border: 1px solid var(--h-accent);
   border-radius: var(--radius-pill);
-  background: #3a2915;
-  color: #fdf1dc;
+  background: var(--h-accent);
+  color: #fff;
   padding: var(--space-8) var(--space-16);
   font-weight: var(--weight-bold);
 }
 
 .home-hero-cta:hover {
-  background: #2a1c0d;
+  background: var(--h-accent-strong);
+  border-color: var(--h-accent-strong);
+}
+
+html[data-theme="dark"] .home-hero-cta {
+  color: #0e1621;
 }
 
 .home-hero-done {
@@ -1805,13 +1833,13 @@ body.meal-dragging {
   align-items: center;
   gap: var(--space-6);
   margin: var(--space-2) 0 0;
-  color: #6f4a21;
+  color: var(--h-muted);
   font-weight: var(--weight-semibold);
 }
 
 .home-hero-done svg {
   flex: none;
-  color: #a85d24;
+  color: var(--h-accent);
 }
 
 .home-hero-ring {
@@ -1819,80 +1847,17 @@ body.meal-dragging {
 }
 
 .home-hero-ring .progress-ring-track {
-  stroke: rgba(120, 72, 30, 0.22);
+  stroke: var(--h-line-strong);
 }
 
-.home-hero-ring .progress-ring-fill {
-  stroke: #bf5840;
-}
-
+.home-hero-ring .progress-ring-fill,
 .home-hero-ring .progress-ring.complete .progress-ring-fill {
-  stroke: #8a5a1e;
+  stroke: var(--h-accent);
 }
 
 .home-hero-ring .progress-ring-text {
-  fill: #3a2915;
-}
-
-/* Golden hour after dark: deep bronze/amber with warm light text. */
-html[data-theme="dark"] .home-hero {
-  border-color: #6d4f24;
-  background: linear-gradient(118deg, #493516 0%, #5b411b 52%, #6a4a1d 100%);
-}
-
-html[data-theme="dark"] .home-hero-glow {
-  background:
-    radial-gradient(140px 130px at 84% -18%, rgba(255, 213, 148, 0.22), transparent 70%),
-    linear-gradient(45deg, transparent 54%, rgba(255, 224, 170, 0.1) 72%, transparent 82%);
-}
-
-html[data-theme="dark"] .home-hero .section-kicker {
-  color: #f0b972;
-}
-
-html[data-theme="dark"] .home-hero-dates {
-  color: #e4c496;
-}
-
-html[data-theme="dark"] .home-hero-count {
-  color: #fbe7d0;
-}
-
-html[data-theme="dark"] .home-hero-count-of {
-  color: #e6bd85;
-}
-
-html[data-theme="dark"] .home-hero-count-label {
-  color: #d8bd91;
-}
-
-html[data-theme="dark"] .home-hero-cta {
-  background: #f2d29a;
-  color: #33240f;
-}
-
-html[data-theme="dark"] .home-hero-cta:hover {
-  background: #f7dcae;
-}
-
-html[data-theme="dark"] .home-hero-done {
-  color: #e4c496;
-}
-
-html[data-theme="dark"] .home-hero-done svg {
-  color: #f0b972;
-}
-
-html[data-theme="dark"] .home-hero-ring .progress-ring-track {
-  stroke: rgba(255, 213, 148, 0.2);
-}
-
-html[data-theme="dark"] .home-hero-ring .progress-ring-fill {
-  stroke: #f0b972;
-}
-
-html[data-theme="dark"] .home-hero-ring .progress-ring-text {
-  fill: #fbe7d0;
+  fill: var(--h-ink);
+  font-weight: var(--weight-semibold);
 }
 
 .home-week-switch {
@@ -2208,20 +2173,17 @@ html[data-theme="dark"] .home-hero-ring .progress-ring-text {
 }
 
 /* ============================================================
-   Home — "Golden Hour Editorial" redesign.
-   Serif section dividers, the week as one flat agenda, and even
-   vertical rhythm. Scoped to .home-screen so Meals/Shop/Recipes
-   keep their existing chunky-card styling.
+   Home clinical layout — cool dividers, a flat agenda, an airy
+   Tonight card and shopping block, all on the Home cool palette.
    ============================================================ */
 
-/* Let the screen's grid gap carry the rhythm evenly — drop the ad-hoc bottom
-   margins on the two big feature cards. */
+/* Even rhythm: drop ad-hoc bottom margins; the screen grid gap carries it. */
 .home-screen .home-hero,
 .home-screen .tonight-card {
   margin-bottom: 0;
 }
 
-/* Serif section divider: a title with a hairline rule running to the edge. */
+/* Clinical section label: small, tracked, muted, with a hairline to the edge. */
 .home-rule {
   display: flex;
   align-items: center;
@@ -2230,32 +2192,33 @@ html[data-theme="dark"] .home-hero-ring .progress-ring-text {
 }
 
 .home-rule-title {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-weight: var(--weight-medium);
-  letter-spacing: -0.01em;
-  color: var(--ink);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-heavy);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--h-muted);
 }
 
 .home-rule-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, var(--line-strong) 0%, transparent 100%);
+  background: var(--h-line);
 }
 
-/* The week as one editorial agenda: a single bordered list with hairline row
-   separators, instead of a stack of chunky separated cards. */
+/* The week as one clean agenda: a white card, hairline rows, a blue spine on
+   today. */
 .home-screen .meal-grid {
   gap: 0;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--h-line);
   border-radius: var(--radius-lg);
-  background: var(--surface);
+  background: var(--h-card);
   overflow: hidden;
-  box-shadow: var(--shadow);
+  box-shadow: none;
 }
 
 .home-screen .meal-grid > * + * {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--h-line);
 }
 
 .home-screen .meal-grid .meal-card,
@@ -2271,14 +2234,205 @@ html[data-theme="dark"] .home-hero-ring .progress-ring-text {
   border: none;
 }
 
-/* Today's row gets a warm gold spine down its left edge. */
 .home-screen .meal-grid .meal-card-today {
-  box-shadow: inset 3px 0 0 var(--rust);
+  box-shadow: inset 3px 0 0 var(--h-accent);
 }
 
-/* Shopping block: rounder, to match the new editorial radii. */
-.home-screen .home-topup {
+/* Neutralise the warm meal-type accents inside the agenda so it stays cool. */
+.home-screen .meal-grid .meal-type-badge {
+  background: var(--h-accent-soft);
+  color: var(--h-accent);
+}
+.home-screen .meal-grid .meal-row-main strong,
+.home-screen .meal-grid .meal-row-add {
+  color: var(--h-ink);
+}
+.home-screen .meal-grid .meal-row-sub,
+.home-screen .meal-grid .meal-row-chevron,
+.home-screen .meal-grid .meal-daycol-dow,
+.home-screen .meal-grid .meal-daycol-dom {
+  color: var(--h-muted);
+}
+.home-screen .meal-grid .meal-daycol-today .meal-daycol-dow,
+.home-screen .meal-grid .meal-daycol-today .meal-daycol-dom {
+  color: var(--h-accent);
+}
+.home-screen .meal-grid .meal-today-pill {
+  background: var(--h-accent);
+}
+
+/* Tonight: an airy white feature card, not the dark warm hero. */
+.home-screen .tonight-card {
+  position: static;
+  overflow: visible;
+  isolation: auto;
+  border: 1px solid var(--h-line);
   border-radius: var(--radius-lg);
+  background: var(--h-card);
+  color: var(--h-ink);
+  box-shadow: none;
+  padding: var(--space-16);
+}
+.home-screen .tonight-card::after {
+  content: none;
+}
+.home-screen .tonight-kicker {
+  color: var(--h-accent);
+}
+.home-screen .tonight-dish {
+  font-family: inherit;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-2xl);
+  letter-spacing: -0.01em;
+  color: var(--h-ink);
+}
+.home-screen .tonight-sub {
+  color: var(--h-muted);
+}
+.home-screen .tonight-note {
+  color: var(--h-accent-strong);
+}
+.home-screen .tonight-action {
+  border: 1px solid var(--h-accent);
+  background: var(--h-accent);
+  color: #fff;
+}
+html[data-theme="dark"] .home-screen .tonight-action {
+  color: #0e1621;
+}
+.home-screen .tonight-action:hover {
+  background: var(--h-accent-strong);
+  border-color: var(--h-accent-strong);
+}
+
+/* Shopping block: a plain white card with a blue action. */
+.home-screen .home-topup {
+  border: 1px solid var(--h-line);
+  border-radius: var(--radius-lg);
+  background: var(--h-card);
+  box-shadow: none;
+}
+.home-screen .home-topup.needs {
+  border-color: var(--h-accent);
+  background: var(--h-accent-soft);
+}
+.home-screen .home-topup.done {
+  border-color: var(--h-line);
+  background: var(--h-card);
+}
+.home-screen .home-topup-body strong {
+  color: var(--h-ink);
+}
+.home-screen .home-topup-body > span {
+  color: var(--h-muted);
+}
+.home-screen .home-topup .primary-button {
+  background: var(--h-accent);
+  border-color: var(--h-accent);
+  color: #fff;
+}
+html[data-theme="dark"] .home-screen .home-topup .primary-button {
+  color: #0e1621;
+}
+.home-screen .home-topup .secondary {
+  border: 1px solid var(--h-line-strong);
+  color: var(--h-accent-strong);
+  background: transparent;
+}
+
+/* Quiet, cool next-week + browse links. */
+.home-screen .home-nextweek {
+  border: 1px solid var(--h-line);
+  border-radius: var(--radius-md);
+  background: var(--h-card);
+  color: var(--h-accent-strong);
+  box-shadow: none;
+}
+.home-screen .home-nextweek:hover {
+  background: var(--h-accent-soft);
+}
+.home-screen .home-recipes-link {
+  color: var(--h-accent-strong);
+}
+
+/* Onboarding cards (welcome / what's-new / first-run) on the cool palette. */
+.home-screen .welcome-card,
+.home-screen .home-firstrun {
+  border: 1px solid var(--h-line);
+  border-left: 3px solid var(--h-accent);
+  background: var(--h-card);
+  box-shadow: none;
+}
+.home-screen .home-firstrun {
+  border-left: 1px solid var(--h-line);
+}
+.home-screen .welcome-card > strong,
+.home-screen .home-firstrun > strong {
+  color: var(--h-ink);
+}
+.home-screen .welcome-lede,
+.home-screen .home-firstrun-lede {
+  color: var(--h-muted);
+}
+.home-screen .section-kicker {
+  color: var(--h-muted);
+}
+.home-screen .welcome-dismiss {
+  color: var(--h-muted);
+}
+.home-screen .home-firstrun-glyph {
+  background: var(--h-accent-soft);
+  color: var(--h-accent);
+}
+.home-screen .home-firstrun-glyph svg {
+  color: var(--h-accent);
+}
+
+/* All primary buttons on Home go blue; skip links go cool-quiet. */
+.home-screen .primary-button {
+  background: var(--h-accent);
+  border-color: var(--h-accent);
+  color: #fff;
+}
+.home-screen .primary-button:hover {
+  background: var(--h-accent-strong);
+  border-color: var(--h-accent-strong);
+}
+html[data-theme="dark"] .home-screen .primary-button {
+  color: #0e1621;
+}
+.home-screen .welcome-skip {
+  color: var(--h-muted);
+}
+.home-screen .welcome-skip:hover {
+  color: var(--h-ink);
+}
+
+/* Keep the shopping card cool in dark too (beats the warm dark-theme rule). */
+html[data-theme="dark"] .home-screen .home-topup {
+  background: var(--h-card);
+  border-color: var(--h-line);
+}
+html[data-theme="dark"] .home-screen .home-topup.needs {
+  background: var(--h-accent-soft);
+  border-color: var(--h-accent);
+}
+
+/* Tonight's "View recipe" disclosure on the cool palette. */
+.home-screen .recipe-detail-sheet .recipe-detail-toggle {
+  color: var(--h-accent);
+  border-color: var(--h-line);
+  background: var(--h-card);
+}
+.home-screen .recipe-detail-sheet .recipe-detail-toggle:hover {
+  background: var(--h-accent-soft);
+}
+.home-screen .recipe-detail-sheet .recipe-detail-body {
+  border-color: var(--h-line);
+  background: var(--h-card);
+}
+.home-screen .recipe-detail-sheet .recipe-detail-label {
+  color: var(--h-muted);
 }
 
 .group-count,
