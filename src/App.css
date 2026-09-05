@@ -1,39 +1,40 @@
 :root {
-  --bg: #faf6ee;
-  --surface: #fffdf7;
-  --panel: #fffdf7;
-  --ink: #2a2420;
-  --muted: #6d6456;
-  --line: #ece6d9;
-  --line-strong: #ded6c4;
-  --soft: #f1eadd;
+  --bg: #f5f8fb;
+  --surface: #ffffff;
+  --panel: #ffffff;
+  --ink: #1f2a37;
+  --muted: #667587;
+  --line: #e6ecf2;
+  --line-strong: #d5dee7;
+  --soft: #eef2f7;
   /* Form-control fill. Matches --panel in light; recessed below the surface in
      dark so inputs read as tappable fields, not flat panels. */
-  --field: #fffdf7;
-  /* Olive is the calm UI primary; rust is reserved as a rare warm accent
-     (the dark Tonight hero + its CTA), not the everything-colour it had become. */
+  --field: #ffffff;
+  /* Slate & sky-blue: a cool, clinical primary. --olive / --rust are kept as
+     token names for compatibility across the app, but now resolve to the blue
+     accent family rather than the old warm olive/terracotta. */
   --accent: var(--olive);
-  --accent-strong: #4c5530;
+  --accent-strong: #2f5da3;
   --accent-soft: var(--olive-soft);
-  --olive: #5f6a3a;
-  --olive-soft: #edefdf;
+  --olive: #3f74c0;
+  --olive-soft: #eaf1fb;
   --primary: var(--olive);
-  --primary-strong: #4c5530;
+  --primary-strong: #2f5da3;
   /* Hover fill for the base/primary button (white text sits on it, so it must
-     stay dark in both themes — unlike --primary-strong, which is a light text
-     accent in dark mode). */
-  --primary-hover: #4c5530;
-  --rust: #bf5840;
-  --rust-strong: #9c4632;
-  --rust-soft: #f6e7df;
-  --danger: #a23b2b;
-  /* Layered, tighter shadows (a soft contact shadow + a wider ambient one)
-     read more refined than a single muddy brown blur. */
-  --shadow: 0 1px 2px rgba(43, 33, 24, 0.05), 0 8px 24px -10px rgba(43, 33, 24, 0.12);
-  --shadow-lg: 0 2px 6px rgba(43, 33, 24, 0.06), 0 24px 48px -16px rgba(43, 33, 24, 0.16);
+     stay dark enough in both themes — unlike --primary-strong, which is a light
+     text accent in dark mode). */
+  --primary-hover: #2f5da3;
+  --rust: #3f74c0;
+  --rust-strong: #2f5da3;
+  --rust-soft: #eaf1fb;
+  --danger: #c0402c;
+  /* Layered, tighter shadows (a soft contact shadow + a wider ambient one),
+     tinted cool slate rather than warm brown. */
+  --shadow: 0 1px 2px rgba(30, 41, 59, 0.06), 0 8px 24px -10px rgba(30, 41, 59, 0.14);
+  --shadow-lg: 0 2px 6px rgba(30, 41, 59, 0.07), 0 24px 48px -16px rgba(30, 41, 59, 0.18);
   --radius: 14px;
   --font-display: "Fraunces", Georgia, serif;
-  --meal-tone: #e3d8c6;
+  --meal-tone: #dbe3ec;
 
   /* Motion tokens (a little more pronounced; --ease-spring adds a gentle
      overshoot on entrances). */
@@ -88,36 +89,33 @@ html[data-theme="dark"] {
   /* Warm charcoal, lifted off near-black: the canvas sits a step up from black
      and the panel a clear step above the canvas, so cards read as floating
      rather than dissolving into one dark-on-dark mass. */
-  --bg: #231f16;
-  --surface: #34301f;
-  --panel: #34301f;
-  --ink: #f1eadc;
-  --muted: #ab9f8b;
+  --bg: #12171e;
+  --surface: #1a212b;
+  --panel: #1a212b;
+  --ink: #e9eef4;
+  --muted: #98a6b8;
   /* Hairlines need to sit clearly above the surface in dark mode, or cards and
      dividers dissolve into the background. --line is the everyday hairline;
      --line-strong outlines structural containers (cards, accordions, headers). */
-  --line: #5f5643;
-  --line-strong: #736a55;
-  --soft: #423c28;
-  --field: #1c1810;
-  /* Olive for buttons stays a saturated mid-tone (white text reads on it);
+  --line: #29333f;
+  --line-strong: #384656;
+  --soft: #232d39;
+  --field: #141a22;
+  /* Blue for buttons stays a saturated mid-tone (white text reads on it);
      olive-soft becomes a dark tint for chips/tiles, with a light accent-strong
      for text/icons sitting on those tiles. */
-  --olive: #7c8a4b;
-  --olive-soft: #3a4129;
-  --accent-strong: #c3cf88;
-  --primary-strong: #c3cf88;
-  /* Button hover stays a deep olive (not the light --primary-strong accent), so
+  --olive: #6ea3e6;
+  --olive-soft: #1d2a3b;
+  --accent-strong: #8bb8f0;
+  --primary-strong: #8bb8f0;
+  /* Button hover stays a deep blue (not the light --primary-strong accent), so
      white button text keeps its contrast on hover. */
-  --primary-hover: #5f6a3a;
-  --rust: #cf6d54;
-  /* Text/icon rust for the dark rust-soft tiles — lightened so small badge
-     text ("N short", chef source, takeaway) clears WCAG AA (was #b95c44 at
-     3.1:1 on --rust-soft). Only ever sits on dark backgrounds. */
-  --rust-strong: #dd8168;
-  --rust-soft: #4a3327;
+  --primary-hover: #2f5da3;
+  --rust: #6ea3e6;
+  --rust-strong: #8bb8f0;
+  --rust-soft: #1d2a3b;
   --danger: #e2745f;
-  --meal-tone: #453d22;
+  --meal-tone: #2a333f;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px -10px rgba(0, 0, 0, 0.55);
   --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.4), 0 24px 48px -16px rgba(0, 0, 0, 0.65);
   --elev-1: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -1621,8 +1619,8 @@ body.meal-dragging {
 }
 
 .home-topup.needs {
-  border-color: #e1c38f;
-  background: #fffaf0;
+  border-color: #a9c6ea;
+  background: #eef4fb;
 }
 
 .home-topup.done {
@@ -2025,7 +2023,7 @@ html[data-theme="dark"] .home-hero-cta {
   top: 0;
   z-index: 5;
   /* Frosted glass: rows blur softly behind the pinned header as they scroll. */
-  background: rgba(250, 246, 238, 0.72);
+  background: rgba(245, 248, 251, 0.72);
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   backdrop-filter: blur(10px) saturate(1.4);
 }
@@ -2036,7 +2034,7 @@ html[data-theme="dark"] .home-hero-cta {
 .staples-panel .category-toggle[aria-expanded="true"],
 .staples-panel .category-toggle:hover,
 .staples-panel .category-toggle:focus-visible {
-  background: rgba(250, 246, 238, 0.72);
+  background: rgba(245, 248, 251, 0.72);
 }
 
 /* A press-scale on a pinned header reads as a jump — keep it steady. */
@@ -2166,9 +2164,9 @@ html[data-theme="dark"] .home-hero-cta {
    solid olive + button, so a missing meal reads as a call to action. */
 .plan-screen .meal-card-empty,
 .home-screen .meal-card-empty {
-  background: #f3f5e6;
+  background: var(--soft);
   border-style: dashed;
-  border-color: #c9d0ad;
+  border-color: var(--line-strong);
   box-shadow: none;
 }
 
@@ -3460,7 +3458,7 @@ input[type="number"] {
 }
 
 .progress-ring-track {
-  stroke: rgba(76, 85, 48, 0.18);
+  stroke: rgba(47, 93, 163, 0.18);
 }
 
 .progress-ring-fill {
@@ -3469,7 +3467,7 @@ input[type="number"] {
 }
 
 .progress-ring.complete .progress-ring-fill {
-  stroke: #4c7a33;
+  stroke: #2f5da3;
 }
 
 .progress-ring-text {
@@ -3479,18 +3477,18 @@ input[type="number"] {
 }
 
 .plan-hero {
-  border: 1px solid #bcc795;
-  background: linear-gradient(152deg, #ccd6a4 0%, #e4e9c3 100%);
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(152deg, #eef3f9 0%, #f6f9fc 100%);
 }
 
 .shop-hero {
-  border: 1px solid #c6cdb2;
-  background: linear-gradient(152deg, #d7ddc4 0%, #ecedde 100%);
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(152deg, #eef3f9 0%, #f6f9fc 100%);
 }
 
 .shop-hero.needs-update {
-  border-color: #d9b471;
-  background: linear-gradient(152deg, #f6d79b 0%, #fce7c2 100%);
+  border-color: #a9c6ea;
+  background: linear-gradient(152deg, #dce9f7 0%, #eef4fb 100%);
 }
 
 .page-hero-kicker {
@@ -3574,7 +3572,7 @@ input[type="number"] {
 
 /* Cleared list: the bar fills green and gives a single celebratory pulse. */
 .shop-hero-progress.complete > span {
-  background: #4c7a33;
+  background: #2f5da3;
   animation: shop-complete-pulse 0.7s var(--ease-spring);
 }
 
@@ -3632,8 +3630,8 @@ input[type="number"] {
 .woolworths-removal-section {
   display: grid;
   gap: var(--space-10);
-  border-color: #e1c38f;
-  background: #fffaf0;
+  border-color: #a9c6ea;
+  background: #eef4fb;
   padding: var(--space-12);
 }
 
@@ -3903,7 +3901,7 @@ input[type="number"] {
 
 .shop-screen .removal-row {
   border-color: #ead8ad;
-  background: #fffaf0;
+  background: #eef4fb;
 }
 
 .shop-screen .removal-row.checked-row {
@@ -4381,46 +4379,46 @@ input[type="number"] {
 /* Shared category-tone palette: any element tagged with the recipe category's
    tone (recipe rows, meal cards, …) exposes --recipe-tone for accents. */
 [data-tone="chicken"] {
-  --recipe-tone: #cf9a45;
+  --recipe-tone: #6f8fae;
 }
 [data-tone="beef"] {
-  --recipe-tone: #b0503c;
+  --recipe-tone: #7d7f97;
 }
 [data-tone="pork"] {
-  --recipe-tone: #c67e6e;
+  --recipe-tone: #8fa0a6;
 }
 [data-tone="lamb"] {
-  --recipe-tone: #9c5e72;
+  --recipe-tone: #86798f;
 }
 [data-tone="seafood"] {
   --recipe-tone: #5f8e88;
 }
 [data-tone="pasta"] {
-  --recipe-tone: #c79a2f;
+  --recipe-tone: #7f93a0;
 }
 [data-tone="rice"] {
-  --recipe-tone: #d2b15c;
+  --recipe-tone: #9aa7b3;
 }
 [data-tone="slow"] {
-  --recipe-tone: #946c46;
+  --recipe-tone: #6b7d8c;
 }
 [data-tone="mexican"] {
-  --recipe-tone: #c4582f;
+  --recipe-tone: #7e8aa0;
 }
 [data-tone="noodles"] {
-  --recipe-tone: #b97a44;
+  --recipe-tone: #6f97a0;
 }
 [data-tone="vegetarian"] {
-  --recipe-tone: var(--olive);
+  --recipe-tone: #6f9e86;
 }
 [data-tone="kid"] {
-  --recipe-tone: #cf7a63;
+  --recipe-tone: #7c93b4;
 }
 [data-tone="family"] {
-  --recipe-tone: #9c5e72;
+  --recipe-tone: #86798f;
 }
 [data-tone="other"] {
-  --recipe-tone: #a89683;
+  --recipe-tone: #8b95a1;
 }
 
 /* Aisle / stock-category tone palette (utils/categoryColour). A leading colour
@@ -4550,7 +4548,7 @@ input[type="number"] {
   (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
 ) {
   .recipes-modes-bar {
-    background: rgba(250, 246, 238, 0.82);
+    background: rgba(245, 248, 251, 0.82);
     -webkit-backdrop-filter: blur(12px) saturate(1.1);
     backdrop-filter: blur(12px) saturate(1.1);
   }
@@ -4784,7 +4782,7 @@ html[data-theme="dark"] .recipes-modes-bar {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.82);
-  text-shadow: 0 1px 3px rgba(20, 13, 6, 0.45);
+  text-shadow: 0 1px 3px rgba(15, 23, 42, 0.5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4792,7 +4790,7 @@ html[data-theme="dark"] .recipes-modes-bar {
 }
 
 .recipe-tile-kicker.is-original {
-  color: #ffdf9e;
+  color: #d6e6fb;
 }
 
 .recipe-tile-kicker svg {
@@ -7326,7 +7324,7 @@ html[data-theme="dark"] .conflict-banner {
   margin: 0;
   padding: var(--space-6) 0;
   /* Frosted glass, matching the Stock/Recurring pinned headers. */
-  background: rgba(250, 246, 238, 0.72);
+  background: rgba(245, 248, 251, 0.72);
   -webkit-backdrop-filter: blur(10px) saturate(1.4);
   backdrop-filter: blur(10px) saturate(1.4);
 }

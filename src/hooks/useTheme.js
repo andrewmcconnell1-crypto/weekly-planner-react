@@ -21,7 +21,7 @@ function resolved(theme) {
 
 // Browser-chrome colour per theme: the dark canvas, or the brand terracotta on
 // light. Must match the values in index.html's pre-paint script and App.css.
-const THEME_COLORS = { dark: "#231f16", light: "#bf5840" };
+const THEME_COLORS = { dark: "#12171e", light: "#3f74c0" };
 
 function apply(theme) {
   const mode = resolved(theme);

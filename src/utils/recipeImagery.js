@@ -1,24 +1,26 @@
 import { getRecipeTone } from "./recipeUtils";
 
-// Visual for a recipe with no photo: a warm gradient keyed to its category
-// tone, plus a hand-drawn dish glyph (see components/DishGlyph.jsx). One
-// consistent line-icon family instead of platform emoji keeps the Recipes and
-// Meals screens looking designed rather than assembled.
+// Visual for a recipe with no photo: a cool, muted gradient keyed to its
+// category tone, plus a hand-drawn dish glyph (see components/DishGlyph.jsx).
+// One consistent line-icon family instead of platform emoji keeps the Recipes
+// and Meals screens looking designed rather than assembled. The palette is a
+// desaturated cool/slate spectrum so tiles stay distinguishable by category
+// while reading clean and clinical rather than warm.
 const TONE_VISUAL = {
-  chicken: { from: "#e8c98a", to: "#cf9a45", glyph: "drumstick" },
-  beef: { from: "#d98a76", to: "#b0503c", glyph: "steak" },
-  pork: { from: "#e3a99a", to: "#c67e6e", glyph: "steak" },
-  lamb: { from: "#c290a0", to: "#9c5e72", glyph: "steak" },
-  seafood: { from: "#8fbdb6", to: "#5f8e88", glyph: "fish" },
-  vegetarian: { from: "#a7bd7f", to: "#5f6a3a", glyph: "leaf" },
-  pasta: { from: "#e6c66f", to: "#c79a2f", glyph: "pastaFork" },
-  rice: { from: "#e3cd8c", to: "#d2b15c", glyph: "rice" },
-  slow: { from: "#bd9a78", to: "#946c46", glyph: "pot" },
-  mexican: { from: "#e0855c", to: "#c4582f", glyph: "taco" },
-  noodles: { from: "#d6a373", to: "#b97a44", glyph: "noodles" },
-  kid: { from: "#e5a08c", to: "#cf7a63", glyph: "burger" },
-  family: { from: "#c290a0", to: "#9c5e72", glyph: "plate" },
-  other: { from: "#c4b39d", to: "#a89683", glyph: "plate" },
+  chicken: { from: "#aec4dc", to: "#6f8fae", glyph: "drumstick" },
+  beef: { from: "#b3b3c6", to: "#7d7f97", glyph: "steak" },
+  pork: { from: "#c2cdd2", to: "#8fa0a6", glyph: "steak" },
+  lamb: { from: "#b6a6bd", to: "#86798f", glyph: "steak" },
+  seafood: { from: "#9fc4bf", to: "#5f8e88", glyph: "fish" },
+  vegetarian: { from: "#a9c9b6", to: "#6f9e86", glyph: "leaf" },
+  pasta: { from: "#b7c3cd", to: "#7f93a0", glyph: "pastaFork" },
+  rice: { from: "#c3ccd6", to: "#9aa7b3", glyph: "rice" },
+  slow: { from: "#a6b4bf", to: "#6b7d8c", glyph: "pot" },
+  mexican: { from: "#b3bccd", to: "#7e8aa0", glyph: "taco" },
+  noodles: { from: "#a7c3cb", to: "#6f97a0", glyph: "noodles" },
+  kid: { from: "#aec2dc", to: "#7c93b4", glyph: "burger" },
+  family: { from: "#b6a6bd", to: "#86798f", glyph: "plate" },
+  other: { from: "#bcc4ce", to: "#8b95a1", glyph: "plate" },
 };
 
 // A more specific glyph when the dish name gives one away (checked in order).
