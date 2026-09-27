@@ -13,6 +13,7 @@ describe("normaliseData", () => {
     expect(data.settings).toEqual({
       keepStandingList: true,
       shopUsingSavedList: true,
+      keepScreenOn: true,
       defaultServings: 4,
     });
   });
@@ -42,6 +43,7 @@ describe("normaliseData", () => {
     expect(data.settings).toEqual({
       keepStandingList: false,
       shopUsingSavedList: false,
+      keepScreenOn: true,
       defaultServings: 4,
     });
   });

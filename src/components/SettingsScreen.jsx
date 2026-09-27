@@ -22,6 +22,8 @@ export default function SettingsScreen({
   onSetKeepStandingList,
   defaultServings,
   onSetDefaultServings,
+  keepScreenOn,
+  onSetKeepScreenOn,
   theme,
   onSetTheme,
   install,
@@ -57,6 +59,8 @@ export default function SettingsScreen({
             onSetKeepStandingList={onSetKeepStandingList}
             defaultServings={defaultServings}
             onSetDefaultServings={onSetDefaultServings}
+            keepScreenOn={keepScreenOn}
+            onSetKeepScreenOn={onSetKeepScreenOn}
             theme={theme}
             onSetTheme={onSetTheme}
             install={install}

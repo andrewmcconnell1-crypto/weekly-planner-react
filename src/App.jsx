@@ -44,6 +44,7 @@ import { captureJoinCodeFromUrl } from "./lib/household";
 
 import { useAuth } from "./hooks/useAuth";
 import { useTheme } from "./hooks/useTheme";
+import { useWakeLock } from "./hooks/useWakeLock";
 import { useHousehold } from "./hooks/useHousehold";
 import { usePlannerStore } from "./hooks/usePlannerStore";
 import { useUpdatePrompt } from "./hooks/useUpdatePrompt";
@@ -328,6 +329,10 @@ function App() {
   );
 
   const keepStandingList = settings?.keepStandingList !== false;
+  // Keep the screen awake while a recipe is open (following it while cooking),
+  // when the setting is on. Best-effort — see useWakeLock.
+  const keepScreenOn = settings?.keepScreenOn !== false;
+  useWakeLock(keepScreenOn && Boolean(openRecipeId));
   // Per-trip: are we using the saved list (online order) or shopping fresh?
   const usingSavedList =
     keepStandingList && settings?.shopUsingSavedList !== false;
@@ -1012,6 +1017,10 @@ function App() {
               ...settings,
               defaultServings: Math.min(99, Math.max(1, value)),
             })
+          }
+          keepScreenOn={keepScreenOn}
+          onSetKeepScreenOn={(value) =>
+            setSettings({ ...settings, keepScreenOn: value })
           }
           theme={theme}
           onSetTheme={setTheme}
