@@ -58,6 +58,9 @@ export const defaultSettings = {
   shopUsingSavedList: true,
   // How many people a newly created recipe serves by default.
   defaultServings: 4,
+  // Hold a screen wake lock while a recipe is open, so the phone doesn't dim or
+  // lock mid-cook. On by default; toggled in Settings.
+  keepScreenOn: true,
 };
 
 function normaliseServings(value) {
@@ -97,6 +100,7 @@ function normaliseSettings(raw) {
   return {
     keepStandingList: value.keepStandingList !== false,
     shopUsingSavedList: value.shopUsingSavedList !== false,
+    keepScreenOn: value.keepScreenOn !== false,
     defaultServings:
       value.defaultServings == null
         ? defaultSettings.defaultServings

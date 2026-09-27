@@ -88,6 +88,8 @@ function SettingsPanel({
   keepStandingList = true,
   defaultServings = 4,
   onSetDefaultServings,
+  keepScreenOn = true,
+  onSetKeepScreenOn,
   theme = "system",
   onSetTheme,
   install,
@@ -268,6 +270,31 @@ function SettingsPanel({
             pendingJoinCode={pendingJoinCode}
             onJoined={onJoinedHousehold}
           />
+        </SettingsSection>
+      )}
+
+      {onSetKeepScreenOn && (
+        <SettingsSection
+          icon={Utensils}
+          title="Cooking"
+          subtitle="Following a recipe"
+        >
+          <label className="settings-toggle">
+            <input
+              type="checkbox"
+              checked={keepScreenOn}
+              onChange={(event) => onSetKeepScreenOn(event.target.checked)}
+            />
+            <span>
+              <span className="settings-toggle-title">
+                Keep the screen on while a recipe is open
+              </span>
+              <span className="small-text">
+                Stops your phone dimming or locking mid-cook while you follow a
+                recipe. The screen goes back to normal as soon as you close it.
+              </span>
+            </span>
+          </label>
         </SettingsSection>
       )}
 
