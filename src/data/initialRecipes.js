@@ -6,7 +6,7 @@ import { deriveMainCategory, deriveRecipeTags } from "../utils/recipeUtils";
 const RECIPETIN_SOURCE = "RecipeTin Eats";
 const METHOD_NOTE = "Open source link for full method.";
 
-function recipe({ id, name, category, sourceUrl, ingredients }) {
+function recipe({ id, name, category, sourceUrl, ingredients, addedOn = null }) {
   return {
     id,
     name,
@@ -17,6 +17,7 @@ function recipe({ id, name, category, sourceUrl, ingredients }) {
     method: METHOD_NOTE,
     tags: deriveRecipeTags({ name, category, ingredients }),
     timeMins: null,
+    addedOn,
   };
 }
 
@@ -937,6 +938,23 @@ const baseRecipes = [
       "2 tbsp cider vinegar",
       "1/2 cup peanut butter",
       "1 bunch coriander",
+    ],
+  }),
+  recipe({
+    id: "lime-grilled-chicken",
+    addedOn: "2026-11-07",
+    name: "Lime Marinated Grilled Chicken",
+    category: "Chicken",
+    sourceUrl: "https://www.recipetineats.com/lime-marinated-grilled-chicken/",
+    ingredients: [
+      "4 chicken breasts",
+      "2 limes",
+      "2 garlic cloves",
+      "3 tbsp brown sugar",
+      "2 tbsp soy sauce",
+      "1 tbsp olive oil",
+      "1 bunch coriander",
+      "salt and pepper",
     ],
   }),
 
