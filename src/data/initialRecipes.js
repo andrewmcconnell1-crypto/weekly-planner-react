@@ -1091,6 +1091,7 @@ const SERVES_BY_ID = {
   "ck-black-bean-sweet-potato-enchiladas": 4,
   "mb-red-curry-roasted-veg": 4,
   "mb-massaman-curry": 4,
+  "abc-tamarind-beef-baos": 6,
 };
 
 // Total hands-on + cooking time (minutes) for each recipe, so the whole library

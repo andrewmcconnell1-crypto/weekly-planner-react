@@ -47,6 +47,7 @@ const EXTRA_TAGS = {
   "wol-general-tso-tofu": ["Quick", "Spicy", "Kid-friendly"],
   "wol-kung-pao-tofu": ["Quick", "Spicy"],
   "abc-creamy-chicken-risoni-soup": ["Kid-friendly"],
+  "abc-tamarind-beef-baos": ["Spicy", "Leftover-friendly"],
 };
 
 function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
@@ -99,6 +100,7 @@ const TIME_BY_ID = {
   "wol-kung-pao-tofu": 40,
   "abc-creamy-chicken-risoni-soup": 40,
   "abc-french-yoghurt-cake": 75,
+  "abc-tamarind-beef-baos": 210,
 };
 
 // When a recipe was added to the bundle, so the Recipes tab can flag and sort by
@@ -106,6 +108,7 @@ const TIME_BY_ID = {
 const ADDED_ON_BY_ID = {
   "abc-creamy-chicken-risoni-soup": "2026-07-25",
   "abc-french-yoghurt-cake": "2026-07-25",
+  "abc-tamarind-beef-baos": "2026-11-14",
 };
 
 const baseWebRecipes = [
@@ -731,6 +734,35 @@ const baseWebRecipes = [
       "1 bunch parsley",
       "1 tsp salt",
       "1/2 tsp black pepper",
+    ],
+  }),
+  webRecipe({
+    id: "abc-tamarind-beef-baos",
+    name: "Slow Roast Tamarind Beef Baos with Pickled Cucumber",
+    category: "Beef",
+    source: "ABC",
+    sourceUrl:
+      "https://www.abc.net.au/news/2026-11-14/slow-roast-tamarind-beef-chuck-baos-with-quick-pickled-cucumber/107379522",
+    ingredients: [
+      "1.2 kg beef chuck",
+      "3 tbsp tamarind paste",
+      "3 tbsp brown sugar",
+      "1/4 cup soy sauce",
+      "1 tbsp sesame oil",
+      "4 garlic cloves",
+      "1 tbsp ginger",
+      "1 tsp ground cumin",
+      "1 tsp smoked paprika",
+      "1 tsp chilli flakes",
+      "1 brown onion",
+      "1 cup beef stock",
+      "4 Lebanese cucumbers",
+      "1/4 cup rice wine vinegar",
+      "12 bao buns",
+      "1 bunch coriander",
+      "1/4 cup whole-egg mayonnaise",
+      "2 tbsp sriracha",
+      "salt and pepper",
     ],
   }),
   // A dessert — the first "Sweet" recipe. It doesn't go through webRecipe()
