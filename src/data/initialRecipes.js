@@ -1092,6 +1092,7 @@ const SERVES_BY_ID = {
   "mb-red-curry-roasted-veg": 4,
   "mb-massaman-curry": 4,
   "abc-tamarind-beef-baos": 6,
+  "roty-chicken-fiesta": 5,
 };
 
 // Total hands-on + cooking time (minutes) for each recipe, so the whole library

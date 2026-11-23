@@ -48,6 +48,7 @@ const EXTRA_TAGS = {
   "wol-kung-pao-tofu": ["Quick", "Spicy"],
   "abc-creamy-chicken-risoni-soup": ["Kid-friendly"],
   "abc-tamarind-beef-baos": ["Spicy", "Leftover-friendly"],
+  "roty-chicken-fiesta": ["One-pot", "Kid-friendly"],
 };
 
 function webRecipe({ id, name, category, source, sourceUrl, ingredients }) {
@@ -101,6 +102,7 @@ const TIME_BY_ID = {
   "abc-creamy-chicken-risoni-soup": 40,
   "abc-french-yoghurt-cake": 75,
   "abc-tamarind-beef-baos": 210,
+  "roty-chicken-fiesta": 80,
 };
 
 // When a recipe was added to the bundle, so the Recipes tab can flag and sort by
@@ -109,6 +111,7 @@ const ADDED_ON_BY_ID = {
   "abc-creamy-chicken-risoni-soup": "2026-07-25",
   "abc-french-yoghurt-cake": "2026-07-25",
   "abc-tamarind-beef-baos": "2026-11-14",
+  "roty-chicken-fiesta": "2026-11-23",
 };
 
 const baseWebRecipes = [
@@ -762,6 +765,26 @@ const baseWebRecipes = [
       "1 bunch coriander",
       "1/4 cup whole-egg mayonnaise",
       "2 tbsp sriracha",
+      "salt and pepper",
+    ],
+  }),
+  webRecipe({
+    id: "roty-chicken-fiesta",
+    name: "One-Pan Chicken Fiesta",
+    category: "Chicken",
+    source: "Recipe of the Year",
+    sourceUrl: "https://recipeoftheyear.com.au/recipes/chicken-fiesta/",
+    ingredients: [
+      "1.5 kg chicken thigh fillets",
+      "1/2 cup olive oil",
+      "1 tbsp sweet paprika",
+      "6 garlic cloves",
+      "1 red capsicum",
+      "1 red onion",
+      "1/2 cup Worcestershire sauce",
+      "1 cup basmati rice",
+      "2 limes",
+      "1 bunch coriander",
       "salt and pepper",
     ],
   }),
